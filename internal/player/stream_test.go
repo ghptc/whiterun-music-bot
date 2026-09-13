@@ -1,8 +1,10 @@
 package player
 
 import (
+	"bytes"
 	"context"
 	"encoding/binary"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -104,5 +106,25 @@ func TestStreamerMissingExecutable(t *testing.T) {
 		if err == nil || !strings.Contains(err.Error(), "start") {
 			t.Fatalf("expected start failure, got %v", err)
 		}
+	}
+}
+
+func TestStreamResolutionMarkerAcrossWrites(t *testing.T) {
+	var logs bytes.Buffer
+	timing := media.NewTiming(slog.New(slog.NewJSONHandler(&logs, nil)))
+	w := &streamTimingWriter{buffer: &media.LimitedBuffer{Limit: 8}, timing: timing, start: time.Now()}
+	for i, chunk := range []string{strings.Repeat("warning", 100), "\n[info] Writing BARD_STREAM_RESOLVED %(id)s to /dev/stderr\n", "BARD_STREAM_", "RESOLVED abcdefghijk\n", streamResolvedMarker + " abcdefghijk\n"} {
+		if n, err := w.Write([]byte(chunk)); err != nil || n != len(chunk) {
+			t.Fatalf("write: %d %v", n, err)
+		}
+		if i < 3 && logs.Len() != 0 {
+			t.Fatal("diagnostic or partial marker triggered timing")
+		}
+	}
+	if strings.Count(logs.String(), "stream_resolve_complete") != 1 {
+		t.Fatalf("logs: %s", logs.String())
+	}
+	if !w.buffer.Truncated {
+		t.Fatal("diagnostics were not bounded")
 	}
 }

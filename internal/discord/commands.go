@@ -29,9 +29,23 @@ func commands() []d.ApplicationCommandCreate {
 	return result
 }
 func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
+	started := time.Now()
+	data, slash := e.Data.(d.SlashCommandInteractionData)
+	var timing *media.Timing
+	if slash && data.CommandName() == "play" {
+		timing = media.NewTiming(b.log.With("interaction_id", e.ID(), "guild_id", e.GuildID()))
+		timing.Event("play_request_start", started, "query", data.String("query"))
+		defer func() { timing.Event("play_request_total", started) }()
+	}
 	ack, cancel := context.WithTimeout(b.ctx, 2*time.Second)
-	err := e.DeferCreateMessage(true, rest.WithCtx(ack))
+	var err error
+	if timing != nil {
+		err = e.CreateMessage(d.MessageCreate{Content: "The Bard searches Skyrim for your song...", Flags: d.MessageFlagEphemeral, AllowedMentions: &d.AllowedMentions{}}, rest.WithCtx(ack))
+	} else {
+		err = e.DeferCreateMessage(true, rest.WithCtx(ack))
+	}
 	cancel()
+	timing.Event("discord_acknowledged", started, "error", err)
 	if err != nil {
 		b.log.Warn("command acknowledgement failed", "error", err)
 		return
@@ -39,7 +53,9 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 	reply := func(content string) {
 		ctx, cancel := context.WithTimeout(b.ctx, 5*time.Second)
 		defer cancel()
+		replyStart := time.Now()
 		_, err := b.client.Rest.UpdateInteractionResponse(b.client.ApplicationID, e.Token(), d.MessageUpdate{Content: &content, AllowedMentions: &d.AllowedMentions{}}, rest.WithCtx(ctx))
+		timing.Event("discord_response_complete", replyStart, "error", err)
 		if err != nil {
 			b.log.Warn("command response failed", "error", err)
 		}
@@ -80,8 +96,10 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 	if name == "summon" || name == "play" {
 		if g.conn == nil {
 			ctx, cancel := context.WithTimeout(b.ctx, 15*time.Second)
+			joinStart := time.Now()
 			conn := b.client.VoiceManager.CreateConn(id)
 			err := conn.Open(ctx, channel, false, true)
+			timing.Event("voice_join_complete", joinStart, "error", err)
 			cancel()
 			if err != nil {
 				cleanup, c := context.WithTimeout(context.Background(), 3*time.Second)
@@ -118,7 +136,7 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 			reply("The Bard is searching for other songs. Try again shortly.")
 			return
 		}
-		track, err := b.resolver.Resolve(searchCtx, data.String("query"))
+		track, err := b.resolver.Resolve(media.WithTiming(searchCtx, timing), data.String("query"))
 		<-b.searches
 		if err != nil {
 			if searchCtx.Err() != nil {
@@ -139,7 +157,9 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 			reply("Join the Bard's voice channel and ask again.")
 			return
 		}
+		queueStart := time.Now()
 		err = g.player.Enqueue(track, ticket)
+		timing.Event("queue_inserted", queueStart, "error", err)
 		g.mu.Unlock()
 		if err != nil {
 			reply(err.Error())

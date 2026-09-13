@@ -137,3 +137,27 @@ func TestQueueResponseStaysWithinDiscordLimit(t *testing.T) {
 		t.Fatal("missing overflow count")
 	}
 }
+
+func TestPlayAcknowledgesWithContentBeforeGuildWork(t *testing.T) {
+	b, r := testBot(t)
+	e := interaction(t, "play", true)
+	acknowledged := false
+	e.Respond = func(typ d.InteractionResponseType, data d.InteractionResponseData, _ ...rest.RequestOpt) error {
+		if typ != d.InteractionResponseTypeCreateMessage {
+			t.Fatalf("response type %v", typ)
+		}
+		message, ok := data.(d.MessageCreate)
+		if !ok || message.Content != "The Bard searches Skyrim for your song..." || message.Flags != d.MessageFlagEphemeral || message.AllowedMentions == nil {
+			t.Fatalf("acknowledgement: %#v", data)
+		}
+		if len(b.guilds) != 0 || r.response != "" {
+			t.Fatal("guild work happened before acknowledgement")
+		}
+		acknowledged = true
+		return nil
+	}
+	b.command(e)
+	if !acknowledged || !strings.Contains(r.response, "Join a voice channel") {
+		t.Fatalf("ack=%v response=%s", acknowledged, r.response)
+	}
+}

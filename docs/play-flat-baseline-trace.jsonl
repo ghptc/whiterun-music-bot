@@ -1,0 +1,46 @@
+{"event": "subprocess_start", "time": "2026-09-13T21:18:12.971667+00:00", "elapsed_ms": 0.016, "purpose": "baseline discovery with per-video metadata", "category": "yt_dlp_search", "candidates": 10, "argv": ["yt-dlp", "--ignore-config", "--no-playlist", "--no-warnings", "--no-progress", "--no-cache-dir", "--socket-timeout", "15", "--retries", "2", "--extractor-retries", "2", "--js-runtimes", "deno", "--extractor-args", "youtube:player_client=web;player_skip=js;skip=hls,dash,translated_subs", "--ignore-no-formats-error", "--skip-download", "--dump-single-json", "--no-quiet", "--ignore-errors", "--print-to-file", "video:BARD_CANDIDATE_DONE %(id)s", "/dev/stderr", "--", "ytsearch10:Arctic Monkeys 505"]}
+{"event": "network_operation", "time": "2026-09-13T21:18:13.127469+00:00", "elapsed_ms": 155.819, "detail": "[download] Downloading playlist: Arctic Monkeys 505", "parent_pid": 7}
+{"event": "network_operation", "time": "2026-09-13T21:18:13.127525+00:00", "elapsed_ms": 155.871, "detail": "[youtube:search] query \"Arctic Monkeys 505\": Downloading web client config", "parent_pid": 7}
+{"event": "network_operation", "time": "2026-09-13T21:18:13.699073+00:00", "elapsed_ms": 727.428, "detail": "[youtube:search] query \"Arctic Monkeys 505\" page 1: Downloading API JSON", "parent_pid": 7}
+{"event": "network_operation", "time": "2026-09-13T21:18:14.507979+00:00", "elapsed_ms": 1536.334, "detail": "[youtube:search] Playlist Arctic Monkeys 505: Downloading 10 items of 10", "parent_pid": 7}
+{"event": "network_operation", "time": "2026-09-13T21:18:14.508053+00:00", "elapsed_ms": 1536.393, "detail": "[download] Downloading item 1 of 10", "parent_pid": 7}
+{"event": "candidate_extract_start", "time": "2026-09-13T21:18:14.508918+00:00", "elapsed_ms": 1537.259, "video_id": "CKI8iQTgZKU", "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:14.508949+00:00", "elapsed_ms": 1537.288, "detail": "[youtube] CKI8iQTgZKU: Downloading webpage", "parent_pid": 7}
+{"event": "candidate_extract_complete", "time": "2026-09-13T21:18:15.490594+00:00", "elapsed_ms": 2518.941, "video_id": "CKI8iQTgZKU", "stage_elapsed_ms": 981.671, "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:15.491147+00:00", "elapsed_ms": 2519.485, "detail": "[download] Downloading item 2 of 10", "parent_pid": 7}
+{"event": "candidate_extract_start", "time": "2026-09-13T21:18:15.491274+00:00", "elapsed_ms": 2519.611, "video_id": "bhk-yqnGlpM", "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:15.491280+00:00", "elapsed_ms": 2519.617, "detail": "[youtube] bhk-yqnGlpM: Downloading webpage", "parent_pid": 7}
+{"event": "candidate_extract_complete", "time": "2026-09-13T21:18:16.712541+00:00", "elapsed_ms": 3740.913, "video_id": "bhk-yqnGlpM", "stage_elapsed_ms": 1221.252, "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:16.713134+00:00", "elapsed_ms": 3741.476, "detail": "[download] Downloading item 3 of 10", "parent_pid": 7}
+{"event": "candidate_extract_start", "time": "2026-09-13T21:18:16.713250+00:00", "elapsed_ms": 3741.593, "video_id": "iIRnWv1k-js", "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:16.713287+00:00", "elapsed_ms": 3741.626, "detail": "[youtube] iIRnWv1k-js: Downloading webpage", "parent_pid": 7}
+{"event": "candidate_extract_complete", "time": "2026-09-13T21:18:17.739498+00:00", "elapsed_ms": 4767.845, "video_id": "iIRnWv1k-js", "stage_elapsed_ms": 1026.242, "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:17.740091+00:00", "elapsed_ms": 4768.432, "detail": "[download] Downloading item 4 of 10", "parent_pid": 7}
+{"event": "candidate_extract_start", "time": "2026-09-13T21:18:17.740219+00:00", "elapsed_ms": 4768.559, "video_id": "MrmPDUvKyLs", "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:17.740239+00:00", "elapsed_ms": 4768.578, "detail": "[youtube] MrmPDUvKyLs: Downloading webpage", "parent_pid": 7}
+{"event": "candidate_extract_complete", "time": "2026-09-13T21:18:18.957818+00:00", "elapsed_ms": 5986.165, "video_id": "MrmPDUvKyLs", "stage_elapsed_ms": 1217.593, "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:18.958400+00:00", "elapsed_ms": 5986.74, "detail": "[download] Downloading item 5 of 10", "parent_pid": 7}
+{"event": "candidate_extract_start", "time": "2026-09-13T21:18:18.958507+00:00", "elapsed_ms": 5986.845, "video_id": "iIfl5k2nQBQ", "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:18.958518+00:00", "elapsed_ms": 5986.856, "detail": "[youtube] iIfl5k2nQBQ: Downloading webpage", "parent_pid": 7}
+{"event": "candidate_extract_complete", "time": "2026-09-13T21:18:19.979518+00:00", "elapsed_ms": 7007.871, "video_id": "iIfl5k2nQBQ", "stage_elapsed_ms": 1021.004, "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:19.979999+00:00", "elapsed_ms": 7008.346, "detail": "[download] Downloading item 6 of 10", "parent_pid": 7}
+{"event": "candidate_extract_start", "time": "2026-09-13T21:18:19.980115+00:00", "elapsed_ms": 7008.454, "video_id": "J7K6EbcWhig", "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:19.980128+00:00", "elapsed_ms": 7008.467, "detail": "[youtube] J7K6EbcWhig: Downloading webpage", "parent_pid": 7}
+{"event": "candidate_extract_complete", "time": "2026-09-13T21:18:21.081683+00:00", "elapsed_ms": 8110.03, "video_id": "J7K6EbcWhig", "stage_elapsed_ms": 1101.562, "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:21.082261+00:00", "elapsed_ms": 8110.6, "detail": "[download] Downloading item 7 of 10", "parent_pid": 7}
+{"event": "candidate_extract_start", "time": "2026-09-13T21:18:21.082384+00:00", "elapsed_ms": 8110.722, "video_id": "fz0TC9Q4fhw", "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:21.082395+00:00", "elapsed_ms": 8110.733, "detail": "[youtube] fz0TC9Q4fhw: Downloading webpage", "parent_pid": 7}
+{"event": "candidate_extract_complete", "time": "2026-09-13T21:18:22.224076+00:00", "elapsed_ms": 9252.423, "video_id": "fz0TC9Q4fhw", "stage_elapsed_ms": 1141.684, "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:22.224681+00:00", "elapsed_ms": 9253.029, "detail": "[download] Downloading item 8 of 10", "parent_pid": 7}
+{"event": "candidate_extract_start", "time": "2026-09-13T21:18:22.224776+00:00", "elapsed_ms": 9253.115, "video_id": "VcV00GDAjaY", "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:22.224936+00:00", "elapsed_ms": 9253.275, "detail": "[youtube] VcV00GDAjaY: Downloading webpage", "parent_pid": 7}
+{"event": "candidate_extract_complete", "time": "2026-09-13T21:18:23.711576+00:00", "elapsed_ms": 10739.923, "video_id": "VcV00GDAjaY", "stage_elapsed_ms": 1486.793, "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:23.712155+00:00", "elapsed_ms": 10740.494, "detail": "[download] Downloading item 9 of 10", "parent_pid": 7}
+{"event": "candidate_extract_start", "time": "2026-09-13T21:18:23.712259+00:00", "elapsed_ms": 10740.597, "video_id": "1Jd2DysfCW8", "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:23.712266+00:00", "elapsed_ms": 10740.603, "detail": "[youtube] 1Jd2DysfCW8: Downloading webpage", "parent_pid": 7}
+{"event": "candidate_extract_complete", "time": "2026-09-13T21:18:24.499187+00:00", "elapsed_ms": 11527.535, "video_id": "1Jd2DysfCW8", "stage_elapsed_ms": 786.919, "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:24.499767+00:00", "elapsed_ms": 11528.108, "detail": "[download] Downloading item 10 of 10", "parent_pid": 7}
+{"event": "candidate_extract_start", "time": "2026-09-13T21:18:24.499870+00:00", "elapsed_ms": 11528.209, "video_id": "dvw3v2ibQUo", "parent_pid": 7, "subprocess": false}
+{"event": "network_operation", "time": "2026-09-13T21:18:24.499884+00:00", "elapsed_ms": 11528.222, "detail": "[youtube] dvw3v2ibQUo: Downloading webpage", "parent_pid": 7}
+{"event": "candidate_extract_complete", "time": "2026-09-13T21:18:25.289854+00:00", "elapsed_ms": 12318.201, "video_id": "dvw3v2ibQUo", "stage_elapsed_ms": 789.977, "parent_pid": 7, "subprocess": false}
+{"event": "subprocess_complete", "time": "2026-09-13T21:18:25.311540+00:00", "elapsed_ms": 12339.895, "pid": 7, "exit_code": 0, "candidates": 10}

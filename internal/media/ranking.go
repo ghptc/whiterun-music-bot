@@ -9,7 +9,7 @@ func words(s string) string {
 func has(s, term string) bool { return strings.Contains(words(s), words(term)) }
 
 // IsMusic is deliberately conservative. Metadata is a heuristic, not proof.
-func IsMusic(c Candidate) bool {
+func musicShape(c Candidate) bool {
 	if c.Title == "" || c.Duration < 45 || c.Duration > 20*60 || c.Live || c.LiveStatus == "is_upcoming" {
 		return false
 	}
@@ -18,6 +18,13 @@ func IsMusic(c Candidate) bool {
 		if has(text, term) {
 			return false
 		}
+	}
+	return true
+}
+
+func IsMusic(c Candidate) bool {
+	if !musicShape(c) {
+		return false
 	}
 	for _, cat := range c.Categories {
 		if strings.EqualFold(cat, "Music") {
@@ -48,6 +55,12 @@ func Score(query string, c Candidate) (int, bool) {
 	if !IsMusic(c) {
 		return 0, false
 	}
+	return scoreMusic(query, c)
+}
+
+// scoreMusic is shared by confirmed music and provisional discovery ranking.
+// A provisional score never authorizes queue insertion.
+func scoreMusic(query string, c Candidate) (int, bool) {
 	text := c.Title + " " + c.Channel + " " + c.Artist
 	tokens := strings.Fields(words(query))
 	matched, total := 0, 0
@@ -78,12 +91,7 @@ func Score(query string, c Candidate) (int, bool) {
 		}
 	}
 	channel := c.Channel + " " + c.Uploader
-	channelRelevant := false
-	for _, token := range tokens {
-		if len(token) > 2 && has(channel, token) {
-			channelRelevant = true
-		}
-	}
+	channelRelevant := channelMatchesQuery(query, c)
 	switch {
 	case c.Verified && c.Artist != "" && has(channel, c.Artist):
 		score += 65
@@ -110,4 +118,14 @@ func Select(query string, candidates []Candidate) (Candidate, bool) {
 		}
 	}
 	return best, found
+}
+
+func channelMatchesQuery(query string, c Candidate) bool {
+	channel := c.Channel + " " + c.Uploader
+	for _, token := range strings.Fields(words(query)) {
+		if len(token) > 2 && has(channel, token) {
+			return true
+		}
+	}
+	return false
 }

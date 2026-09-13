@@ -1,0 +1,26 @@
+{"time":"2026-09-13T20:55:38.602865223Z","level":"INFO","msg":"resolver_start","query":"Arctic Monkeys 505","elapsed_ms":0,"request_elapsed_ms":0.001}
+{"time":"2026-09-13T20:55:38.602946859Z","level":"INFO","msg":"youtube_search_start","query":"Arctic Monkeys 505","elapsed_ms":0,"request_elapsed_ms":0.085,"direct_url":false}
+{"time":"2026-09-13T20:55:54.131852404Z","level":"INFO","msg":"youtube_search_complete","query":"Arctic Monkeys 505","elapsed_ms":15528.903,"request_elapsed_ms":15528.988,"error":null}
+{"time":"2026-09-13T20:55:54.136222181Z","level":"INFO","msg":"candidate_parsing_complete","query":"Arctic Monkeys 505","elapsed_ms":4.346,"request_elapsed_ms":15533.359,"entries":10,"direct_url":false}
+{"time":"2026-09-13T20:55:54.136296894Z","level":"INFO","msg":"music_filtering_complete","query":"Arctic Monkeys 505","elapsed_ms":0.066,"request_elapsed_ms":15533.435,"candidates":10,"accepted":7}
+{"time":"2026-09-13T20:55:54.136428545Z","level":"INFO","msg":"ranking_complete","query":"Arctic Monkeys 505","elapsed_ms":0.129,"request_elapsed_ms":15533.567,"found":true}
+{"time":"2026-09-13T20:55:54.136434116Z","level":"INFO","msg":"candidate_selected","query":"Arctic Monkeys 505","elapsed_ms":15533.572,"request_elapsed_ms":15533.573,"selected":"Arctic Monkeys - 505","video_id":"CKI8iQTgZKU"}
+{"time":"2026-09-13T20:55:54.136437743Z","level":"INFO","msg":"resolver_complete","query":"Arctic Monkeys 505","elapsed_ms":15533.576,"request_elapsed_ms":15533.577}
+{"time":"2026-09-13T20:55:54.136439196Z","level":"INFO","msg":"profile_resolution_total","query":"Arctic Monkeys 505","elapsed_ms":15533.584,"request_elapsed_ms":15533.578,"error":null}
+{"time":"2026-09-13T20:55:54.136443063Z","level":"INFO","msg":"resolver_start","query":"Arctic Monkeys 505 live","elapsed_ms":0,"request_elapsed_ms":0}
+{"time":"2026-09-13T20:55:54.136458192Z","level":"INFO","msg":"youtube_search_start","query":"Arctic Monkeys 505 live","elapsed_ms":0,"request_elapsed_ms":0.015,"direct_url":false}
+{"time":"2026-09-13T20:56:08.119391466Z","level":"INFO","msg":"youtube_search_complete","query":"Arctic Monkeys 505 live","elapsed_ms":13982.929,"request_elapsed_ms":13982.945,"error":null}
+{"time":"2026-09-13T20:56:08.123029866Z","level":"INFO","msg":"candidate_parsing_complete","query":"Arctic Monkeys 505 live","elapsed_ms":3.615,"request_elapsed_ms":13986.586,"entries":10,"direct_url":false}
+{"time":"2026-09-13T20:56:08.123091083Z","level":"INFO","msg":"music_filtering_complete","query":"Arctic Monkeys 505 live","elapsed_ms":0.057,"request_elapsed_ms":13986.648,"candidates":10,"accepted":8}
+{"time":"2026-09-13T20:56:08.123244406Z","level":"INFO","msg":"ranking_complete","query":"Arctic Monkeys 505 live","elapsed_ms":0.151,"request_elapsed_ms":13986.801,"found":true}
+{"time":"2026-09-13T20:56:08.123248874Z","level":"INFO","msg":"candidate_selected","query":"Arctic Monkeys 505 live","elapsed_ms":13986.805,"request_elapsed_ms":13986.806,"selected":"Arctic Monkeys - 505 (Live at Rock Werchter 2023)","video_id":"dLi6DNu2MPE"}
+{"time":"2026-09-13T20:56:08.123253754Z","level":"INFO","msg":"resolver_complete","query":"Arctic Monkeys 505 live","elapsed_ms":13986.81,"request_elapsed_ms":13986.81}
+{"time":"2026-09-13T20:56:08.123255968Z","level":"INFO","msg":"profile_resolution_total","query":"Arctic Monkeys 505 live","elapsed_ms":13986.814,"request_elapsed_ms":13986.813,"error":null}
+{"time":"2026-09-13T20:56:08.123260276Z","level":"INFO","msg":"resolver_start","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":0,"request_elapsed_ms":0}
+{"time":"2026-09-13T20:56:08.1232831Z","level":"INFO","msg":"youtube_search_start","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":0,"request_elapsed_ms":0.023,"direct_url":true}
+{"time":"2026-09-13T20:56:10.120633326Z","level":"INFO","msg":"youtube_search_complete","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":1997.34,"request_elapsed_ms":1997.363,"error":null}
+{"time":"2026-09-13T20:56:10.121044902Z","level":"INFO","msg":"candidate_parsing_complete","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":0.377,"request_elapsed_ms":1997.784,"entries":0,"direct_url":true}
+{"time":"2026-09-13T20:56:10.121068306Z","level":"INFO","msg":"music_filtering_complete","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":0.016,"request_elapsed_ms":1997.807,"accepted":true}
+{"time":"2026-09-13T20:56:10.121076352Z","level":"INFO","msg":"candidate_selected","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":1997.816,"request_elapsed_ms":1997.816,"selected":"505","video_id":"qU9mHegkTc4"}
+{"time":"2026-09-13T20:56:10.121084828Z","level":"INFO","msg":"resolver_complete","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":1997.824,"request_elapsed_ms":1997.824}
+{"time":"2026-09-13T20:56:10.121088796Z","level":"INFO","msg":"profile_resolution_total","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":1997.83,"request_elapsed_ms":1997.828,"error":null}

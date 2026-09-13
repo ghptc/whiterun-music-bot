@@ -1,0 +1,44 @@
+{"time":"2026-09-13T21:03:01.774025937Z","level":"INFO","msg":"resolver_start","query":"Arctic Monkeys 505","elapsed_ms":0,"request_elapsed_ms":0.001}
+{"time":"2026-09-13T21:03:01.774110048Z","level":"INFO","msg":"youtube_search_start","query":"Arctic Monkeys 505","elapsed_ms":0,"request_elapsed_ms":0.088,"direct_url":false}
+{"time":"2026-09-13T21:03:20.010495517Z","level":"INFO","msg":"youtube_search_complete","query":"Arctic Monkeys 505","elapsed_ms":18236.382,"request_elapsed_ms":18236.47,"error":null}
+{"time":"2026-09-13T21:03:20.016064825Z","level":"INFO","msg":"candidate_parsing_complete","query":"Arctic Monkeys 505","elapsed_ms":5.546,"request_elapsed_ms":18242.042,"entries":10,"direct_url":false}
+{"time":"2026-09-13T21:03:20.016147753Z","level":"INFO","msg":"music_filtering_complete","query":"Arctic Monkeys 505","elapsed_ms":0.077,"request_elapsed_ms":18242.126,"candidates":10,"accepted":7}
+{"time":"2026-09-13T21:03:20.016291237Z","level":"INFO","msg":"ranking_complete","query":"Arctic Monkeys 505","elapsed_ms":0.14,"request_elapsed_ms":18242.269,"found":true}
+{"time":"2026-09-13T21:03:20.016297329Z","level":"INFO","msg":"candidate_selected","query":"Arctic Monkeys 505","elapsed_ms":18242.275,"request_elapsed_ms":18242.275,"selected":"Arctic Monkeys - 505","video_id":"CKI8iQTgZKU"}
+{"time":"2026-09-13T21:03:20.016301537Z","level":"INFO","msg":"resolver_complete","query":"Arctic Monkeys 505","elapsed_ms":18242.279,"request_elapsed_ms":18242.279}
+{"time":"2026-09-13T21:03:20.016303501Z","level":"INFO","msg":"profile_resolution_total","query":"Arctic Monkeys 505","elapsed_ms":18242.287,"request_elapsed_ms":18242.281,"error":null}
+{"time":"2026-09-13T21:03:20.016307689Z","level":"INFO","msg":"playback_start","query":"Arctic Monkeys 505","elapsed_ms":0,"request_elapsed_ms":18242.286}
+{"time":"2026-09-13T21:03:20.016483084Z","level":"INFO","msg":"ffmpeg_start","query":"Arctic Monkeys 505","elapsed_ms":0.127,"request_elapsed_ms":18242.461}
+{"time":"2026-09-13T21:03:20.016485268Z","level":"INFO","msg":"stream_resolve_start","query":"Arctic Monkeys 505","elapsed_ms":0.143,"request_elapsed_ms":18242.463}
+{"time":"2026-09-13T21:03:22.027482696Z","level":"INFO","msg":"stream_resolve_complete","query":"Arctic Monkeys 505","elapsed_ms":2011.129,"request_elapsed_ms":20253.449}
+{"time":"2026-09-13T21:03:22.07785952Z","level":"INFO","msg":"first_audio_frame","query":"Arctic Monkeys 505","elapsed_ms":2061.547,"request_elapsed_ms":20303.833}
+{"time":"2026-09-13T21:03:22.079338595Z","level":"INFO","msg":"profile_playback_complete","query":"Arctic Monkeys 505","elapsed_ms":20305.321,"request_elapsed_ms":20305.315,"error":"context canceled"}
+{"time":"2026-09-13T21:03:22.079366188Z","level":"INFO","msg":"resolver_start","query":"Arctic Monkeys 505 live","elapsed_ms":0,"request_elapsed_ms":0}
+{"time":"2026-09-13T21:03:22.079383451Z","level":"INFO","msg":"youtube_search_start","query":"Arctic Monkeys 505 live","elapsed_ms":0,"request_elapsed_ms":0.018,"direct_url":false}
+{"time":"2026-09-13T21:03:36.872610896Z","level":"INFO","msg":"youtube_search_complete","query":"Arctic Monkeys 505 live","elapsed_ms":14793.221,"request_elapsed_ms":14793.239,"error":null}
+{"time":"2026-09-13T21:03:36.87675952Z","level":"INFO","msg":"candidate_parsing_complete","query":"Arctic Monkeys 505 live","elapsed_ms":4.112,"request_elapsed_ms":14797.393,"entries":10,"direct_url":false}
+{"time":"2026-09-13T21:03:36.876841236Z","level":"INFO","msg":"music_filtering_complete","query":"Arctic Monkeys 505 live","elapsed_ms":0.075,"request_elapsed_ms":14797.475,"candidates":10,"accepted":8}
+{"time":"2026-09-13T21:03:36.877004117Z","level":"INFO","msg":"ranking_complete","query":"Arctic Monkeys 505 live","elapsed_ms":0.159,"request_elapsed_ms":14797.638,"found":true}
+{"time":"2026-09-13T21:03:36.877008996Z","level":"INFO","msg":"candidate_selected","query":"Arctic Monkeys 505 live","elapsed_ms":14797.643,"request_elapsed_ms":14797.643,"selected":"Arctic Monkeys - 505 - Live @ Lollapalooza Chicago 2014 - HD","video_id":"aZv8tmvCGPE"}
+{"time":"2026-09-13T21:03:36.877013796Z","level":"INFO","msg":"resolver_complete","query":"Arctic Monkeys 505 live","elapsed_ms":14797.648,"request_elapsed_ms":14797.648}
+{"time":"2026-09-13T21:03:36.87701626Z","level":"INFO","msg":"profile_resolution_total","query":"Arctic Monkeys 505 live","elapsed_ms":14797.654,"request_elapsed_ms":14797.65,"error":null}
+{"time":"2026-09-13T21:03:36.877020769Z","level":"INFO","msg":"playback_start","query":"Arctic Monkeys 505 live","elapsed_ms":0,"request_elapsed_ms":14797.655}
+{"time":"2026-09-13T21:03:36.877202676Z","level":"INFO","msg":"ffmpeg_start","query":"Arctic Monkeys 505 live","elapsed_ms":0.137,"request_elapsed_ms":14797.837}
+{"time":"2026-09-13T21:03:36.877204981Z","level":"INFO","msg":"stream_resolve_start","query":"Arctic Monkeys 505 live","elapsed_ms":0.154,"request_elapsed_ms":14797.839}
+{"time":"2026-09-13T21:03:38.989525357Z","level":"INFO","msg":"stream_resolve_complete","query":"Arctic Monkeys 505 live","elapsed_ms":2112.47,"request_elapsed_ms":16910.155}
+{"time":"2026-09-13T21:03:39.181574528Z","level":"INFO","msg":"first_audio_frame","query":"Arctic Monkeys 505 live","elapsed_ms":2304.55,"request_elapsed_ms":17102.206}
+{"time":"2026-09-13T21:03:39.183331815Z","level":"INFO","msg":"profile_playback_complete","query":"Arctic Monkeys 505 live","elapsed_ms":17103.967,"request_elapsed_ms":17103.964,"error":"context canceled"}
+{"time":"2026-09-13T21:03:39.183346162Z","level":"INFO","msg":"resolver_start","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":0,"request_elapsed_ms":0}
+{"time":"2026-09-13T21:03:39.183373955Z","level":"INFO","msg":"youtube_search_start","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":0,"request_elapsed_ms":0.028,"direct_url":true}
+{"time":"2026-09-13T21:03:42.05818316Z","level":"INFO","msg":"youtube_search_complete","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":2874.802,"request_elapsed_ms":2874.83,"error":null}
+{"time":"2026-09-13T21:03:42.058510135Z","level":"INFO","msg":"candidate_parsing_complete","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":0.296,"request_elapsed_ms":2875.164,"entries":0,"direct_url":true}
+{"time":"2026-09-13T21:03:42.058552516Z","level":"INFO","msg":"music_filtering_complete","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":0.035,"request_elapsed_ms":2875.205,"accepted":true}
+{"time":"2026-09-13T21:03:42.058566352Z","level":"INFO","msg":"candidate_selected","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":2875.22,"request_elapsed_ms":2875.22,"selected":"505","video_id":"qU9mHegkTc4"}
+{"time":"2026-09-13T21:03:42.058572334Z","level":"INFO","msg":"resolver_complete","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":2875.226,"request_elapsed_ms":2875.226}
+{"time":"2026-09-13T21:03:42.058574919Z","level":"INFO","msg":"profile_resolution_total","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":2875.232,"request_elapsed_ms":2875.229,"error":null}
+{"time":"2026-09-13T21:03:42.058579548Z","level":"INFO","msg":"playback_start","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":0,"request_elapsed_ms":2875.234}
+{"time":"2026-09-13T21:03:42.058700318Z","level":"INFO","msg":"ffmpeg_start","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":0.082,"request_elapsed_ms":2875.355}
+{"time":"2026-09-13T21:03:42.058702272Z","level":"INFO","msg":"stream_resolve_start","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":0.096,"request_elapsed_ms":2875.357}
+{"time":"2026-09-13T21:03:44.72538609Z","level":"INFO","msg":"stream_resolve_complete","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":2666.772,"request_elapsed_ms":5542.032}
+{"time":"2026-09-13T21:03:44.865476576Z","level":"INFO","msg":"first_audio_frame","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":2806.892,"request_elapsed_ms":5682.126}
+{"time":"2026-09-13T21:03:44.867413185Z","level":"INFO","msg":"profile_playback_complete","query":"https://www.youtube.com/watch?v=qU9mHegkTc4","elapsed_ms":5684.067,"request_elapsed_ms":5684.065,"error":"context canceled"}

@@ -45,7 +45,7 @@ type Bot struct {
 
 func New(ctx context.Context, token string, appID snowflake.ID, log *slog.Logger) (*Bot, error) {
 	ctx, cancel := context.WithCancel(ctx)
-	b := &Bot{ctx: ctx, cancel: cancel, log: log, resolver: media.Resolver{Binary: "yt-dlp"}, streamer: player.Streamer{YTDLP: "yt-dlp", FFmpeg: "ffmpeg"}, guilds: make(map[snowflake.ID]*guild), searches: make(chan struct{}, 4)}
+	b := &Bot{ctx: ctx, cancel: cancel, log: log, resolver: media.Resolver{Binary: "yt-dlp", Cache: &media.SearchCache{}}, streamer: player.Streamer{YTDLP: "yt-dlp", FFmpeg: "ffmpeg"}, guilds: make(map[snowflake.ID]*guild), searches: make(chan struct{}, 4)}
 	c, err := disgo.New(token, bot.WithLogger(log),
 		bot.WithGatewayConfigOpts(gateway.WithIntents(gateway.IntentGuilds, gateway.IntentGuildVoiceStates)),
 		bot.WithCacheConfigOpts(cache.WithCaches(cache.FlagGuilds, cache.FlagVoiceStates)),

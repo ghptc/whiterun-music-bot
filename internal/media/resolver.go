@@ -14,11 +14,16 @@ import (
 var ErrNoSong = errors.New("The Bard could find no song worthy of playing.")
 
 type Track struct {
+	VideoID  string
+	Channel  string
 	Title    string
 	URL      string
 	Duration time.Duration
+	Timing   *Timing
 }
 type Candidate struct {
+	Type        string   `json:"_type"`
+	ChannelID   string   `json:"channel_id"`
 	ID          string   `json:"id"`
 	Title       string   `json:"title"`
 	Channel     string   `json:"channel"`
@@ -33,9 +38,16 @@ type Candidate struct {
 	LiveStatus  string   `json:"live_status"`
 }
 
-type Resolver struct{ Binary string }
+type Resolver struct {
+	Binary string
+	Cache  *SearchCache
+}
 
 func (r Resolver) Resolve(ctx context.Context, query string) (Track, error) {
+	started := time.Now()
+	timing := TimingFrom(ctx)
+	timing.Event("resolver_start", started)
+	defer func() { timing.Event("resolver_complete", started) }()
 	query = strings.TrimSpace(query)
 	if query == "" || len(query) > 500 {
 		return Track{}, errors.New("Give the Bard a song name or YouTube video URL (up to 500 characters).")
@@ -44,54 +56,121 @@ func (r Resolver) Resolve(ctx context.Context, query string) (Track, error) {
 	if err != nil {
 		return Track{}, err
 	}
-	target := "ytsearch10:" + query
-	if isURL {
-		target = direct
+	if err := ctx.Err(); err != nil {
+		return Track{}, err
 	}
-	ctx, cancel := context.WithTimeout(ctx, 90*time.Second)
-	defer cancel()
-	args := append(BaseArgs(), "--skip-download", "--dump-single-json", "--ignore-errors", "--", target)
+	key := normalizeQuery(query)
+	if isURL {
+		key = direct
+	}
+	if track, ok := r.Cache.get(key, time.Now()); ok {
+		track.Timing = timing
+		timing.Event("resolver_cache_hit", started, "selected", track.Title)
+		return track, nil
+	}
+	work := func(workCtx context.Context) (Track, error) { return r.resolveUncached(workCtx, query, direct, isURL) }
+	track, err := r.Cache.resolve(ctx, key, work)
+	if err != nil {
+		return Track{}, err
+	}
+	track.Timing = timing
+	return track, nil
+}
+
+type searchResult struct {
+	Candidate
+	Entries []*Candidate `json:"entries"`
+}
+
+func (r Resolver) extract(ctx context.Context, target, purpose string, flat bool) (searchResult, error) {
+	args := MetadataArgs()
+	count := 1
+	if flat {
+		args = append(BaseArgs(), "--flat-playlist")
+		count = 10
+	}
+	args = append(args, "--skip-download", "--dump-single-json", "--ignore-errors", "--", target)
 	cmd := Command(ctx, r.Binary, args...)
 	out := &LimitedBuffer{Limit: 8 << 20}
 	stderr := &LimitedBuffer{Limit: 8192}
-	cmd.Stdout = out
-	cmd.Stderr = stderr
-	if err := cmd.Run(); err != nil {
-		return Track{}, fmt.Errorf("YouTube resolution failed: %w: %s", err, strings.TrimSpace(string(stderr.Data)))
+	cmd.Stdout, cmd.Stderr = out, stderr
+	started := time.Now()
+	timing := TimingFrom(ctx)
+	timing.Event("yt_dlp_start", started, "purpose", purpose, "category", "metadata", "flat", flat, "candidates", count, "target", target, "started_at", started.UTC())
+	runErr := cmd.Run()
+	timing.Event("yt_dlp_complete", started, "purpose", purpose, "flat", flat, "candidates", count, "error", runErr)
+	if runErr != nil {
+		return searchResult{}, fmt.Errorf("YouTube resolution failed: %w: %s", runErr, strings.TrimSpace(string(stderr.Data)))
 	}
 	if out.Truncated {
-		return Track{}, errors.New("YouTube metadata exceeded the size limit")
+		return searchResult{}, errors.New("YouTube metadata exceeded the size limit")
 	}
-	var result struct {
-		Candidate
-		Entries []*Candidate `json:"entries"`
-	}
+	parseStart := time.Now()
+	var result searchResult
 	if err := json.Unmarshal(out.Data, &result); err != nil {
-		return Track{}, fmt.Errorf("invalid YouTube metadata: %w", err)
+		return result, fmt.Errorf("invalid YouTube metadata: %w", err)
 	}
+	timing.Event("candidate_parsing_complete", parseStart, "entries", len(result.Entries), "purpose", purpose)
+	return result, nil
+}
+
+func (r Resolver) resolveUncached(ctx context.Context, query, direct string, isURL bool) (Track, error) {
+	ctx, cancel := context.WithTimeout(ctx, 90*time.Second)
+	defer cancel()
+	started := time.Now()
+	timing := TimingFrom(ctx)
 	var chosen Candidate
 	if isURL {
+		result, err := r.extract(ctx, direct, "direct_video_metadata", false)
+		if err != nil {
+			return Track{}, err
+		}
 		chosen = result.Candidate
-		if !IsMusic(chosen) {
+		filterStart := time.Now()
+		music := IsMusic(chosen)
+		timing.Event("music_filtering_complete", filterStart, "accepted", music)
+		if !music {
 			return Track{}, ErrNoSong
 		}
 	} else {
+		result, err := r.extract(ctx, "ytsearch10:"+query, "flat_search", true)
+		if err != nil {
+			return Track{}, err
+		}
 		candidates := make([]Candidate, 0, len(result.Entries))
 		for _, c := range result.Entries {
 			if c != nil {
 				candidates = append(candidates, *c)
 			}
 		}
-		var ok bool
-		chosen, ok = Select(query, candidates)
-		if !ok {
-			return Track{}, ErrNoSong
+		chosen, err = selectDiscovered(ctx, query, candidates, func(c Candidate) (Candidate, error) {
+			result, err := r.extract(ctx, "https://www.youtube.com/watch?v="+c.ID, "selected_candidate_verification", false)
+			if err != nil {
+				return Candidate{}, err
+			}
+			if result.ID != c.ID {
+				return Candidate{}, errors.New("YouTube returned a different video ID")
+			}
+			return result.Candidate, nil
+		})
+		if err != nil {
+			return Track{}, err
 		}
 	}
 	if !videoID.MatchString(chosen.ID) {
 		return Track{}, ErrNoSong
 	}
-	return Track{Title: chosen.Title, URL: "https://www.youtube.com/watch?v=" + chosen.ID, Duration: time.Duration(chosen.Duration * float64(time.Second))}, nil
+	if err := ctx.Err(); err != nil {
+		return Track{}, err
+	}
+	timing.Event("candidate_selected", started, "selected", chosen.Title, "video_id", chosen.ID)
+	return Track{VideoID: chosen.ID, Channel: chosen.Channel, Timing: timing, Title: chosen.Title, URL: "https://www.youtube.com/watch?v=" + chosen.ID, Duration: time.Duration(chosen.Duration * float64(time.Second))}, nil
+}
+
+// MetadataArgs is used only for direct videos and selected candidates whose
+// lightweight metadata needs verification. Playback retains full format extraction.
+func MetadataArgs() []string {
+	return append(BaseArgs(), "--extractor-args", "youtube:player_client=web;player_skip=js;skip=hls,dash,translated_subs", "--ignore-no-formats-error")
 }
 
 func BaseArgs() []string {
