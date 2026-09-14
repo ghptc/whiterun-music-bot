@@ -1,7 +1,9 @@
 package media
 
-import "strings"
-import "unicode"
+import (
+	"strings"
+	"unicode"
+)
 
 func words(s string) string {
 	return " " + strings.Join(strings.FieldsFunc(strings.ToLower(s), func(r rune) bool { return !unicode.IsLetter(r) && !unicode.IsNumber(r) }), " ") + " "
@@ -10,7 +12,7 @@ func has(s, term string) bool { return strings.Contains(words(s), words(term)) }
 
 // IsMusic is deliberately conservative. Metadata is a heuristic, not proof.
 func musicShape(c Candidate) bool {
-	if c.Title == "" || c.Duration < 45 || c.Duration > 20*60 || c.Live || c.LiveStatus == "is_upcoming" {
+	if c.Title == "" || c.Duration < 45 || c.Duration > 20*60 || c.Live || (c.LiveStatus == "is_upcoming" || c.LiveStatus == "is_live") {
 		return false
 	}
 	text := c.Title + " " + c.Channel + " " + c.Uploader
@@ -36,7 +38,7 @@ func IsMusic(c Candidate) bool {
 	}
 	channel := c.Channel + " " + c.Uploader
 	return has(channel, "topic") || strings.HasSuffix(strings.ToLower(strings.TrimSpace(c.Channel)), "vevo") ||
-		has(c.Title, "official audio") || has(c.Title, "official music video") ||
+		has(c.Title, "official audio") || has(c.Title, "official video") || has(c.Title, "official music video") ||
 		strings.Contains(strings.ToLower(c.Description), "provided to youtube by")
 }
 
@@ -69,11 +71,11 @@ func scoreMusic(query string, c Candidate) (int, bool) {
 			continue
 		}
 		total++
-		if has(text, token) {
+		if tokenMatches(text, token) {
 			matched++
 		}
 	}
-	if total == 0 || matched*100/total < 60 {
+	if total == 0 || matched == 0 {
 		return 0, false
 	}
 	score := matched * 300 / total
@@ -95,7 +97,7 @@ func scoreMusic(query string, c Candidate) (int, bool) {
 	switch {
 	case c.Verified && c.Artist != "" && has(channel, c.Artist):
 		score += 65
-	case has(c.Title, "official audio") || has(c.Title, "official music video") || has(c.Title, "official video"):
+	case has(c.Title, "official audio") || has(c.Title, "official video") || has(c.Title, "official music video") || has(c.Title, "official video"):
 		score += 55
 	case has(channel, "topic") || strings.Contains(strings.ToLower(c.Description), "provided to youtube by"):
 		score += 45
@@ -124,6 +126,44 @@ func channelMatchesQuery(query string, c Candidate) bool {
 	channel := c.Channel + " " + c.Uploader
 	for _, token := range strings.Fields(words(query)) {
 		if len(token) > 2 && has(channel, token) {
+			return true
+		}
+	}
+	return false
+}
+
+// tokenMatches tolerates small spelling errors in longer words only.
+func tokenMatches(text, token string) bool {
+	if has(text, token) {
+		return true
+	}
+	a := []rune(token)
+	if len(a) < 5 {
+		return false
+	}
+	for _, word := range strings.Fields(words(text)) {
+		b := []rune(word)
+		if len(b) < 5 || len(a)-len(b) > 2 || len(b)-len(a) > 2 {
+			continue
+		}
+		row := make([]int, len(b)+1)
+		for j := range row {
+			row[j] = j
+		}
+		for i, x := range a {
+			prev := row[0]
+			row[0] = i + 1
+			for j, y := range b {
+				old := row[j+1]
+				cost := 1
+				if x == y {
+					cost = 0
+				}
+				row[j+1] = min(row[j+1]+1, row[j]+1, prev+cost)
+				prev = old
+			}
+		}
+		if row[len(b)] <= 2 {
 			return true
 		}
 	}

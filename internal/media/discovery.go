@@ -5,6 +5,50 @@ import (
 	"time"
 )
 
+type MusicState string
+
+const (
+	Eligible                  MusicState = "eligible"
+	Uncertain                 MusicState = "uncertain"
+	Rejected                  MusicState = "rejected"
+	maxDiscoveryVerifications            = 3
+)
+
+// ClassifyDiscovery distinguishes absent evidence from explicit negatives.
+func ClassifyDiscovery(query string, c Candidate) (MusicState, string) {
+	if !videoID.MatchString(c.ID) {
+		return Rejected, "invalid_video_id"
+	}
+	for _, term := range []string{"podcast", "interview", "reaction", "reacts", "review", "tutorial", "documentary", "gameplay", "news", "shorts", "short"} {
+		if has(c.Title+" "+c.Channel+" "+c.Uploader, term) {
+			return Rejected, "hard_reject=" + term
+		}
+	}
+	shape := c
+	if shape.Duration == 0 {
+		shape.Duration = 45
+	}
+	if shape.Title == "" {
+		shape.Title = "unknown"
+	}
+	if !musicShape(shape) {
+		return Rejected, "invalid_music_shape"
+	}
+	if c.Title == "" {
+		return Uncertain, "missing_flat_metadata"
+	}
+	if _, ok := scoreMusic(query, c); !ok {
+		return Rejected, "query_match_too_low"
+	}
+	if IsMusic(c) {
+		return Eligible, "music_evidence"
+	}
+	if c.Duration == 0 || len(c.Categories) == 0 || c.Channel == "" {
+		return Uncertain, "missing_flat_metadata"
+	}
+	return Uncertain, "insufficient_music_evidence"
+}
+
 // Discovery ranks the ten search summaries, retaining uncertain music results
 // for verification instead of either accepting them or losing concert uploads.
 // Verification alone is not proof of an official artist channel: that bonus is
@@ -18,29 +62,50 @@ func selectDiscovered(ctx context.Context, query string, candidates []Candidate,
 	timing := TimingFrom(ctx)
 	start := time.Now()
 	var remaining []ranked
+	counts := map[MusicState]int{}
 	for _, c := range candidates {
-		if !videoID.MatchString(c.ID) {
-			continue
+		state, reason := ClassifyDiscovery(query, c)
+		counts[state]++
+		if timing != nil {
+			timing.log.DebugContext(ctx, "discovery_candidate", "video_id", c.ID, "title", c.Title, "state", state, "reason", reason)
 		}
-		shape := c
-		if shape.Duration == 0 {
-			shape.Duration = 45
-		} // Missing duration needs verification.
-		if !musicShape(shape) || c.LiveStatus == "is_live" {
+		if state == Rejected {
 			continue
 		}
 		provisional := c
-		uncertainArtist := c.Verified && c.Artist == "" && len(c.Categories) == 0 && channelMatchesQuery(query, c)
+		uncertainArtist := state == Uncertain && c.Verified && c.Artist == "" && len(c.Categories) == 0 && channelMatchesQuery(query, c)
 		if uncertainArtist {
 			provisional.Artist = c.Channel
 		}
 		score, ok := scoreMusic(query, provisional)
 		if !ok {
-			continue
+			score = 0
 		}
 		remaining = append(remaining, ranked{c, score, !IsMusic(c) || uncertainArtist})
 	}
-	timing.Event("discovery_ranking_complete", start, "candidates", len(candidates), "eligible", len(remaining))
+	timing.Event("discovery_ranking_complete", start, "candidates", len(candidates), "eligible", counts[Eligible], "uncertain", counts[Uncertain], "rejected", counts[Rejected])
+	verifications := 0
+	defer func() { timing.Event("discovery_complete", start, "full_verifications", verifications) }()
+	// Prefer a strong confirmed match before spending subprocesses on metadata
+	// that could only improve a provisional channel bonus. Requested versions
+	// can still outrank a canonical result whose version penalty lowers its score.
+	bestEligible := -1
+	for i, c := range remaining {
+		if !c.verify && c.score >= 300 && (bestEligible < 0 || c.score > remaining[bestEligible].score) {
+			bestEligible = i
+		}
+	}
+	if bestEligible >= 0 {
+		competitive := false
+		for _, c := range remaining {
+			if c.score > remaining[bestEligible].score+30 {
+				competitive = true
+			}
+		}
+		if !competitive {
+			return remaining[bestEligible].candidate, nil
+		}
+	}
 	var lastErr error
 	for len(remaining) > 0 {
 		if err := ctx.Err(); err != nil {
@@ -58,6 +123,11 @@ func selectDiscovered(ctx context.Context, query string, candidates []Candidate,
 		if !selected.verify {
 			return selected.candidate, nil
 		}
+		if verifications >= maxDiscoveryVerifications {
+			remaining = append(remaining[:best], remaining[best+1:]...)
+			continue
+		}
+		verifications++
 		full, err := verify(selected.candidate)
 		if err != nil {
 			if ctx.Err() != nil {

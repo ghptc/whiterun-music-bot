@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log/slog"
 	"os"
 	"testing"
 )
@@ -77,10 +79,12 @@ func TestDiscoveryReRanksUnconfirmedOfficialChannel(t *testing.T) {
 		c.Categories = []string{"Music"}
 		return c, nil
 	})
-	if err != nil || got.ID != official.ID || calls != 1 {
+	if err != nil || got.ID != official.ID || calls != 0 {
 		t.Fatalf("got=%+v err=%v calls=%d", got, err, calls)
 	}
-	// A genuine artist-channel confirmation preserves the existing higher tier.
+	// Complete artist metadata preserves the existing higher tier.
+	generic.Categories = []string{"Music"}
+	generic.Artist = "Arctic Monkeys"
 	got, err = selectDiscovered(context.Background(), "Arctic Monkeys 505", []Candidate{generic, official}, func(c Candidate) (Candidate, error) {
 		c.Categories = []string{"Music"}
 		c.Artist = "Arctic Monkeys"
@@ -199,6 +203,104 @@ func TestCapturedDiscoveryPreservesSelection(t *testing.T) {
 			if calls > 1 {
 				t.Fatalf("extracted %d candidates", calls)
 			}
+		})
+	}
+}
+
+func TestDiscoveryRegressionQueries(t *testing.T) {
+	for _, tt := range []struct{ query, title string }{
+		{"The Strokes Sunday", "The Strokes - Why Are Sundays So Depressing?"},
+		{"Metallica unforguiven", "Metallica - The Unforgiven"},
+		{"Metallica inforguiven", "Metallica - The Unforgiven"},
+	} {
+		t.Run(tt.query, func(t *testing.T) {
+			c := flat(song(tt.title, ""))
+			state, reason := ClassifyDiscovery(tt.query, c)
+			if state != Uncertain {
+				t.Fatalf("state=%s reason=%s", state, reason)
+			}
+			calls := 0
+			got, err := selectDiscovered(context.Background(), tt.query, []Candidate{c}, func(c Candidate) (Candidate, error) {
+				calls++
+				c.Categories = []string{"Music"}
+				return c, nil
+			})
+			if err != nil || got.Title != tt.title || calls != 1 {
+				t.Fatalf("got=%+v err=%v calls=%d", got, err, calls)
+			}
+			c.Title += " (Official Video)"
+			state, _ = ClassifyDiscovery(tt.query, c)
+			if state != Eligible {
+				t.Fatalf("official video state=%s", state)
+			}
+		})
+	}
+}
+
+func TestDiscoveryStates(t *testing.T) {
+	c := song("Metallica - The Unforgiven", "Metallica")
+	if state, _ := ClassifyDiscovery("Metallica unforguiven", c); state != Eligible {
+		t.Fatal(state)
+	}
+	c = flat(c)
+	c.Duration = 0
+	c.Channel = ""
+	if state, _ := ClassifyDiscovery("Metallica unforguiven", c); state != Uncertain {
+		t.Fatal(state)
+	}
+	for _, term := range []string{"podcast", "interview", "reaction", "review", "tutorial", "documentary", "gameplay", "news"} {
+		negative := c
+		negative.Title += " " + term
+		if state, reason := ClassifyDiscovery("Metallica unforguiven", negative); state != Rejected || reason != "hard_reject="+term {
+			t.Fatalf("%s %s", state, reason)
+		}
+	}
+}
+
+func TestDiscoveryVerificationBudget(t *testing.T) {
+	candidates := make([]Candidate, 10)
+	for i := range candidates {
+		candidates[i] = flat(song("Metallica - The Unforgiven", ""))
+		candidates[i].ID = fmt.Sprintf("video%06d", i)
+	}
+	for _, winner := range []int{2, 3, -1} {
+		calls := 0
+		got, err := selectDiscovered(context.Background(), "Metallica unforguiven", candidates, func(c Candidate) (Candidate, error) {
+			if c.ID != candidates[calls].ID {
+				t.Fatal("search order not preserved")
+			}
+			if calls == winner {
+				c.Categories = []string{"Music"}
+			}
+			calls++
+			return c, nil
+		})
+		if calls != 3 {
+			t.Fatalf("calls=%d", calls)
+		}
+		if winner == 2 {
+			if err != nil || got.ID != candidates[2].ID {
+				t.Fatalf("got=%+v err=%v", got, err)
+			}
+		} else if !errors.Is(err, ErrNoSong) {
+			t.Fatalf("budget exceeded: %v", err)
+		}
+	}
+}
+
+func TestLiveResolverTiming(t *testing.T) {
+	binary := os.Getenv("BARD_LIVE_YTDLP")
+	if binary == "" {
+		t.Skip("opt-in network timing probe")
+	}
+	for _, query := range []string{"Arctic Monkeys 505", "the strokes sunday", "metallica unforguiven", "metallica inforguiven"} {
+		t.Run(query, func(t *testing.T) {
+			ctx := WithTiming(context.Background(), NewTiming(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))))
+			got, err := (Resolver{Binary: binary}).Resolve(ctx, query)
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Logf("selected %s", got.Title)
 		})
 	}
 }
