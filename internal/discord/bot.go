@@ -3,6 +3,7 @@ package discord
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"sync"
 	"time"
@@ -185,11 +186,8 @@ func (c *voiceConn) Close(ctx context.Context) {
 	_ = c.dave.Close()
 }
 func (v transport) WriteFrame(ctx context.Context, frame []byte) error {
-	if c, ok := v.conn.(*voiceConn); ok && c.dave.ShouldHoldFrames() {
-		wait, cancel := context.WithTimeout(ctx, 10*time.Second)
-		_, err := c.dave.WaitReady(wait)
-		cancel()
-		if err != nil {
+	if c, ok := v.conn.(*voiceConn); ok {
+		if err := waitVoiceReady(ctx, c.dave, 60*time.Second); err != nil {
 			return err
 		}
 	}
@@ -200,6 +198,9 @@ func (v transport) WriteFrame(ctx context.Context, frame []byte) error {
 		return err
 	}
 	_, err := v.conn.UDP().Write(frame)
+	if err == nil {
+		media.TimingFrom(ctx).FirstDiscordSend()
+	}
 	return err
 }
 func (v transport) Speaking(ctx context.Context, on bool) error {
@@ -231,4 +232,28 @@ func (g *guild) resetSearches(parent context.Context) {
 		g.searchCancel()
 	}
 	g.searchCtx, g.searchCancel = context.WithCancel(parent)
+}
+
+// DAVE's recovery watchdog starts after 15s and may need a second cycle.
+// This deadline bounds only readiness waiting, never the track's processes.
+type voiceReadiness interface {
+	ShouldHoldFrames() bool
+	WaitReady(context.Context) (time.Duration, error)
+}
+
+func waitVoiceReady(ctx context.Context, ready voiceReadiness, timeout time.Duration) error {
+	if !ready.ShouldHoldFrames() {
+		return nil
+	}
+	started := time.Now()
+	timing := media.TimingFrom(ctx)
+	timing.Event("dave_ready_wait_start", started)
+	wait, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	_, err := ready.WaitReady(wait)
+	timing.Event("dave_ready_wait_complete", started, "error", err)
+	if err != nil {
+		return fmt.Errorf("DAVE readiness: %w", err)
+	}
+	return nil
 }

@@ -7,12 +7,16 @@ import (
 	"io"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"whiterun/internal/media"
 )
 
-type Streamer struct{ YTDLP, FFmpeg string }
+type Streamer struct {
+	YTDLP, FFmpeg                     string
+	ResolveTimeout, FirstAudioTimeout time.Duration
+}
 
 // Play pipes yt-dlp into FFmpeg, then sends paced Opus packets. There are no
 // audio files, signed stream URLs in queue state, or shell commands.
@@ -20,8 +24,23 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	started := time.Now()
 	t.Timing.Event("playback_start", started)
 	defer func() { t.Timing.Event("playback_complete", started, "error", err) }()
-	ctx, cancel := context.WithTimeout(parent, t.Duration+2*time.Minute)
+	ctx, cancelCause := context.WithCancelCause(media.WithTiming(parent, t.Timing))
+	cancel := func() { cancelCause(context.Canceled) }
 	defer cancel()
+	defer func() {
+		t.Timing.Event("playback_context_complete", started, "cause", context.Cause(ctx), "parent_error", parent.Err())
+	}()
+	resolved, firstAudio := make(chan struct{}), make(chan struct{})
+	var resolvedOnce sync.Once
+	markResolved := func() { resolvedOnce.Do(func() { close(resolved) }) }
+	resolveTimeout, audioTimeout := s.ResolveTimeout, s.FirstAudioTimeout
+	if resolveTimeout <= 0 {
+		resolveTimeout = 30 * time.Second
+	}
+	if audioTimeout <= 0 {
+		audioTimeout = 30 * time.Second
+	}
+	go watchStartup(ctx, cancelCause, resolved, firstAudio, resolveTimeout, audioTimeout)
 	input, output, err := os.Pipe()
 	if err != nil {
 		return err
@@ -29,11 +48,20 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	defer input.Close()
 	defer output.Close()
 	yt := media.Command(ctx, s.YTDLP, append(media.BaseArgs(), "--print-to-file", "before_dl:"+streamResolvedMarker+" %(id)s", "/dev/stderr", "-f", "bestaudio/best", "-o", "-", "--", t.URL)...)
-	yt.Stdout = output
+
+	// A successful producer can exit while its buffered bytes are still being
+	// paced downstream. Do not apply Command's short post-exit I/O drain limit.
+	// Track cancellation kills FFmpeg too, unblocking the pipe writer.
+	yt.WaitDelay = 0
 	ytErr := &media.LimitedBuffer{Limit: 8192}
 	streamStart := time.Now()
-	streamTiming := &streamTimingWriter{buffer: ytErr, timing: t.Timing, start: streamStart, tail: "\n"}
+	streamTiming := &streamTimingWriter{buffer: ytErr, timing: t.Timing, start: streamStart, tail: "\n", onResolved: markResolved}
 	yt.Stderr = streamTiming
+	yt.Stdout = &firstWrite{writer: output, first: func() {
+		t.Timing.Event("yt_dlp_first_byte", streamStart)
+		markResolved()
+	}, written: func() { t.Timing.Event("ffmpeg_first_input", streamStart) }}
+
 	ff := media.Command(ctx, s.FFmpeg, "-hide_banner", "-loglevel", "error", "-nostdin", "-i", "pipe:0", "-vn", "-ac", "2", "-ar", "48000", "-c:a", "libopus", "-b:a", "96k", "-vbr", "off", "-application", "audio", "-frame_duration", "20", "-f", "opus", "-flush_packets", "1", "pipe:1")
 	ff.Stdin = input
 	ffErr := &media.LimitedBuffer{Limit: 8192}
@@ -57,25 +85,33 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 		_ = ff.Wait()
 		return fmt.Errorf("start yt-dlp: %w", err)
 	}
-	// Children hold their own descriptors. Closing parent copies permits EOF.
+	// FFmpeg owns its read descriptor; release the parent copy.
 	input.Close()
-	output.Close()
+	// yt's Go stdout copier owns the write descriptor until Wait drains it.
+	ytDone := make(chan error, 1)
+	go func() {
+		waitErr := yt.Wait()
+		output.Close()
+		t.Timing.Event("yt_dlp_complete", streamStart, "purpose", "playback", "candidates", 1, "error", waitErr)
+		ytDone <- waitErr
+	}()
+	t.Timing.Event("stream_process_started", streamStart, "pid", yt.Process.Pid)
 	defer func() {
 		cleanup, c := context.WithTimeout(context.Background(), 2*time.Second)
 		defer c()
 		_ = v.Speaking(cleanup, false)
 	}()
-	// A stalled producer must not block this guild for an entire song duration.
-	idle := time.AfterFunc(60*time.Second, cancel)
-	defer idle.Stop()
 	speaking := false
 	firstFrame := true
 	next := time.Now()
-	readErr := oggPackets(audio, func(packet []byte) error {
+	readErr := oggPackets(&firstRead{reader: audio, first: func() { t.Timing.Event("ffmpeg_first_output", streamStart) }}, func(packet []byte) error {
+		if firstFrame {
+			t.Timing.Event("first_opus_frame", streamStart)
+			close(firstAudio)
+		}
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
-		idle.Reset(30 * time.Second)
 		if !speaking {
 			if err := v.Speaking(ctx, true); err != nil {
 				return err
@@ -90,8 +126,11 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 			return ctx.Err()
 		case <-timer.C:
 		}
+		if firstFrame {
+			t.Timing.Event("first_voice_frame_attempt", streamStart)
+		}
 		if err := v.WriteFrame(ctx, packet); err != nil {
-			return err
+			return fmt.Errorf("voice frame send: %w", err)
 		}
 		if firstFrame {
 			t.Timing.Event("first_audio_frame", started)
@@ -102,17 +141,17 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 			next = time.Now().Add(20 * time.Millisecond)
 		}
 		return nil
-	})
+	}, func() { t.Timing.Event("first_ogg_packet", streamStart) })
 	if readErr != nil {
-		cancel()
+		cancelCause(readErr)
 	}
 	ffWait := ff.Wait()
+	t.Timing.Event("ffmpeg_complete", ffStart, "error", ffWait)
 	// FFmpeg may exit early while the producer is still fetching data.
 	if ffWait != nil {
 		cancel()
 	}
-	ytWait := yt.Wait()
-	t.Timing.Event("yt_dlp_complete", streamStart, "purpose", "playback", "candidates", 1, "error", ytWait)
+	ytWait := <-ytDone
 	if !streamTiming.resolved {
 		t.Timing.Event("stream_resolve_incomplete", streamStart, "error", ytWait)
 	}
@@ -120,6 +159,9 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 		return parent.Err()
 	}
 	var failures []error
+	if cause := context.Cause(ctx); cause != nil {
+		failures = append(failures, cause)
+	}
 	if readErr != nil && !errors.Is(readErr, io.EOF) {
 		failures = append(failures, fmt.Errorf("audio stream: %w", readErr))
 	}
@@ -153,11 +195,12 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 const streamResolvedMarker = "BARD_STREAM_RESOLVED"
 
 type streamTimingWriter struct {
-	buffer   *media.LimitedBuffer
-	timing   *media.Timing
-	start    time.Time
-	tail     string
-	resolved bool
+	buffer     *media.LimitedBuffer
+	timing     *media.Timing
+	start      time.Time
+	tail       string
+	resolved   bool
+	onResolved func()
 }
 
 func (w *streamTimingWriter) Write(p []byte) (int, error) {
@@ -167,6 +210,10 @@ func (w *streamTimingWriter) Write(p []byte) (int, error) {
 		if strings.Contains(combined, marker) {
 			w.timing.Event("stream_resolve_complete", w.start)
 			w.resolved = true
+			w.timing.Event("stream_url_resolved", w.start)
+			if w.onResolved != nil {
+				w.onResolved()
+			}
 		}
 		if len(combined) > len(marker) {
 			combined = combined[len(combined)-len(marker):]
@@ -174,4 +221,65 @@ func (w *streamTimingWriter) Write(p []byte) (int, error) {
 		w.tail = combined
 	}
 	return w.buffer.Write(p)
+}
+
+// Startup deadlines supervise readiness; neither deadline owns subprocesses
+// after the first Opus frame. Track cancellation alone owns playback lifetime.
+func watchStartup(ctx context.Context, cancel context.CancelCauseFunc, resolved, firstAudio <-chan struct{}, resolveTimeout, audioTimeout time.Duration) {
+	timer := time.NewTimer(resolveTimeout)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return
+	case <-firstAudio:
+		return
+	case <-resolved:
+	case <-timer.C:
+		cancel(fmt.Errorf("stream resolution timeout: %w", context.DeadlineExceeded))
+		return
+	}
+	timer.Reset(audioTimeout)
+	select {
+	case <-ctx.Done():
+	case <-firstAudio:
+	case <-timer.C:
+		cancel(fmt.Errorf("first Opus frame timeout: %w", context.DeadlineExceeded))
+	}
+}
+
+type firstWrite struct {
+	writer         io.Writer
+	first, written func()
+	seen           bool
+}
+
+func (w *firstWrite) Write(p []byte) (int, error) {
+	if len(p) == 0 {
+		return 0, nil
+	}
+	first := !w.seen
+	if first {
+		w.seen = true
+		w.first()
+	}
+	n, err := w.writer.Write(p)
+	if first && n > 0 {
+		w.written()
+	}
+	return n, err
+}
+
+type firstRead struct {
+	reader io.Reader
+	first  func()
+	seen   bool
+}
+
+func (r *firstRead) Read(p []byte) (int, error) {
+	n, err := r.reader.Read(p)
+	if n > 0 && !r.seen {
+		r.seen = true
+		r.first()
+	}
+	return n, err
 }

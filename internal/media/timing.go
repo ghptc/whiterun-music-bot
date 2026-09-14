@@ -3,14 +3,16 @@ package media
 import (
 	"context"
 	"log/slog"
+	"sync"
 	"time"
 )
 
-// Timing follows a request into the queue. All fields are immutable so playback
-// and the interaction handler can safely report events concurrently.
+// Timing follows a request into the queue. Immutable request fields and a
+// synchronized send marker allow concurrent playback and interaction events.
 type Timing struct {
-	log   *slog.Logger
-	start time.Time
+	log         *slog.Logger
+	start       time.Time
+	discordSend sync.Once
 }
 
 type timingKey struct{}
@@ -32,4 +34,11 @@ func (t *Timing) Event(name string, start time.Time, attrs ...any) {
 	}
 	fields := []any{"elapsed_ms", float64(time.Since(start).Microseconds()) / 1000, "request_elapsed_ms", float64(time.Since(t.start).Microseconds()) / 1000}
 	t.log.Info(name, append(fields, attrs...)...)
+}
+
+// FirstDiscordSend records successful UDP submission, not proof of audibility.
+func (t *Timing) FirstDiscordSend() {
+	if t != nil {
+		t.discordSend.Do(func() { t.Event("first_discord_send", t.start) })
+	}
 }

@@ -128,3 +128,107 @@ func TestStreamResolutionMarkerAcrossWrites(t *testing.T) {
 		t.Fatal("diagnostics were not bounded")
 	}
 }
+
+func TestStartupDeadlinesEndAtFirstOpus(t *testing.T) {
+	for _, phase := range []string{"resolve", "audio", "playing"} {
+		t.Run(phase, func(t *testing.T) {
+			ctx, cancel := context.WithCancelCause(context.Background())
+			defer cancel(context.Canceled)
+			resolved, first := make(chan struct{}), make(chan struct{})
+			done := make(chan struct{})
+			if phase != "resolve" {
+				close(resolved)
+			}
+			if phase == "playing" {
+				close(first)
+			}
+			go func() {
+				watchStartup(ctx, cancel, resolved, first, 20*time.Millisecond, 20*time.Millisecond)
+				close(done)
+			}()
+			select {
+			case <-done:
+			case <-time.After(time.Second):
+				t.Fatal("watchdog leaked")
+			}
+			if phase == "playing" {
+				time.Sleep(40 * time.Millisecond)
+				if ctx.Err() != nil {
+					t.Fatal("startup deadline canceled healthy playback")
+				}
+			} else {
+				want := "stream resolution timeout"
+				if phase == "audio" {
+					want = "first Opus frame timeout"
+				}
+				if !strings.Contains(context.Cause(ctx).Error(), want) {
+					t.Fatal(context.Cause(ctx))
+				}
+			}
+		})
+	}
+}
+
+func TestStreamerReportsStagesBeforeVoiceFailure(t *testing.T) {
+	ff, err := exec.LookPath("ffmpeg")
+	if err != nil {
+		t.Skip("FFmpeg unavailable")
+	}
+	yt := executable(t, "yt-dlp", "cat '"+wav(t)+"'")
+	var logs bytes.Buffer
+	timing := media.NewTiming(slog.New(slog.NewJSONHandler(&logs, nil)))
+	// Once frames reach Voice, the first-audio watchdog must be disabled even
+	// while the transport is waiting for encryption readiness.
+	v := &delayedVoice{}
+	err = (Streamer{YTDLP: yt, FFmpeg: ff, FirstAudioTimeout: 100 * time.Millisecond}).Play(context.Background(), media.Track{Timing: timing}, v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, event := range []string{"stream_process_started", "yt_dlp_first_byte", "ffmpeg_first_input", "ffmpeg_first_output", "first_ogg_packet", "first_opus_frame", "first_voice_frame_attempt"} {
+		if strings.Count(logs.String(), "\"msg\":\""+event+"\"") != 1 {
+			t.Fatalf("missing/duplicate %s: %s", event, logs.String())
+		}
+	}
+	if strings.Contains(logs.String(), "\"first_discord_send\"") {
+		t.Fatal("local sink claimed Discord send")
+	}
+}
+
+type delayedVoice struct{ recordingVoice }
+
+func (v *delayedVoice) WriteFrame(ctx context.Context, p []byte) error {
+	if v.frames == 0 {
+		select {
+		case <-time.After(150 * time.Millisecond):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+	return v.recordingVoice.WriteFrame(ctx, p)
+}
+
+// A producer may exit before FFmpeg consumes the remaining bytes. The generic
+// two-second WaitDelay must not truncate that data during a voice pause.
+func TestStreamerDrainsAfterProducerExit(t *testing.T) {
+	ff, err := exec.LookPath("ffmpeg")
+	if err != nil {
+		t.Skip("FFmpeg unavailable")
+	}
+	dir := t.TempDir()
+	opus := filepath.Join(dir, "audio.opus")
+	cmd := exec.Command(ff, "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo", "-t", "5", "-c:a", "libopus", "-b:a", "96k", "-vbr", "off", opus)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("%v: %s", err, out)
+	}
+	yt := executable(t, "yt-dlp", "cat '"+opus+"'")
+	// A compressed fixture fits in producer/kernel buffers and drains slowly.
+	v := &recordingVoice{}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := (Streamer{YTDLP: yt, FFmpeg: ff}).Play(ctx, media.Track{}, v); err != nil {
+		t.Fatal(err)
+	}
+	if v.frames < 250 {
+		t.Fatalf("truncated stream: %d frames", v.frames)
+	}
+}

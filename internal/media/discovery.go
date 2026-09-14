@@ -77,7 +77,14 @@ func selectDiscovered(ctx context.Context, query string, candidates []Candidate,
 		if uncertainArtist {
 			provisional.Artist = c.Channel
 		}
-		score, ok := scoreMusic(query, provisional)
+		breakdown, ok := musicScoreBreakdown(query, provisional)
+		score := breakdown.FinalScore
+		if timing != nil {
+			timing.log.DebugContext(ctx, "discovery_score", "candidate", c.Title,
+				"artist_score", breakdown.ArtistScore, "exact_token_score", breakdown.ExactTokenScore,
+				"fuzzy_score", breakdown.FuzzyScore, "unmatched_penalty", breakdown.UnmatchedPenalty,
+				"version_score", breakdown.VersionScore, "official_bonus", breakdown.OfficialBonus, "final_score", score)
+		}
 		if !ok {
 			score = 0
 		}

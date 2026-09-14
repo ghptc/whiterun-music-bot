@@ -1,6 +1,9 @@
 package media
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 func song(title, channel string) Candidate {
 	return Candidate{ID: "abcdefghijk", Title: title, Channel: channel, Duration: 240, Categories: []string{"Music"}}
@@ -93,5 +96,71 @@ func TestURLValidation(t *testing.T) {
 	}
 	if _, ok, err := YouTubeURL("505 Arctic Monkeys"); ok || err != nil {
 		t.Fatal("query treated as URL")
+	}
+}
+
+func TestExactSongTitleRelevance(t *testing.T) {
+	candidates := []Candidate{
+		song("The Strokes - Why Are Sundays So Depressing (Official Audio)", "The Strokes"),
+		song("The Strokes - Someday", "The Strokes"),
+		song("The Strokes - Last Nite", "The Strokes"),
+		song("The Strokes - Sunday Morning", "The Strokes"),
+	}
+	got, ok := Select("the strokes sunday", candidates)
+	if !ok || got.Title != candidates[3].Title {
+		t.Fatalf("got=%+v ok=%v", got, ok)
+	}
+	for _, c := range []Candidate{candidates[3], candidates[0]} {
+		b, _ := musicScoreBreakdown("the strokes sunday", c)
+		t.Logf("%s: %+v", c.Title, b)
+	}
+	// Discovery must also prefer the fourth result without new extraction work.
+	got, err := selectDiscovered(context.Background(), "the strokes sunday", candidates, func(Candidate) (Candidate, error) {
+		t.Fatal("complete music metadata must not trigger verification")
+		return Candidate{}, nil
+	})
+	if err != nil || got.Title != candidates[3].Title {
+		t.Fatalf("got=%+v err=%v", got, err)
+	}
+}
+
+func TestTokenMatchStrength(t *testing.T) {
+	previous := 101
+	for _, token := range []string{"sunday", "sundey", "sundays", "sundaymorning", "xxsundayxx"} {
+		weight := tokenWeight("sunday", token)
+		if weight > previous || weight <= 0 {
+			t.Fatalf("%s weight=%d previous=%d", token, weight, previous)
+		}
+		previous = weight
+	}
+	exact := song("Artist - Sunday", "Artist")
+	for _, title := range []string{"Sundays", "Sundaymorning", "xxsundayxx", "Sundey"} {
+		other := song("Artist - "+title+" (Official Audio)", "Artist")
+		a, _ := Score("artist sunday", exact)
+		b, _ := Score("artist sunday", other)
+		if a <= b {
+			t.Fatalf("exact=%d %s=%d", a, title, b)
+		}
+	}
+	normalized := song("ARTIST — SUNDAY! (Official Audio HD 4K Remastered)", "Artist")
+	plain := song("Artist - Sunday (Official Audio)", "Artist")
+	a, _ := Score("artist sunday", normalized)
+	b, _ := Score("artist sunday", plain)
+	if a != b {
+		t.Fatalf("normalization/noise changed score: %d != %d", a, b)
+	}
+}
+
+func TestTypoScoreRemainsUseful(t *testing.T) {
+	for _, query := range []string{"metallica unforguiven", "metallica inforguiven"} {
+		candidate := song("Metallica - The Unforgiven", "Metallica")
+		b, ok := musicScoreBreakdown(query, candidate)
+		if !ok || b.FuzzyScore <= 0 || b.FinalScore < 200 {
+			t.Fatalf("%s: %+v ok=%v", query, b, ok)
+		}
+		unrelated, _ := Score(query, song("Metallica - Nothing Else Matters", "Metallica"))
+		if b.FinalScore <= unrelated {
+			t.Fatalf("typo lost relevance: %+v <= %d", b, unrelated)
+		}
 	}
 }

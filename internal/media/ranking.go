@@ -63,22 +63,26 @@ func Score(query string, c Candidate) (int, bool) {
 // scoreMusic is shared by confirmed music and provisional discovery ranking.
 // A provisional score never authorizes queue insertion.
 func scoreMusic(query string, c Candidate) (int, bool) {
-	text := c.Title + " " + c.Channel + " " + c.Artist
-	tokens := strings.Fields(words(query))
-	matched, total := 0, 0
-	for _, token := range tokens {
-		if token == "the" || token == "and" || token == "official" || token == "audio" || token == "music" || token == "video" {
-			continue
-		}
-		total++
-		if tokenMatches(text, token) {
-			matched++
-		}
+	b, ok := musicScoreBreakdown(query, c)
+	return b.FinalScore, ok
+}
+
+type scoreBreakdown struct {
+	ArtistScore      int
+	ExactTokenScore  int
+	FuzzyScore       int
+	UnmatchedPenalty int
+	VersionScore     int
+	OfficialBonus    int
+	FinalScore       int
+}
+
+func musicScoreBreakdown(query string, c Candidate) (scoreBreakdown, bool) {
+	breakdown, ok := relevance(query, c)
+	if !ok {
+		return breakdown, false
 	}
-	if total == 0 || matched == 0 {
-		return 0, false
-	}
-	score := matched * 300 / total
+	score := breakdown.ArtistScore + breakdown.ExactTokenScore + breakdown.FuzzyScore - breakdown.UnmatchedPenalty
 	// Version intent outweighs official-source preference.
 	for _, variant := range variants {
 		present := has(c.Title, variant)
@@ -92,12 +96,14 @@ func scoreMusic(query string, c Candidate) (int, bool) {
 			score -= 100
 		}
 	}
+	breakdown.VersionScore = score - (breakdown.ArtistScore + breakdown.ExactTokenScore + breakdown.FuzzyScore - breakdown.UnmatchedPenalty)
+	beforeBonus := score
 	channel := c.Channel + " " + c.Uploader
 	channelRelevant := channelMatchesQuery(query, c)
 	switch {
 	case c.Verified && c.Artist != "" && has(channel, c.Artist):
 		score += 65
-	case has(c.Title, "official audio") || has(c.Title, "official video") || has(c.Title, "official music video") || has(c.Title, "official video"):
+	case has(c.Title, "official audio") || has(c.Title, "official video") || has(c.Title, "official music video"):
 		score += 55
 	case has(channel, "topic") || strings.Contains(strings.ToLower(c.Description), "provided to youtube by"):
 		score += 45
@@ -106,7 +112,9 @@ func scoreMusic(query string, c Candidate) (int, bool) {
 	case c.Verified && channelRelevant:
 		score += 25
 	}
-	return score, true
+	breakdown.OfficialBonus = score - beforeBonus
+	breakdown.FinalScore = score
+	return breakdown, true
 }
 func Select(query string, candidates []Candidate) (Candidate, bool) {
 	bestScore := -100000
@@ -132,40 +140,122 @@ func channelMatchesQuery(query string, c Candidate) bool {
 	return false
 }
 
-// tokenMatches tolerates small spelling errors in longer words only.
-func tokenMatches(text, token string) bool {
-	if has(text, token) {
-		return true
+// Matching weights deliberately separate whole tokens from morphology and typos.
+// Case and punctuation are normalized by words before comparison.
+func tokenWeight(query, candidate string) int {
+	if query == candidate {
+		return 100
 	}
-	a := []rune(token)
-	if len(a) < 5 {
-		return false
+	if len([]rune(query)) < 5 || len([]rune(candidate)) < 5 {
+		return 0
 	}
-	for _, word := range strings.Fields(words(text)) {
-		b := []rune(word)
-		if len(b) < 5 || len(a)-len(b) > 2 || len(b)-len(a) > 2 {
+	if strings.HasPrefix(candidate, query) || strings.HasPrefix(query, candidate) {
+		return 35
+	}
+	if strings.Contains(candidate, query) || strings.Contains(query, candidate) {
+		return 10
+	}
+	a, b := []rune(query), []rune(candidate)
+	if len(a)-len(b) > 2 || len(b)-len(a) > 2 {
+		return 0
+	}
+	row := make([]int, len(b)+1)
+	for j := range row {
+		row[j] = j
+	}
+	for i, x := range a {
+		prev := row[0]
+		row[0] = i + 1
+		for j, y := range b {
+			old := row[j+1]
+			cost := 1
+			if x == y {
+				cost = 0
+			}
+			row[j+1] = min(row[j+1]+1, row[j]+1, prev+cost)
+			prev = old
+		}
+	}
+	if row[len(b)] <= 2 {
+		return 60
+	}
+	return 0
+}
+
+func semanticTokens(text string) []string {
+	var result []string
+	for _, token := range strings.Fields(words(text)) {
+		switch token {
+		case "the", "and", "official", "audio", "video", "music", "lyrics", "remastered", "hd", "4k":
 			continue
 		}
-		row := make([]int, len(b)+1)
-		for j := range row {
-			row[j] = j
-		}
-		for i, x := range a {
-			prev := row[0]
-			row[0] = i + 1
-			for j, y := range b {
-				old := row[j+1]
-				cost := 1
-				if x == y {
-					cost = 0
-				}
-				row[j+1] = min(row[j+1]+1, row[j]+1, prev+cost)
-				prev = old
-			}
-		}
-		if row[len(b)] <= 2 {
-			return true
+		result = append(result, token)
+	}
+	return result
+}
+
+// Infer artist tokens from explicit metadata or the conventional Artist - Title
+// prefix. Channel tokens are artist evidence only when also present in query.
+func relevance(query string, c Candidate) (scoreBreakdown, bool) {
+	var b scoreBreakdown
+	artist := c.Artist
+	if artist == "" {
+		if prefix, _, ok := strings.Cut(c.Title, " - "); ok {
+			artist = prefix
+		} else {
+			artist = c.Channel + " " + c.Uploader
 		}
 	}
-	return false
+	queryTokens := semanticTokens(query)
+	titleTokens := semanticTokens(c.Title)
+	songCount, artistCount, matched := 0, 0, 0
+	for _, q := range queryTokens {
+		if has(artist, q) {
+			artistCount++
+			b.ArtistScore += 100
+			matched++
+			continue
+		}
+		songCount++
+		weight := 0
+		for _, t := range titleTokens {
+			weight = max(weight, tokenWeight(q, t))
+		}
+		if weight > 0 {
+			matched++
+		}
+		if weight == 100 {
+			b.ExactTokenScore += 300
+		} else {
+			b.FuzzyScore += weight * 3
+		}
+	}
+	if artistCount > 0 {
+		b.ArtistScore /= artistCount
+	}
+	if songCount > 0 {
+		b.ExactTokenScore /= songCount
+		b.FuzzyScore /= songCount
+		if artistCount == 0 {
+			b.ExactTokenScore = b.ExactTokenScore * 4 / 3
+			b.FuzzyScore = b.FuzzyScore * 4 / 3
+		}
+	}
+	for _, t := range titleTokens {
+		if has(artist, t) {
+			continue
+		}
+		relevant := false
+		for _, q := range queryTokens {
+			if tokenWeight(q, t) > 0 {
+				relevant = true
+				break
+			}
+		}
+		if !relevant {
+			b.UnmatchedPenalty += 8
+		}
+	}
+	b.UnmatchedPenalty = min(b.UnmatchedPenalty, 64)
+	return b, matched > 0
 }

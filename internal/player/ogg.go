@@ -8,9 +8,10 @@ import (
 
 // oggPackets reconstructs packets across Ogg pages. FFmpeg emits 20ms Opus
 // packets; OpusHead/OpusTags are container metadata, not Discord audio frames.
-func oggPackets(r io.Reader, send func([]byte) error) error {
+func oggPackets(r io.Reader, send func([]byte) error, firstPacket ...func()) error {
 	var packet []byte
 	seenHead := false
+	first := true
 	for {
 		var header [27]byte
 		_, err := io.ReadFull(r, header[:])
@@ -47,6 +48,12 @@ func oggPackets(r io.Reader, send func([]byte) error) error {
 			}
 			if size == 255 {
 				continue
+			}
+			if first {
+				first = false
+				for _, notify := range firstPacket {
+					notify()
+				}
 			}
 			if bytes.HasPrefix(packet, []byte("OpusHead")) {
 				seenHead = true
