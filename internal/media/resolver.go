@@ -14,28 +14,33 @@ import (
 var ErrNoSong = errors.New("The Bard could find no song worthy of playing.")
 
 type Track struct {
-	VideoID  string
-	Channel  string
-	Title    string
-	URL      string
-	Duration time.Duration
-	Timing   *Timing
+	RequestedSource  string
+	SourceURL        string
+	Artist           string
+	VerifyBeforePlay bool
+	VideoID          string
+	Channel          string
+	Title            string
+	URL              string
+	Duration         time.Duration
+	Timing           *Timing
 }
 type Candidate struct {
-	Type        string   `json:"_type"`
-	ChannelID   string   `json:"channel_id"`
-	ID          string   `json:"id"`
-	Title       string   `json:"title"`
-	Channel     string   `json:"channel"`
-	Uploader    string   `json:"uploader"`
-	Description string   `json:"description"`
-	Categories  []string `json:"categories"`
-	Duration    float64  `json:"duration"`
-	Artist      string   `json:"artist"`
-	Track       string   `json:"track"`
-	Verified    bool     `json:"channel_is_verified"`
-	Live        bool     `json:"is_live"`
-	LiveStatus  string   `json:"live_status"`
+	Type         string   `json:"_type"`
+	ChannelID    string   `json:"channel_id"`
+	ID           string   `json:"id"`
+	Title        string   `json:"title"`
+	Channel      string   `json:"channel"`
+	Uploader     string   `json:"uploader"`
+	Description  string   `json:"description"`
+	Categories   []string `json:"categories"`
+	Duration     float64  `json:"duration"`
+	Artist       string   `json:"artist"`
+	Track        string   `json:"track"`
+	Verified     bool     `json:"channel_is_verified"`
+	Availability string   `json:"availability"`
+	Live         bool     `json:"is_live"`
+	LiveStatus   string   `json:"live_status"`
 }
 
 type Resolver struct {

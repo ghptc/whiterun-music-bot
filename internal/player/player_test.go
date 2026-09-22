@@ -148,6 +148,9 @@ func TestConcurrentQueueAccess(t *testing.T) {
 				ticket := p.Ticket()
 				_ = p.Enqueue(media.Track{Title: "song"}, ticket)
 				p.Snapshot()
+				p.Clear()
+				p.Length()
+				_ = p.EnqueueMany([]media.Track{{Title: "batch one"}, {Title: "batch two"}}, ticket)
 				p.Skip()
 				p.Stop()
 			}
@@ -155,4 +158,52 @@ func TestConcurrentQueueAccess(t *testing.T) {
 	}
 	wg.Wait()
 	p.Stop()
+}
+
+func TestBatchOrderClearAndCapacity(t *testing.T) {
+	started := make(chan string, 10)
+	release := make(chan error, 10)
+	p, _ := newTestPlayer(t, func(ctx context.Context, track media.Track, _ Voice) error {
+		started <- track.Title
+		select {
+		case err := <-release:
+			return err
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	})
+	batch := []media.Track{{Title: "one"}, {Title: "two"}, {Title: "three"}}
+	if err := p.EnqueueMany(batch, p.Ticket()); err != nil {
+		t.Fatal(err)
+	}
+	batch[1].Title = "mutated"
+	receive(t, started, "one")
+	if p.Length() != 2 {
+		t.Fatal(p.Length())
+	}
+	release <- nil
+	receive(t, started, "two")
+	if n := p.Clear(); n != 1 {
+		t.Fatal(n)
+	}
+	current, queue := p.Snapshot()
+	if current == nil || current.Title != "two" || len(queue) != 0 || p.Clear() != 0 {
+		t.Fatal("clear interrupted playback or retained queue")
+	}
+	select {
+	case next := <-started:
+		t.Fatalf("unexpected playback %s", next)
+	default:
+	}
+	ticket := p.Ticket()
+	if err := p.EnqueueMany(make([]media.Track, 1000), ticket); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.EnqueueMany([]media.Track{{Title: "overflow"}}, ticket); err == nil || p.Length() != 1000 {
+		t.Fatal("capacity was not atomic")
+	}
+	p.Stop()
+	if err := p.EnqueueMany(batch, ticket); err == nil {
+		t.Fatal("stale batch accepted")
+	}
 }

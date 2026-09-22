@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"strings"
 	"testing"
+	"time"
 	"unicode/utf16"
 	"whiterun/internal/media"
 	"whiterun/internal/player"
@@ -160,4 +161,100 @@ func TestPlayAcknowledgesWithContentBeforeGuildWork(t *testing.T) {
 	if !acknowledged || !strings.Contains(r.response, "Join a voice channel") {
 		t.Fatalf("ack=%v response=%s", acknowledged, r.response)
 	}
+}
+
+type commandSpotify struct{ t *testing.T }
+
+func (s commandSpotify) Collection(_ context.Context, kind, id string) (media.Collection, error) {
+	if kind != "playlist" || id != "37i9dQZF1DZ06evO1sJmec" {
+		s.t.Fatalf("incorrect Spotify route: %s %s", kind, id)
+	}
+	return media.Collection{Tracks: []media.Track{{Title: "First", Artist: "Artist"}, {Title: "Missing", Artist: "Artist"}, {Title: "Last", Artist: "Artist"}}}, nil
+}
+func TestPlayCollectionAndClearCommands(t *testing.T) {
+	b, r := testBot(t)
+	g := b.getGuild(1)
+	g.player.Close(context.Background())
+	started := make(chan string, 4)
+	release := make(chan struct{}, 4)
+	g.player = player.New(b.ctx, b.log, func(ctx context.Context, track media.Track, _ player.Voice) error {
+		started <- track.Title
+		select {
+		case <-release:
+			return nil
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	})
+	c := &dummyConn{}
+	g.conn = c
+	g.channel = 5
+	if err := g.player.Attach(transport{conn: c}); err != nil {
+		t.Fatal(err)
+	}
+	b.client.Caches.AddVoiceState(d.VoiceState{GuildID: 1, UserID: 3, ChannelID: new(snowflake.ID(5))})
+	b.searches = make(chan struct{}, 4)
+	b.resolver = media.CollectionResolver{Spotify: commandSpotify{t: t}, Search: func(_ context.Context, q string) (media.Track, error) {
+		if strings.Contains(q, "Missing") {
+			return media.Track{}, media.ErrNoSong
+		}
+		return media.Track{URL: "https://youtube.com/watch?v=abcdefghijk"}, nil
+	}}
+	e := interaction(t, "play", true)
+	raw := `{"id":"10","application_id":"2","type":2,"token":"test","guild_id":"1","user":{"id":"3","username":"tester"},"data":{"id":"4","name":"play","type":1,"options":[{"name":"query","type":3,"value":"https://open.spotify.com/playlist/37i9dQZF1DZ06evO1sJmec?si=1f277a033f9b4f28"}]}}`
+	if err := json.Unmarshal([]byte(raw), &e.ApplicationCommandInteraction); err != nil {
+		t.Fatal(err)
+	}
+	e.Respond = func(d.InteractionResponseType, d.InteractionResponseData, ...rest.RequestOpt) error { return nil }
+	b.command(e)
+	if r.response != "Added 2 tracks to the queue. 1 unavailable tracks were skipped." {
+		t.Fatal(r.response)
+	}
+	select {
+	case title := <-started:
+		if title != "First" {
+			t.Fatal(title)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("did not start")
+	}
+	b.command(interaction(t, "queue", true))
+	if !strings.Contains(r.response, "Artist — First") || !strings.Contains(r.response, "Artist — Last") || !strings.Contains(r.response, "1 tracks remaining") {
+		t.Fatal(r.response)
+	}
+	// A second playlist appends without interrupting the first, preserving duplicates.
+	b.command(e)
+	if g.player.Length() != 3 {
+		t.Fatal(g.player.Length())
+	}
+	release <- struct{}{}
+	select {
+	case title := <-started:
+		if title != "Last" {
+			t.Fatal(title)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("did not advance")
+	}
+	b.command(interaction(t, "clear", true))
+	if r.response != "Cleared 2 tracks from the queue." {
+		t.Fatal(r.response)
+	}
+	current, queued := g.player.Snapshot()
+	if current == nil || current.Title != "Last" || len(queued) != 0 {
+		t.Fatal("clear changed current")
+	}
+	b.command(interaction(t, "clear", true))
+	if r.response != "The queue is already empty." {
+		t.Fatal(r.response)
+	}
+}
+
+func TestClearRegistered(t *testing.T) {
+	for _, command := range commands() {
+		if command.CommandName() == "clear" {
+			return
+		}
+	}
+	t.Fatal("clear not registered")
 }

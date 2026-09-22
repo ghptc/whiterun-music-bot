@@ -14,15 +14,15 @@ import (
 )
 
 func commands() []d.ApplicationCommandCreate {
-	result := make([]d.ApplicationCommandCreate, 0, 6)
+	result := make([]d.ApplicationCommandCreate, 0, 7)
 	for _, c := range []struct{ name, description string }{
 		{"summon", "Summon the Bard to your voice channel."}, {"play", "Find a song and add it to the queue."},
 		{"skip", "Skip the current song."}, {"queue", "Show the current song and queue."},
-		{"stop", "Stop playback and clear the queue."}, {"leave", "Dismiss the Bard and clear the queue."},
+		{"clear", "Clear upcoming tracks without stopping playback."}, {"stop", "Stop playback and clear the queue."}, {"leave", "Dismiss the Bard and clear the queue."},
 	} {
 		command := d.SlashCommandCreate{Name: c.name, Description: c.description, Contexts: []d.InteractionContextType{d.InteractionContextTypeGuild}}
 		if c.name == "play" {
-			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionString{Name: "query", Description: "Song and artist, requested version, or YouTube video URL", Required: true, MaxLength: new(500)}}
+			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionString{Name: "query", Description: "Song and artist, YouTube video/playlist, or Spotify playlist/album URL", Required: true, MaxLength: new(500)}}
 		}
 		result = append(result, command)
 	}
@@ -136,16 +136,18 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 			reply("The Bard is searching for other songs. Try again shortly.")
 			return
 		}
-		track, err := b.resolver.Resolve(media.WithTiming(searchCtx, timing), data.String("query"))
+		result, err := b.resolver.Resolve(media.WithTiming(searchCtx, timing), data.String("query"))
 		<-b.searches
 		if err != nil {
+			b.log.Warn("media resolution failed", "guild_id", id, "error", err)
 			if searchCtx.Err() != nil {
 				reply("Playback changed while searching. Ask the Bard again.")
+			} else if errors.Is(err, media.ErrNoTracks) || errors.Is(err, media.ErrCollectionTooLarge) || errors.Is(err, media.ErrSpotifyConfig) || errors.Is(err, media.ErrSpotifyAccess) {
+				reply(err.Error())
 			} else if errors.Is(err, media.ErrNoSong) {
 				reply(media.ErrNoSong.Error())
 			} else {
-				b.log.Warn("song resolution failed", "guild_id", id, "error", err)
-				reply("The Bard could not resolve that song. Use a song name or a single YouTube video URL, and try again.")
+				reply("Could not resolve this song or collection. Check the link and try again.")
 			}
 			return
 		}
@@ -158,14 +160,22 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 			return
 		}
 		queueStart := time.Now()
-		err = g.player.Enqueue(track, ticket)
+		err = g.player.EnqueueMany(result.Tracks, ticket)
 		timing.Event("queue_inserted", queueStart, "error", err)
 		g.mu.Unlock()
 		if err != nil {
 			reply(err.Error())
 			return
 		}
-		reply("Queued: " + title(track.Title))
+		if result.IsCollection {
+			message := fmt.Sprintf("Added %d tracks to the queue.", len(result.Tracks))
+			if result.Skipped > 0 {
+				message += fmt.Sprintf(" %d unavailable tracks were skipped.", result.Skipped)
+			}
+			reply(message)
+		} else {
+			reply("Queued: " + title(result.Tracks[0].Title))
+		}
 	case "skip":
 		skipped := g.player.Skip()
 		g.mu.Unlock()
@@ -173,6 +183,14 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 			reply("On to the next song.")
 		} else {
 			reply("The Bard is not playing.")
+		}
+	case "clear":
+		count := g.player.Clear()
+		g.mu.Unlock()
+		if count == 0 {
+			reply("The queue is already empty.")
+		} else {
+			reply(fmt.Sprintf("Cleared %d tracks from the queue.", count))
 		}
 	case "stop":
 		g.resetSearches(b.ctx)
@@ -208,18 +226,27 @@ func queueText(g *guild) string {
 	if current == nil {
 		out.WriteString("Now: nothing playing.\n")
 	} else {
-		fmt.Fprintf(&out, "Now: %s\n", title(current.Title))
+		fmt.Fprintf(&out, "Now: %s\n", trackTitle(*current))
 	}
 	if len(queued) == 0 {
 		out.WriteString("The queue is empty.")
 	} else {
+		out.WriteString("Up next:\n")
 		for i, t := range queued {
 			if i == 10 {
 				fmt.Fprintf(&out, "…and %d more.", len(queued)-10)
 				break
 			}
-			fmt.Fprintf(&out, "%d. %s\n", i+1, title(t.Title))
+			fmt.Fprintf(&out, "%d. %s\n", i+1, trackTitle(t))
 		}
 	}
+	fmt.Fprintf(&out, "\n%d tracks remaining.", len(queued))
 	return out.String()
+}
+
+func trackTitle(t media.Track) string {
+	if t.Artist != "" {
+		return title(t.Artist + " — " + t.Title)
+	}
+	return title(t.Title)
 }

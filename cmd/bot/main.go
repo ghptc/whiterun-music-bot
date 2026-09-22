@@ -13,6 +13,7 @@ import (
 
 	"github.com/disgoorg/snowflake/v2"
 	"whiterun/internal/discord"
+	"whiterun/internal/media"
 )
 
 func main() {
@@ -49,6 +50,7 @@ func run(log *slog.Logger) error {
 	if err != nil {
 		return err
 	}
+	b.ConfigureSpotify(&media.Spotify{ClientID: strings.TrimSpace(os.Getenv("SPOTIFY_CLIENT_ID")), ClientSecret: strings.TrimSpace(os.Getenv("SPOTIFY_CLIENT_SECRET")), RefreshToken: strings.TrimSpace(os.Getenv("SPOTIFY_REFRESH_TOKEN")), Market: strings.TrimSpace(os.Getenv("SPOTIFY_MARKET"))})
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()

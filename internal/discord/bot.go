@@ -35,7 +35,7 @@ type Bot struct {
 	ctx      context.Context
 	cancel   context.CancelFunc
 	log      *slog.Logger
-	resolver media.Resolver
+	resolver media.CollectionResolver
 	streamer player.Streamer
 	mu       sync.Mutex
 	guilds   map[snowflake.ID]*guild
@@ -46,7 +46,7 @@ type Bot struct {
 
 func New(ctx context.Context, token string, appID snowflake.ID, log *slog.Logger) (*Bot, error) {
 	ctx, cancel := context.WithCancel(ctx)
-	b := &Bot{ctx: ctx, cancel: cancel, log: log, resolver: media.Resolver{Binary: "yt-dlp", Cache: &media.SearchCache{}}, streamer: player.Streamer{YTDLP: "yt-dlp", FFmpeg: "ffmpeg"}, guilds: make(map[snowflake.ID]*guild), searches: make(chan struct{}, 4)}
+	b := &Bot{ctx: ctx, cancel: cancel, log: log, resolver: media.CollectionResolver{YouTube: media.Resolver{Binary: "yt-dlp", Cache: &media.SearchCache{}}, Log: log}, streamer: player.Streamer{YTDLP: "yt-dlp", FFmpeg: "ffmpeg"}, guilds: make(map[snowflake.ID]*guild), searches: make(chan struct{}, 4)}
 	c, err := disgo.New(token, bot.WithLogger(log),
 		bot.WithGatewayConfigOpts(gateway.WithIntents(gateway.IntentGuilds, gateway.IntentGuildVoiceStates)),
 		bot.WithCacheConfigOpts(cache.WithCaches(cache.FlagGuilds, cache.FlagVoiceStates)),
@@ -65,6 +65,21 @@ func New(ctx context.Context, token string, appID snowflake.ID, log *slog.Logger
 	b.client = c
 	return b, nil
 }
+
+// ConfigureSpotify is called before starting the gateway.
+func (b *Bot) ConfigureSpotify(s *media.Spotify) { b.resolver.Spotify = s }
+
+func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) error {
+	if track.VerifyBeforePlay {
+		verified, err := b.resolver.YouTube.Resolve(ctx, track.URL)
+		if err != nil {
+			return err
+		}
+		track = verified
+	}
+	return b.streamer.Play(ctx, track, voice)
+}
+
 func (b *Bot) Start(scope snowflake.ID) error {
 	ctx, cancel := context.WithTimeout(b.ctx, 30*time.Second)
 	defer cancel()
@@ -93,7 +108,7 @@ func (b *Bot) getGuild(id snowflake.ID) *guild {
 	}
 	g := b.guilds[id]
 	if g == nil {
-		g = &guild{player: player.New(b.ctx, b.log.With("guild_id", id), b.streamer.Play)}
+		g = &guild{player: player.New(b.ctx, b.log.With("guild_id", id), b.play)}
 		g.searchCtx, g.searchCancel = context.WithCancel(b.ctx)
 		b.guilds[id] = g
 	}

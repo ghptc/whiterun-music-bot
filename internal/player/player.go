@@ -17,6 +17,8 @@ type Voice interface {
 }
 type PlayFunc func(context.Context, media.Track, Voice) error
 
+const MaxQueueTracks = 1000
+
 type GuildPlayer struct {
 	mu          sync.Mutex
 	ctx         context.Context
@@ -61,15 +63,20 @@ func (p *GuildPlayer) Attach(v Voice) error {
 }
 func (p *GuildPlayer) Ticket() uint64 { p.mu.Lock(); defer p.mu.Unlock(); return p.generation }
 func (p *GuildPlayer) Enqueue(t media.Track, ticket uint64) error {
+	return p.EnqueueMany([]media.Track{t}, ticket)
+}
+
+// EnqueueMany appends a collection atomically; concurrent commands cannot interleave it.
+func (p *GuildPlayer) EnqueueMany(tracks []media.Track, ticket uint64) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.ctx.Err() != nil || p.voice == nil || ticket != p.generation {
 		return errors.New("Playback changed while searching. Ask the Bard again.")
 	}
-	if len(p.queue) >= 100 {
-		return errors.New("The Bard's queue is full (100 songs).")
+	if len(tracks) > MaxQueueTracks-len(p.queue) {
+		return errors.New("The collection will not fit in the queue (1000 upcoming tracks maximum).")
 	}
-	p.queue = append(p.queue, t)
+	p.queue = append(p.queue, tracks...)
 	p.signal()
 	return nil
 }
