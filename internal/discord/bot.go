@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/disgoorg/disgo"
@@ -23,35 +24,43 @@ import (
 )
 
 type guild struct {
-	mu           sync.Mutex // voice orchestration only; searches never hold this lock
-	player       *player.GuildPlayer
-	conn         voice.Conn
-	channel      snowflake.ID
-	searchCtx    context.Context
-	searchCancel context.CancelFunc
+	mu                  sync.Mutex // voice orchestration only; searches never hold this lock
+	player              *player.GuildPlayer
+	conn                voice.Conn
+	channel             snowflake.ID
+	searchCtx           context.Context
+	searchCancel        context.CancelFunc
+	emptySince          time.Time
+	unhealthySince      time.Time
+	announcementMu      sync.Mutex // serialize accepted channel changes with first-frame snapshots
+	announcementChannel atomic.Uint64
+	announcementEpoch   atomic.Uint64
+	announcements       chan announcement
 }
 type Bot struct {
-	client   *bot.Client
-	ctx      context.Context
-	cancel   context.CancelFunc
-	log      *slog.Logger
-	resolver media.CollectionResolver
-	streamer player.Streamer
-	mu       sync.Mutex
-	guilds   map[snowflake.ID]*guild
-	closing  bool
-	workers  sync.WaitGroup
-	searches chan struct{}
+	client    *bot.Client
+	ctx       context.Context
+	cancel    context.CancelFunc
+	log       *slog.Logger
+	resolver  media.CollectionResolver
+	streamer  player.Streamer
+	mu        sync.Mutex
+	guilds    map[snowflake.ID]*guild
+	closing   bool
+	workers   sync.WaitGroup
+	searches  chan struct{}
+	voiceWake chan struct{}
 }
 
 func New(ctx context.Context, token string, appID snowflake.ID, log *slog.Logger) (*Bot, error) {
 	ctx, cancel := context.WithCancel(ctx)
-	b := &Bot{ctx: ctx, cancel: cancel, log: log, resolver: media.CollectionResolver{YouTube: media.Resolver{Binary: "yt-dlp", Cache: &media.SearchCache{}}, Log: log}, streamer: player.Streamer{YTDLP: "yt-dlp", FFmpeg: "ffmpeg"}, guilds: make(map[snowflake.ID]*guild), searches: make(chan struct{}, 4)}
+	b := &Bot{ctx: ctx, cancel: cancel, log: log, resolver: media.CollectionResolver{YouTube: media.Resolver{Binary: "yt-dlp", Cache: &media.SearchCache{}}, Log: log, Limiter: media.NewMatchLimiter()}, streamer: player.Streamer{YTDLP: "yt-dlp", FFmpeg: "ffmpeg"}, guilds: make(map[snowflake.ID]*guild), searches: make(chan struct{}, 4), voiceWake: make(chan struct{}, 1)}
 	c, err := disgo.New(token, bot.WithLogger(log),
 		bot.WithGatewayConfigOpts(gateway.WithIntents(gateway.IntentGuilds, gateway.IntentGuildVoiceStates)),
-		bot.WithCacheConfigOpts(cache.WithCaches(cache.FlagGuilds, cache.FlagVoiceStates)),
+		bot.WithCacheConfigOpts(cache.WithCaches(cache.FlagGuilds, cache.FlagVoiceStates, cache.FlagMembers)),
 		bot.WithVoiceManagerConfigOpts(voice.WithConnCreateFunc(newVoiceConn)),
 		bot.WithEventListenerFunc(b.handle),
+		bot.WithEventListenerFunc(b.voiceStateChanged),
 	)
 	if err != nil {
 		cancel()
@@ -75,6 +84,7 @@ func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) e
 		if err != nil {
 			return err
 		}
+		verified.Position, verified.Total, verified.Timing = track.Position, track.Total, track.Timing
 		track = verified
 	}
 	return b.streamer.Play(ctx, track, voice)
@@ -110,6 +120,7 @@ func (b *Bot) getGuild(id snowflake.ID) *guild {
 	if g == nil {
 		g = &guild{player: player.New(b.ctx, b.log.With("guild_id", id), b.play)}
 		g.searchCtx, g.searchCancel = context.WithCancel(b.ctx)
+		b.setupAnnouncements(id, g)
 		b.guilds[id] = g
 	}
 	return g
@@ -131,6 +142,7 @@ func (b *Bot) Close(ctx context.Context) {
 			defer wg.Done()
 			g.mu.Lock()
 			defer g.mu.Unlock()
+			g.emptySince = time.Time{}
 			g.player.Close(ctx)
 			g.conn = nil
 			g.channel = 0
@@ -151,6 +163,7 @@ func (b *Bot) watchVoice() {
 		case <-b.ctx.Done():
 			return
 		case <-tick.C:
+		case <-b.voiceWake:
 		}
 		b.mu.Lock()
 		guilds := make(map[snowflake.ID]*guild, len(b.guilds))
@@ -164,16 +177,15 @@ func (b *Bot) watchVoice() {
 			}
 			if g.conn != nil {
 				state, ok := b.client.Caches.VoiceState(id, b.client.ID())
-				if b.client.Gateway.Status() != gateway.StatusReady || !ok || state.ChannelID == nil || *state.ChannelID != g.channel || g.conn.Gateway().Status() != voice.StatusReady {
-					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-					g.resetSearches(b.ctx)
-					g.player.Leave(ctx)
-					cancel()
-					g.conn = nil
-					g.channel = 0
-					b.log.Info("voice disconnected; cleared playback", "guild_id", id)
+				mainReady := b.client.Gateway.Status() == gateway.StatusReady
+				voiceReady := mainReady && ok && state.ChannelID != nil && *state.ChannelID == g.channel && g.conn.Gateway().Status() == voice.StatusReady
+				sameChannel := ok && state.ChannelID != nil && *state.ChannelID == g.channel
+				if b.checkVoiceHealth(id, g, time.Now(), mainReady, voiceReady, ok, sameChannel) {
+					g.mu.Unlock()
+					continue
 				}
 			}
+			b.checkEmpty(id, g, time.Now())
 			g.mu.Unlock()
 		}
 	}

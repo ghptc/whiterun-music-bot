@@ -70,7 +70,7 @@ func TestSpotifyPaginationAndTokenReuse(t *testing.T) {
 	}
 }
 func TestSpotifyFailures(t *testing.T) {
-	for _, status := range []int{401, 403, 429, 500} {
+	for _, status := range []int{401, 403, 404, 429, 500} {
 		t.Run(fmt.Sprint(status), func(t *testing.T) {
 			s := &Spotify{ClientID: "id", ClientSecret: "secret", Client: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
 				if r.URL.Host == "accounts.spotify.com" {
@@ -82,7 +82,10 @@ func TestSpotifyFailures(t *testing.T) {
 			if err == nil || strings.Contains(err.Error(), "secret") {
 				t.Fatalf("%v", err)
 			}
-			if (status == 401 || status == 403) && !errors.Is(err, ErrSpotifyAccess) {
+			if status == 401 && !errors.Is(err, ErrSpotifyAuth) {
+				t.Fatal(err)
+			}
+			if (status == 403 || status == 404) && !errors.Is(err, ErrSpotifyAccess) {
 				t.Fatal(err)
 			}
 		})
@@ -123,5 +126,60 @@ func TestSpotifyUnavailableEntriesAndBounds(t *testing.T) {
 				t.Fatalf("%+v %v", got, err)
 			}
 		})
+	}
+}
+
+func TestSpotifySingleTrack(t *testing.T) {
+	s := &Spotify{ClientID: "id", ClientSecret: "secret", Market: "BR", Client: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		if r.URL.Host == "accounts.spotify.com" {
+			return jsonResponse(200, `{"access_token":"a","expires_in":3600}`), nil
+		}
+		if r.URL.Path != "/v1/tracks/1234567890123456789012" || r.URL.Query().Get("market") != "BR" {
+			t.Fatal(r.URL)
+		}
+		return jsonResponse(200, `{"id":"1234567890123456789012","name":"505","type":"track","duration_ms":253000,"album":{"name":"Favourite Worst Nightmare"},"artists":[{"name":"Arctic Monkeys"}]}`), nil
+	})}}
+	got, err := s.Collection(context.Background(), "track", "1234567890123456789012")
+	if err != nil || got.IsCollection || len(got.Tracks) != 1 {
+		t.Fatalf("%+v %v", got, err)
+	}
+	track := got.Tracks[0]
+	if track.Artist != "Arctic Monkeys" || track.Duration.Seconds() != 253 || track.Album != "Favourite Worst Nightmare" || track.SourceURL != "https://open.spotify.com/track/1234567890123456789012" {
+		t.Fatal(track)
+	}
+}
+func TestSpotifyTokenAuthorizationError(t *testing.T) {
+	s := &Spotify{ClientID: "id", ClientSecret: "secret", Client: &http.Client{Transport: roundTripFunc(func(*http.Request) (*http.Response, error) { return jsonResponse(400, "private details"), nil })}}
+	_, err := s.Collection(context.Background(), "track", "1234567890123456789012")
+	if !errors.Is(err, ErrSpotifyAuth) || strings.Contains(err.Error(), "private details") {
+		t.Fatal(err)
+	}
+}
+
+func TestSpotifyLaterPageFailureIsAtomic(t *testing.T) {
+	pages := 0
+	s := &Spotify{ClientID: "id", ClientSecret: "secret", Client: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		if r.URL.Host == "accounts.spotify.com" {
+			return jsonResponse(200, `{"access_token":"a","expires_in":3600}`), nil
+		}
+		if r.URL.Host == "open.spotify.com" {
+			return jsonResponse(403, ""), nil
+		}
+		if !strings.HasSuffix(r.URL.Path, "/items") {
+			return jsonResponse(200, `{"name":"Playlist"}`), nil
+		}
+		pages++
+		if pages == 1 {
+			return jsonResponse(200, `{"items":[{"item":`+spotifyTrackJSON+`}],"next":"next"}`), nil
+		}
+		return jsonResponse(403, `unavailable`), nil
+	})}}
+	r := CollectionResolver{Spotify: s, Search: func(context.Context, string) (Track, error) {
+		t.Fatal("matched incomplete collection")
+		return Track{}, nil
+	}}
+	got, err := r.Resolve(context.Background(), "https://open.spotify.com/playlist/1234567890123456789012")
+	if !errors.Is(err, ErrSpotifyAccess) || len(got.Tracks) != 0 || pages != 2 {
+		t.Fatal(got, err, pages)
 	}
 }

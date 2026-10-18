@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"reflect"
 	"runtime"
 	"sync"
 	"sync/atomic"
@@ -46,7 +47,7 @@ func TestResolverCacheReusesMetadataButKeepsVariantsSeparate(t *testing.T) {
 		t.Fatal(err)
 	}
 	hit, err := r.Resolve(ctx, " Arctic Monkeys 505 ")
-	if err != nil || hit != first {
+	if err != nil || !reflect.DeepEqual(hit, first) {
 		t.Fatalf("cache miss: %#v %v", hit, err)
 	}
 	if _, err := r.Resolve(ctx, "Arctic Monkeys 505 live"); err == nil {
@@ -104,7 +105,7 @@ func TestNormalizedQueryKeepsVariantsAndURLCase(t *testing.T) {
 		t.Fatal(err)
 	}
 	got, err := r.Resolve(context.Background(), "arctic   MONKEYS 505")
-	if err != nil || got != first {
+	if err != nil || !reflect.DeepEqual(got, first) {
 		t.Fatalf("not normalized: %+v %v", got, err)
 	}
 	// YouTube IDs are case sensitive; URL keys must not use text normalization.

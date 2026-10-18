@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"errors"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -231,4 +233,82 @@ func TestStreamerDrainsAfterProducerExit(t *testing.T) {
 	if v.frames < 250 {
 		t.Fatalf("truncated stream: %d frames", v.frames)
 	}
+}
+
+// Use a deterministic Ogg stream to verify that pause retains packet order and
+// the same process invocation. Cancellation while blocked must reap children.
+func TestStreamerPauseResumeAndCancel(t *testing.T) {
+	for _, cancelPaused := range []bool{false, true} {
+		t.Run(fmt.Sprint(cancelPaused), func(t *testing.T) {
+			audio := page(2, []byte{8}, []byte("OpusHead"))
+			for i := byte(1); i <= 10; i++ {
+				audio = append(audio, page(0, []byte{1}, []byte{i})...)
+			}
+			file := filepath.Join(t.TempDir(), "test.ogg")
+			if err := os.WriteFile(file, audio, 0600); err != nil {
+				t.Fatal(err)
+			}
+			yt := executable(t, "yt-dlp", "cat '"+file+"'")
+			ff := executable(t, "ffmpeg", "cat")
+			gate := &pauseGate{}
+			ctx, cancel := context.WithTimeout(context.WithValue(context.Background(), pauseKey{}, gate), 3*time.Second)
+			defer cancel()
+			v := &pauseTestVoice{gate: gate, frames: make(chan byte, 20)}
+			done := make(chan error, 1)
+			go func() { done <- (Streamer{YTDLP: yt, FFmpeg: ff}).Play(ctx, media.Track{}, v) }()
+			select {
+			case first := <-v.frames:
+				if first != 1 {
+					t.Fatal(first)
+				}
+			case <-ctx.Done():
+				t.Fatal(ctx.Err())
+			}
+			select {
+			case <-v.frames:
+				t.Fatal("audio advanced while paused")
+			case <-time.After(80 * time.Millisecond):
+			}
+			if cancelPaused {
+				cancel()
+			} else {
+				gate.set(false)
+			}
+			select {
+			case err := <-done:
+				if cancelPaused {
+					if !errors.Is(err, context.Canceled) {
+						t.Fatal(err)
+					}
+				} else {
+					if err != nil {
+						t.Fatal(err)
+					}
+					for i := byte(2); i <= 10; i++ {
+						if got := <-v.frames; got != i {
+							t.Fatalf("packet %d got %d", i, got)
+						}
+					}
+				}
+			case <-time.After(time.Second):
+				t.Fatal("paused pipeline did not finish")
+			}
+		})
+	}
+}
+
+type pauseTestVoice struct {
+	fakeVoice
+	gate   *pauseGate
+	frames chan byte
+}
+
+func (v *pauseTestVoice) WriteFrame(_ context.Context, p []byte) error {
+	if len(p) == 1 {
+		if p[0] == 1 {
+			v.gate.set(true)
+		}
+		v.frames <- p[0]
+	}
+	return nil
 }

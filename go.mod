@@ -6,6 +6,8 @@ require (
 	github.com/disgoorg/disgo v0.19.6
 	github.com/disgoorg/snowflake/v2 v2.0.3
 	github.com/thomas-vilte/dave-go v0.5.1
+	golang.org/x/net v0.56.0
+	golang.org/x/text v0.40.0
 )
 
 require (

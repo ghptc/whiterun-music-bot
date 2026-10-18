@@ -82,7 +82,9 @@ func TestDiscoveryReRanksUnconfirmedOfficialChannel(t *testing.T) {
 	if err != nil || got.ID != official.ID || calls != 0 {
 		t.Fatalf("got=%+v err=%v calls=%d", got, err, calls)
 	}
-	// Complete artist metadata preserves the existing higher tier.
+	// Artist metadata alone cannot turn an archive into an artist channel.
+	generic.Channel = "Arctic Monkeys"
+	// A matching entire artist identity preserves the higher tier.
 	generic.Categories = []string{"Music"}
 	generic.Artist = "Arctic Monkeys"
 	got, err = selectDiscovered(context.Background(), "Arctic Monkeys 505", []Candidate{generic, official}, func(c Candidate) (Candidate, error) {

@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 	"os/exec"
+	"regexp"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -30,10 +32,19 @@ type LimitedBuffer struct {
 	Data      []byte
 	Limit     int
 	Truncated bool
+	Tail      bool
 }
 
 func (b *LimitedBuffer) Write(p []byte) (int, error) {
 	n := len(p)
+	if b.Tail {
+		b.Data = append(b.Data, p...)
+		if len(b.Data) > b.Limit {
+			b.Data = append([]byte(nil), b.Data[len(b.Data)-b.Limit:]...)
+			b.Truncated = true
+		}
+		return n, nil
+	}
 	left := b.Limit - len(b.Data)
 	if len(p) > left {
 		p = p[:left]
@@ -41,4 +52,10 @@ func (b *LimitedBuffer) Write(p []byte) (int, error) {
 	}
 	b.Data = append(b.Data, p...)
 	return n, nil
+}
+
+var diagnosticURL = regexp.MustCompile(`https?://[^\s]+`)
+
+func SafeDiagnostic(data []byte) string {
+	return strings.TrimSpace(diagnosticURL.ReplaceAllString(string(data), "[url]"))
 }

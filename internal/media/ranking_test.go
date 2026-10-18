@@ -46,10 +46,8 @@ func TestCanonicalSourceOrder(t *testing.T) {
 	official := song("Arctic Monkeys - 505 Official Audio", "Domino")
 	topic := song("505", "Arctic Monkeys - Topic")
 	vevo := song("Arctic Monkeys - 505", "ArcticMonkeysVEVO")
-	verified := song("Arctic Monkeys - 505", "Arctic Monkeys Records")
-	verified.Verified = true
 	generic := song("Arctic Monkeys - 505", "Music archive")
-	ordered := []Candidate{oac, official, topic, vevo, verified, generic}
+	ordered := []Candidate{oac, topic, official, vevo, generic}
 	for i := 0; i < len(ordered)-1; i++ {
 		a, ok := Score("Arctic Monkeys 505", ordered[i])
 		b, _ := Score("Arctic Monkeys 505", ordered[i+1])
@@ -89,7 +87,7 @@ func TestURLValidation(t *testing.T) {
 			t.Errorf("%s: %q %v %v", s, u, ok, err)
 		}
 	}
-	for _, s := range []string{"https://youtube.com.evil.test/watch?v=abcdefghijk", "file:///etc/passwd", "https://example.com/a", "https://youtube.com/playlist?list=x", "https://youtube.com/shorts/abcdefghijk", "https://youtube.com/watch?v=bad", "https://user@youtube.com/watch?v=abcdefghijk", "https://youtube.com:8080/watch?v=abcdefghijk"} {
+	for _, s := range []string{"https://youtube.com.evil.test/watch?v=abcdefghijk", "file:///etc/passwd", "https://example.com/a", "https://youtube.com/playlist?list=x", "https://youtube.com/watch?v=bad", "https://user@youtube.com/watch?v=abcdefghijk", "https://youtube.com:8080/watch?v=abcdefghijk"} {
 		if _, _, err := YouTubeURL(s); err == nil {
 			t.Errorf("accepted %s", s)
 		}
@@ -162,5 +160,16 @@ func TestTypoScoreRemainsUseful(t *testing.T) {
 		if b.FinalScore <= unrelated {
 			t.Fatalf("typo lost relevance: %+v <= %d", b, unrelated)
 		}
+	}
+}
+
+func TestOfficialVideoIsStillCredibleFallback(t *testing.T) {
+	video := song("Arctic Monkeys - 505 Official Music Video", "Arctic Monkeys")
+	video.Verified = true
+	random := song("Arctic Monkeys - 505", "Pizza Music")
+	random.Verified = true
+	got, ok := Select("505 Arctic Monkeys", []Candidate{random, video})
+	if !ok || got.Title != video.Title {
+		t.Fatal(got)
 	}
 }

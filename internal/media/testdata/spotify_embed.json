@@ -1,0 +1,417 @@
+{
+  "props": {
+    "pageProps": {
+      "state": {
+        "data": {
+          "entity": {
+            "type": "playlist",
+            "uri": "spotify:playlist:37i9dQZF1DZ06evO3VkoW4",
+            "name": "This Is Dr. Dre",
+            "trackList": [
+              {
+                "uri": "spotify:track:4LwU4Vp6od3Sb08CsP99GC",
+                "uid": "37313162343438356131346438646632",
+                "title": "The Next Episode",
+                "subtitle": "Dr. Dre, Snoop Dogg",
+                "entityType": "track",
+                "duration": 161506
+              },
+              {
+                "uri": "spotify:track:503OTo2dSqe7qk76rgsbep",
+                "uid": "37393962346436666561666538316162",
+                "title": "Still D.R.E.",
+                "subtitle": "Dr. Dre, Snoop Dogg",
+                "entityType": "track",
+                "duration": 270586
+              },
+              {
+                "uri": "spotify:track:3ia3dJETSOllPsv3LJkE35",
+                "uid": "63633737666365386434333437656563",
+                "title": "California Love - Original Version",
+                "subtitle": "2Pac, Roger, Dr. Dre",
+                "entityType": "track",
+                "duration": 284906
+              },
+              {
+                "uri": "spotify:track:6MdqqkQ8sSC0WB4i8PyRuQ",
+                "uid": "30616165396631663061376637663161",
+                "title": "No Diggity",
+                "subtitle": "Blackstreet, Dr. Dre, Queen Pen",
+                "entityType": "track",
+                "duration": 304600
+              },
+              {
+                "uri": "spotify:track:5Tbpp3OLLClPJF8t1DmrFD",
+                "uid": "36353432613138316166353532643736",
+                "title": "Nuthin' But A \"G\" Thang",
+                "subtitle": "Dr. Dre, Snoop Dogg",
+                "entityType": "track",
+                "duration": 237573
+              },
+              {
+                "uri": "spotify:track:7lgvU7WnwcNZ8dbGUz8yhP",
+                "uid": "31613230633764343033343564353366",
+                "title": "Bitch Please II",
+                "subtitle": "Eminem, Dr. Dre, Snoop Dogg, Xzibit, Nate Dogg",
+                "entityType": "track",
+                "duration": 288200
+              },
+              {
+                "uri": "spotify:track:70ATm56tH7OrQ1zurYssz0",
+                "uid": "37376261383762393466343565666161",
+                "title": "I Need A Doctor",
+                "subtitle": "Dr. Dre, Eminem, Skylar Grey",
+                "entityType": "track",
+                "duration": 283733
+              },
+              {
+                "uri": "spotify:track:1rylJ0VXvhOzLGNm401iaI",
+                "uid": "37323463393364646134656565356532",
+                "title": "Keep Their Heads Ringin'",
+                "subtitle": "Dr. Dre",
+                "entityType": "track",
+                "duration": 310226
+              },
+              {
+                "uri": "spotify:track:7iXF2W9vKmDoGAhlHdpyIa",
+                "uid": "61613163376366373935383764323563",
+                "title": "Forgot About Dre",
+                "subtitle": "Dr. Dre, Eminem",
+                "entityType": "track",
+                "duration": 222293
+              },
+              {
+                "uri": "spotify:track:4dK00wCxlqWEeN8BoM1BHT",
+                "uid": "32663536313563623366363761326333",
+                "title": "Crack A Bottle",
+                "subtitle": "Eminem, Dr. Dre, 50 Cent",
+                "entityType": "track",
+                "duration": 297520
+              },
+              {
+                "uri": "spotify:track:21NA5Zggba7pyACm25h6k4",
+                "uid": "35396164613139656630336263613365",
+                "title": "Fuck Wit Dre Day (And Everybody's Celebratin')",
+                "subtitle": "Dr. Dre, Snoop Dogg, RBX, Jewell",
+                "entityType": "track",
+                "duration": 291053
+              },
+              {
+                "uri": "spotify:track:60uesDF4UyLUs61FgiDkdp",
+                "uid": "39326539363266653831633266666165",
+                "title": "Hello",
+                "subtitle": "Ice Cube, Dr. Dre, MC Ren",
+                "entityType": "track",
+                "duration": 232533
+              },
+              {
+                "uri": "spotify:track:1SWVDBtw6h3tm9OehOkDhv",
+                "uid": "61653565613435636561656330316435",
+                "title": "What's The Difference",
+                "subtitle": "Dr. Dre, Eminem, Xzibit",
+                "entityType": "track",
+                "duration": 244200
+              },
+              {
+                "uri": "spotify:track:1U8Ho1nOzKXYDvfigOuHG4",
+                "uid": "32303132623764643465646362303737",
+                "title": "Kush - Main",
+                "subtitle": "Dr. Dre, Snoop Dogg, Akon",
+                "entityType": "track",
+                "duration": 235120
+              },
+              {
+                "uri": "spotify:track:3a2jFwnts4Cf0OwJbK61SL",
+                "uid": "36343234306164363363333138663835",
+                "title": "Gospel (with Eminem)",
+                "subtitle": "Dr. Dre, Eminem",
+                "entityType": "track",
+                "duration": 210027
+              },
+              {
+                "uri": "spotify:track:1eRBW1HcyM1zPlxO26cScZ",
+                "uid": "33323336336538663639303437633935",
+                "title": "The Recipe - Bonus Track",
+                "subtitle": "Kendrick Lamar, Dr. Dre",
+                "entityType": "track",
+                "duration": 352853
+              },
+              {
+                "uri": "spotify:track:0Ed7MeXx64f6OcIuoTRCg1",
+                "uid": "31363365663439633934343365633962",
+                "title": "Xxplosive",
+                "subtitle": "Dr. Dre, Hittman, Six-Two, Nate Dogg, Kurupt",
+                "entityType": "track",
+                "duration": 215200
+              },
+              {
+                "uri": "spotify:track:4nqKqrFUwEkHEGKBr1lBe3",
+                "uid": "63396531323438313061313235313564",
+                "title": "Last Dance With Mary Jane (feat. Tom Petty & Jelly Roll)",
+                "subtitle": "Snoop Dogg, Dr. Dre, Tom Petty, Jelly Roll",
+                "entityType": "track",
+                "duration": 185092
+              },
+              {
+                "uri": "spotify:track:36yUCSB9OaMz0RMUQDOSpT",
+                "uid": "39306239646365386138333866326363",
+                "title": "Let Me Ride",
+                "subtitle": "Dr. Dre, Snoop Dogg, RBX, Jewell",
+                "entityType": "track",
+                "duration": 260333
+              },
+              {
+                "uri": "spotify:track:6da04YB906XonC6IQNC44u",
+                "uid": "62623964616134363931303762666264",
+                "title": "Guilty Conscience",
+                "subtitle": "Eminem, Dr. Dre",
+                "entityType": "track",
+                "duration": 199333
+              },
+              {
+                "uri": "spotify:track:1iQ5E4z6CJ38dIzvMI9Wdo",
+                "uid": "63366234626636653638613538646538",
+                "title": "The Watcher",
+                "subtitle": "Dr. Dre, Eminem, Knoc-Turn'al",
+                "entityType": "track",
+                "duration": 206546
+              },
+              {
+                "uri": "spotify:track:1r3cH3Y1QGe8VseL8GEvn2",
+                "uid": "33383236303466383764343965613632",
+                "title": "Shit Hits The Fan",
+                "subtitle": "Obie Trice, Dr. Dre",
+                "entityType": "track",
+                "duration": 292013
+              },
+              {
+                "uri": "spotify:track:1ohwrBQrxIlqMYfkoYERiN",
+                "uid": "33633739646532373463326666303634",
+                "title": "Eazy-Duz-It",
+                "subtitle": "Eazy-E, Dr. Dre, MC Ren",
+                "entityType": "track",
+                "duration": 259493
+              },
+              {
+                "uri": "spotify:track:4ymByZAPRqTlyJASAoJ921",
+                "uid": "61323332303661383131313232353666",
+                "title": "Bounce",
+                "subtitle": "Timbaland, Missy Elliott, Justin Timberlake, Dr. Dre",
+                "entityType": "track",
+                "duration": 244293
+              },
+              {
+                "uri": "spotify:track:3AK1FxCiH9DQijxVHhW667",
+                "uid": "37346634636432353236616165373735",
+                "title": "Deep Cover",
+                "subtitle": "Snoop Dogg, Dr. Dre",
+                "entityType": "track",
+                "duration": 252493
+              },
+              {
+                "uri": "spotify:track:2AsUIjkkqwLnv5vkiwkvsT",
+                "uid": "30363335666665643165363762356630",
+                "title": "Natural Born Killaz",
+                "subtitle": "Ice Cube, Dr. Dre",
+                "entityType": "track",
+                "duration": 289226
+              },
+              {
+                "uri": "spotify:track:4EQkcrSLF3QdlwNca7sMXY",
+                "uid": "63623336343434333832616363336365",
+                "title": "Say What You Say",
+                "subtitle": "Eminem, Dr. Dre",
+                "entityType": "track",
+                "duration": 309893
+              },
+              {
+                "uri": "spotify:track:1iYWNf225EUIESs4svZudx",
+                "uid": "65636534386133306134623232663330",
+                "title": "Just Dippin'",
+                "subtitle": "Snoop Dogg, Dr. Dre, Jewell",
+                "entityType": "track",
+                "duration": 242506
+              },
+              {
+                "uri": "spotify:track:10C83Ul1IxCyuoJRWtx5GN",
+                "uid": "64396436323365336264333238383835",
+                "title": "Your Wife (feat. Dr. Dre)",
+                "subtitle": "Nate Dogg, Dr. Dre",
+                "entityType": "track",
+                "duration": 219493
+              },
+              {
+                "uri": "spotify:track:0bzX26mfmUi0djOLemE2b8",
+                "uid": "61336461316565666533366365343262",
+                "title": "ETA (with Snoop Dogg, Busta Rhymes & Anderson .Paak)",
+                "subtitle": "Dr. Dre, Snoop Dogg, Busta Rhymes, Anderson .Paak",
+                "entityType": "track",
+                "duration": 237233
+              },
+              {
+                "uri": "spotify:track:3hZnp7n8WI3UnnURw1i1DF",
+                "uid": "65656463313336663835316232653261",
+                "title": "Medicine Man",
+                "subtitle": "Dr. Dre, Eminem, Candice Pillay, Anderson .Paak",
+                "entityType": "track",
+                "duration": 254306
+              },
+              {
+                "uri": "spotify:track:77tHKMBRVkxOugr1Z3N4et",
+                "uid": "36383731666431303138613131633365",
+                "title": "Lil' Ghetto Boy",
+                "subtitle": "Dr. Dre, Daz, Snoop Dogg",
+                "entityType": "track",
+                "duration": 324960
+              },
+              {
+                "uri": "spotify:track:3WpHqtFUwzIQBsV9YC5iNc",
+                "uid": "31346331613637313232343063356536",
+                "title": "Guns Blazing (feat. Dr. Dre & Sly Pyper)",
+                "subtitle": "Eminem, Dr. Dre, Sly Pyper",
+                "entityType": "track",
+                "duration": 196180
+              },
+              {
+                "uri": "spotify:track:5jG3djnKEjdcJwidjYWtxL",
+                "uid": "36353561383336353964306634306531",
+                "title": "Eazy-er Said Than Dunn",
+                "subtitle": "Eazy-E, Dr. Dre",
+                "entityType": "track",
+                "duration": 219946
+              },
+              {
+                "uri": "spotify:track:1T3VPhjkgPm2TZsprzf78z",
+                "uid": "39376639383734623563313366313930",
+                "title": "Bad Intentions",
+                "subtitle": "Dr. Dre, Knoc-Turn'al",
+                "entityType": "track",
+                "duration": 182240
+              },
+              {
+                "uri": "spotify:track:22763wCAdRd1wwwCN3CU8u",
+                "uid": "61306237616431356231633333656533",
+                "title": "Bitches Ain't Shit",
+                "subtitle": "Dr. Dre, Snoop Dogg, Daz, Kurupt, Jewell",
+                "entityType": "track",
+                "duration": 288800
+              },
+              {
+                "uri": "spotify:track:5j6ODxGVhAWeCS49bBKuxz",
+                "uid": "37653636363363393734373864666363",
+                "title": "Old Time's Sake",
+                "subtitle": "Eminem, Dr. Dre",
+                "entityType": "track",
+                "duration": 278160
+              },
+              {
+                "uri": "spotify:track:2GiJpAxK7T6JddAmEVreKT",
+                "uid": "36383365666336656235363538303063",
+                "title": "Gunz N Smoke (feat. 50 Cent & Eminem)",
+                "subtitle": "Snoop Dogg, Dr. Dre, 50 Cent, Eminem",
+                "entityType": "track",
+                "duration": 213739
+              },
+              {
+                "uri": "spotify:track:5UHjWOJA6MDl1g3x2HC68V",
+                "uid": "62653162313230643735333465633932",
+                "title": "The Recipe (Black Hippy Remix) - Bonus Track",
+                "subtitle": "Kendrick Lamar, Dr. Dre",
+                "entityType": "track",
+                "duration": 262920
+              },
+              {
+                "uri": "spotify:track:1SZqIkhIYVM4H2gDUfOqtk",
+                "uid": "61326438633936333564646166613265",
+                "title": "Deeez Nuuuts",
+                "subtitle": "Dr. Dre, Warren G, Snoop Dogg, Daz, Nate Dogg",
+                "entityType": "track",
+                "duration": 306653
+              },
+              {
+                "uri": "spotify:track:7KZs2C1UGjrIfVXXuvtb20",
+                "uid": "30366662646562653937613134303632",
+                "title": "Talking To My Diary",
+                "subtitle": "Dr. Dre",
+                "entityType": "track",
+                "duration": 263226
+              },
+              {
+                "uri": "spotify:track:4cEmMB907Xi22vV9RIOSQE",
+                "uid": "65306463616236303062623834623531",
+                "title": "The Scenic Route (with Rick Ross & Anderson .Paak)",
+                "subtitle": "Dr. Dre, Rick Ross, Anderson .Paak",
+                "entityType": "track",
+                "duration": 182998
+              },
+              {
+                "uri": "spotify:track:0fylOXF4S9d7p6aiWrHHX6",
+                "uid": "34383932383665353739336361666632",
+                "title": "No Diggity - Radio Version",
+                "subtitle": "Blackstreet, Dr. Dre",
+                "entityType": "track",
+                "duration": 250626
+              },
+              {
+                "uri": "spotify:track:1wf4LnpdAhLaoI2WwYDKAE",
+                "uid": "61393866646566353364623531616631",
+                "title": "Compton",
+                "subtitle": "Kendrick Lamar, Dr. Dre",
+                "entityType": "track",
+                "duration": 248093
+              },
+              {
+                "uri": "spotify:track:23REvMDaoGFRdMKGSVVK5z",
+                "uid": "63656236646432313864633166333530",
+                "title": "Indika",
+                "subtitle": "Olamide, Dr. Dre, SPINALL",
+                "entityType": "track",
+                "duration": 109210
+              },
+              {
+                "uri": "spotify:track:0FNPiAAdWdWaGr7JOnlKmi",
+                "uid": "33353930316138656134643765616231",
+                "title": "Imagine",
+                "subtitle": "Snoop Dogg, Dr. Dre, D'Angelo",
+                "entityType": "track",
+                "duration": 282186
+              },
+              {
+                "uri": "spotify:track:6Sfjns8CRlgVUK1rswTwPr",
+                "uid": "36363031616333656438626631383664",
+                "title": "The Wash",
+                "subtitle": "Dr. Dre, Snoop Dogg",
+                "entityType": "track",
+                "duration": 200693
+              },
+              {
+                "uri": "spotify:track:3q5dginMcEftGNTopyd14e",
+                "uid": "30613533633331303166376431303432",
+                "title": "Fallin Up (with Thurz & Cocoa Sarai)",
+                "subtitle": "Dr. Dre, Thurz, Cocoa Sarai",
+                "entityType": "track",
+                "duration": 203468
+              },
+              {
+                "uri": "spotify:track:0OW1giby0jqdaXrLPz6IUk",
+                "uid": "33336561383337656262613939633833",
+                "title": "U Know (feat. Dr. Dre)",
+                "subtitle": "Xzibit, Dr. Dre",
+                "entityType": "track",
+                "duration": 206426
+              },
+              {
+                "uri": "spotify:track:5lWOdnLsibUnGLcxhz1mri",
+                "uid": "37396331363739643761356334616336",
+                "title": "Encore",
+                "subtitle": "Eminem, Dr. Dre, 50 Cent",
+                "entityType": "track",
+                "duration": 312946
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

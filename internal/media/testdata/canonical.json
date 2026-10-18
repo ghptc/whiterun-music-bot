@@ -1,0 +1,837 @@
+[
+  {
+    "name": "artist beats verified aggregator",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000001",
+        "title": "Arctic Monkeys - 505",
+        "channel": "Pizza Music",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000003",
+        "title": "505",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505",
+        "channel_is_verified": true
+      }
+    ],
+    "want": "video000003"
+  },
+  {
+    "name": "topic beats video and reupload",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000004",
+        "title": "Arctic Monkeys - 505 (Official Music Video)",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000001",
+        "title": "Arctic Monkeys - 505",
+        "channel": "Pizza Music",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000002",
+        "title": "505",
+        "channel": "Arctic Monkeys - Topic",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505"
+      }
+    ],
+    "want": "video000002"
+  },
+  {
+    "name": "official audio beats verified archive",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000006",
+        "title": "Arctic Monkeys - 505",
+        "channel": "Arctic Monkeys Archive",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000005",
+        "title": "Arctic Monkeys - 505 (Official Audio)",
+        "channel": "Domino",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ]
+      }
+    ],
+    "want": "video000005"
+  },
+  {
+    "name": "canonical artist video loses to official audio",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000004",
+        "title": "Arctic Monkeys - 505 (Official Music Video)",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000005",
+        "title": "Arctic Monkeys - 505 (Official Audio)",
+        "channel": "Domino",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ]
+      }
+    ],
+    "want": "video000005"
+  },
+  {
+    "name": "unsolicited live",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 live",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000001",
+        "title": "Arctic Monkeys - 505",
+        "channel": "Pizza Music",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000002",
+        "title": "505",
+        "channel": "Arctic Monkeys - Topic",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505"
+      }
+    ],
+    "want": "video000002"
+  },
+  {
+    "name": "explicit live",
+    "query": "505 Arctic Monkeys live",
+    "candidates": [
+      {
+        "id": "video000003",
+        "title": "505",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 live",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      }
+    ],
+    "want": "video000007"
+  },
+  {
+    "name": "unsolicited cover",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 cover",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000001",
+        "title": "Arctic Monkeys - 505",
+        "channel": "Pizza Music",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000002",
+        "title": "505",
+        "channel": "Arctic Monkeys - Topic",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505"
+      }
+    ],
+    "want": "video000002"
+  },
+  {
+    "name": "explicit cover",
+    "query": "505 Arctic Monkeys cover",
+    "candidates": [
+      {
+        "id": "video000003",
+        "title": "505",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 cover",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      }
+    ],
+    "want": "video000007"
+  },
+  {
+    "name": "unsolicited lyrics",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 lyrics",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000001",
+        "title": "Arctic Monkeys - 505",
+        "channel": "Pizza Music",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000002",
+        "title": "505",
+        "channel": "Arctic Monkeys - Topic",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505"
+      }
+    ],
+    "want": "video000002"
+  },
+  {
+    "name": "explicit lyrics",
+    "query": "505 Arctic Monkeys lyrics",
+    "candidates": [
+      {
+        "id": "video000003",
+        "title": "505",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 lyrics",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      }
+    ],
+    "want": "video000007"
+  },
+  {
+    "name": "unsolicited remix",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 remix",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000001",
+        "title": "Arctic Monkeys - 505",
+        "channel": "Pizza Music",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000002",
+        "title": "505",
+        "channel": "Arctic Monkeys - Topic",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505"
+      }
+    ],
+    "want": "video000002"
+  },
+  {
+    "name": "explicit remix",
+    "query": "505 Arctic Monkeys remix",
+    "candidates": [
+      {
+        "id": "video000003",
+        "title": "505",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 remix",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      }
+    ],
+    "want": "video000007"
+  },
+  {
+    "name": "unsolicited slowed",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 slowed",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000001",
+        "title": "Arctic Monkeys - 505",
+        "channel": "Pizza Music",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000002",
+        "title": "505",
+        "channel": "Arctic Monkeys - Topic",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505"
+      }
+    ],
+    "want": "video000002"
+  },
+  {
+    "name": "explicit slowed",
+    "query": "505 Arctic Monkeys slowed",
+    "candidates": [
+      {
+        "id": "video000003",
+        "title": "505",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 slowed",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      }
+    ],
+    "want": "video000007"
+  },
+  {
+    "name": "unsolicited reverb",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 reverb",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000001",
+        "title": "Arctic Monkeys - 505",
+        "channel": "Pizza Music",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000002",
+        "title": "505",
+        "channel": "Arctic Monkeys - Topic",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505"
+      }
+    ],
+    "want": "video000002"
+  },
+  {
+    "name": "explicit reverb",
+    "query": "505 Arctic Monkeys reverb",
+    "candidates": [
+      {
+        "id": "video000003",
+        "title": "505",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 reverb",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      }
+    ],
+    "want": "video000007"
+  },
+  {
+    "name": "unsolicited nightcore",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 nightcore",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000001",
+        "title": "Arctic Monkeys - 505",
+        "channel": "Pizza Music",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000002",
+        "title": "505",
+        "channel": "Arctic Monkeys - Topic",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505"
+      }
+    ],
+    "want": "video000002"
+  },
+  {
+    "name": "explicit nightcore",
+    "query": "505 Arctic Monkeys nightcore",
+    "candidates": [
+      {
+        "id": "video000003",
+        "title": "505",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 nightcore",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      }
+    ],
+    "want": "video000007"
+  },
+  {
+    "name": "unsolicited karaoke",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 karaoke",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000001",
+        "title": "Arctic Monkeys - 505",
+        "channel": "Pizza Music",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000002",
+        "title": "505",
+        "channel": "Arctic Monkeys - Topic",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505"
+      }
+    ],
+    "want": "video000002"
+  },
+  {
+    "name": "explicit karaoke",
+    "query": "505 Arctic Monkeys karaoke",
+    "candidates": [
+      {
+        "id": "video000003",
+        "title": "505",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 karaoke",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      }
+    ],
+    "want": "video000007"
+  },
+  {
+    "name": "unsolicited unplugged",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 unplugged",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000001",
+        "title": "Arctic Monkeys - 505",
+        "channel": "Pizza Music",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000002",
+        "title": "505",
+        "channel": "Arctic Monkeys - Topic",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505"
+      }
+    ],
+    "want": "video000002"
+  },
+  {
+    "name": "explicit unplugged",
+    "query": "505 Arctic Monkeys unplugged",
+    "candidates": [
+      {
+        "id": "video000003",
+        "title": "505",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 unplugged",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      }
+    ],
+    "want": "video000007"
+  },
+  {
+    "name": "unsolicited acoustic",
+    "query": "505 Arctic Monkeys",
+    "candidates": [
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 acoustic",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000001",
+        "title": "Arctic Monkeys - 505",
+        "channel": "Pizza Music",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000002",
+        "title": "505",
+        "channel": "Arctic Monkeys - Topic",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505"
+      }
+    ],
+    "want": "video000002"
+  },
+  {
+    "name": "explicit acoustic",
+    "query": "505 Arctic Monkeys acoustic",
+    "candidates": [
+      {
+        "id": "video000003",
+        "title": "505",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "track": "505",
+        "channel_is_verified": true
+      },
+      {
+        "id": "video000007",
+        "title": "Arctic Monkeys - 505 acoustic",
+        "channel": "Arctic Monkeys",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ],
+        "artist": "Arctic Monkeys",
+        "channel_is_verified": true
+      }
+    ],
+    "want": "video000007"
+  },
+  {
+    "name": "explicit unplugged",
+    "query": "Nutshell Alice in Chains unplugged",
+    "candidates": [
+      {
+        "id": "video000008",
+        "title": "Alice in Chains - Nutshell Official Audio",
+        "channel": "Alice in Chains",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ]
+      },
+      {
+        "id": "video000009",
+        "title": "Alice in Chains - Nutshell MTV Unplugged live",
+        "channel": "Alice in Chains",
+        "duration": 253,
+        "categories": [
+          "Music"
+        ]
+      }
+    ],
+    "want": "video000009"
+  }
+]

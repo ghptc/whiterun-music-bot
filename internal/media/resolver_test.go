@@ -2,7 +2,7 @@ package media
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -34,14 +34,14 @@ func TestResolverSearchesMultipleCandidates(t *testing.T) {
 		t.Fatalf("args: %s", b)
 	}
 }
-func TestResolverDirectVideoIsFiltered(t *testing.T) {
+func TestResolverDirectVideoRetainsIntent(t *testing.T) {
 	for _, tt := range []struct {
 		title    string
 		rejected bool
-	}{{"Arctic Monkeys 505 live", false}, {"Arctic Monkeys interview", true}} {
+	}{{"Arctic Monkeys 505 live", false}, {"Arctic Monkeys interview", false}} {
 		r, args := resolverFixture(t, `{"id":"abcdefghijk","title":"`+tt.title+`","duration":240,"categories":["Music"]}`)
 		_, err := r.Resolve(context.Background(), "https://youtu.be/abcdefghijk?list=ignored")
-		if tt.rejected && !errors.Is(err, ErrNoSong) || !tt.rejected && err != nil {
+		if err != nil {
 			t.Fatalf("%s: %v", tt.title, err)
 		}
 		b, _ := os.ReadFile(args)
@@ -101,4 +101,27 @@ esac
 	if strings.Contains(calls[1], "--flat-playlist") || !strings.HasSuffix(calls[1], "https://www.youtube.com/watch?v=abcdefghijk") {
 		t.Fatalf("verification: %s", calls[1])
 	}
+}
+
+// Search returns a flat playlist; verification returns the requested video only.
+func candidateResolverFixture(t *testing.T, output string) (Resolver, string) {
+	t.Helper()
+	r, calls := resolverFixture(t, output)
+	var data searchResult
+	if err := json.Unmarshal([]byte(output), &data); err != nil {
+		t.Fatal(err)
+	}
+	script := "#!/bin/sh\nfor arg do target=\"$arg\"; done\nprintf '%s\\n' \"$target\" >> '" + calls + "'\ncase \"$target\" in\n"
+	for _, c := range data.Entries {
+		if c == nil {
+			continue
+		}
+		body, _ := json.Marshal(c)
+		script += "*'watch?v=" + c.ID + "')\ncat <<'JSON'\n" + string(body) + "\nJSON\n;;\n"
+	}
+	script += "*)\ncat <<'JSON'\n" + output + "\nJSON\n;;\nesac\n"
+	if err := os.WriteFile(r.Binary, []byte(script), 0700); err != nil {
+		t.Fatal(err)
+	}
+	return r, calls
 }

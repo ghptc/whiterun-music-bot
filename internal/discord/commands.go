@@ -5,24 +5,33 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	d "github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/rest"
 	"whiterun/internal/media"
+	"whiterun/internal/player"
 )
 
 func commands() []d.ApplicationCommandCreate {
-	result := make([]d.ApplicationCommandCreate, 0, 7)
+	result := make([]d.ApplicationCommandCreate, 0, 10)
 	for _, c := range []struct{ name, description string }{
 		{"summon", "Summon the Bard to your voice channel."}, {"play", "Find a song and add it to the queue."},
+		{"now", "Show the current song."}, {"pause", "Pause the current song."}, {"resume", "Resume the current song."},
 		{"skip", "Skip the current song."}, {"queue", "Show the current song and queue."},
 		{"clear", "Clear upcoming tracks without stopping playback."}, {"stop", "Stop playback and clear the queue."}, {"leave", "Dismiss the Bard and clear the queue."},
 	} {
 		command := d.SlashCommandCreate{Name: c.name, Description: c.description, Contexts: []d.InteractionContextType{d.InteractionContextTypeGuild}}
 		if c.name == "play" {
-			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionString{Name: "query", Description: "Song and artist, YouTube video/playlist, or Spotify playlist/album URL", Required: true, MaxLength: new(500)}}
+			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionString{Name: "query", Description: "Song and artist, YouTube video/playlist, or Spotify track/playlist/album URL", Required: true, MaxLength: new(500)}}
+		}
+		if c.name == "queue" {
+			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionInt{Name: "page", Description: "Upcoming queue page (10 tracks per page)", MinValue: new(1), MaxValue: new(player.MaxQueueTracks / queuePageSize)}}
+		}
+		if c.name == "skip" {
+			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionInt{Name: "count", Description: "Tracks to skip, including the current track (default 1)", MinValue: new(1), MaxValue: new(player.MaxSkipTracks)}}
 		}
 		result = append(result, command)
 	}
@@ -40,9 +49,9 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 	ack, cancel := context.WithTimeout(b.ctx, 2*time.Second)
 	var err error
 	if timing != nil {
-		err = e.CreateMessage(d.MessageCreate{Content: "The Bard searches Skyrim for your song...", Flags: d.MessageFlagEphemeral, AllowedMentions: &d.AllowedMentions{}}, rest.WithCtx(ack))
+		err = e.CreateMessage(d.MessageCreate{Content: "The Bard searches Skyrim for your song...", AllowedMentions: &d.AllowedMentions{}}, rest.WithCtx(ack))
 	} else {
-		err = e.DeferCreateMessage(true, rest.WithCtx(ack))
+		err = e.DeferCreateMessage(!(slash && data.CommandName() == "queue"), rest.WithCtx(ack))
 	}
 	cancel()
 	timing.Event("discord_acknowledged", started, "error", err)
@@ -75,8 +84,16 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 		reply("The Bard is shutting down.")
 		return
 	}
+	if data.CommandName() == "now" {
+		reply(nowText(g))
+		return
+	}
 	if data.CommandName() == "queue" {
-		reply(queueText(g))
+		page := 1
+		if value, present := data.OptInt("page"); present {
+			page = value
+		}
+		reply(queuePageText(g.player.State(), page))
 		return
 	}
 	g.mu.Lock()
@@ -120,6 +137,7 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 			}
 			g.conn = conn
 			g.channel = channel
+			g.emptySince = time.Time{}
 		}
 	}
 	switch name {
@@ -136,13 +154,17 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 			reply("The Bard is searching for other songs. Try again shortly.")
 			return
 		}
-		result, err := b.resolver.Resolve(media.WithTiming(searchCtx, timing), data.String("query"))
-		<-b.searches
+		releaseSearch := sync.OnceFunc(func() { <-b.searches })
+		defer releaseSearch()
+		resolveCtx := media.WithTiming(searchCtx, timing)
+		result, progressive, err := b.resolver.Prepare(resolveCtx, data.String("query"))
 		if err != nil {
-			b.log.Warn("media resolution failed", "guild_id", id, "error", err)
+			b.log.Warn("media resolution failed", "guild_id", id, "stage", resolutionStage(err), "error", err)
 			if searchCtx.Err() != nil {
 				reply("Playback changed while searching. Ask the Bard again.")
-			} else if errors.Is(err, media.ErrNoTracks) || errors.Is(err, media.ErrCollectionTooLarge) || errors.Is(err, media.ErrSpotifyConfig) || errors.Is(err, media.ErrSpotifyAccess) {
+			} else if message := spotifyErrorText(err); message != "" {
+				reply(message)
+			} else if errors.Is(err, media.ErrNoTracks) || errors.Is(err, media.ErrCollectionTooLarge) {
 				reply(err.Error())
 			} else if errors.Is(err, media.ErrNoSong) {
 				reply(media.ErrNoSong.Error())
@@ -160,31 +182,85 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 			return
 		}
 		queueStart := time.Now()
-		err = g.player.EnqueueMany(result.Tracks, ticket)
-		timing.Event("queue_inserted", queueStart, "error", err)
+		var job *player.CollectionJob
+		g.announcementMu.Lock()
+		previousChannel := g.announcementChannel.Load()
+		if channel := e.Channel(); channel.MessageChannel != nil {
+			g.announcementChannel.Store(uint64(channel.ID()))
+		}
+		if progressive {
+			job, err = g.player.BeginCollection(resolveCtx, result, b.resolver.MatchSpotify, ticket)
+		} else {
+			err = g.player.EnqueueMany(result.Tracks, ticket)
+		}
+		if err != nil {
+			g.announcementChannel.Store(previousChannel)
+		}
+		g.announcementMu.Unlock()
+		timing.Event("queue_inserted", queueStart, "error", err, "pending", progressive)
 		g.mu.Unlock()
+		var first player.CollectionFirst
+		if err == nil && progressive {
+			first = <-job.First
+			err = first.Err
+		}
+		releaseSearch()
 		if err != nil {
 			reply(err.Error())
 			return
 		}
-		if result.IsCollection {
+		if progressive {
+			message := "Queued: " + trackTitle(first.Track)
+			if remaining := first.Total - first.Position; remaining > 0 {
+				message += fmt.Sprintf(". Resolving the remaining %d tracks… Use /queue for progress.", remaining)
+			}
+			if first.Skipped > 0 {
+				message += fmt.Sprintf(" %d earlier positions were skipped.", first.Skipped)
+			}
+			reply(message)
+		} else if result.IsCollection {
 			message := fmt.Sprintf("Added %d tracks to the queue.", len(result.Tracks))
 			if result.Skipped > 0 {
 				message += fmt.Sprintf(" %d unavailable tracks were skipped.", result.Skipped)
 			}
 			reply(message)
 		} else {
-			reply("Queued: " + title(result.Tracks[0].Title))
+			reply("Queued: " + trackTitle(result.Tracks[0]))
+		}
+	case "pause", "resume":
+		paused := name == "pause"
+		providerBlocked := g.player.State().ProviderBlocked
+		changed, err := g.player.SetPaused(paused)
+		g.mu.Unlock()
+		if err != nil {
+			reply(err.Error())
+		} else if paused && changed {
+			reply("Playback paused.")
+		} else if paused {
+			reply("Playback is already paused.")
+		} else if changed {
+			if providerBlocked {
+				reply("YouTube recovery requested. Retrying the same track.")
+			} else {
+				reply("Playback resumed.")
+			}
+		} else {
+			reply("Playback is already playing.")
 		}
 	case "skip":
-		skipped := g.player.Skip()
+		count := 1
+		if value, present := data.OptInt("count"); present {
+			count = value
+		}
+		result, err := g.player.SkipN(count)
 		g.mu.Unlock()
-		if skipped {
-			reply("On to the next song.")
+		if err != nil {
+			reply(err.Error())
 		} else {
-			reply("The Bard is not playing.")
+			reply(skipText(result))
 		}
 	case "clear":
+		g.resetSearches(b.ctx)
 		count := g.player.Clear()
 		g.mu.Unlock()
 		if count == 0 {
@@ -198,12 +274,9 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 		g.mu.Unlock()
 		reply("Playback stopped. The queue is clear.")
 	case "leave":
-		g.resetSearches(b.ctx)
 		ctx, cancel := context.WithTimeout(b.ctx, 5*time.Second)
-		g.player.Leave(ctx)
+		g.leave(ctx, b.ctx)
 		cancel()
-		g.conn = nil
-		g.channel = 0
 		g.mu.Unlock()
 		reply("The Bard takes his leave.")
 	default:
@@ -220,28 +293,88 @@ func title(s string) string {
 	}
 	return s
 }
-func queueText(g *guild) string {
-	current, queued := g.player.Snapshot()
+
+const queuePageSize = 10
+
+func queueText(g *guild) string { return queuePageText(g.player.State(), 1) }
+
+// Render a single bounded page from one snapshot, outside guild/player locks.
+func queuePageText(state player.State, page int) string {
+	queued := state.Entries
+	if queued == nil {
+		for _, track := range state.Queued {
+			queued = append(queued, player.QueueEntry{Track: track})
+		}
+	}
+	pages := max(1, (len(queued)+queuePageSize-1)/queuePageSize)
+	if page < 1 || page > pages {
+		return fmt.Sprintf("Queue has %d page(s). Use /queue page:1 through page:%d.", pages, pages)
+	}
 	var out strings.Builder
-	if current == nil {
-		out.WriteString("Now: nothing playing.\n")
-	} else {
-		fmt.Fprintf(&out, "Now: %s\n", trackTitle(*current))
+	out.WriteString(currentText(state.Current, state.Paused) + "\n")
+	if state.ProviderBlocked {
+		out.WriteString("Playback blocked by YouTube. Queue retained; use /resume to retry the same track.\n")
+	}
+	if state.Halted {
+		out.WriteString("Playback halted after 5 consecutive failures. Queue retained; use /resume or /play.\n")
 	}
 	if len(queued) == 0 {
 		out.WriteString("The queue is empty.")
 	} else {
+		start, end := (page-1)*queuePageSize, min(page*queuePageSize, len(queued))
 		out.WriteString("Up next:\n")
-		for i, t := range queued {
-			if i == 10 {
-				fmt.Fprintf(&out, "…and %d more.", len(queued)-10)
-				break
+		for i := start; i < end; i++ {
+			label := trackTitle(queued[i].Track)
+			if len(state.Resolving) > 0 {
+				r := []rune(label)
+				if len(r) > 60 {
+					label = string(r[:57]) + "..."
+				}
 			}
-			fmt.Fprintf(&out, "%d. %s\n", i+1, trackTitle(t))
+			if queued[i].Pending {
+				label += " [resolving]"
+			}
+			fmt.Fprintf(&out, "%d. %s\n", i+1, label)
+		}
+		if end < len(queued) {
+			fmt.Fprintf(&out, "…and %d more.\n", len(queued)-end)
 		}
 	}
-	fmt.Fprintf(&out, "\n%d tracks remaining.", len(queued))
+	total := len(queued)
+	if state.Current != nil {
+		total++
+	}
+	fmt.Fprintf(&out, "\n%d tracks remaining. %d total including current. Page %d/%d.", len(queued), total, page, pages)
+	if pages > 1 {
+		out.WriteString("\nInspect any page with /queue page:N.")
+	}
+	if len(state.Resolving) > 0 {
+		total, resolved, failed := 0, 0, 0
+		for _, job := range state.Resolving {
+			total += job.Total
+			resolved += job.Resolved
+			failed += job.Failed
+		}
+		fmt.Fprintf(&out, "\nResolving collections: %d/%d matched; %d failed. Pending entries are not playable yet.", resolved, total, failed)
+	}
 	return out.String()
+}
+func skipText(result player.SkipResult) string {
+	if result.Skipped == 0 {
+		return "The Bard is not playing. The queue is empty."
+	}
+	word := "tracks"
+	if result.Skipped == 1 {
+		word = "track"
+	}
+	if result.Next == nil {
+		return fmt.Sprintf("Skipped %d %s. Queue is now empty.", result.Skipped, word)
+	}
+	label := trackTitle(*result.Next)
+	if result.NextPending {
+		label += " [resolving]"
+	}
+	return fmt.Sprintf("Skipped %d %s. Next: %s. %d tracks remaining.", result.Skipped, word, label, result.Remaining)
 }
 
 func trackTitle(t media.Track) string {
@@ -249,4 +382,74 @@ func trackTitle(t media.Track) string {
 		return title(t.Artist + " — " + t.Title)
 	}
 	return title(t.Title)
+}
+
+func currentText(current *media.Track, paused bool) string {
+	if current == nil {
+		return "Now: nothing playing."
+	}
+	label := "Now playing: "
+	if paused {
+		label = "Paused: "
+	}
+	text := label + trackTitle(*current)
+	if current.RequestedSource == "spotify" {
+		text += " · Spotify"
+	}
+	return text
+}
+func nowText(g *guild) string {
+	state := g.player.State()
+	if state.ProviderBlocked {
+		return "Playback is blocked by YouTube. The next track is retained; use /resume to retry it."
+	}
+	text := currentText(state.Current, state.Paused)
+	if state.Current == nil {
+		return text
+	}
+	t := state.Current
+	if t.Duration > 0 {
+		seconds := int(t.Duration.Seconds())
+		text += fmt.Sprintf(" · %d:%02d", seconds/60, seconds%60)
+	}
+	if t.Album != "" {
+		text += "\nAlbum: " + title(t.Album)
+	}
+	if t.RequestedSource == "spotify" {
+		text += "\nSpotify metadata · YouTube audio"
+	} else {
+		text += "\nYouTube"
+	}
+	if t.Channel != "" {
+		text += " · " + title(t.Channel)
+	}
+	return text
+}
+func spotifyErrorText(err error) string {
+	for _, known := range []error{media.ErrSpotifyIncomplete, media.ErrSpotifyPageParse, media.ErrSpotifyPageFetch, media.ErrSpotifyURL, media.ErrSpotifyConfig, media.ErrSpotifyAuth, media.ErrSpotifyAccess, media.ErrSpotifyMatch} {
+		if errors.Is(err, known) {
+			return known.Error()
+		}
+	}
+	return ""
+}
+func resolutionStage(err error) string {
+	switch {
+	case errors.Is(err, media.ErrSpotifyURL):
+		return "spotify_url"
+	case errors.Is(err, media.ErrSpotifyConfig), errors.Is(err, media.ErrSpotifyAuth):
+		return "spotify_authorization"
+	case errors.Is(err, media.ErrSpotifyIncomplete):
+		return "spotify_public_incomplete"
+	case errors.Is(err, media.ErrSpotifyPageParse):
+		return "spotify_public_parse"
+	case errors.Is(err, media.ErrSpotifyPageFetch):
+		return "spotify_public_fetch"
+	case errors.Is(err, media.ErrSpotifyAccess):
+		return "spotify_access"
+	case errors.Is(err, media.ErrSpotifyMatch), errors.Is(err, media.ErrNoSong):
+		return "track_match"
+	default:
+		return "metadata_resolution"
+	}
 }

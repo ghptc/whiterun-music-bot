@@ -3,6 +3,7 @@ package discord
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"strings"
@@ -24,6 +25,7 @@ import (
 type recordingRest struct {
 	rest.Rest
 	response string
+	messages chan sentMessage
 }
 
 func (r *recordingRest) UpdateInteractionResponse(_ snowflake.ID, _ string, m d.MessageUpdate, _ ...rest.RequestOpt) (*d.Message, error) {
@@ -58,10 +60,11 @@ func interaction(t *testing.T, name string, guild bool) *events.ApplicationComma
 func testBot(t *testing.T) (*Bot, *recordingRest) {
 	t.Helper()
 	ctx, cancel := context.WithCancel(context.Background())
-	r := &recordingRest{}
-	b := &Bot{ctx: ctx, cancel: cancel, log: slog.New(slog.NewTextHandler(io.Discard, nil)), client: &bot.Client{ApplicationID: 2, Rest: r, Caches: cache.New(cache.WithCaches(cache.FlagGuilds, cache.FlagVoiceStates))}, guilds: make(map[snowflake.ID]*guild)}
+	r := &recordingRest{messages: make(chan sentMessage, 256)}
+	b := &Bot{ctx: ctx, cancel: cancel, log: slog.New(slog.NewTextHandler(io.Discard, nil)), client: &bot.Client{ApplicationID: 2, Rest: r, Caches: cache.New(cache.WithCaches(cache.FlagGuilds, cache.FlagVoiceStates, cache.FlagMembers))}, guilds: make(map[snowflake.ID]*guild)}
 	t.Cleanup(func() {
 		cancel()
+		b.workers.Wait()
 		for _, g := range b.guilds {
 			g.player.Close(context.Background())
 		}
@@ -148,7 +151,7 @@ func TestPlayAcknowledgesWithContentBeforeGuildWork(t *testing.T) {
 			t.Fatalf("response type %v", typ)
 		}
 		message, ok := data.(d.MessageCreate)
-		if !ok || message.Content != "The Bard searches Skyrim for your song..." || message.Flags != d.MessageFlagEphemeral || message.AllowedMentions == nil {
+		if !ok || message.Content != "The Bard searches Skyrim for your song..." || message.Flags != 0 || message.AllowedMentions == nil {
 			t.Fatalf("acknowledgement: %#v", data)
 		}
 		if len(b.guilds) != 0 || r.response != "" {
@@ -207,7 +210,7 @@ func TestPlayCollectionAndClearCommands(t *testing.T) {
 	}
 	e.Respond = func(d.InteractionResponseType, d.InteractionResponseData, ...rest.RequestOpt) error { return nil }
 	b.command(e)
-	if r.response != "Added 2 tracks to the queue. 1 unavailable tracks were skipped." {
+	if r.response != "Queued: Artist — First. Resolving the remaining 2 tracks… Use /queue for progress." {
 		t.Fatal(r.response)
 	}
 	select {
@@ -218,12 +221,14 @@ func TestPlayCollectionAndClearCommands(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("did not start")
 	}
+	waitForCollections(t, g.player)
 	b.command(interaction(t, "queue", true))
 	if !strings.Contains(r.response, "Artist — First") || !strings.Contains(r.response, "Artist — Last") || !strings.Contains(r.response, "1 tracks remaining") {
 		t.Fatal(r.response)
 	}
 	// A second playlist appends without interrupting the first, preserving duplicates.
 	b.command(e)
+	waitForCollections(t, g.player)
 	if g.player.Length() != 3 {
 		t.Fatal(g.player.Length())
 	}
@@ -257,4 +262,95 @@ func TestClearRegistered(t *testing.T) {
 		}
 	}
 	t.Fatal("clear not registered")
+}
+
+func TestPauseResumeNowAndLeaveCommands(t *testing.T) {
+	b, r := testBot(t)
+	g, c := idleGuild(t, b, 1)
+	listener(b, 1, 3, false)
+	started := make(chan struct{})
+	g.player.Close(context.Background())
+	g.player = player.New(b.ctx, b.log, func(ctx context.Context, _ media.Track, _ player.Voice) error {
+		close(started)
+		<-ctx.Done()
+		return ctx.Err()
+	})
+	c = &dummyConn{}
+	g.conn = c
+	if err := g.player.Attach(transport{conn: c}); err != nil {
+		t.Fatal(err)
+	}
+	track := media.Track{Title: "505", Artist: "Arctic Monkeys", Album: "Favourite Worst Nightmare", RequestedSource: "spotify", Duration: 253 * time.Second}
+	if err := g.player.EnqueueMany([]media.Track{track, {Title: "Next"}}, g.player.Ticket()); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-started:
+	case <-time.After(time.Second):
+		t.Fatal("not playing")
+	}
+	for _, tt := range []struct{ command, want string }{
+		{"pause", "Playback paused."}, {"pause", "already paused"}, {"now", "Paused: Arctic Monkeys — 505"}, {"queue", "Paused: Arctic Monkeys — 505"}, {"resume", "Playback resumed."}, {"resume", "already playing"}, {"pause", "Playback paused."}, {"leave", "takes his leave"},
+	} {
+		b.command(interaction(t, tt.command, true))
+		if !strings.Contains(r.response, tt.want) {
+			t.Fatalf("%s: %s", tt.command, r.response)
+		}
+		if tt.command == "now" && (!strings.Contains(r.response, "Spotify metadata") || !strings.Contains(r.response, "4:13") || strings.Contains(r.response, "Next")) {
+			t.Fatal(r.response)
+		}
+	}
+	if !c.closed || g.player.State().Paused || g.player.State().Current != nil || g.player.Length() != 0 {
+		t.Fatal("leave retained paused session")
+	}
+	b.command(interaction(t, "pause", true))
+	if !strings.Contains(r.response, "not playing") {
+		t.Fatal(r.response)
+	}
+}
+func TestNewCommandsRegisteredAndNowNeedsNoVoice(t *testing.T) {
+	names := map[string]bool{}
+	for _, c := range commands() {
+		names[c.CommandName()] = true
+	}
+	for _, name := range []string{"pause", "resume", "now", "queue"} {
+		if !names[name] {
+			t.Fatal(name)
+		}
+	}
+	b, r := testBot(t)
+	b.command(interaction(t, "now", true))
+	if !strings.Contains(r.response, "nothing playing") {
+		t.Fatal(r.response)
+	}
+}
+func TestSpotifyErrorsHideDiagnosticDetails(t *testing.T) {
+	for _, known := range []error{media.ErrSpotifyAuth, media.ErrSpotifyAccess, media.ErrSpotifyURL, media.ErrSpotifyMatch} {
+		err := fmt.Errorf("%w: status=403 path=private", known)
+		if got := spotifyErrorText(err); got != known.Error() || strings.Contains(got, "path=") {
+			t.Fatal(got)
+		}
+	}
+}
+
+func waitForCollections(t *testing.T, p *player.GuildPlayer) {
+	t.Helper()
+	deadline := time.After(3 * time.Second)
+	for len(p.State().Resolving) != 0 {
+		select {
+		case <-deadline:
+			t.Fatal("collection did not finish")
+		case <-time.After(time.Millisecond):
+		}
+	}
+}
+
+type sentMessage struct {
+	channel snowflake.ID
+	message d.MessageCreate
+}
+
+func (r *recordingRest) CreateMessage(channel snowflake.ID, message d.MessageCreate, _ ...rest.RequestOpt) (*d.Message, error) {
+	r.messages <- sentMessage{channel, message}
+	return &d.Message{}, nil
 }

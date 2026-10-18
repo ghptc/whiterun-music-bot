@@ -1,6 +1,6 @@
 # The Bard, Slave of Whiterun
 
-A small Go Discord music bot. **The Bard plays songs, not content.** State lives in memory, independently per server. No database or Redis.
+A small Go Discord music bot. Music discovery follows source intent; explicit YouTube links retain the selected video. State lives in memory, independently per server. No database or Redis.
 
 ## Setup
 
@@ -27,13 +27,13 @@ Prerequisites: Docker Engine running with Docker Compose, a Discord server where
 | `DISCORD_GUILD_ID` | Optional server ID for fast, server-scoped command registration |
 | `YTDLP_VERSION` | Optional Docker build override; defaults to `2026.08.19` |
 
-Enable Discord Developer Mode to copy a server ID. With no guild ID, commands register globally and may take time to appear. Startup replaces the application's commands in the selected scope with the seven commands. Use a dedicated application; changing scope does not remove commands previously registered in another scope.
+Enable Discord Developer Mode to copy a server ID. With no guild ID, commands register globally and may take time to appear. Startup replaces the application's commands in the selected scope with the ten commands. Use a dedicated application; changing scope does not remove commands previously registered in another scope.
 
 Logs: `docker compose logs -f bard`. Shut down: `docker compose down`. To update yt-dlp, change its version in `.env` and rebuild. Rebuild the image rather than updating a running container.
 
 ## Commands
 
-Join a regular voice channel first. Commands that change playback require you to be in the Bard's channel; `/queue` can be used by anyone in the server. Responses are concise and visible only to the invoker.
+Join a regular voice channel first. Commands that change playback require you to be in the Bard's channel; `/queue` and `/now` can be used by anyone in the server. Responses are concise and visible only to the invoker.
 
 | Command | Behavior |
 | --- | --- |
@@ -41,22 +41,33 @@ Join a regular voice channel first. Commands that change playback require you to
 | `/play query:505 Arctic Monkeys` | Find and enqueue a song; join automatically if necessary |
 | `/play query:505 Arctic Monkeys live Reading 2009` | Prefer the requested live performance |
 | `/play query:Nutshell Alice in Chains unplugged` | Prefer the unplugged version |
-| `/play query:https://www.youtube.com/watch?v=VIDEO_ID` | Resolve that video directly, still checking for music |
-| `/skip` | Cancel the current song and advance |
-| `/queue` | Show the current song and first ten queued songs, plus remaining count |
+| `/play query:https://www.youtube.com/watch?v=VIDEO_ID` | Play that exact video, including unofficial uploads and live streams |
+| `/skip [count]` | Skip 1–1001 tracks atomically, including the current track; default 1 |
+| `/queue [page]` | Show the current song and pause state, plus ten upcoming tracks per page; default page 1 |
+| `/now` | Show only the current track, pause state, duration, album when available, and source/channel |
+| `/pause` | Hold the current track and keep the queue intact |
+| `/resume` | Continue paused audio, or release a consecutive-failure halt |
 | `/clear` | Clear upcoming tracks without interrupting playback or cancelling pending searches |
 | `/stop` | Stop playback, cancel searches, clear the queue, remain in voice |
 | `/leave` | Stop, cancel searches, clear the queue, and disconnect |
+
+`/queue` keeps the concise first-ten view. Use `/queue page:2`, `/queue page:3`, and so on to inspect every upcoming track. Pages have fixed ten-position boundaries, retain absolute upcoming position numbers, and show the current track separately plus upcoming/total counts. Each command takes a fresh consistent snapshot, so positions can change as playback advances or someone edits the queue. Responses remain below Discord's 2,000-character limit, including emoji; no track positions are silently omitted.
+
+`/skip count:50` skips the current track plus the next 49 queued entries in one operation. For current track 1 and queued tracks 2–123, track 51 is selected next and tracks 52–123 remain queued. Omitted count means 1. Counts beyond the available tracks skip everything available; 0, negative values, and values above 1001 are rejected. During cancellation cleanup, further skips advance queued successors rather than recounting the cancelled track. With queued tracks but no active track, counting starts at the queue head. Replies report the selected **Next** track, not a claim that audio has started. The operation also works while paused or starting playback, and does not cancel pending searches.
+
+Pause holds delivery at an Opus packet boundary using bounded pipe backpressure. Resume keeps the same yt-dlp and FFmpeg processes; it does not search, download again, or restart the track. One already in-flight frame may finish. Skip, stop, leave, voice disconnect, and shutdown remain cancellable while paused. The next track starts unpaused.
+
+After **two minutes with no human listeners**, the Bard stops playback, clears the queue, cancels pending resolutions, and leaves. Other bots do not count. A human returning during the grace period cancels the deadline and preserves the session. Voice events wake the existing watcher; its one-second check handles deadlines and missed transport events. Unknown member identities conservatively count as listeners until known, so incomplete Discord cache data can delay auto-leave.
 
 A finished or failed track advances automatically. Playback failures are logged. A voice disconnect, forced channel move, or detected gateway loss clears that session; summon again after connectivity returns.
 
 ## Collections and Spotify setup
 
-`/play` accepts YouTube playlists (including album playlists), Spotify playlists, and Spotify albums. Collections append atomically in source order and start automatically when idle. `/queue` displays the current track, the next ten tracks, and the total upcoming count. `/clear` removes only upcoming tracks; `/stop` also cancels playback and pending searches.
+`/play` accepts YouTube playlists (including album playlists), Spotify tracks, Spotify playlists, and Spotify albums. Normal `https://open.spotify.com/track/...`, `/album/...`, and `/playlist/...` links accept share parameters such as `?si=...` and localized `intl-...` paths. Malformed or unsupported Spotify links are rejected, never searched as song text. Spotify short/redirect links and URIs are not supported. Collections append atomically in source order and start automatically when idle. `/queue` displays the current track, the next ten tracks, and the total upcoming count. `/clear` removes only upcoming tracks; `/stop` also cancels playback and pending searches.
 
-YouTube uses flat playlist metadata, skips known unavailable entries, and verifies each video against the existing music filter when its turn arrives. Audio streams are extracted only at playback. Later verification or playback failures are logged and advance to the next track; the initial added/skipped count describes metadata resolution, not a guarantee of future availability. Single long videos are not segmented and retain the existing single-video music/duration filtering.
+YouTube playlist URLs use flat metadata, preserve video IDs/order/duplicates, and skip known unavailable entries. Each exact video is verified when its turn arrives; no alternate recording is searched. Explicit video URLs (even with a playlist share parameter) play that video without a music/category/duration filter. Direct live URLs are supported with no fixed playback-duration deadline. Audio streams are extracted fresh only at playback. Individual failures advance; five consecutive failures halt with the remaining queue retained for `/resume` or an accepted `/play`.
 
-Spotify is optional and uses the official Web API through Go's HTTP client (no new dependency). Configure these variables in `.env` and recreate the container:
+Spotify is optional and uses the official Web API through Go's HTTP client, with an anonymous public-playlist metadata fallback parsed using `golang.org/x/net/html`. Configure these variables in `.env` and recreate the container:
 
 | Variable | Meaning |
 | --- | --- |
@@ -67,11 +78,21 @@ Spotify is optional and uses the official Web API through Go's HTTP client (no n
 
 Create an app in the [Spotify developer dashboard](https://developer.spotify.com/dashboard), register a redirect URI, and complete the [authorization-code flow](https://developer.spotify.com/documentation/web-api/tutorials/code-flow) once for the account whose playlists Bard should read. Request `playlist-read-private` and `playlist-read-collaborative` as needed; exchange the authorization code for tokens and store the returned refresh token in `.env`. Bard refreshes access tokens automatically; it does not host a login callback. Never commit credentials. A rotated refresh token is retained in memory; if authorization stops working after a restart, update the configured refresh token.
 
-Without a refresh token, Bard uses client credentials, useful for album metadata and any collections the app's access tier permits. [Spotify's development-mode restrictions](https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide) require a Premium app owner and restrict playlist contents to playlists the authorized user owns or collaborates on. Arbitrary public playlists are therefore not guaranteed to work. This is a shared operator-configured account, not per-Discord-user Spotify authorization. Access errors are reported without exposing credentials or raw API responses.
+Without a refresh token, Bard uses client credentials, useful for album metadata and any collections the app's access tier permits. [Spotify's development-mode restrictions](https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide) require a Premium app owner and restrict playlist contents to playlists the authorized user owns or collaborates on. Arbitrary public playlists are therefore not guaranteed to work. This is a shared operator-configured account, not per-Discord-user Spotify authorization. URL validation, authorization/access failures, YouTube matching failures, and later playback failures are separate stages. Access errors are reported without exposing credentials, API paths, or raw responses. A syntactically valid URL does not guarantee access.
 
-Spotify matching searches YouTube for primary artist plus title using the existing ranking. Four workers preserve original order, skip failed individual matches, and retain original title, artist, and Spotify source URL alongside the playable YouTube URL. No Spotify audio is streamed. Playlist pages, local files, unavailable tracks, and non-track items are handled explicitly.
+For playlist API 403/404 responses only, Bard fetches public metadata anonymously (two-minute overall deadline, 15 seconds per request, 8 MiB per response). Configuration/authentication failures, API 401/429/5xx responses, and track/album errors do not trigger this fallback. It first tries complete public HTML, then a complete playlist Embed verified against the public count and exposed prefix.
 
-Collections are limited to 500 entries and queues to 1,000 upcoming tracks. Oversized collections or batches that do not fit are rejected in full. Commands acknowledge immediately; collection resolution has a ten-minute deadline so the final response remains within the interaction lifetime. If metadata retrieval or that deadline fails, nothing is enqueued. Spotify matching can take minutes on large playlists. Up to four requests resolve concurrently, each Spotify request using up to four matching workers. Separate requests append in completion order. Queues survive between commands but are lost on restart, leave, or voice disconnection.
+If Embed is truncated, Bard extracts Spotify's own runtime anonymous session token from that Embed and paginates the public spclient playlist metadata in 50-entry pages. It verifies offsets, occurrence IDs, totals and a stable revision, reuses the validated Embed metadata, and fetches missing titles/artists from individual public track Embeds with at most four workers. A final revision check protects against edits during resolution. Repeated track IDs retain every playlist position; only metadata requests are deduplicated. Tokens stay in memory for that operation, respect expiry, refresh at most once, and never appear in logs or errors. No account cookies, private playlists, or Spotify audio are used. Missing or inconsistent metadata rejects the entire collection before YouTube matching.
+
+Live metadata checks on 2026-09-23 passed for `35m4wmHSlcS2RNsafX4dEg` (123/123, three metadata pages) and `37i9dQZF1DZ06evO3VkoW4` (50/50 through the existing Embed path). Run `BARD_SPOTIFY_LIVE_TEST=1 go test ./internal/media -run 'TestSpotify(PublicLarge|Embed)LiveRegression' -v -count=1` to repeat them. Normal tests are offline. See [the investigation results](docs/spotify-public-metadata.md) for mechanism details and limitations.
+
+Spotify matching combines bounded YouTube Music song search and normal YouTube search, deduplicates video IDs, and verifies a four-candidate shortlist. It requires title/artist evidence, bidirectional version compatibility, and close duration where Spotify supplies it. Source authority breaks ties only among compatible recordings; “Official Audio” in a title is not proof. Failed matches are skipped in original logical order. See [the source-selection and lifecycle policy](docs/source-selection-and-lifecycle.md) for thresholds, pinned yt-dlp research, failure recovery, and investigation evidence.
+
+Collections are limited to 500 entries and queues to 1,000 upcoming logical positions, including pending tracks. Oversized collections or batches that do not fit are rejected in full. Commands acknowledge immediately. Spotify collections validate complete metadata, reserve ordered queue positions, and start the first matched track without waiting for the rest. Three workers per collection resolve remaining tracks; a shared limiter allows at most three background matches and four total matches, retaining capacity for first tracks. Results become playable only in contiguous playlist order; failed matches are skipped. Concurrent plays reserve whole batches atomically in metadata-completion order. `/queue` and `/queue page:N` are public channel responses showing pending positions and matching progress. `/skip count:N` counts both playable and pending positions; `/clear` cancels unfinished loading and preserves the current song. Stop, leave, and voice disconnection cancel loading too. The ten-minute collection deadline discards unresolved positions while retaining already committed tracks. Queues are held in memory and are lost on restart or leave.
+
+`/play` and `/queue` responses are public. Every actual first voice frame triggers one compact public Now Playing/Next message; pending next positions say “resolving…”. The latest accepted `/play` sets the text channel for future announcements. Spotify requests are labeled as Spotify metadata with YouTube audio.
+
+Lifecycle logs correlate queue selection, process exits, voice submission, cleanup, and advancement. A pause-aware 90-second inactivity deadline and two-second post-EOF cleanup deadline prevent indefinite fake Current states. Transient gateway reconnects receive 60 seconds of grace; confirmed moves/leaves still clear immediately. See [the investigation and tests](docs/source-selection-and-lifecycle.md).
 
 ## Architecture
 
@@ -90,25 +111,25 @@ Each guild owns one synchronized player, queue, current track, and voice transpo
 YouTube → yt-dlp stdout → FFmpeg → 48 kHz stereo Opus → Discord voice
 ```
 
-Audio travels through pipes, never permanent audio files. FFmpeg emits 20 ms Opus frames at 96 kb/s; Go reconstructs the Ogg packets and paces delivery. Skip, stop, disconnect, and shutdown cancel process groups, including helper processes, and reap the two direct children. Startup/stalled-stream timeouts prevent a broken source from blocking the queue indefinitely.
+Audio travels through pipes, never permanent audio files. FFmpeg emits 20 ms Opus frames at 96 kb/s; Go reconstructs the Ogg packets and paces delivery. Skip, stop, disconnect, and shutdown cancel process groups, including helper processes, and reap the two direct children. Startup deadlines bound stream resolution and first audio; they end once the first Opus packet arrives, so an intentional pause cannot expire a playback lifetime timer.
 
 The client uses [DisGo](https://github.com/disgoorg/disgo) and the experimental pure-Go [dave-go](https://github.com/thomas-vilte/dave-go) implementation. [Discord requires DAVE encryption for voice](https://discord.com/blog/bringing-dave-to-all-discord-platforms); audio waits for encryption handshakes. The image includes FFmpeg/libopus, Python, yt-dlp with its EJS dependencies, Deno, and certificates. Deno supports [YouTube's JavaScript challenges](https://github.com/yt-dlp/yt-dlp/wiki/EJS). The process runs as a non-root user with temporary runtime storage.
 
 ## Music selection
 
-Text searches use `ytsearch10`, extract candidate metadata, then apply `internal/media/ranking.go`. No candidate passing the filter means: **“The Bard could find no song worthy of playing.”** There is no random-video fallback.
+Text searches use `ytsearch10`, extract candidate metadata, then apply `internal/media/ranking.go`. When the initial results lack a canonical source and no alternate version/video was requested, one additional `ytsearch10` with “official audio” broadens the pool. Both sets are ranked against the original request, with at most three full candidate verifications and the same 90-second search deadline. No candidate passing the filter means: **“The Bard could find no song worthy of playing.”** There is no random-video fallback.
 
 - Reject obvious podcasts, interviews, reactions, reviews, tutorials, documentaries, gameplay, news, shorts, ongoing livestreams, and upcoming streams.
 - Require evidence such as the Music category, artist/track metadata, Topic/VEVO source, official music labeling, or an auto-generated music description.
-- Rank query relevance and explicit version intent before canonical-source signals. Prefer an inferred official artist source, official audio/video, Topic/auto-generated upload, VEVO, then a relevant verified source and other reasonable music.
+- Rank query relevance and explicit version intent before canonical-source signals. Prefer a matching canonical artist source, Topic/auto-generated release, official audio, and matching VEVO/artist upload. Music videos remain eligible but normally lose to canonical audio. A verified archive/aggregator does not receive an artist bonus; the entire normalized channel identity must match.
 - Penalize unrequested live, cover, remix, slowed, reverb, nightcore, lyrics, karaoke, unplugged, and acoustic versions. Explicit requests remove that variant penalty and reward matches. Unplugged/concert requests also permit live labeling. Obvious reaction content remains rejected.
-- Accept YouTube watch, youtu.be, embed, and playlist links. A supported URL with a `list` parameter queues the playlist in its original order. Direct videos bypass search ranking, not the music filter. Spotify playlist and album URLs use metadata to search YouTube. Shorts and other sites remain unsupported.
+- Accept YouTube watch, youtu.be, embed, and playlist links. Explicit `/playlist` URLs queue their selected IDs in order. Video URLs with `list=` still select the exact video. Direct URLs bypass music ranking/filtering; watch, embed, shorts, and live video paths are supported. Spotify uses the separate strict policy above. Other sites remain unsupported.
 
-These are fallible heuristics. yt-dlp does not reliably expose an Official Artist Channel badge, so artist metadata and verification provide an approximation; verification alone is not proof. Missing metadata may reject a real song, and misleading music metadata may still pass. V1 accepts only tracks between **45 seconds and 20 minutes**, favoring songs over long-form content.
+These are fallible heuristics. yt-dlp does not reliably expose an Official Artist Channel badge, so artist metadata and verification provide an approximation; verification alone is not proof. Missing metadata may reject a real song, and misleading music metadata may still pass. The free-text music filter accepts tracks between **45 seconds and 20 minutes**. These constraints do not override explicit YouTube video/playlist intent.
 
 ## Development and verification
 
-With Go 1.27 installed (FFmpeg is optional for the local audio smoke test):
+With Go 1.27 and FFmpeg with libopus installed (the Docker test stage installs and verifies both):
 
 ```sh
 gofmt -w cmd internal
@@ -118,17 +139,18 @@ go test -race ./...
 go build ./...
 ```
 
-The Docker build also runs vet and unit tests, and verifies runtime tools and FFmpeg's Opus encoder. Tests cover selection, requested variants, URL validation, resolver fixtures, queue ordering/isolation, automatic advancement after failures, stop/leave, stale searches, concurrent access, Ogg parsing, and subprocess cancellation. A local FFmpeg test uses synthetic PCM; tests never contact YouTube or Discord.
+The Docker build also runs vet and unit tests, and verifies runtime tools and FFmpeg's Opus encoder. Tests cover canonical/variant selection fixtures, strict Spotify metadata matching and cache isolation, Spotify URL/access errors, ordered atomic collections, pause/resume and cancellation during pause, queue ordering/isolation, automatic advancement, stale searches, empty-channel deadlines/rejoins/bot exclusion, concurrent state access, Ogg parsing, subprocess cancellation, independent two-track media delivery, and provider-challenge queue retention and recovery. These deterministic tests use local media/provider helpers and a recording voice sink; they do not contact YouTube or Discord. Review player/provider changes against [the Bard behavioral requirements](docs/bard-requirements.md) using [the reliability audit role](docs/bard-reliability-agent.md): “How could Bard violate this requirement while every current test still passes?”
 
-After installation, manually check `/summon`, text and URL `/play`, queue two songs, automatic advancement, `/skip`, `/stop`, and `/leave`. Repeat in a second server to verify live isolation, and disconnect/move the bot while playing to check cleanup. This requires your Discord account, server, and bot credentials.
+After installation, manually check `/summon`, text and URL `/play`, Spotify track/album/accessible and inaccessible playlist links, `/now`, `/queue`, `/pause`, `/resume`, automatic advancement, and `/skip`, `/stop`, `/leave` while paused. Check a human rejoining before the two-minute deadline and a bots-only channel reaching it. Repeat in a second server to verify live isolation, and disconnect/move the bot while playing to check cleanup. This requires your Discord account, server, and bot credentials.
 
-## V1 limitations
+## Limitations
 
-- Restarting loses queues. One voice channel per guild; no pause, seek, volume, persistent history, or Stage channels.
+- Restarting loses queues. One voice channel per guild; no seek, volume, persistent history, or Stage channels.
+- Long pauses keep the existing stream open; upstream connection expiry or network failure can still end a track. Track-local playback errors advance the queue; a classified YouTube challenge or rate limit blocks playback, retains the logical queue, and waits for `/resume` to retry the same position.
 - Search can take up to 90 seconds; concurrent searches enqueue in resolution-completion order. Selection is heuristic, not a guarantee of the canonical recording.
-- YouTube can block server IPs, impose regional restrictions or login requirements, and change extraction behavior. V1 has no cookies, authentication, proxy, or PO-token configuration. Such tracks fail and the queue continues.
+- YouTube can block server IPs, impose regional restrictions or login requirements, and change extraction behavior. V1 has no cookies, authentication, proxy, or PO-token configuration. Classified provider challenges retain the queue and require an explicit `/resume`; the command does not make the provider available.
 - DAVE support depends on an experimental upstream implementation and still needs real Discord playback verification. No transparent voice reconnection or queue recovery after disconnect.
-- Disconnect detection polls once per second. Idle voice connections remain until `/leave` or disconnection.
+- An empty human audience triggers auto-leave after two minutes, including while paused. Remaining in a channel with listeners and an empty queue is allowed.
 - Linux containers are the supported runtime; process-group cleanup is Linux-specific.
 
-In this workspace, Go checks and local FFmpeg tests can run. Full image build and live Discord/YouTube playback need a running Docker daemon and configured bot credentials; configuration validation alone does not establish those work end-to-end.
+Go tests and the Docker build/runtime checks are offline acceptance checks. Live Discord audibility, DAVE recovery across pause, Spotify access for the configured app/account, and YouTube availability still require live verification; a successful build does not establish those end-to-end.

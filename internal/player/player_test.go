@@ -147,6 +147,9 @@ func TestConcurrentQueueAccess(t *testing.T) {
 			for range 100 {
 				ticket := p.Ticket()
 				_ = p.Enqueue(media.Track{Title: "song"}, ticket)
+				p.SetPaused(true)
+				p.State()
+				p.SetPaused(false)
 				p.Snapshot()
 				p.Clear()
 				p.Length()

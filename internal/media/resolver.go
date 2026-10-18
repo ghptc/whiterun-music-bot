@@ -14,9 +14,13 @@ import (
 var ErrNoSong = errors.New("The Bard could find no song worthy of playing.")
 
 type Track struct {
+	Live             bool
+	Position, Total  int
 	RequestedSource  string
 	SourceURL        string
 	Artist           string
+	Artists          []string
+	Album            string
 	VerifyBeforePlay bool
 	VideoID          string
 	Channel          string
@@ -27,6 +31,9 @@ type Track struct {
 }
 type Candidate struct {
 	Type         string   `json:"_type"`
+	Artists      []string `json:"artists"`
+	Album        string   `json:"album"`
+	MusicSearch  bool     `json:"-"`
 	ChannelID    string   `json:"channel_id"`
 	ID           string   `json:"id"`
 	Title        string   `json:"title"`
@@ -46,6 +53,8 @@ type Candidate struct {
 type Resolver struct {
 	Binary string
 	Cache  *SearchCache
+	// Match is immutable structured metadata for a Spotify-originated search.
+	Match *Track
 }
 
 func (r Resolver) Resolve(ctx context.Context, query string) (Track, error) {
@@ -67,6 +76,14 @@ func (r Resolver) Resolve(ctx context.Context, query string) (Track, error) {
 	key := normalizeQuery(query)
 	if isURL {
 		key = direct
+	}
+	if r.Match != nil {
+		metadata, _ := json.Marshal(struct {
+			Title, Artist, Album string
+			Artists              []string
+			Duration             time.Duration
+		}{r.Match.Title, r.Match.Artist, r.Match.Album, r.Match.Artists, r.Match.Duration})
+		key = "spotify:" + string(metadata)
 	}
 	if track, ok := r.Cache.get(key, time.Now()); ok {
 		track.Timing = timing
@@ -91,7 +108,7 @@ func (r Resolver) extract(ctx context.Context, target, purpose string, flat bool
 	args := MetadataArgs()
 	count := 1
 	if flat {
-		args = append(BaseArgs(), "--flat-playlist")
+		args = append(BaseArgs(), "--flat-playlist", "--playlist-end", "10")
 		count = 10
 	}
 	args = append(args, "--skip-download", "--dump-single-json", "--ignore-errors", "--", target)
@@ -131,11 +148,14 @@ func (r Resolver) resolveUncached(ctx context.Context, query, direct string, isU
 			return Track{}, err
 		}
 		chosen = result.Candidate
-		filterStart := time.Now()
-		music := IsMusic(chosen)
-		timing.Event("music_filtering_complete", filterStart, "accepted", music)
-		if !music {
+		if "https://www.youtube.com/watch?v="+chosen.ID != direct || chosen.LiveStatus == "is_upcoming" {
 			return Track{}, ErrNoSong
+		}
+	} else if r.Match != nil {
+		var err error
+		chosen, err = r.resolveSpotify(ctx, query)
+		if err != nil {
+			return Track{}, err
 		}
 	} else {
 		result, err := r.extract(ctx, "ytsearch10:"+query, "flat_search", true)
@@ -148,7 +168,40 @@ func (r Resolver) resolveUncached(ctx context.Context, query, direct string, isU
 				candidates = append(candidates, *c)
 			}
 		}
-		chosen, err = selectDiscovered(ctx, query, candidates, func(c Candidate) (Candidate, error) {
+		// A general search can omit the canonical release entirely. One
+		// bounded audio-oriented discovery pass broadens the candidate pool;
+		// rank it against the ORIGINAL request so version intent is unchanged.
+		canonical := false
+		variant := has(query, "video")
+		for _, v := range variants {
+			variant = variant || requested(query, v)
+		}
+		for _, c := range candidates {
+			breakdown, relevant := musicScoreBreakdown(query, c)
+			state, _ := ClassifyDiscovery(query, c)
+			if state != Rejected && relevant && breakdown.FinalScore >= 400 && breakdown.VersionScore >= 0 && sourceBonus(query, c) >= 60 && matchesMetadata(r.Match, c) {
+				canonical = true
+			}
+		}
+		if !canonical && !variant {
+			extra, extraErr := r.extract(ctx, "ytsearch10:"+query+" official audio", "canonical_audio_search", true)
+			if ctx.Err() != nil {
+				return Track{}, ctx.Err()
+			}
+			if extraErr == nil {
+				seen := make(map[string]bool)
+				for _, c := range candidates {
+					seen[c.ID] = true
+				}
+				for _, c := range extra.Entries {
+					if c != nil && !seen[c.ID] {
+						candidates = append(candidates, *c)
+						seen[c.ID] = true
+					}
+				}
+			}
+		}
+		chosen, err = selectDiscoveredMatch(ctx, query, candidates, r.Match, func(c Candidate) (Candidate, error) {
 			result, err := r.extract(ctx, "https://www.youtube.com/watch?v="+c.ID, "selected_candidate_verification", false)
 			if err != nil {
 				return Candidate{}, err
@@ -169,7 +222,7 @@ func (r Resolver) resolveUncached(ctx context.Context, query, direct string, isU
 		return Track{}, err
 	}
 	timing.Event("candidate_selected", started, "selected", chosen.Title, "video_id", chosen.ID)
-	return Track{VideoID: chosen.ID, Channel: chosen.Channel, Timing: timing, Title: chosen.Title, URL: "https://www.youtube.com/watch?v=" + chosen.ID, Duration: time.Duration(chosen.Duration * float64(time.Second))}, nil
+	return Track{RequestedSource: "youtube", Live: chosen.Live || chosen.LiveStatus == "is_live", VideoID: chosen.ID, Channel: chosen.Channel, Timing: timing, Title: chosen.Title, URL: "https://www.youtube.com/watch?v=" + chosen.ID, Duration: time.Duration(chosen.Duration * float64(time.Second))}, nil
 }
 
 // MetadataArgs is used only for direct videos and selected candidates whose
@@ -209,6 +262,10 @@ func YouTubeURL(s string) (string, bool, error) {
 	case "youtube.com", "www.youtube.com", "m.youtube.com", "music.youtube.com":
 		if u.Path == "/watch" {
 			id = u.Query().Get("v")
+		} else if strings.HasPrefix(u.Path, "/live/") {
+			id = strings.TrimPrefix(u.Path, "/live/")
+		} else if strings.HasPrefix(u.Path, "/shorts/") {
+			id = strings.TrimPrefix(u.Path, "/shorts/")
 		} else if strings.HasPrefix(u.Path, "/embed/") {
 			id = strings.TrimPrefix(u.Path, "/embed/")
 		}

@@ -42,3 +42,7 @@ func (t *Timing) FirstDiscordSend() {
 		t.discordSend.Do(func() { t.Event("first_discord_send", t.start) })
 	}
 }
+
+func (t *Timing) Child(attrs ...any) *Timing {
+	return &Timing{log: t.log.With(attrs...), start: t.start}
+}

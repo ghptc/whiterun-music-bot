@@ -54,6 +54,10 @@ func ClassifyDiscovery(query string, c Candidate) (MusicState, string) {
 // Verification alone is not proof of an official artist channel: that bonus is
 // provisional until the selected video's artist metadata confirms it.
 func selectDiscovered(ctx context.Context, query string, candidates []Candidate, verify func(Candidate) (Candidate, error)) (Candidate, error) {
+	return selectDiscoveredMatch(ctx, query, candidates, nil, verify)
+}
+
+func selectDiscoveredMatch(ctx context.Context, query string, candidates []Candidate, match *Track, verify func(Candidate) (Candidate, error)) (Candidate, error) {
 	type ranked struct {
 		candidate Candidate
 		score     int
@@ -69,11 +73,11 @@ func selectDiscovered(ctx context.Context, query string, candidates []Candidate,
 		if timing != nil {
 			timing.log.DebugContext(ctx, "discovery_candidate", "video_id", c.ID, "title", c.Title, "state", state, "reason", reason)
 		}
-		if state == Rejected {
+		if state == Rejected || !matchesMetadata(match, c) {
 			continue
 		}
 		provisional := c
-		uncertainArtist := state == Uncertain && c.Verified && c.Artist == "" && len(c.Categories) == 0 && channelMatchesQuery(query, c)
+		uncertainArtist := state == Uncertain && c.Verified && c.Artist == "" && len(c.Categories) == 0 && artistChannel(c)
 		if uncertainArtist {
 			provisional.Artist = c.Channel
 		}
@@ -105,7 +109,7 @@ func selectDiscovered(ctx context.Context, query string, candidates []Candidate,
 	if bestEligible >= 0 {
 		competitive := false
 		for _, c := range remaining {
-			if c.score > remaining[bestEligible].score+30 {
+			if c.score > remaining[bestEligible].score {
 				competitive = true
 			}
 		}
@@ -146,7 +150,7 @@ func selectDiscovered(ctx context.Context, query string, candidates []Candidate,
 		filterStart := time.Now()
 		score, music := Score(query, full)
 		timing.Event("music_filtering_complete", filterStart, "video_id", selected.candidate.ID, "accepted", err == nil && music)
-		if err != nil || !music {
+		if err != nil || !music || !matchesMetadata(match, full) {
 			remaining = append(remaining[:best], remaining[best+1:]...)
 			continue
 		}

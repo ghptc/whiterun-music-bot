@@ -23,7 +23,14 @@ func main() {
 		os.Exit(1)
 	}
 }
+func configuredSpotify(log *slog.Logger) *media.Spotify {
+	return &media.Spotify{Log: log, ClientID: strings.TrimSpace(os.Getenv("SPOTIFY_CLIENT_ID")), ClientSecret: strings.TrimSpace(os.Getenv("SPOTIFY_CLIENT_SECRET")), RefreshToken: strings.TrimSpace(os.Getenv("SPOTIFY_REFRESH_TOKEN")), Market: strings.TrimSpace(os.Getenv("SPOTIFY_MARKET"))}
+}
+
 func run(log *slog.Logger) error {
+	if len(os.Args) > 1 && os.Args[1] == "spotify-diagnose" {
+		return diagnoseSpotify(log, os.Args[2:])
+	}
 	token := strings.TrimSpace(os.Getenv("DISCORD_TOKEN"))
 	if token == "" {
 		return fmt.Errorf("DISCORD_TOKEN is required")
@@ -50,7 +57,7 @@ func run(log *slog.Logger) error {
 	if err != nil {
 		return err
 	}
-	b.ConfigureSpotify(&media.Spotify{ClientID: strings.TrimSpace(os.Getenv("SPOTIFY_CLIENT_ID")), ClientSecret: strings.TrimSpace(os.Getenv("SPOTIFY_CLIENT_SECRET")), RefreshToken: strings.TrimSpace(os.Getenv("SPOTIFY_REFRESH_TOKEN")), Market: strings.TrimSpace(os.Getenv("SPOTIFY_MARKET"))})
+	b.ConfigureSpotify(configuredSpotify(log))
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()

@@ -20,7 +20,7 @@ func TestYouTubeCollectionPartialAndLazy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := (CollectionResolver{YouTube: r}).Resolve(context.Background(), "https://www.youtube.com/watch?v=abcdefghijk&list=PLtest")
+	got, err := (CollectionResolver{YouTube: r}).Resolve(context.Background(), "https://www.youtube.com/playlist?list=PLtest")
 	if err != nil || len(got.Tracks) != 2 || got.Skipped != 2 || got.Title != "Album" || got.Tracks[0].Title != "First" || got.Tracks[1].Title != "Second" || !got.Tracks[0].VerifyBeforePlay {
 		t.Fatalf("%+v %v", got, err)
 	}
@@ -84,7 +84,7 @@ func TestCollectionURL(t *testing.T) {
 		bad                 bool
 	}{
 		{"https://music.youtube.com/playlist?list=OLAK5uy_test", "youtube", "playlist", false},
-		{"https://youtu.be/abcdefghijk?list=PL123", "youtube", "playlist", false},
+		{"https://youtu.be/abcdefghijk?list=PL123", "", "", false},
 		{"https://open.spotify.com/intl-pt/album/1234567890123456789012?si=x", "spotify", "album", false},
 		{"https://evil.test/playlist?list=PL123", "", "", false},
 		{"https://youtube.com:443/playlist?list=PL123", "", "", true},
@@ -111,5 +111,50 @@ func TestReportedSpotifyPlaylistURL(t *testing.T) {
 	r := CollectionResolver{YouTube: Resolver{Binary: "/nonexistent/yt-dlp"}}
 	if _, err := r.Resolve(context.Background(), query); !errors.Is(err, ErrSpotifyConfig) {
 		t.Fatalf("incorrect resolver selected: %v", err)
+	}
+}
+
+func TestSpotifyURLKindsAndMalformedNeverSearch(t *testing.T) {
+	for _, kind := range []string{"track", "album", "playlist"} {
+		for _, prefix := range []string{"https://open.spotify.com/", "HTTPS://OPEN.SPOTIFY.COM/", "OPEN.SPOTIFY.COM/", "https://open.spotify.com/intl-pt/"} {
+			query := prefix + kind + "/1234567890123456789012?si=share#fragment"
+			source, gotKind, id, err := CollectionURL(query)
+			if err != nil || source != "spotify" || gotKind != kind || id != "1234567890123456789012" {
+				t.Fatalf("%s: %s %s %s %v", query, source, gotKind, id, err)
+			}
+			_, err = (CollectionResolver{YouTube: Resolver{Binary: "/never-run"}}).Resolve(context.Background(), query)
+			if !errors.Is(err, ErrSpotifyConfig) {
+				t.Fatal(err)
+			}
+		}
+	}
+	for _, query := range []string{"open.spotify.com", "https:/open.spotify.com/track/1234567890123456789012", "//open.spotify.com/track/1234567890123456789012", "https://open.spotify.com/track/nope", "https://open.spotify.com/artist/1234567890123456789012", "spotify:track:1234567890123456789012", "ftp://open.spotify.com/track/1234567890123456789012", "https://open.spotify.com:443/album/1234567890123456789012", "https://user@open.spotify.com/playlist/1234567890123456789012", "https://open.spotify.com/track/%zz"} {
+		_, err := (CollectionResolver{YouTube: Resolver{Binary: "/never-run"}}).Resolve(context.Background(), query)
+		if !errors.Is(err, ErrSpotifyURL) {
+			t.Fatalf("%s: %v", query, err)
+		}
+	}
+}
+
+type inaccessibleSpotify struct{}
+
+func (inaccessibleSpotify) Collection(context.Context, string, string) (Collection, error) {
+	return Collection{}, ErrSpotifyAccess
+}
+func TestInaccessibleSpotifyCollectionDoesNotMatch(t *testing.T) {
+	r := CollectionResolver{Spotify: inaccessibleSpotify{}, Search: func(context.Context, string) (Track, error) {
+		t.Fatal("searched inaccessible metadata")
+		return Track{}, nil
+	}}
+	got, err := r.Resolve(context.Background(), "https://open.spotify.com/playlist/1234567890123456789012?si=x")
+	if !errors.Is(err, ErrSpotifyAccess) || len(got.Tracks) != 0 {
+		t.Fatal(got, err)
+	}
+}
+func TestSpotifySingleTrackMatchFailure(t *testing.T) {
+	r := CollectionResolver{Spotify: fakeSpotify{Collection{Tracks: []Track{{Title: "505", Artist: "Arctic Monkeys"}}}}, Search: func(context.Context, string) (Track, error) { return Track{}, ErrNoSong }}
+	_, err := r.Resolve(context.Background(), "https://open.spotify.com/track/1234567890123456789012")
+	if !errors.Is(err, ErrSpotifyMatch) {
+		t.Fatal(err)
 	}
 }

@@ -98,20 +98,7 @@ func musicScoreBreakdown(query string, c Candidate) (scoreBreakdown, bool) {
 	}
 	breakdown.VersionScore = score - (breakdown.ArtistScore + breakdown.ExactTokenScore + breakdown.FuzzyScore - breakdown.UnmatchedPenalty)
 	beforeBonus := score
-	channel := c.Channel + " " + c.Uploader
-	channelRelevant := channelMatchesQuery(query, c)
-	switch {
-	case c.Verified && c.Artist != "" && has(channel, c.Artist):
-		score += 65
-	case has(c.Title, "official audio") || has(c.Title, "official video") || has(c.Title, "official music video"):
-		score += 55
-	case has(channel, "topic") || strings.Contains(strings.ToLower(c.Description), "provided to youtube by"):
-		score += 45
-	case strings.Contains(strings.ToLower(channel), "vevo"):
-		score += 35
-	case c.Verified && channelRelevant:
-		score += 25
-	}
+	score += sourceBonus(query, c)
 	breakdown.OfficialBonus = score - beforeBonus
 	breakdown.FinalScore = score
 	return breakdown, true
@@ -128,16 +115,6 @@ func Select(query string, candidates []Candidate) (Candidate, bool) {
 		}
 	}
 	return best, found
-}
-
-func channelMatchesQuery(query string, c Candidate) bool {
-	channel := c.Channel + " " + c.Uploader
-	for _, token := range strings.Fields(words(query)) {
-		if len(token) > 2 && has(channel, token) {
-			return true
-		}
-	}
-	return false
 }
 
 // Matching weights deliberately separate whole tokens from morphology and typos.
@@ -258,4 +235,97 @@ func relevance(query string, c Candidate) (scoreBreakdown, bool) {
 	}
 	b.UnmatchedPenalty = min(b.UnmatchedPenalty, 64)
 	return b, matched > 0
+}
+
+// Normalize the entire channel identity, not a single overlapping artist token.
+// "Artist Archive" and unrelated verified music aggregators are not the artist.
+func channelIdentity(s string) string {
+	s = strings.TrimSpace(words(s))
+	s = strings.TrimPrefix(s, "official ")
+	s = strings.TrimSuffix(s, " official")
+	s = strings.TrimSuffix(s, " topic")
+	s = strings.TrimSuffix(s, "vevo")
+	return strings.ReplaceAll(s, " ", "")
+}
+func artistChannel(c Candidate) bool {
+	artist := c.Artist
+	if artist == "" {
+		artist, _, _ = strings.Cut(c.Title, " - ")
+	}
+	if artist == "" {
+		return false
+	}
+	return channelIdentity(artist) == channelIdentity(c.Channel) || channelIdentity(artist) == channelIdentity(c.Uploader)
+}
+func sourceBonus(query string, c Candidate) int {
+	channel := c.Channel + " " + c.Uploader
+	auto := has(channel, "topic") || strings.Contains(strings.ToLower(c.Description), "provided to youtube by")
+	video := has(c.Title, "video") && !has(query, "video")
+	bonus := 0
+	switch {
+	case c.Verified && artistChannel(c):
+		bonus = 85
+	case auto:
+		bonus = 75
+	case has(c.Title, "official audio"):
+		bonus = 60
+	case artistChannel(c) && strings.Contains(strings.ToLower(channel), "vevo"):
+		bonus = 50
+	case has(c.Title, "official video") || has(c.Title, "official music video"):
+		bonus = 35
+	case artistChannel(c):
+		bonus = 25
+	}
+	if video {
+		// Official video remains a credible fallback, below canonical audio.
+		if bonus >= 35 {
+			bonus = 20
+		} else {
+			bonus -= 20
+		}
+	}
+	return bonus
+}
+
+// Spotify metadata is a constraint, not merely extra query tokens. Require
+// title and artist evidence independently, reject unsolicited versions, and
+// reject major duration mismatches when duration is available on both sides.
+func matchesMetadata(t *Track, c Candidate) bool {
+	if t == nil {
+		return true
+	}
+	title := c.Track
+	if title == "" {
+		title = c.Title
+	}
+	for _, token := range semanticTokens(t.Title) {
+		if !has(title, token) {
+			return false
+		}
+	}
+	artist := c.Channel + " " + c.Uploader + " " + c.Title
+	if c.Artist != "" {
+		artist = c.Artist
+	}
+	for _, token := range semanticTokens(t.Artist) {
+		if !has(artist, token) && !(c.Artist == "" && channelIdentity(c.Channel) == channelIdentity(t.Artist)) {
+			return false
+		}
+	}
+	for _, variant := range variants {
+		if has(c.Title, variant) && !requested(t.Title+" "+t.Album, variant) {
+			return false
+		}
+	}
+	if t.Duration > 0 && c.Duration > 0 {
+		expected := t.Duration.Seconds()
+		delta := c.Duration - expected
+		if delta < 0 {
+			delta = -delta
+		}
+		if delta > max(15, expected*0.1) {
+			return false
+		}
+	}
+	return true
 }

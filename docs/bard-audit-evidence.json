@@ -1,0 +1,402 @@
+{
+  "source": "stopped whiterun-music-bot-bard-1 retained logs; inspected 2026-09-27",
+  "image": "sha256:978fb1bdb8fe100c648fbca7ac90e425c6d2d36e25d9d669a4bdb66665556dca",
+  "binary_matches_worktree": "not established",
+  "raw_log_sha256": "911d1b9e465c434c2c3f55e83ee8a5bf37d5a48638e89883e9bba72331278632",
+  "events": [
+    {
+      "time": "2026-09-24T23:45:10.327399958Z",
+      "msg": "next_track_selected",
+      "sequence": 1,
+      "position": 1,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:45:10.328050701Z",
+      "msg": "ffmpeg_start",
+      "sequence": 1,
+      "position": 1,
+      "purpose": "audio_decode",
+      "category": "ffmpeg",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:45:10.328066Z",
+      "msg": "yt_dlp_start",
+      "sequence": 1,
+      "position": 1,
+      "purpose": "playback",
+      "category": "stream",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:45:12.366787095Z",
+      "msg": "stream_resolve_complete",
+      "sequence": 1,
+      "position": 1,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:45:12.567077933Z",
+      "msg": "first_opus_frame",
+      "sequence": 1,
+      "position": 1,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:45:12.567247116Z",
+      "msg": "first_discord_send",
+      "sequence": 1,
+      "position": 1,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:45:12.567267004Z",
+      "msg": "first_audio_frame",
+      "sequence": 1,
+      "position": 1,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:12.212189633Z",
+      "msg": "yt_dlp_complete",
+      "sequence": 1,
+      "position": 1,
+      "purpose": "playback",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:27.927673002Z",
+      "msg": "audio_source_exit",
+      "sequence": 1,
+      "position": 1,
+      "category": "eof",
+      "yt_exit_code": 0,
+      "ffmpeg_exit_code": 0,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:28.028560349Z",
+      "msg": "track_playback_end",
+      "sequence": 1,
+      "position": 1,
+      "category": "eof",
+      "cancel_reason": null,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:28.028570138Z",
+      "msg": "player_transition",
+      "sequence": 1,
+      "halted": false,
+      "ready": 138,
+      "pending": 159,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:28.028582172Z",
+      "msg": "next_track_selected",
+      "sequence": 2,
+      "position": 2,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:28.028821262Z",
+      "msg": "ffmpeg_start",
+      "sequence": 2,
+      "position": 2,
+      "purpose": "audio_decode",
+      "category": "ffmpeg",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:28.028832404Z",
+      "msg": "yt_dlp_start",
+      "sequence": 2,
+      "position": 2,
+      "purpose": "playback",
+      "category": "stream",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:30.256951171Z",
+      "msg": "yt_dlp_complete",
+      "sequence": 2,
+      "position": 2,
+      "purpose": "playback",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:30.258826248Z",
+      "msg": "audio_source_exit",
+      "sequence": 2,
+      "position": 2,
+      "category": "yt_dlp_exit",
+      "yt_exit_code": 1,
+      "ffmpeg_exit_code": 1,
+      "provider_challenge": true
+    },
+    {
+      "time": "2026-09-24T23:51:30.258926826Z",
+      "msg": "track_playback_end",
+      "sequence": 2,
+      "position": 2,
+      "category": "yt_dlp_exit",
+      "cancel_reason": null,
+      "provider_challenge": true
+    },
+    {
+      "time": "2026-09-24T23:51:30.258937466Z",
+      "msg": "player_transition",
+      "sequence": 2,
+      "halted": false,
+      "ready": 138,
+      "pending": 158,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:30.258965281Z",
+      "msg": "next_track_selected",
+      "sequence": 3,
+      "position": 3,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:30.259176356Z",
+      "msg": "ffmpeg_start",
+      "sequence": 3,
+      "position": 3,
+      "purpose": "audio_decode",
+      "category": "ffmpeg",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:30.259197969Z",
+      "msg": "yt_dlp_start",
+      "sequence": 3,
+      "position": 3,
+      "purpose": "playback",
+      "category": "stream",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:33.315506016Z",
+      "msg": "yt_dlp_complete",
+      "sequence": 3,
+      "position": 3,
+      "purpose": "playback",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:33.317480949Z",
+      "msg": "audio_source_exit",
+      "sequence": 3,
+      "position": 3,
+      "category": "yt_dlp_exit",
+      "yt_exit_code": 1,
+      "ffmpeg_exit_code": 1,
+      "provider_challenge": true
+    },
+    {
+      "time": "2026-09-24T23:51:33.317573271Z",
+      "msg": "track_playback_end",
+      "sequence": 3,
+      "position": 3,
+      "category": "yt_dlp_exit",
+      "cancel_reason": null,
+      "provider_challenge": true
+    },
+    {
+      "time": "2026-09-24T23:51:33.31758304Z",
+      "msg": "player_transition",
+      "sequence": 3,
+      "halted": false,
+      "ready": 138,
+      "pending": 157,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:33.317591276Z",
+      "msg": "next_track_selected",
+      "sequence": 4,
+      "position": 4,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:33.317804305Z",
+      "msg": "ffmpeg_start",
+      "sequence": 4,
+      "position": 4,
+      "purpose": "audio_decode",
+      "category": "ffmpeg",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:33.317818032Z",
+      "msg": "yt_dlp_start",
+      "sequence": 4,
+      "position": 4,
+      "purpose": "playback",
+      "category": "stream",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:35.69936708Z",
+      "msg": "yt_dlp_complete",
+      "sequence": 4,
+      "position": 4,
+      "purpose": "playback",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:35.701025661Z",
+      "msg": "audio_source_exit",
+      "sequence": 4,
+      "position": 4,
+      "category": "yt_dlp_exit",
+      "yt_exit_code": 1,
+      "ffmpeg_exit_code": 1,
+      "provider_challenge": true
+    },
+    {
+      "time": "2026-09-24T23:51:35.701082643Z",
+      "msg": "track_playback_end",
+      "sequence": 4,
+      "position": 4,
+      "category": "yt_dlp_exit",
+      "cancel_reason": null,
+      "provider_challenge": true
+    },
+    {
+      "time": "2026-09-24T23:51:35.701089666Z",
+      "msg": "player_transition",
+      "sequence": 4,
+      "halted": false,
+      "ready": 138,
+      "pending": 156,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:35.701094786Z",
+      "msg": "next_track_selected",
+      "sequence": 5,
+      "position": 5,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:35.701253669Z",
+      "msg": "ffmpeg_start",
+      "sequence": 5,
+      "position": 5,
+      "purpose": "audio_decode",
+      "category": "ffmpeg",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:35.701269249Z",
+      "msg": "yt_dlp_start",
+      "sequence": 5,
+      "position": 5,
+      "purpose": "playback",
+      "category": "stream",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:38.229256628Z",
+      "msg": "yt_dlp_complete",
+      "sequence": 5,
+      "position": 5,
+      "purpose": "playback",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:38.231169779Z",
+      "msg": "audio_source_exit",
+      "sequence": 5,
+      "position": 5,
+      "category": "yt_dlp_exit",
+      "yt_exit_code": 1,
+      "ffmpeg_exit_code": 1,
+      "provider_challenge": true
+    },
+    {
+      "time": "2026-09-24T23:51:38.231228825Z",
+      "msg": "track_playback_end",
+      "sequence": 5,
+      "position": 5,
+      "category": "yt_dlp_exit",
+      "cancel_reason": null,
+      "provider_challenge": true
+    },
+    {
+      "time": "2026-09-24T23:51:38.23123651Z",
+      "msg": "player_transition",
+      "sequence": 5,
+      "halted": false,
+      "ready": 137,
+      "pending": 156,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:38.231241981Z",
+      "msg": "next_track_selected",
+      "sequence": 6,
+      "position": 6,
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:38.23141476Z",
+      "msg": "ffmpeg_start",
+      "sequence": 6,
+      "position": 6,
+      "purpose": "audio_decode",
+      "category": "ffmpeg",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:38.23142497Z",
+      "msg": "yt_dlp_start",
+      "sequence": 6,
+      "position": 6,
+      "purpose": "playback",
+      "category": "stream",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:40.93478474Z",
+      "msg": "yt_dlp_complete",
+      "sequence": 6,
+      "position": 6,
+      "purpose": "playback",
+      "provider_challenge": false
+    },
+    {
+      "time": "2026-09-24T23:51:40.936843727Z",
+      "msg": "audio_source_exit",
+      "sequence": 6,
+      "position": 6,
+      "category": "yt_dlp_exit",
+      "yt_exit_code": 1,
+      "ffmpeg_exit_code": 1,
+      "provider_challenge": true
+    },
+    {
+      "time": "2026-09-24T23:51:40.936902162Z",
+      "msg": "track_playback_end",
+      "sequence": 6,
+      "position": 6,
+      "category": "yt_dlp_exit",
+      "cancel_reason": null,
+      "provider_challenge": true
+    },
+    {
+      "time": "2026-09-24T23:51:40.936912532Z",
+      "msg": "player_transition",
+      "sequence": 6,
+      "halted": true,
+      "ready": 137,
+      "pending": 155,
+      "provider_challenge": false
+    }
+  ]
+}
