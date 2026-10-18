@@ -51,7 +51,7 @@ exemplo). Não é uma probabilidade. Os defaults e regras são:
 | Duração Spotify ausente | Título/artistas/versão ainda obrigatórios; candidato acima de 20 minutos é rejeitado; não se inventa uma duração Spotify |
 | ISRC / explicit | Se ambos os lados fornecem, divergência rejeita; ausência não é evidência positiva |
 | Pontuação | Título ×400, artista ×200, créditos ×100, penalidade de imprecisão, duração e bônus de fonte; mínimo 650 |
-| Ambiguidade | Diferença entre primeiro e segundo candidatos verificados inferior a 20 impede a seleção |
+| Ambiguidade | Diferença entre representantes de grupos de gravação verificados inferior a 20 impede a seleção |
 
 Bônus de canal oficial/topic/VEVO apenas ordena candidatos que já passaram pelos
 critérios de identidade. Visualizações não são utilizadas. Remaster não é um
@@ -60,8 +60,11 @@ continuam sendo tokens obrigatórios. Letras de nomes artísticos, como `2 Live
 Crew`, são removidas do texto de versão antes de classificar a variante.
 
 As pesquisas Music e YouTube normal são combinadas e deduplicadas por VideoID.
-A verificação completa contempla no máximo quatro candidatos, reservando espaço
-para os dois pools. Não é garantia de encontrar todos os candidatos existentes.
+A verificação completa contempla no máximo quatro candidatos por rodada e oito
+IDs únicos na resolução, reservando espaço para os dois pools. Até duas buscas
+alternativas ampliam os pools sob o deadline global de 90 s. Evidências estritas
+de equivalência permitem agrupar uploads antes de comparar a margem; consulte
+[as regras e a investigação real](spotify-fidelity-false-rejections.md). Não é garantia de encontrar todos os candidatos existentes.
 Candidatos não verificados não são autorizados. Falha na verificação de um
 candidato plausível gera incerteza com a causa original preservada, inclusive
 para suspender a fila em bloqueios globais do provedor. A identidade também é aplicada

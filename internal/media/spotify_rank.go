@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"net/url"
 	"regexp"
 	"sort"
 	"strings"
@@ -308,29 +307,21 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (Candidate, 
 		}
 	}
 
-	music, musicErr := r.extract(ctx, "https://music.youtube.com/search?q="+url.QueryEscape(query)+"#songs", "spotify_music_search", true)
-	if ctx.Err() != nil {
-		return Candidate{}, ctx.Err()
-	}
-	for _, c := range music.Entries {
-		if c != nil {
-			c.MusicSearch = true
-		}
-	}
-	regular, regularErr := r.extract(ctx, "ytsearch10:"+query, "spotify_video_search", true)
-	if ctx.Err() != nil {
-		return Candidate{}, ctx.Err()
-	}
-	if musicErr != nil && regularErr != nil {
-		return Candidate{}, errors.Join(musicErr, regularErr)
-	}
-	chosen, err := selectSpotifyPolicy(ctx, *r.Match, r.matchPolicy(), deduplicateCandidates(music.Entries, regular.Entries), func(c Candidate) (Candidate, error) {
-		full, err := r.extract(ctx, "https://www.youtube.com/watch?v="+c.ID, "spotify_candidate_verification", false)
-		if err == nil && full.ID != c.ID {
-			err = errors.New("YouTube returned a different video ID")
-		}
-		return full.Candidate, err
-	})
+	chosen, err := discoverSpotify(ctx, *r.Match, r.matchPolicy(), query,
+		func(target, purpose string) ([]*Candidate, error) {
+			attempt, cancel := context.WithTimeout(ctx, 15*time.Second)
+			defer cancel()
+			result, err := r.extract(attempt, target, purpose, true)
+			return result.Entries, err
+		}, func(c Candidate) (Candidate, error) {
+			attempt, cancel := context.WithTimeout(ctx, 15*time.Second)
+			defer cancel()
+			full, err := r.extract(attempt, "https://www.youtube.com/watch?v="+c.ID, "spotify_candidate_verification", false)
+			if err == nil && full.ID != c.ID {
+				err = errors.New("YouTube returned a different video ID")
+			}
+			return full.Candidate, err
+		})
 	if err == nil && r.Mappings != nil {
 		if saveErr := r.Mappings.SaveMapping(ctx, key, chosen); saveErr != nil {
 			return Candidate{}, saveErr
@@ -345,34 +336,31 @@ func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, c
 	if err := policy.Validate(); err != nil {
 		return Candidate{}, err
 	}
-	type item struct {
+	type rankedCandidate struct {
 		candidate Candidate
 		rank      spotifyRank
 	}
-	var shortlist []item
+	var shortlist []rankedCandidate
 	timing := TimingFrom(ctx)
 	logRank := func(c Candidate, b spotifyRank, stage string) {
 		if timing != nil {
-			timing.log.InfoContext(ctx, "spotify_candidate", "video_id", c.ID, "stage", stage, "title_similarity", b.Title, "title_precision", b.TitlePrecision, "artist_similarity", b.Artist, "credited_artist_similarity", b.Credits, "duration_delta_ms", b.DurationDeltaMS, "source_class", b.SourceClass, "version_compatible", b.VersionCompatible, "negative_markers", b.NegativeMarkers, "ranking_score", b.Score, "reason", b.Reason)
+			timing.log.InfoContext(ctx, "spotify_candidate", "spotify_track_id", track.SpotifyID, "video_id", c.ID, "stage", stage, "title_similarity", b.Title, "title_precision", b.TitlePrecision, "artist_similarity", b.Artist, "credited_artist_similarity", b.Credits, "duration_delta_ms", b.DurationDeltaMS, "source_class", b.SourceClass, "version_compatible", b.VersionCompatible, "negative_markers", b.NegativeMarkers, "ranking_score", b.Score, "reason", b.Reason)
 		}
 	}
 	for _, c := range candidates {
 		b := rankSpotifyPolicy(track, c, true, policy)
 		logRank(c, b, "discovery")
 		if b.Reason == "accepted" {
-			shortlist = append(shortlist, item{c, b})
+			shortlist = append(shortlist, rankedCandidate{c, b})
 		}
 	}
 	sort.SliceStable(shortlist, func(i, j int) bool { return shortlist[i].rank.Score > shortlist[j].rank.Score })
-	bestScore := -1
-	runnerUp := -1
+	var accepted []rankedCandidate
 	sawUncertain := false
 	var verificationErrors []error
-	var best Candidate
-	var bestRank spotifyRank
 	// Sparse Music summaries must get a verification opportunity even when
 	// normal search has many richly described but noncanonical reuploads.
-	var selected []item
+	var selected []rankedCandidate
 	used := map[string]bool{}
 	for _, music := range []bool{true, false} {
 		count := 0
@@ -396,6 +384,7 @@ func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, c
 		}
 		full, err := verify(item.candidate)
 		if err != nil {
+			timing.Event("spotify_candidate_verification_failed", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", item.candidate.ID, "reason", "verification_failed")
 			verificationErrors = append(verificationErrors, err)
 			continue
 		}
@@ -405,12 +394,7 @@ func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, c
 		}
 		logRank(full, b, "verified")
 		if b.Reason == "accepted" {
-			if b.Score > bestScore {
-				runnerUp = bestScore
-				best, bestRank, bestScore = full, b, b.Score
-			} else if full.ID != best.ID && b.Score > runnerUp {
-				runnerUp = b.Score
-			}
+			accepted = append(accepted, rankedCandidate{full, b})
 		}
 	}
 	if ctx.Err() != nil {
@@ -419,15 +403,61 @@ func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, c
 	if len(verificationErrors) > 0 {
 		return Candidate{}, fmt.Errorf("candidate verification infrastructure failed: %w", errors.Join(verificationErrors...))
 	}
-	if bestScore < 0 {
+	if len(accepted) == 0 {
 		if sawUncertain {
 			return Candidate{}, &MatchError{Status: MatchUncertain, Reason: "insufficient_metadata"}
 		}
 		return Candidate{}, &MatchError{Status: MatchRejected, Reason: "no_acceptable_candidate"}
 	}
+	// Complete-link grouping prevents A~B~C from hiding an A/C contradiction.
+	sort.Slice(accepted, func(i, j int) bool {
+		if accepted[i].rank.Score == accepted[j].rank.Score {
+			return accepted[i].candidate.ID < accepted[j].candidate.ID
+		}
+		return accepted[i].rank.Score > accepted[j].rank.Score
+	})
+	var groups [][]rankedCandidate
+	for _, candidate := range accepted {
+		placed := false
+		for gi, group := range groups {
+			compatible := true
+			for _, member := range group {
+				if recordingEquivalence(track, candidate.candidate, member.candidate) == "" {
+					compatible = false
+					break
+				}
+			}
+			if compatible {
+				groups[gi] = append(groups[gi], candidate)
+				placed = true
+				break
+			}
+		}
+		if !placed {
+			groups = append(groups, []rankedCandidate{candidate})
+		}
+	}
+	best, bestRank, bestScore := groups[0][0].candidate, groups[0][0].rank, groups[0][0].rank.Score
+	runnerUp := -1
+	if len(groups) > 1 {
+		runnerUp = groups[1][0].rank.Score
+	}
+
+	for gi, group := range groups {
+		ids := make([]string, 0, len(group))
+		evidence := []string{}
+		for _, member := range group {
+			ids = append(ids, member.candidate.ID)
+			if member.candidate.ID != group[0].candidate.ID {
+				evidence = append(evidence, recordingEquivalence(track, group[0].candidate, member.candidate))
+			}
+		}
+		timing.Event("spotify_recording_group", time.Now(), "spotify_track_id", track.SpotifyID, "group", gi, "video_ids", ids, "evidence", evidence)
+	}
 	if runnerUp >= 0 && bestScore-runnerUp < policy.MinScoreMargin {
+		timing.Event("spotify_recording_ambiguous", time.Now(), "spotify_track_id", track.SpotifyID, "reason", "ambiguous_candidates", "groups", len(groups))
 		return Candidate{}, &MatchError{Status: MatchUncertain, Reason: "ambiguous_candidates"}
 	}
-	timing.Event("spotify_recording_selected", time.Now(), "video_id", best.ID, "source_class", bestRank.SourceClass, "duration_delta_ms", bestRank.DurationDeltaMS, "ranking_score", bestRank.Score)
+	timing.Event("spotify_recording_selected", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", best.ID, "source_class", bestRank.SourceClass, "duration_delta_ms", bestRank.DurationDeltaMS, "ranking_score", bestRank.Score)
 	return best, nil
 }
