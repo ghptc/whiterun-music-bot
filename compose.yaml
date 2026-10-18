@@ -12,6 +12,10 @@ services:
       SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET:-}
       SPOTIFY_REFRESH_TOKEN: ${SPOTIFY_REFRESH_TOKEN:-}
       SPOTIFY_MARKET: ${SPOTIFY_MARKET:-}
+      BARD_DB_PATH: /home/bard/data/bard.db
+      SPOTIFY_MATCH_POLICY: ${SPOTIFY_MATCH_POLICY:-}
+    volumes:
+      - bard-data:/home/bard/data
     init: true
     restart: unless-stopped
     stop_grace_period: 30s
@@ -22,3 +26,6 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+
+volumes:
+  bard-data:

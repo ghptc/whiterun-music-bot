@@ -154,3 +154,24 @@ After installation, manually check `/summon`, text and URL `/play`, Spotify trac
 - Linux containers are the supported runtime; process-group cleanup is Linux-specific.
 
 Go tests and the Docker build/runtime checks are offline acceptance checks. Live Discord audibility, DAVE recovery across pause, Spotify access for the configured app/account, and YouTube availability still require live verification; a successful build does not establish those end-to-end.
+
+## Qualidade, fidelidade e recuperação (outubro de 2026)
+
+`/previous` reinicia a música anterior e recoloca a interrompida a seguir. Como
+os demais controles, exige o mesmo canal de voz do Bardo. O histórico considera
+inícios efetivos de áudio e mantém até 100 entradas.
+
+SQLite persiste fila, metadados, histórico, canal de anúncios e mapeamentos
+Spotify → YouTube. Configure `BARD_DB_PATH` (default `bard.db`); Compose fornece
+volume `bard-data`. Após reinício, a voz precisa ser conectada explicitamente e a
+faixa interrompida recomeça do início. Não há recuperação de posição por seek.
+
+Spotify é a fonte de identidade; candidatos incompatíveis ou ambíguos não são
+reproduzidos. `SPOTIFY_MATCH_POLICY` permite configurar os critérios documentados.
+`/queue` apresenta o resumo da última importação.
+
+- [Auditoria e limites reais](docs/quality-audit.md)
+- [Política Spotify → YouTube](docs/spotify-fidelity.md)
+- [Matriz, CI e testes externos](docs/test-matrix.md)
+
+Os testes locais não comprovam áudio audível no Discord real.

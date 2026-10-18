@@ -4,3 +4,9 @@
 /bard
 /bin/
 /coverage.out
+
+*.db
+*.db-shm
+*.db-wal
+/coverage.html
+/coverage-summary.txt

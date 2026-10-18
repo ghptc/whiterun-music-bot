@@ -87,3 +87,14 @@ func (p *GuildPlayer) SetPaused(paused bool) (bool, error) {
 	}
 	return p.pause.set(paused), nil
 }
+
+// A stopped or detached session must not carry a provider latch into a fresh one.
+func (p *GuildPlayer) resetProviderLocked() {
+	if !p.providerBlocked {
+		return
+	}
+	p.providerBlocked = false
+	p.providerReason = ""
+	close(p.providerChanged)
+	p.providerChanged = make(chan struct{})
+}

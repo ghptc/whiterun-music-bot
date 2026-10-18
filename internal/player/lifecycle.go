@@ -119,6 +119,11 @@ func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequ
 		p.mu.Unlock()
 		return
 	}
+	p.startedSequence = sequence
+	p.history = append(p.history, copyTrack(track))
+	if len(p.history) > 100 {
+		p.history = append([]media.Track(nil), p.history[len(p.history)-100:]...)
+	}
 	event := PlaybackEvent{Track: copyTrack(track), Sequence: sequence}
 	if len(p.queue) > 0 {
 		next := copyTrack(p.queue[0].Track)
@@ -126,6 +131,15 @@ func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequ
 		event.NextPending = p.queue[0].Pending
 	}
 	fn := p.onStart
+	p.persistLocked()
+	if recorder, ok := p.store.(PlaybackRecorder); ok && p.ctx.Err() == nil {
+		save, cancel := context.WithTimeout(context.Background(), persistenceTimeout)
+		if err := recorder.RecordPlayback(save, p.guildID, track); err != nil {
+			p.persistenceError = "Playback history could not be saved."
+			p.log.Error("playback_history_write_failed", "guild_id", p.guildID, "error", err)
+		}
+		cancel()
+	}
 	p.mu.Unlock()
 	p.log.Info("next_track_start", "sequence", sequence, "video_id", track.VideoID, "position", track.Position)
 	if fn != nil {

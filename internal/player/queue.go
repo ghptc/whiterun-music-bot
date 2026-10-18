@@ -15,14 +15,16 @@ func (p *GuildPlayer) Snapshot() (*media.Track, []media.Track) {
 }
 
 type State struct {
-	Current         *media.Track
-	Queued          []media.Track
-	Paused          bool
-	Halted          bool
-	ProviderBlocked bool
-	ProviderReason  string
-	Entries         []QueueEntry
-	Resolving       []CollectionProgress
+	PersistenceError string
+	Imports          []CollectionProgress
+	Current          *media.Track
+	Queued           []media.Track
+	Paused           bool
+	Halted           bool
+	ProviderBlocked  bool
+	ProviderReason   string
+	Entries          []QueueEntry
+	Resolving        []CollectionProgress
 }
 
 // State takes one consistent snapshot of playback and upcoming tracks.
@@ -34,7 +36,7 @@ func (p *GuildPlayer) State() State {
 		t := copyTrack(*p.current)
 		current = &t
 	}
-	state := State{Current: current, Paused: p.pause.paused(), Halted: p.halted, ProviderBlocked: p.providerBlocked, ProviderReason: p.providerReason}
+	state := State{PersistenceError: p.persistenceError, Imports: append([]CollectionProgress(nil), p.completedImports...), Current: current, Paused: p.pause.paused(), Halted: p.halted, ProviderBlocked: p.providerBlocked, ProviderReason: p.providerReason}
 	for _, entry := range p.queue {
 		track := copyTrack(entry.Track)
 		state.Entries = append(state.Entries, QueueEntry{Track: track, Pending: entry.Pending, CollectionID: entry.jobID, Position: entry.position + 1})
@@ -54,6 +56,7 @@ func (p *GuildPlayer) State() State {
 func (p *GuildPlayer) Clear() int {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	defer p.persistLocked()
 	n := len(p.queue)
 	p.cancelJobsLocked()
 	p.generation++
@@ -88,6 +91,7 @@ func (p *GuildPlayer) SkipN(count int) (SkipResult, error) {
 	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	defer p.persistLocked()
 	result := SkipResult{}
 	if p.current != nil {
 		result.Skipped++
@@ -126,7 +130,4 @@ func (p *GuildPlayer) cancelTrackLocked(reason ...string) {
 	p.current = nil
 	p.pause = nil
 }
-func copyTrack(t media.Track) media.Track {
-	t.Artists = append([]string(nil), t.Artists...)
-	return t
-}
+func copyTrack(t media.Track) media.Track { return media.CloneTrack(t) }

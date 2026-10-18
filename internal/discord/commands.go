@@ -20,7 +20,7 @@ func commands() []d.ApplicationCommandCreate {
 	for _, c := range []struct{ name, description string }{
 		{"summon", "Summon the Bard to your voice channel."}, {"play", "Find a song and add it to the queue."},
 		{"now", "Show the current song."}, {"pause", "Pause the current song."}, {"resume", "Resume the current song."},
-		{"skip", "Skip the current song."}, {"queue", "Show the current song and queue."},
+		{"previous", "Play the previous song from the beginning."}, {"skip", "Skip the current song."}, {"queue", "Show the current song and queue."},
 		{"clear", "Clear upcoming tracks without stopping playback."}, {"stop", "Stop playback and clear the queue."}, {"leave", "Dismiss the Bard and clear the queue."},
 	} {
 		command := d.SlashCommandCreate{Name: c.name, Description: c.description, Contexts: []d.InteractionContextType{d.InteractionContextTypeGuild}}
@@ -181,6 +181,9 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 			reply("Join the Bard's voice channel and ask again.")
 			return
 		}
+		for i := range result.Tracks {
+			result.Tracks[i].RequestedBy = e.User().ID.String()
+		}
 		queueStart := time.Now()
 		var job *player.CollectionJob
 		g.announcementMu.Lock()
@@ -197,6 +200,9 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 			g.announcementChannel.Store(previousChannel)
 		}
 		g.announcementMu.Unlock()
+		if err == nil {
+			b.saveSettings(id.String(), g)
+		}
 		timing.Event("queue_inserted", queueStart, "error", err, "pending", progressive)
 		g.mu.Unlock()
 		var first player.CollectionFirst
@@ -246,6 +252,14 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 			}
 		} else {
 			reply("Playback is already playing.")
+		}
+	case "previous":
+		err := g.player.Previous()
+		g.mu.Unlock()
+		if err != nil {
+			reply(err.Error())
+		} else {
+			reply("Previous song queued from the beginning.")
 		}
 	case "skip":
 		count := 1
@@ -325,7 +339,7 @@ func queuePageText(state player.State, page int) string {
 		out.WriteString("Up next:\n")
 		for i := start; i < end; i++ {
 			label := trackTitle(queued[i].Track)
-			if len(state.Resolving) > 0 {
+			if len(state.Resolving) > 0 || len(state.Imports) > 0 || state.PersistenceError != "" {
 				r := []rune(label)
 				if len(r) > 60 {
 					label = string(r[:57]) + "..."
@@ -339,6 +353,12 @@ func queuePageText(state player.State, page int) string {
 		if end < len(queued) {
 			fmt.Fprintf(&out, "…and %d more.\n", len(queued)-end)
 		}
+	}
+	if state.PersistenceError != "" {
+		out.WriteString("\n" + state.PersistenceError + "\n")
+	}
+	for _, summary := range state.Imports {
+		fmt.Fprintf(&out, "\nLast import: %d matched; %d uncertain; %d rejected; %d unavailable; %d skipped.\n", summary.Resolved, summary.Uncertain, summary.Failed-summary.Uncertain, summary.MetadataSkipped, summary.Skipped)
 	}
 	total := len(queued)
 	if state.Current != nil {

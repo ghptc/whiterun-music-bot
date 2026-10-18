@@ -26,6 +26,7 @@ type QueueEntry struct {
 	Position     int // original one-based position, even after failures/skips
 }
 type CollectionProgress struct {
+	Uncertain, MetadataSkipped       int
 	ID                               uint64
 	Total, Resolved, Failed, Skipped int
 }
@@ -62,6 +63,7 @@ type CollectionJob struct {
 func (p *GuildPlayer) BeginCollection(parent context.Context, c media.Collection, match CollectionMatcher, ticket uint64) (*CollectionJob, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	defer p.persistLocked()
 	if p.ctx.Err() != nil || parent.Err() != nil || p.voice == nil || ticket != p.generation {
 		return nil, errors.New("Playback changed while searching. Ask the Bard again.")
 	}
@@ -77,9 +79,11 @@ func (p *GuildPlayer) BeginCollection(parent context.Context, c media.Collection
 	p.nextJob++
 	first := make(chan CollectionFirst, 1)
 	done := make(chan struct{})
-	j := &CollectionJob{First: first, Done: done, first: first, done: done, ctx: ctx, cancel: cancel, player: p, match: match, metadata: make([]media.Track, len(c.Tracks)), wanted: make([]bool, len(c.Tracks)), searches: make([]context.CancelFunc, len(c.Tracks)), recorded: make([]bool, len(c.Tracks)), blockedPosition: -1, progress: CollectionProgress{ID: p.nextJob, Total: len(c.Tracks)}}
+	j := &CollectionJob{First: first, Done: done, first: first, done: done, ctx: ctx, cancel: cancel, player: p, match: match, metadata: make([]media.Track, len(c.Tracks)), wanted: make([]bool, len(c.Tracks)), searches: make([]context.CancelFunc, len(c.Tracks)), recorded: make([]bool, len(c.Tracks)), blockedPosition: -1, progress: CollectionProgress{ID: p.nextJob, Total: len(c.Tracks), MetadataSkipped: c.Skipped}}
 	for i, t := range c.Tracks {
-		t.Position, t.Total = i+1, len(c.Tracks)
+		if t.Position == 0 {
+			t.Position, t.Total = i+1, len(c.Tracks)
+		}
 		j.metadata[i] = copyTrack(t)
 		j.wanted[i] = true
 		p.queue = append(p.queue, queueEntry{Track: copyTrack(t), Pending: true, jobID: j.progress.ID, position: i})
@@ -160,7 +164,7 @@ func (j *CollectionJob) resolve(index int, first bool) collectionResolution {
 		err = media.ErrSpotifyMatch
 	}
 	track.Timing = media.TimingFrom(j.ctx)
-	track.Position, track.Total = index+1, len(j.metadata)
+	track.Position, track.Total = j.metadata[index].Position, j.metadata[index].Total
 	return collectionResolution{index: index, track: track, err: err, skipped: skipped}
 }
 
@@ -197,6 +201,7 @@ func (j *CollectionJob) commit(results []collectionResolution) bool {
 	p := j.player
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	defer p.persistLocked()
 	if j.ctx.Err() != nil {
 		return false
 	}
@@ -230,6 +235,10 @@ func (j *CollectionJob) record(r collectionResolution) {
 		j.progress.Skipped++
 	} else if r.err != nil {
 		j.progress.Failed++
+		var decision *media.MatchError
+		if errors.As(r.err, &decision) && decision.Status == media.MatchUncertain {
+			j.progress.Uncertain++
+		}
 	} else {
 		j.progress.Resolved++
 	}
@@ -253,7 +262,9 @@ func (j *CollectionJob) run() {
 		}
 		clear(p.queue[len(kept):])
 		p.queue = kept
+		p.persistLocked()
 		progress := j.progress
+		p.completedImports = []CollectionProgress{progress}
 		delete(p.jobs, progress.ID)
 		p.signal()
 		p.mu.Unlock()
@@ -269,7 +280,7 @@ func (j *CollectionJob) run() {
 		close(j.done)
 	}()
 	firstIndex := -1
-	for i := range j.metadata {
+	for i := 0; i < len(j.metadata); {
 		if j.ctx.Err() != nil {
 			return
 		}
@@ -292,6 +303,7 @@ func (j *CollectionJob) run() {
 			return
 		}
 		if r.err != nil || r.skipped {
+			i++
 			continue
 		}
 		firstIndex = i

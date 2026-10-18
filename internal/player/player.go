@@ -21,31 +21,37 @@ type PlayFunc func(context.Context, media.Track, Voice) error
 const MaxQueueTracks = 1000
 
 type GuildPlayer struct {
-	mu              sync.Mutex
-	ctx             context.Context
-	cancel          context.CancelFunc
-	done            chan struct{}
-	wake            chan struct{}
-	log             *slog.Logger
-	play            PlayFunc
-	voice           Voice
-	current         *media.Track
-	queue           []queueEntry
-	jobs            map[uint64]*CollectionJob
-	nextJob         uint64
-	jobWorkers      sync.WaitGroup
-	trackCancel     context.CancelFunc
-	trackDone       chan struct{}
-	generation      uint64
-	pause           *pauseGate
-	trackCause      context.CancelCauseFunc
-	onStart         func(PlaybackEvent)
-	sequence        uint64
-	halted          bool
-	failures        int
-	providerBlocked bool
-	providerReason  string
-	providerChanged chan struct{}
+	store            Store
+	guildID          string
+	persistenceError string
+	mu               sync.Mutex
+	ctx              context.Context
+	cancel           context.CancelFunc
+	done             chan struct{}
+	wake             chan struct{}
+	log              *slog.Logger
+	play             PlayFunc
+	voice            Voice
+	current          *media.Track
+	history          []media.Track
+	completedImports []CollectionProgress
+	startedSequence  uint64
+	queue            []queueEntry
+	jobs             map[uint64]*CollectionJob
+	nextJob          uint64
+	jobWorkers       sync.WaitGroup
+	trackCancel      context.CancelFunc
+	trackDone        chan struct{}
+	generation       uint64
+	pause            *pauseGate
+	trackCause       context.CancelCauseFunc
+	onStart          func(PlaybackEvent)
+	sequence         uint64
+	halted           bool
+	failures         int
+	providerBlocked  bool
+	providerReason   string
+	providerChanged  chan struct{}
 }
 
 func New(ctx context.Context, log *slog.Logger, play PlayFunc) *GuildPlayer {
@@ -83,6 +89,7 @@ func (p *GuildPlayer) Enqueue(t media.Track, ticket uint64) error {
 func (p *GuildPlayer) EnqueueMany(tracks []media.Track, ticket uint64) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	defer p.persistLocked()
 	if p.ctx.Err() != nil || p.voice == nil || ticket != p.generation {
 		return errors.New("Playback changed while searching. Ask the Bard again.")
 	}
@@ -108,10 +115,12 @@ func (p *GuildPlayer) Stop() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.cancelJobsLocked()
+	p.resetProviderLocked()
 	p.queue = nil
 	p.halted, p.failures = false, 0
 	p.generation++
 	p.cancelTrackLocked("stop")
+	p.persistLocked()
 }
 
 // Leave detaches first, so in-flight searches cannot resurrect playback.
@@ -121,10 +130,12 @@ func (p *GuildPlayer) Leave(ctx context.Context) {
 	v := p.voice
 	p.voice = nil
 	p.cancelJobsLocked()
+	p.resetProviderLocked()
 	p.queue = nil
 	p.halted, p.failures = false, 0
 	p.generation++
 	p.cancelTrackLocked("leave")
+	p.persistLocked()
 	done := p.trackDone
 	p.mu.Unlock()
 	if done != nil {
@@ -135,6 +146,12 @@ func (p *GuildPlayer) Leave(ctx context.Context) {
 	}
 }
 func (p *GuildPlayer) Close(ctx context.Context) {
+	p.mu.Lock()
+	if p.store != nil && p.ctx.Err() == nil {
+		p.persistLocked()
+	}
+	p.store = nil
+	p.mu.Unlock()
 	p.cancel()
 	p.Leave(ctx)
 	<-p.done
@@ -180,6 +197,7 @@ func (p *GuildPlayer) run() {
 		p.pause = &pauseGate{}
 		ctx = context.WithValue(ctx, pauseKey{}, p.pause)
 		v := p.voice
+		p.persistLocked()
 		p.mu.Unlock()
 		started := time.Now()
 		p.log.Info("next_track_selected", "sequence", sequence, "collection_id", entry.jobID, "position", t.Position, "title", t.Title, "video_id", t.VideoID)
@@ -193,6 +211,7 @@ func (p *GuildPlayer) run() {
 		expectedCancel := ctx.Err() != nil
 		cancel()
 		p.mu.Lock()
+		expectedCancel = expectedCancel || p.current == nil || p.ctx.Err() != nil
 		p.current = nil
 		p.pause = nil
 		p.trackCancel = nil
@@ -222,6 +241,9 @@ func (p *GuildPlayer) run() {
 		}
 		ready, pending := p.queueCountsLocked()
 		p.log.Info("player_transition", "sequence", sequence, "ready", ready, "pending", pending, "halted", p.halted, "next_pending", len(p.queue) > 0 && p.queue[0].Pending)
+		if p.ctx.Err() == nil {
+			p.persistLocked()
+		}
 		close(done)
 		p.mu.Unlock()
 	}

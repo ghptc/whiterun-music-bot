@@ -60,6 +60,9 @@ func playbackText(event player.PlaybackEvent) string {
 	} else if event.Next != nil {
 		next = trackTitle(*event.Next)
 	}
+	if track.RequestedBy != "" {
+		source += " • Requested by <@" + track.RequestedBy + ">"
+	}
 	return fmt.Sprintf("%s Now Playing\n%s\n%s\nNext: %s", icon, trackTitle(track), source, next)
 }
 
@@ -73,7 +76,8 @@ func (b *Bot) bindAnnouncements(g *guild) {
 		}
 		select {
 		case g.announcements <- item:
-		case <-b.ctx.Done():
+		default:
+			b.log.Warn("playback_announcement_dropped", "sequence", event.Sequence, "reason", "announcement_queue_full")
 		}
 	})
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -14,6 +15,7 @@ import (
 	"github.com/disgoorg/snowflake/v2"
 	"whiterun/internal/discord"
 	"whiterun/internal/media"
+	"whiterun/internal/storage"
 )
 
 func main() {
@@ -58,6 +60,25 @@ func run(log *slog.Logger) error {
 		return err
 	}
 	b.ConfigureSpotify(configuredSpotify(log))
+	policy := media.DefaultMatchPolicy()
+	if raw := os.Getenv("SPOTIFY_MATCH_POLICY"); raw != "" {
+		if err := json.Unmarshal([]byte(raw), &policy); err != nil {
+			return fmt.Errorf("SPOTIFY_MATCH_POLICY: %w", err)
+		}
+	}
+	if err := b.ConfigureMatchPolicy(policy); err != nil {
+		return err
+	}
+	path := os.Getenv("BARD_DB_PATH")
+	if path == "" {
+		path = "bard.db"
+	}
+	db, err := storage.Open(path)
+	if err != nil {
+		return fmt.Errorf("database: %w", err)
+	}
+	defer db.Close()
+	b.ConfigureStore(db)
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()

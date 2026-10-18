@@ -2,6 +2,7 @@ package player
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -525,4 +526,27 @@ func TestProgressiveSnapshotsDuringResolutionAndControls(t *testing.T) {
 	if p.Length() != 0 {
 		t.Fatal("late result resurrected a cleared entry")
 	}
+}
+
+func TestFirstCollectionPositionRetriesAfterProviderRecovery(t *testing.T) {
+	p, _ := newTestPlayer(t, func(ctx context.Context, _ media.Track, _ Voice) error { <-ctx.Done(); return ctx.Err() })
+	var attempts atomic.Int32
+	j := begin(t, p, context.Background(), numberedTracks(1, 3), func(_ context.Context, t media.Track, _ bool) (media.Track, error) {
+		if t.Title == "1" && attempts.Add(1) == 1 {
+			return media.Track{}, errors.New("Sign in to confirm you're not a bot")
+		}
+		return matched(t), nil
+	})
+	await(t, func() bool { return p.State().ProviderBlocked })
+	if state := p.State(); len(state.Entries) != 3 || state.Entries[0].Track.Title != "1" {
+		t.Fatal(state)
+	}
+	if _, err := p.SetPaused(false); err != nil {
+		t.Fatal(err)
+	}
+	first := firstResult(t, j)
+	if first.Track.Title != "1" || first.Position != 1 {
+		t.Fatal("recovery skipped first position", first)
+	}
+	jobDone(t, j)
 }

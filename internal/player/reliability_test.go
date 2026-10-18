@@ -392,3 +392,34 @@ drained:
 		t.Fatal("explicit recovery did not restart provider matching")
 	}
 }
+
+func TestStopAndLeaveReleaseOldProviderBlock(t *testing.T) {
+	for _, operation := range []string{"stop", "leave"} {
+		t.Run(operation, func(t *testing.T) {
+			started := make(chan string, 2)
+			p, _ := newTestPlayer(t, func(ctx context.Context, track media.Track, _ Voice) error {
+				if track.Title == "blocked" {
+					return errors.New("Sign in to confirm you're not a bot")
+				}
+				started <- track.Title
+				<-ctx.Done()
+				return ctx.Err()
+			})
+			add(t, p, "blocked")
+			await(t, func() bool { return p.State().ProviderBlocked })
+			if operation == "stop" {
+				p.Stop()
+			} else {
+				p.Leave(context.Background())
+				if err := p.Attach(&fakeVoice{}); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if p.State().ProviderBlocked {
+				t.Fatal("fresh session retained old provider latch")
+			}
+			add(t, p, "fresh request")
+			receive(t, started, "fresh request")
+		})
+	}
+}

@@ -38,6 +38,7 @@ ENV GODEBUG="netedns0=0" \
 RUN ffmpeg -version && yt-dlp --version && deno --version \
     && ffmpeg -hide_banner -loglevel error -f lavfi -i anullsrc=r=48000:cl=stereo \
        -t 0.1 -c:a libopus -f opus -y /dev/null
+RUN mkdir -p /home/bard/data && chown bard:bard /home/bard/data
 USER bard
 WORKDIR /home/bard
 ENTRYPOINT ["bard"]

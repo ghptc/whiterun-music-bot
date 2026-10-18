@@ -38,6 +38,7 @@ type guild struct {
 	announcements       chan announcement
 }
 type Bot struct {
+	store     player.Store
 	client    *bot.Client
 	ctx       context.Context
 	cancel    context.CancelFunc
@@ -75,16 +76,48 @@ func New(ctx context.Context, token string, appID snowflake.ID, log *slog.Logger
 	return b, nil
 }
 
+// ConfigureStore is called before starting the gateway.
+func (b *Bot) ConfigureStore(store player.Store) {
+	b.store = store
+	if mappings, ok := store.(media.MappingStore); ok {
+		b.resolver.YouTube.Mappings = mappings
+	}
+}
+func (b *Bot) ConfigureMatchPolicy(policy media.MatchPolicy) error {
+	if err := policy.Validate(); err != nil {
+		return err
+	}
+	b.resolver.YouTube.Policy = &policy
+	return nil
+}
+
 // ConfigureSpotify is called before starting the gateway.
 func (b *Bot) ConfigureSpotify(s *media.Spotify) { b.resolver.Spotify = s }
 
 func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) error {
+	if track.RequestedSource == "spotify" {
+		if track.URL == "" {
+			var err error
+			track, err = b.resolver.MatchSpotify(ctx, track, true)
+			if err != nil {
+				return err
+			}
+		}
+		if err := b.resolver.YouTube.VerifySpotify(ctx, track); err != nil {
+			if b.resolver.YouTube.Mappings != nil {
+				_ = b.resolver.YouTube.Mappings.DeleteMapping(ctx, media.MappingKey(track, b.resolver.YouTube.Policy))
+			}
+			return err
+		}
+	}
+
 	if track.VerifyBeforePlay {
 		verified, err := b.resolver.YouTube.Resolve(ctx, track.URL)
 		if err != nil {
 			return err
 		}
 		verified.Position, verified.Total, verified.Timing = track.Position, track.Total, track.Timing
+		verified.RequestedBy = track.RequestedBy
 		track = verified
 	}
 	return b.streamer.Play(ctx, track, voice)
@@ -119,6 +152,18 @@ func (b *Bot) getGuild(id snowflake.ID) *guild {
 	g := b.guilds[id]
 	if g == nil {
 		g = &guild{player: player.New(b.ctx, b.log.With("guild_id", id), b.play)}
+		if b.store != nil {
+			if err := g.player.ConfigureStore(b.store, id.String()); err != nil {
+				b.log.Error("durable_state_load_failed", "guild_id", id, "error", err)
+				g.player.Close(context.Background())
+				return nil
+			}
+		}
+		if err := b.restoreSettings(id.String(), g); err != nil {
+			b.log.Error("guild_settings_load_failed", "guild_id", id, "error", err)
+			g.player.Close(context.Background())
+			return nil
+		}
 		g.searchCtx, g.searchCancel = context.WithCancel(b.ctx)
 		b.setupAnnouncements(id, g)
 		b.guilds[id] = g
