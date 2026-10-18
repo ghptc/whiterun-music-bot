@@ -14,6 +14,12 @@ import (
 var ErrNoSong = errors.New("The Bard could find no song worthy of playing.")
 
 type Track struct {
+	SpotifyID        string
+	ISRC             string
+	Explicit         *bool
+	RequestedBy      string
+	MatchStatus      MatchStatus
+	MatchReason      string
 	Live             bool
 	Position, Total  int
 	RequestedSource  string
@@ -27,9 +33,11 @@ type Track struct {
 	Title            string
 	URL              string
 	Duration         time.Duration
-	Timing           *Timing
+	Timing           *Timing `json:"-"`
 }
 type Candidate struct {
+	ISRC         string   `json:"isrc"`
+	Explicit     *bool    `json:"explicit"`
 	Type         string   `json:"_type"`
 	Artists      []string `json:"artists"`
 	Album        string   `json:"album"`
@@ -54,10 +62,14 @@ type Resolver struct {
 	Binary string
 	Cache  *SearchCache
 	// Match is immutable structured metadata for a Spotify-originated search.
-	Match *Track
+	Match  *Track
+	Policy *MatchPolicy
 }
 
 func (r Resolver) Resolve(ctx context.Context, query string) (Track, error) {
+	if err := r.matchPolicy().Validate(); err != nil {
+		return Track{}, err
+	}
 	started := time.Now()
 	timing := TimingFrom(ctx)
 	timing.Event("resolver_start", started)
@@ -79,10 +91,9 @@ func (r Resolver) Resolve(ctx context.Context, query string) (Track, error) {
 	}
 	if r.Match != nil {
 		metadata, _ := json.Marshal(struct {
-			Title, Artist, Album string
-			Artists              []string
-			Duration             time.Duration
-		}{r.Match.Title, r.Match.Artist, r.Match.Album, r.Match.Artists, r.Match.Duration})
+			Track  *Track
+			Policy MatchPolicy
+		}{r.Match, r.matchPolicy()})
 		key = "spotify:" + string(metadata)
 	}
 	if track, ok := r.Cache.get(key, time.Now()); ok {

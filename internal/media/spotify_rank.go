@@ -102,6 +102,9 @@ func sourceClass(t Track, c Candidate) (string, int) {
 	return "other", 0
 }
 func rankSpotify(t Track, c Candidate, provisional bool) spotifyRank {
+	return rankSpotifyPolicy(t, c, provisional, DefaultMatchPolicy())
+}
+func rankSpotifyPolicy(t Track, c Candidate, provisional bool, policy MatchPolicy) spotifyRank {
 	b := spotifyRank{Reason: "accepted", VersionCompatible: true}
 	reject := func(reason string) spotifyRank { b.Reason = reason; return b }
 	if !videoID.MatchString(c.ID) || c.Title == "" || c.Live || c.LiveStatus == "is_live" || c.LiveStatus == "is_upcoming" {
@@ -109,6 +112,12 @@ func rankSpotify(t Track, c Candidate, provisional bool) spotifyRank {
 	}
 	if c.Availability == "private" || c.Availability == "premium_only" || c.Availability == "subscriber_only" {
 		return reject("unavailable")
+	}
+	if t.ISRC != "" && c.ISRC != "" && !strings.EqualFold(t.ISRC, c.ISRC) {
+		return reject("isrc_mismatch")
+	}
+	if t.Explicit != nil && c.Explicit != nil && *t.Explicit != *c.Explicit {
+		return reject("explicit_mismatch")
 	}
 	title := c.Title
 	if c.Track != "" {
@@ -149,7 +158,7 @@ func rankSpotify(t Track, c Candidate, provisional bool) spotifyRank {
 		candidateTitle = strings.ReplaceAll(candidateTitle, " "+word+" ", " ")
 	}
 	b.TitlePrecision = coverage(candidateTitle, recordingTitle(t.Title))
-	if b.TitlePrecision < 0.65 {
+	if b.TitlePrecision < policy.MinTitlePrecision {
 		return reject("extra_title_content")
 	}
 	if b.Title < 1 {
@@ -164,6 +173,18 @@ func rankSpotify(t Track, c Candidate, provisional bool) spotifyRank {
 		artistEvidence = c.Channel + " " + c.Uploader + " " + c.Title
 	}
 	b.Artist = coverage(t.Artist, artistEvidence)
+	if artists != "" {
+		b.Artist = 0
+		actualArtists := c.Artists
+		if len(actualArtists) == 0 {
+			actualArtists = []string{c.Artist}
+		}
+		for _, actual := range actualArtists {
+			if normalized(actual) == normalized(t.Artist) {
+				b.Artist = 1
+			}
+		}
+	}
 	if channelIdentity(normalized(c.Channel)) == channelIdentity(normalized(t.Artist)) && t.Artist != "" && artists == "" {
 		b.Artist = 1
 	}
@@ -204,7 +225,7 @@ func rankSpotify(t Track, c Candidate, provisional bool) spotifyRank {
 		} else {
 			delta := math.Abs(c.Duration - t.Duration.Seconds())
 			b.DurationDeltaMS = int64(delta * 1000)
-			if delta > math.Max(15, t.Duration.Seconds()*0.08) {
+			if delta > math.Max(policy.MaxDurationDelta.Seconds(), t.Duration.Seconds()*policy.MaxDurationFraction) {
 				return reject("duration_mismatch")
 			}
 			durationScore = max(0, 80-int(delta*4))
@@ -218,7 +239,7 @@ func rankSpotify(t Track, c Candidate, provisional bool) spotifyRank {
 	if provisional && c.MusicSearch {
 		b.Score += 50
 	}
-	if b.Score < 650 {
+	if b.Score < policy.MinScore {
 		return reject("below_match_floor")
 	}
 	return b
@@ -265,7 +286,7 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (Candidate, 
 	if musicErr != nil && regularErr != nil {
 		return Candidate{}, errors.Join(musicErr, regularErr)
 	}
-	return selectSpotify(ctx, *r.Match, deduplicateCandidates(music.Entries, regular.Entries), func(c Candidate) (Candidate, error) {
+	return selectSpotifyPolicy(ctx, *r.Match, r.matchPolicy(), deduplicateCandidates(music.Entries, regular.Entries), func(c Candidate) (Candidate, error) {
 		full, err := r.extract(ctx, "https://www.youtube.com/watch?v="+c.ID, "spotify_candidate_verification", false)
 		if err == nil && full.ID != c.ID {
 			err = errors.New("YouTube returned a different video ID")
@@ -274,6 +295,12 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (Candidate, 
 	})
 }
 func selectSpotify(ctx context.Context, track Track, candidates []Candidate, verify func(Candidate) (Candidate, error)) (Candidate, error) {
+	return selectSpotifyPolicy(ctx, track, DefaultMatchPolicy(), candidates, verify)
+}
+func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, candidates []Candidate, verify func(Candidate) (Candidate, error)) (Candidate, error) {
+	if err := policy.Validate(); err != nil {
+		return Candidate{}, err
+	}
 	type item struct {
 		candidate Candidate
 		rank      spotifyRank
@@ -286,7 +313,7 @@ func selectSpotify(ctx context.Context, track Track, candidates []Candidate, ver
 		}
 	}
 	for _, c := range candidates {
-		b := rankSpotify(track, c, true)
+		b := rankSpotifyPolicy(track, c, true, policy)
 		logRank(c, b, "discovery")
 		if b.Reason == "accepted" {
 			shortlist = append(shortlist, item{c, b})
@@ -294,6 +321,7 @@ func selectSpotify(ctx context.Context, track Track, candidates []Candidate, ver
 	}
 	sort.SliceStable(shortlist, func(i, j int) bool { return shortlist[i].rank.Score > shortlist[j].rank.Score })
 	bestScore := -1
+	runnerUp := -1
 	var best Candidate
 	var bestRank spotifyRank
 	// Sparse Music summaries must get a verification opportunity even when
@@ -324,17 +352,25 @@ func selectSpotify(ctx context.Context, track Track, candidates []Candidate, ver
 		if err != nil {
 			continue
 		}
-		b := rankSpotify(track, full, false)
+		b := rankSpotifyPolicy(track, full, false, policy)
 		logRank(full, b, "verified")
-		if b.Reason == "accepted" && b.Score > bestScore {
-			best, bestRank, bestScore = full, b, b.Score
+		if b.Reason == "accepted" {
+			if b.Score > bestScore {
+				runnerUp = bestScore
+				best, bestRank, bestScore = full, b, b.Score
+			} else if full.ID != best.ID && b.Score > runnerUp {
+				runnerUp = b.Score
+			}
 		}
 	}
 	if ctx.Err() != nil {
 		return Candidate{}, ctx.Err()
 	}
 	if bestScore < 0 {
-		return Candidate{}, ErrSpotifyMatch
+		return Candidate{}, &MatchError{Status: MatchRejected, Reason: "no_acceptable_candidate"}
+	}
+	if runnerUp >= 0 && bestScore-runnerUp < policy.MinScoreMargin {
+		return Candidate{}, &MatchError{Status: MatchUncertain, Reason: "ambiguous_candidates"}
 	}
 	timing.Event("spotify_recording_selected", time.Now(), "video_id", best.ID, "source_class", bestRank.SourceClass, "duration_delta_ms", bestRank.DurationDeltaMS, "ranking_score", bestRank.Score)
 	return best, nil

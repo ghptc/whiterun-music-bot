@@ -108,9 +108,14 @@ func (r CollectionResolver) MatchSpotify(ctx context.Context, original Track, fi
 	if track.URL == "" {
 		return Track{}, ErrSpotifyMatch
 	}
-	track.Title, track.Artist, track.Album = original.Title, original.Artist, original.Album
-	track.Artists = append([]string(nil), original.Artists...)
-	track.RequestedSource, track.SourceURL = "spotify", original.SourceURL
-	track.Timing = TimingFrom(ctx)
+	// Spotify remains the identity source; only audio locator fields come from YouTube.
+	original.VideoID, original.URL, original.Channel = track.VideoID, track.URL, track.Channel
+	original.RequestedSource = "spotify"
+	if original.SpotifyID == "" {
+		_, original.SpotifyID, _, _ = spotifyURL(original.SourceURL)
+	}
+	original.MatchStatus, original.MatchReason = MatchConfirmed, "verified_metadata_match"
+	original.Timing = TimingFrom(ctx)
+	track = original
 	return track, nil
 }

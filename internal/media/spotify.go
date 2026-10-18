@@ -109,6 +109,10 @@ func (s *Spotify) get(ctx context.Context, path string, out any) error {
 }
 
 type spotifyTrack struct {
+	Explicit    *bool `json:"explicit"`
+	ExternalIDs struct {
+		ISRC string `json:"isrc"`
+	} `json:"external_ids"`
 	DurationMS int `json:"duration_ms"`
 	Album      struct {
 		Name string `json:"name"`
@@ -198,7 +202,7 @@ func (s *Spotify) apiCollection(ctx context.Context, kind, id string) (Collectio
 		if page.Total > MaxCollectionTracks || offset+len(page.Items) > MaxCollectionTracks {
 			return Collection{}, ErrCollectionTooLarge
 		}
-		for _, raw := range page.Items {
+		for pageIndex, raw := range page.Items {
 			var track *spotifyTrack
 			if kind == "playlist" {
 				var entry struct {
@@ -224,6 +228,7 @@ func (s *Spotify) apiCollection(ctx context.Context, kind, id string) (Collectio
 				result.Skipped++
 				continue
 			}
+			metadata.Position, metadata.Total = offset+pageIndex+1, page.Total
 			if kind == "album" {
 				metadata.Album = meta.Name
 			}
@@ -253,5 +258,5 @@ func spotifyMetadata(track *spotifyTrack) (Track, bool) {
 			artists = append(artists, artist.Name)
 		}
 	}
-	return Track{Artists: artists, Title: track.Name, Artist: track.Artists[0].Name, Album: track.Album.Name, Duration: time.Duration(track.DurationMS) * time.Millisecond, RequestedSource: "spotify", SourceURL: "https://open.spotify.com/track/" + track.ID}, true
+	return Track{SpotifyID: track.ID, ISRC: track.ExternalIDs.ISRC, Explicit: track.Explicit, Artists: artists, Title: track.Name, Artist: track.Artists[0].Name, Album: track.Album.Name, Duration: time.Duration(track.DurationMS) * time.Millisecond, RequestedSource: "spotify", SourceURL: "https://open.spotify.com/track/" + track.ID}, true
 }
