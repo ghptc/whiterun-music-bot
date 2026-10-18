@@ -111,12 +111,12 @@ func TestProgressiveFirstStartsWith122Unresolved(t *testing.T) {
 		t.Fatal(err)
 	}
 	close(gate)
-	jobDone(t, j)
+	await(t, func() bool { return len(p.State().Queued) == CollectionPrefetch })
 	if maximum.Load() > CollectionWorkers || active.Load() != 0 {
 		t.Fatal("worker bound/leak")
 	}
-	if state = p.State(); !state.Paused || len(state.Queued) != 122 || len(state.Resolving) != 0 {
-		t.Fatal("paused loading did not finish")
+	if state = p.State(); !state.Paused || len(state.Queued) != CollectionPrefetch || len(state.Resolving) != 1 {
+		t.Fatal("paused loading exceeded prefetch window")
 	}
 }
 
@@ -283,7 +283,7 @@ func TestProgressiveCancellation(t *testing.T) {
 	}
 }
 
-func TestProgressiveSkipFiftyWithTwentyResolved(t *testing.T) {
+func TestProgressiveSkipFiftyWithBoundedPrefetch(t *testing.T) {
 	started := make(chan string, 123)
 	var blocked atomic.Int32
 	release := make(chan struct{})
@@ -308,12 +308,12 @@ func TestProgressiveSkipFiftyWithTwentyResolved(t *testing.T) {
 		t.Fatal(r.Err)
 	}
 	receive(t, started, "1")
-	await(t, func() bool { return len(p.State().Queued) == 19 && blocked.Load() == 3 })
+	await(t, func() bool { return len(p.State().Queued) == CollectionPrefetch })
 	r, err := p.SkipN(50)
 	if err != nil || r.Skipped != 50 || r.Remaining != 73 || !r.NextPending || r.Next.Title != "51" {
 		t.Fatal(r, err)
 	}
-	await(t, func() bool { return blocked.Load() >= 6 }) // skipped in-flight calls were canceled; workers reached 51+
+	await(t, func() bool { return blocked.Load() >= 3 }) // skipped in-flight calls were canceled; workers reached 51+
 	state := p.State()
 	if len(state.Entries) != 73 || state.Entries[0].Position != 51 {
 		t.Fatal("logical positions lost")
@@ -325,7 +325,7 @@ func TestProgressiveSkipFiftyWithTwentyResolved(t *testing.T) {
 	}
 	close(release)
 	receive(t, started, "51")
-	jobDone(t, j)
+	await(t, func() bool { return len(p.State().Queued) == CollectionPrefetch })
 	for i, e := range p.State().Entries {
 		if e.Track.Title != fmt.Sprint(i+52) {
 			t.Fatal("skipped entries resurrected")
@@ -528,7 +528,7 @@ func TestProgressiveSnapshotsDuringResolutionAndControls(t *testing.T) {
 	}
 }
 
-func TestFirstCollectionPositionRetriesAfterProviderRecovery(t *testing.T) {
+func TestFirstCollectionPositionUnavailableAdvances(t *testing.T) {
 	p, _ := newTestPlayer(t, func(ctx context.Context, _ media.Track, _ Voice) error { <-ctx.Done(); return ctx.Err() })
 	var attempts atomic.Int32
 	j := begin(t, p, context.Background(), numberedTracks(1, 3), func(_ context.Context, t media.Track, _ bool) (media.Track, error) {
@@ -537,16 +537,9 @@ func TestFirstCollectionPositionRetriesAfterProviderRecovery(t *testing.T) {
 		}
 		return matched(t), nil
 	})
-	await(t, func() bool { return p.State().ProviderBlocked })
-	if state := p.State(); len(state.Entries) != 3 || state.Entries[0].Track.Title != "1" {
-		t.Fatal(state)
-	}
-	if _, err := p.SetPaused(false); err != nil {
-		t.Fatal(err)
-	}
 	first := firstResult(t, j)
-	if first.Track.Title != "1" || first.Position != 1 {
-		t.Fatal("recovery skipped first position", first)
+	if first.Track.Title != "2" || first.Position != 2 || first.Skipped != 1 {
+		t.Fatal("unavailable position did not advance in order", first)
 	}
 	jobDone(t, j)
 }

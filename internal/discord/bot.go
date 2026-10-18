@@ -104,7 +104,7 @@ func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) e
 			}
 		}
 		if err := b.resolver.YouTube.VerifySpotify(ctx, track); err != nil {
-			if b.resolver.YouTube.Mappings != nil {
+			if errors.Is(err, media.ErrSpotifyMatch) && b.resolver.YouTube.Mappings != nil {
 				_ = b.resolver.YouTube.Mappings.DeleteMapping(ctx, media.MappingKey(track, b.resolver.YouTube.Policy))
 			}
 			return err

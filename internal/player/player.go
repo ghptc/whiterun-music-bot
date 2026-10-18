@@ -35,6 +35,7 @@ type GuildPlayer struct {
 	current          *media.Track
 	history          []media.Track
 	completedImports []CollectionProgress
+	lastTransition   time.Time
 	startedSequence  uint64
 	queue            []queueEntry
 	jobs             map[uint64]*CollectionJob
@@ -200,7 +201,7 @@ func (p *GuildPlayer) run() {
 		p.persistLocked()
 		p.mu.Unlock()
 		started := time.Now()
-		p.log.Info("next_track_selected", "sequence", sequence, "collection_id", entry.jobID, "position", t.Position, "title", t.Title, "video_id", t.VideoID)
+		p.log.Info("next_track_selected", "sequence", sequence, "collection_id", entry.jobID, "position", t.Position, "spotify_id", t.SpotifyID, "title", t.Title, "video_id", t.VideoID)
 		p.log.Info("track_playback_start", "sequence", sequence, "position", t.Position, "video_id", t.VideoID)
 		err := callPlay(p.play, ctx, t, &startVoice{Voice: v, start: func() { p.announceStart(ctx, t, sequence) }})
 		category := failureCategory(err)
@@ -212,35 +213,20 @@ func (p *GuildPlayer) run() {
 		cancel()
 		p.mu.Lock()
 		expectedCancel = expectedCancel || p.current == nil || p.ctx.Err() != nil
+		p.lastTransition = time.Now()
 		p.current = nil
 		p.pause = nil
 		p.trackCancel = nil
 		p.trackDone = nil
 		p.trackCause = nil
 		if err != nil && !expectedCancel {
-			if isProviderFailure(err) {
-				if entry.jobID != 0 {
-					if job := p.jobs[entry.jobID]; job != nil {
-						job.wanted[entry.position] = true
-					}
-				}
-				p.queue = append(p.queue, queueEntry{})
-				copy(p.queue[1:], p.queue[:len(p.queue)-1])
-				p.queue[0] = entry
-				p.blockProviderLocked(category)
-			} else {
-				p.failures++
-				p.log.Warn("track_failure", "sequence", sequence, "consecutive_failures", p.failures, "category", category)
-				if p.failures >= 5 {
-					p.halted = true
-					p.log.Error("player_failure_limit", "consecutive_failures", p.failures, "action", "queue retained; use resume or play")
-				}
-			}
+			p.failures++
+			p.log.Warn("track_unavailable", "sequence", sequence, "spotify_id", t.SpotifyID, "video_id", t.VideoID, "position", t.Position, "state", "unavailable", "reason", category, "consecutive_failures", p.failures, "action", "advance_in_original_order")
 		} else {
 			p.failures = 0
 		}
 		ready, pending := p.queueCountsLocked()
-		p.log.Info("player_transition", "sequence", sequence, "ready", ready, "pending", pending, "halted", p.halted, "next_pending", len(p.queue) > 0 && p.queue[0].Pending)
+		p.log.Info("player_transition", "sequence", sequence, "ready", ready, "pending", pending, "halted", p.halted, "provider_blocked", p.providerBlocked, "state", "transitioning", "next_pending", len(p.queue) > 0 && p.queue[0].Pending)
 		if p.ctx.Err() == nil {
 			p.persistLocked()
 		}

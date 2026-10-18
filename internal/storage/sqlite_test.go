@@ -303,3 +303,69 @@ func TestRecoveryDuringPreparationPreservesPreviousHistory(t *testing.T) {
 		t.Fatal(history)
 	}
 }
+
+func TestRestartDuring123TrackResolution(t *testing.T) {
+	db := openTest(t)
+	ctx := context.Background()
+	log := slog.New(slog.NewTextHandler(io.Discard, nil))
+	playing := make(chan struct{}, 1)
+	resolving := make(chan struct{}, 3)
+	play := func(ctx context.Context, _ media.Track, _ player.Voice) error {
+		playing <- struct{}{}
+		<-ctx.Done()
+		return ctx.Err()
+	}
+	p := player.New(ctx, log, play)
+	if err := p.ConfigureStore(db, "restart"); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Attach(voice{}); err != nil {
+		t.Fatal(err)
+	}
+	tracks := make([]media.Track, 123)
+	for i := range tracks {
+		tracks[i] = media.Track{SpotifyID: fmt.Sprint(i + 1), Title: fmt.Sprint(i + 1), RequestedSource: "spotify", Position: i + 1, Total: 123}
+	}
+	j, err := p.BeginCollection(ctx, media.Collection{Tracks: tracks}, func(ctx context.Context, track media.Track, first bool) (media.Track, error) {
+		if !first {
+			resolving <- struct{}{}
+			<-ctx.Done()
+			return media.Track{}, ctx.Err()
+		}
+		track.URL = "https://www.youtube.com/watch?v=abcdefghijk"
+		track.VideoID = "abcdefghijk"
+		return track, nil
+	}, p.Ticket())
+	if err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-playing:
+	case <-time.After(time.Second):
+		t.Fatal("first track stalled")
+	}
+	select {
+	case <-resolving:
+	case <-time.After(time.Second):
+		t.Fatal("prefetch not active")
+	}
+	p.Close(ctx)
+	<-j.Done
+	recovered := player.New(ctx, log, play)
+	defer recovered.Close(ctx)
+	if err := recovered.ConfigureStore(db, "restart"); err != nil {
+		t.Fatal(err)
+	}
+	state := recovered.State()
+	if state.Current != nil || len(state.Entries) != 123 {
+		t.Fatal("restart lost playlist", state)
+	}
+	for i, entry := range state.Entries {
+		if entry.Track.SpotifyID != fmt.Sprint(i+1) || entry.Track.Position != i+1 {
+			t.Fatal("restart changed identity/order", entry)
+		}
+		if i > 0 && entry.Track.URL != "" {
+			t.Fatal("pending entry acquired unverified locator")
+		}
+	}
+}

@@ -74,7 +74,9 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	streamStart := time.Now()
 	streamTiming := &streamTimingWriter{buffer: ytErr, timing: t.Timing, start: streamStart, tail: "\n", onResolved: markResolved}
 	yt.Stderr = streamTiming
+	sourceReady := make(chan struct{})
 	yt.Stdout = &firstWrite{writer: output, first: func() {
+		close(sourceReady)
 		t.Timing.Event("yt_dlp_first_byte", streamStart)
 		markResolved()
 	}, written: func() { t.Timing.Event("ffmpeg_first_input", streamStart) }}
@@ -87,26 +89,76 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	if err != nil {
 		return err
 	}
-	ffStart := time.Now()
-	if err = ff.Start(); err != nil {
-		audio.Close()
-		return &StreamError{"ffmpeg_start", fmt.Errorf("start FFmpeg: %w", err)}
-	}
-	t.Timing.Event("ffmpeg_start", ffStart, "purpose", "audio_decode", "category", "ffmpeg", "started_at", ffStart.UTC(), "candidates", 1)
+	defer audio.Close()
 	t.Timing.Event("stream_resolve_start", streamStart)
 	t.Timing.Event("yt_dlp_start", streamStart, "purpose", "playback", "category", "stream", "started_at", streamStart.UTC(), "candidates", 1, "video_id", t.VideoID)
 	if err = yt.Start(); err != nil {
-		cancel()
-		output.Close()
-		input.Close()
-		_ = ff.Wait()
 		return &StreamError{"yt_dlp_start", fmt.Errorf("start yt-dlp: %w", err)}
 	}
-	// FFmpeg owns its read descriptor; release the parent copy.
-	input.Close()
-	// yt's Go stdout copier owns the write descriptor until Wait drains it.
 	ytDone := make(chan error, 1)
 	var ytFinished, ffFinished atomic.Bool
+	go func() {
+		waitErr := yt.Wait()
+		ytFinished.Store(true)
+		t.Timing.Event("yt_dlp_complete", streamStart, "purpose", "playback", "candidates", 1, "error", waitErr, "cancel_reason", context.Cause(ctx))
+		ytDone <- waitErr
+		output.Close()
+	}()
+	// Do not launch a decoder for empty output from a rejected extraction.
+	// Supervise the producer's pipes even if its leader exits before helpers.
+	preForced := make(chan struct{})
+	stopPre := context.AfterFunc(ctx, func() {
+		defer close(preForced)
+		if !ytFinished.Load() {
+			_ = syscall.Kill(-yt.Process.Pid, syscall.SIGKILL)
+		}
+		output.Close()
+	})
+	defer func() {
+		if !stopPre() {
+			<-preForced
+		}
+	}()
+	var earlyErr error
+	producerEnded := false
+	select {
+	case <-sourceReady:
+	case earlyErr = <-ytDone:
+		producerEnded = true
+	case <-ctx.Done():
+		earlyErr = <-ytDone
+		producerEnded = true
+	}
+	if producerEnded {
+		select {
+		case <-sourceReady:
+			// A small valid source may have finished before decoder startup.
+			ytDone <- earlyErr
+		default:
+			defer func() {
+				t.Timing.Event("audio_source_exit", streamStart, "video_id", t.VideoID, "spotify_id", t.SpotifyID, "yt_exit_code", exitCode(yt), "decoder_started", false, "category", failureCategory(err))
+			}()
+			if parent.Err() != nil {
+				return parent.Err()
+			}
+			if earlyErr != nil && exitCode(yt) > 0 {
+				return &StreamError{sourceFailure(ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), earlyErr, media.SafeDiagnostic(ytErr.Data))}
+			}
+			if cause := context.Cause(ctx); cause != nil {
+				return cause
+			}
+			return &StreamError{"no_audio", errors.New("source ended before producing audio")}
+		}
+	}
+	ffStart := time.Now()
+	if err = ff.Start(); err != nil {
+		cancel()
+		output.Close()
+		<-ytDone
+		return &StreamError{"ffmpeg_start", fmt.Errorf("start FFmpeg: %w", err)}
+	}
+	t.Timing.Event("ffmpeg_start", ffStart, "purpose", "audio_decode", "category", "ffmpeg", "started_at", ffStart.UTC(), "candidates", 1)
+	input.Close()
 	// os/exec can retire its context watcher after reaping a leader even while
 	// Wait still drains helpers' inherited pipes. The pipeline owns cancellation
 	// until ALL process I/O completes, independent of that watcher.
@@ -126,13 +178,6 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 		if !stopForce() {
 			<-forced
 		}
-	}()
-	go func() {
-		waitErr := yt.Wait()
-		ytFinished.Store(true)
-		output.Close()
-		t.Timing.Event("yt_dlp_complete", streamStart, "purpose", "playback", "candidates", 1, "error", waitErr)
-		ytDone <- waitErr
 	}()
 	t.Timing.Event("audio_source_start", streamStart, "video_id", t.VideoID, "live", t.Live, "yt_pid", yt.Process.Pid, "ffmpeg_pid", ff.Process.Pid)
 	t.Timing.Event("stream_process_started", streamStart, "pid", yt.Process.Pid)
@@ -266,7 +311,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	// A positive producer exit is the root cause when decoding its empty output
 	// also fails. Killed processes are cleanup consequences, not source diagnoses.
 	if ytWait != nil && exitCode(yt) > 0 {
-		failures = append(failures, &StreamError{sourceFailure(ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), ytWait, media.SafeDiagnostic(ytErr.Data))})
+		failures = append([]error{&StreamError{sourceFailure(ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), ytWait, media.SafeDiagnostic(ytErr.Data))}}, failures...)
 	}
 	if ffWait != nil && exitCode(ff) > 0 {
 		failures = append(failures, &StreamError{"ffmpeg_exit", fmt.Errorf("exit_code=%d: %w: %s", exitCode(ff), ffWait, media.SafeDiagnostic(ffErr.Data))})

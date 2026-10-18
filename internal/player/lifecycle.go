@@ -130,6 +130,10 @@ func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequ
 		event.Next = &next
 		event.NextPending = p.queue[0].Pending
 	}
+	transitionMS := int64(0)
+	if !p.lastTransition.IsZero() {
+		transitionMS = time.Since(p.lastTransition).Milliseconds()
+	}
 	fn := p.onStart
 	p.persistLocked()
 	if recorder, ok := p.store.(PlaybackRecorder); ok && p.ctx.Err() == nil {
@@ -141,7 +145,7 @@ func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequ
 		cancel()
 	}
 	p.mu.Unlock()
-	p.log.Info("next_track_start", "sequence", sequence, "video_id", track.VideoID, "position", track.Position)
+	p.log.Info("next_track_start", "state", "playing", "next_track_delay_ms", transitionMS, "spotify_id", track.SpotifyID, "sequence", sequence, "video_id", track.VideoID, "position", track.Position)
 	if fn != nil {
 		fn(event)
 	}

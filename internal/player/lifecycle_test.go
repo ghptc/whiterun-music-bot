@@ -29,7 +29,7 @@ func TestSourceSurvivesAudioEOFCleanup(t *testing.T) {
 	if err := os.WriteFile(file, audio, 0600); err != nil {
 		t.Fatal(err)
 	}
-	yt := executable(t, "yt-dlp", "sleep 60")
+	yt := executable(t, "yt-dlp", "printf x; sleep 60")
 	ff := executable(t, "ffmpeg", "cat '"+file+"'")
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
@@ -73,12 +73,13 @@ cat`)
 	}
 	defer p.Close(context.Background())
 	tracks := numberedTracks(1, 125)
-	failures := 0
+	failures, rejectedSources := 0, 0
 	for i := range tracks {
 		tracks[i].URL = "ok"
 		if i%17 == 8 {
 			tracks[i].URL = "ytfail"
 			failures++
+			rejectedSources++
 		} else if i%23 == 9 {
 			tracks[i].URL = "fffail"
 			failures++
@@ -119,7 +120,7 @@ cat`)
 		t.Fatal(err)
 	}
 	ids := strings.Fields(string(raw))
-	if len(ids) != 250 {
+	if len(ids) != 250-rejectedSources {
 		t.Fatalf("process count=%d", len(ids))
 	}
 	for _, id := range ids {
@@ -147,7 +148,7 @@ func (l *lockedLog) Write(p []byte) (int, error) {
 }
 func (l *lockedLog) String() string { l.mu.Lock(); defer l.mu.Unlock(); return l.data.String() }
 
-func TestConsecutiveFailuresHaltAndResume(t *testing.T) {
+func TestConsecutiveFailuresDrainWithoutHalt(t *testing.T) {
 	var attempts atomic.Int32
 	p, _ := newTestPlayer(t, func(ctx context.Context, track media.Track, v Voice) error {
 		n := attempts.Add(1)
@@ -157,14 +158,6 @@ func TestConsecutiveFailuresHaltAndResume(t *testing.T) {
 		return nil
 	})
 	if err := p.EnqueueMany(numberedTracks(1, 8), p.Ticket()); err != nil {
-		t.Fatal(err)
-	}
-	await(t, func() bool { return p.State().Halted })
-	state := p.State()
-	if attempts.Load() != 5 || state.Current != nil || len(state.Entries) != 3 {
-		t.Fatal(attempts.Load(), state)
-	}
-	if _, err := p.SetPaused(false); err != nil {
 		t.Fatal(err)
 	}
 	await(t, func() bool { return attempts.Load() == 8 && p.State().Current == nil })
@@ -246,7 +239,7 @@ func TestAudioStallAndDecoderAfterEOF(t *testing.T) {
 			if mode == "decoder_after_eof" {
 				body = "cat '" + file + "'; exec 1>&-; sleep 60"
 			}
-			yt := executable(t, "yt-dlp", "sleep 60")
+			yt := executable(t, "yt-dlp", "printf x; sleep 60")
 			ff := executable(t, "ffmpeg", body)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()

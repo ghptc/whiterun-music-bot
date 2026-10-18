@@ -128,9 +128,9 @@ func (r Resolver) extract(ctx context.Context, target, purpose string, flat bool
 	timing := TimingFrom(ctx)
 	timing.Event("yt_dlp_start", started, "purpose", purpose, "category", "metadata", "flat", flat, "candidates", count, "target", target, "started_at", started.UTC())
 	runErr := cmd.Run()
-	timing.Event("yt_dlp_complete", started, "purpose", purpose, "flat", flat, "candidates", count, "error", runErr)
+	timing.Event("yt_dlp_complete", started, "purpose", purpose, "flat", flat, "candidates", count, "error", runErr, "cancel_reason", context.Cause(ctx), "context_error", ctx.Err())
 	if runErr != nil {
-		return searchResult{}, fmt.Errorf("YouTube resolution failed: %w: %s", runErr, strings.TrimSpace(string(stderr.Data)))
+		return searchResult{}, fmt.Errorf("YouTube resolution failed: %w: %s", errors.Join(runErr, ctx.Err()), SafeDiagnostic(stderr.Data))
 	}
 	if out.Truncated {
 		return searchResult{}, errors.New("YouTube metadata exceeded the size limit")

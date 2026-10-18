@@ -3,6 +3,7 @@ package media
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"net/url"
 	"regexp"
@@ -292,7 +293,10 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (Candidate, 
 		}
 		if ok {
 			full, err := r.extract(ctx, "https://www.youtube.com/watch?v="+cached.ID, "spotify_mapping_revalidation", false)
-			if err == nil && full.ID == cached.ID && CompareSpotify(*r.Match, full.Candidate, r.matchPolicy()).Status == MatchConfirmed {
+			if err != nil {
+				return Candidate{}, err
+			}
+			if full.ID == cached.ID && CompareSpotify(*r.Match, full.Candidate, r.matchPolicy()).Status == MatchConfirmed {
 				return full.Candidate, nil
 			}
 			if err := r.Mappings.DeleteMapping(ctx, key); err != nil {
@@ -413,7 +417,7 @@ func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, c
 		return Candidate{}, ctx.Err()
 	}
 	if len(verificationErrors) > 0 {
-		return Candidate{}, errors.Join(append([]error{&MatchError{Status: MatchUncertain, Reason: "candidate_verification_failed"}}, verificationErrors...)...)
+		return Candidate{}, fmt.Errorf("candidate verification infrastructure failed: %w", errors.Join(verificationErrors...))
 	}
 	if bestScore < 0 {
 		if sawUncertain {

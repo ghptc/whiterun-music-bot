@@ -11,6 +11,8 @@ import (
 )
 
 const CollectionWorkers = 3
+const CollectionPrefetch = 6
+const CollectionResolveTimeout = 90 * time.Second
 
 // Pending positions occupy queue capacity and order, but cannot reach playback.
 type queueEntry struct {
@@ -42,6 +44,7 @@ type CollectionMatcher func(context.Context, media.Track, bool) (media.Track, er
 type CollectionJob struct {
 	First           <-chan CollectionFirst
 	Done            <-chan struct{}
+	wake            chan struct{}
 	first           chan CollectionFirst
 	done            chan struct{}
 	ctx             context.Context
@@ -73,13 +76,13 @@ func (p *GuildPlayer) BeginCollection(parent context.Context, c media.Collection
 	if len(c.Tracks) > MaxQueueTracks-len(p.queue) {
 		return nil, errors.New("The collection will not fit in the queue (1000 upcoming tracks maximum).")
 	}
-	ctx, cancel := context.WithTimeout(parent, 10*time.Minute)
+	ctx, cancel := context.WithCancel(parent)
 	p.halted = false
 	p.failures = 0
 	p.nextJob++
 	first := make(chan CollectionFirst, 1)
 	done := make(chan struct{})
-	j := &CollectionJob{First: first, Done: done, first: first, done: done, ctx: ctx, cancel: cancel, player: p, match: match, metadata: make([]media.Track, len(c.Tracks)), wanted: make([]bool, len(c.Tracks)), searches: make([]context.CancelFunc, len(c.Tracks)), recorded: make([]bool, len(c.Tracks)), blockedPosition: -1, progress: CollectionProgress{ID: p.nextJob, Total: len(c.Tracks), MetadataSkipped: c.Skipped}}
+	j := &CollectionJob{wake: make(chan struct{}, 1), First: first, Done: done, first: first, done: done, ctx: ctx, cancel: cancel, player: p, match: match, metadata: make([]media.Track, len(c.Tracks)), wanted: make([]bool, len(c.Tracks)), searches: make([]context.CancelFunc, len(c.Tracks)), recorded: make([]bool, len(c.Tracks)), blockedPosition: -1, progress: CollectionProgress{ID: p.nextJob, Total: len(c.Tracks), MetadataSkipped: c.Skipped}}
 	for i, t := range c.Tracks {
 		if t.Position == 0 {
 			t.Position, t.Total = i+1, len(c.Tracks)
@@ -106,6 +109,10 @@ func (p *GuildPlayer) cancelJobsLocked() {
 func (p *GuildPlayer) releaseEntryLocked(entry queueEntry) {
 	if j := p.jobs[entry.jobID]; j != nil {
 		j.wanted[entry.position] = false
+		select {
+		case j.wake <- struct{}{}:
+		default:
+		}
 	}
 }
 func (p *GuildPlayer) discardEntryLocked(entry queueEntry) {
@@ -114,6 +121,10 @@ func (p *GuildPlayer) discardEntryLocked(entry queueEntry) {
 		return
 	}
 	j.wanted[entry.position] = false
+	select {
+	case j.wake <- struct{}{}:
+	default:
+	}
 	if cancel := j.searches[entry.position]; cancel != nil {
 		cancel()
 	}
@@ -144,13 +155,25 @@ func (j *CollectionJob) resolve(index int, first bool) collectionResolution {
 		p.mu.Unlock()
 		return collectionResolution{index: index, skipped: true}
 	}
-	ctx, cancel := context.WithCancel(j.ctx)
+	ctx, cancel := context.WithTimeout(j.ctx, CollectionResolveTimeout)
 	j.searches[index] = cancel
-	p.mu.Unlock()
-	track, err := safeMatch(j.match, ctx, copyTrack(j.metadata[index]), first)
-	if category := providerFailureCategory(err); category != "" {
-		p.blockProviderAt(j, index, category)
+	active := 0
+	for _, job := range p.jobs {
+		for _, search := range job.searches {
+			if search != nil {
+				active++
+			}
+		}
 	}
+	p.mu.Unlock()
+	j.event("track_resolution_start", time.Now(), "spotify_id", j.metadata[index].SpotifyID, "position", index+1, "state", "resolving", "concurrent_resolutions", active)
+	started := time.Now()
+	track, err := safeMatch(j.match, ctx, copyTrack(j.metadata[index]), first)
+	if ctx.Err() != nil {
+		err = ctx.Err()
+	}
+	j.event("track_resolution_complete", started, "spotify_id", j.metadata[index].SpotifyID, "video_id", track.VideoID, "position", index+1, "error", err, "cancel_reason", context.Cause(ctx))
+
 	p.mu.Lock()
 	skipped := !j.wanted[index]
 	blocked := p.providerBlocked
@@ -244,7 +267,7 @@ func (j *CollectionJob) record(r collectionResolution) {
 	}
 	p.mu.Unlock()
 	if r.err != nil && !r.skipped && j.ctx.Err() == nil && p.log != nil {
-		p.log.Warn("collection position could not be matched; skipping", "stage", "collection_position_failed", "collection_id", j.progress.ID, "position", r.index+1, "reason", "no_reliable_youtube_match", "error", r.err)
+		p.log.Warn("collection position could not be matched; skipping", "stage", "collection_position_failed", "collection_id", j.progress.ID, "position", r.index+1, "spotify_id", j.metadata[r.index].SpotifyID, "state", "unavailable", "reason", resolutionFailure(r.err), "error", r.err)
 	}
 }
 func (j *CollectionJob) run() {
@@ -319,18 +342,31 @@ func (j *CollectionJob) run() {
 	for {
 		p := j.player
 		p.mu.Lock()
-		indexes := make([]int, 0, len(j.metadata)-firstIndex-1)
-		for i := firstIndex + 1; i < len(j.metadata); i++ {
-			for _, entry := range p.queue {
-				if entry.jobID == j.progress.ID && entry.position == i && entry.Pending && j.wanted[i] {
-					indexes = append(indexes, i)
-					break
-				}
+		indexes := make([]int, 0, CollectionPrefetch)
+		remaining, window := 0, 0
+		for _, entry := range p.queue {
+			if entry.jobID != j.progress.ID {
+				continue
 			}
+			if entry.Pending {
+				remaining++
+			}
+			if window < CollectionPrefetch && entry.Pending && j.wanted[entry.position] {
+				indexes = append(indexes, entry.position)
+			}
+			window++
 		}
 		p.mu.Unlock()
-		if len(indexes) == 0 {
+		if remaining == 0 {
 			return
+		}
+		if len(indexes) == 0 {
+			select {
+			case <-j.ctx.Done():
+				return
+			case <-j.wake:
+			}
+			continue
 		}
 		tasks := make(chan int, len(indexes))
 		results := make(chan collectionResolution, len(indexes))
@@ -419,4 +455,20 @@ func safeMatch(match CollectionMatcher, ctx context.Context, track media.Track, 
 		}
 	}()
 	return match(ctx, track, first)
+}
+
+func resolutionFailure(err error) string {
+	if category := providerFailureCategory(err); category != "" {
+		return category
+	}
+	if errors.Is(err, context.DeadlineExceeded) {
+		return "resolution_timeout"
+	}
+	if errors.Is(err, context.Canceled) {
+		return "resolution_canceled"
+	}
+	if errors.Is(err, media.ErrSpotifyMatch) {
+		return "no_reliable_youtube_match"
+	}
+	return "resolution_infrastructure_failure"
 }

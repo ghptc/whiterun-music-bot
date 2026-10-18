@@ -151,7 +151,7 @@ func TestCandidateVerificationFailureCannotBecomeARejectionOrFallback(t *testing
 		return c, nil
 	})
 	var decision *MatchError
-	if !errors.Is(err, unavailable) || !errors.As(err, &decision) || decision.Status != MatchUncertain {
+	if !errors.Is(err, unavailable) || errors.As(err, &decision) {
 		t.Fatal(err)
 	}
 }
