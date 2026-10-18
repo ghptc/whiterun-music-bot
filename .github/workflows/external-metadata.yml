@@ -1,0 +1,19 @@
+name: Controlled external metadata probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  spotify-public:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: external-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Public Spotify metadata only (no Discord/audio assertion)
+        env:
+          BARD_SPOTIFY_LIVE_TEST: '1'
+        run: go test ./internal/media -run 'TestSpotify(Embed|PublicLarge)LiveRegression' -count=1 -v -timeout=3m
