@@ -84,7 +84,7 @@ func discoverSpotify(ctx context.Context, t Track, p MatchPolicy, query string, 
 		}
 		alternative := t.Artist + " - " + t.Title + " official audio"
 		if round == 1 {
-			alternative = "\"" + t.Title + "\" \"" + t.Artist + "\" \"Provided to YouTube\""
+			alternative = "\"" + t.Title + "\" \"" + t.Artist + "\" \"Topic\""
 		}
 		lookup("ytsearch10:"+alternative, "spotify_alternative_search", false)
 	}

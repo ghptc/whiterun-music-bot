@@ -45,6 +45,9 @@ func (b *Bot) setupAnnouncements(id snowflake.ID, g *guild) {
 }
 func playbackText(event player.PlaybackEvent) string {
 	track := event.Track
+	if event.SkippedReason != "" {
+		return fmt.Sprintf("Skipped: %s • position %d/%d\n%s", trackTitle(track), track.Position, track.Total, event.SkippedReason)
+	}
 	icon, source := "▶", "YouTube"
 	if track.Live {
 		icon, source = "🔴", "YouTube Live"
@@ -67,7 +70,7 @@ func playbackText(event player.PlaybackEvent) string {
 }
 
 func (b *Bot) bindAnnouncements(g *guild) {
-	g.player.SetOnStart(func(event player.PlaybackEvent) {
+	send := func(event player.PlaybackEvent) {
 		g.announcementMu.Lock()
 		item := announcement{snowflake.ID(g.announcementChannel.Load()), g.announcementEpoch.Load(), event}
 		g.announcementMu.Unlock()
@@ -79,5 +82,7 @@ func (b *Bot) bindAnnouncements(g *guild) {
 		default:
 			b.log.Warn("playback_announcement_dropped", "sequence", event.Sequence, "reason", "announcement_queue_full")
 		}
-	})
+	}
+	g.player.SetOnStart(send)
+	g.player.SetOnSkip(send)
 }

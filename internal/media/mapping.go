@@ -24,7 +24,7 @@ func mappingKey(t Track, p MatchPolicy) string {
 		Version int
 		Track   Track
 		Policy  MatchPolicy
-	}{2, t, p})
+	}{3, t, p})
 	return fmt.Sprintf("%x", sha256.Sum256(b))
 }
 

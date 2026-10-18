@@ -195,3 +195,23 @@ func TestSuccessfulPlayPublicForEachSource(t *testing.T) {
 		})
 	}
 }
+
+func TestSkippedAnnouncementKeepsIdentityAndPosition(t *testing.T) {
+	text := playbackText(player.PlaybackEvent{Track: media.Track{Title: "Bring The Noise Remix - Pumpkin Edit", Artist: "Public Enemy", Position: 7, Total: 20}, SkippedReason: "External provider blocked access to audio."})
+	for _, want := range []string{"Public Enemy", "Pumpkin Edit", "7/20", "External provider"} {
+		if !strings.Contains(text, want) {
+			t.Fatal(text)
+		}
+	}
+	if strings.Contains(text, "Now Playing") {
+		t.Fatal(text)
+	}
+	state := player.State{Current: &media.Track{Title: "Waiting"}}
+	if strings.Contains(currentStateText(state), "Now playing") {
+		t.Fatal("announced before first frame")
+	}
+	state.CurrentStarted = true
+	if !strings.Contains(currentStateText(state), "Now playing") {
+		t.Fatal("missing confirmed playback")
+	}
+}

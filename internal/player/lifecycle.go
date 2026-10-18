@@ -87,13 +87,14 @@ func watchActivity(ctx context.Context, cancel context.CancelCauseFunc, last *at
 	}
 }
 
-// PlaybackEvent is a copied snapshot emitted once after the first successful
-// voice frame, never merely on resolution or queue insertion.
+// PlaybackEvent is a copied snapshot. Start events follow the first successful
+// voice frame; skip events carry SkippedReason and never announce a start.
 type PlaybackEvent struct {
-	Track       media.Track
-	Next        *media.Track
-	NextPending bool
-	Sequence    uint64
+	SkippedReason string
+	Track         media.Track
+	Next          *media.Track
+	NextPending   bool
+	Sequence      uint64
 }
 type startVoice struct {
 	Voice
@@ -167,4 +168,37 @@ func (p *GuildPlayer) queueCountsLocked() (ready, pending int) {
 		}
 	}
 	return
+}
+
+func (p *GuildPlayer) SetOnSkip(fn func(PlaybackEvent)) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.onSkip = fn
+}
+func (p *GuildPlayer) announceSkip(t media.Track, err error) {
+	p.mu.Lock()
+	fn := p.onSkip
+	p.mu.Unlock()
+	reason := "Search failed; the recording could not be verified."
+	var match *media.MatchError
+	switch {
+	case providerFailureCategory(err) != "":
+		reason = "External provider blocked access to audio."
+	case errors.As(err, &match):
+		if match.Status == media.MatchUncertain {
+			reason = "Ambiguous recording or insufficient metadata; no reliable selection."
+		} else {
+			reason = "Search found no compatible recording."
+		}
+	case errors.Is(err, context.DeadlineExceeded):
+		reason = "Search timed out."
+	default:
+		var stream *StreamError
+		if errors.As(err, &stream) {
+			reason = "Audio unavailable; playback could not complete."
+		}
+	}
+	if fn != nil {
+		fn(PlaybackEvent{Track: copyTrack(t), SkippedReason: reason})
+	}
 }

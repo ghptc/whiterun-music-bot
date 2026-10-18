@@ -1,0 +1,71 @@
+{
+  "id": "6Knv6wdA0luoMUuuoYi2i1",
+  "name": "My House",
+  "artists": [
+    {
+      "external_urls": {
+        "spotify": "https://open.spotify.com/artist/0jnsk9HBra6NMjO2oANoPY"
+      },
+      "href": "https://api.spotify.com/v1/artists/0jnsk9HBra6NMjO2oANoPY",
+      "id": "0jnsk9HBra6NMjO2oANoPY",
+      "name": "Flo Rida",
+      "type": "artist",
+      "uri": "spotify:artist:0jnsk9HBra6NMjO2oANoPY"
+    }
+  ],
+  "album": {
+    "album_type": "album",
+    "artists": [
+      {
+        "external_urls": {
+          "spotify": "https://open.spotify.com/artist/0jnsk9HBra6NMjO2oANoPY"
+        },
+        "href": "https://api.spotify.com/v1/artists/0jnsk9HBra6NMjO2oANoPY",
+        "id": "0jnsk9HBra6NMjO2oANoPY",
+        "name": "Flo Rida",
+        "type": "artist",
+        "uri": "spotify:artist:0jnsk9HBra6NMjO2oANoPY"
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/album/5lkNnHVlnCCCV304t89wOH"
+    },
+    "href": "https://api.spotify.com/v1/albums/5lkNnHVlnCCCV304t89wOH",
+    "id": "5lkNnHVlnCCCV304t89wOH",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab67616d0000b2736ba3d11e51c7df825292307f",
+        "width": 640,
+        "height": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616d00001e026ba3d11e51c7df825292307f",
+        "width": 300,
+        "height": 300
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616d000048516ba3d11e51c7df825292307f",
+        "width": 64,
+        "height": 64
+      }
+    ],
+    "is_playable": true,
+    "name": "My House",
+    "release_date": "2015-04-07",
+    "release_date_precision": "day",
+    "total_tracks": 7,
+    "type": "album",
+    "uri": "spotify:album:5lkNnHVlnCCCV304t89wOH"
+  },
+  "duration_ms": 192190,
+  "explicit": false,
+  "external_ids": {
+    "isrc": "USAT21500384"
+  },
+  "is_local": false,
+  "is_playable": true,
+  "external_urls": {
+    "spotify": "https://open.spotify.com/track/6Knv6wdA0luoMUuuoYi2i1"
+  },
+  "type": "track"
+}

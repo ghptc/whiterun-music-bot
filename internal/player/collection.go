@@ -266,6 +266,9 @@ func (j *CollectionJob) record(r collectionResolution) {
 		j.progress.Resolved++
 	}
 	p.mu.Unlock()
+	if r.err != nil && !r.skipped && j.ctx.Err() == nil {
+		p.announceSkip(j.metadata[r.index], r.err)
+	}
 	if r.err != nil && !r.skipped && j.ctx.Err() == nil && p.log != nil {
 		p.log.Warn("collection position could not be matched; skipping", "stage", "collection_position_failed", "collection_id", j.progress.ID, "position", r.index+1, "spotify_id", j.metadata[r.index].SpotifyID, "state", "unavailable", "reason", resolutionFailure(r.err), "error", r.err)
 	}

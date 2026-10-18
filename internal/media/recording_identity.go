@@ -40,7 +40,7 @@ func recordingEquivalence(t Track, a, b Candidate) string {
 	if !authoritative(a) || !authoritative(b) || t.Album == "" || a.Track == "" || b.Track == "" || len(a.Artists) == 0 || len(b.Artists) == 0 {
 		return ""
 	}
-	if normalized(a.Track) != normalized(b.Track) || normalized(a.Track) != normalized(t.Title) || normalized(a.Album) != normalized(t.Album) || normalized(b.Album) != normalized(t.Album) {
+	if normalized(recordingTitle(a.Track)) != normalized(recordingTitle(b.Track)) || normalized(recordingTitle(a.Track)) != normalized(recordingTitle(t.Title)) || normalized(a.Album) != normalized(t.Album) || normalized(b.Album) != normalized(t.Album) {
 		return ""
 	}
 	credits := func(c Candidate) []string {

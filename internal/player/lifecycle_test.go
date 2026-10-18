@@ -326,3 +326,26 @@ func TestExitedSourceLeaderCannotLeakPipeHoldingHelper(t *testing.T) {
 		t.Fatal("exited source leader left a helper and a stuck stdout copier after cancellation")
 	}
 }
+
+func TestSkipReasonsPreserveOriginalMetadata(t *testing.T) {
+	p := New(context.Background(), slog.New(slog.NewTextHandler(&bytes.Buffer{}, nil)), func(context.Context, media.Track, Voice) error { return nil })
+	defer p.Close(context.Background())
+	events := make(chan PlaybackEvent, 4)
+	p.SetOnSkip(func(e PlaybackEvent) { events <- e })
+	tr := media.Track{Title: "Song", Artist: "Artist", Position: 8, Total: 12}
+	for _, tc := range []struct {
+		err  error
+		want string
+	}{
+		{&media.MatchError{Status: media.MatchUncertain, Reason: "ambiguous_candidates"}, "Ambiguous"},
+		{errors.New("HTTP Error 429"), "External provider"},
+		{&StreamError{Category: "audio_unavailable", Err: errors.New("no formats")}, "Audio unavailable"},
+		{errors.New("search unavailable"), "Search failed"},
+	} {
+		p.announceSkip(tr, tc.err)
+		e := <-events
+		if e.Track.Title != tr.Title || e.Track.Position != 8 || !strings.Contains(e.SkippedReason, tc.want) {
+			t.Fatal(e)
+		}
+	}
+}

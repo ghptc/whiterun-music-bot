@@ -543,3 +543,34 @@ func TestFirstCollectionPositionUnavailableAdvances(t *testing.T) {
 	}
 	jobDone(t, j)
 }
+
+func TestCollectionFailureAnnouncesOriginalPositionOnce(t *testing.T) {
+	p, _ := newTestPlayer(t, func(ctx context.Context, _ media.Track, _ Voice) error { <-ctx.Done(); return ctx.Err() })
+	events := make(chan PlaybackEvent, 5)
+	p.SetOnSkip(func(e PlaybackEvent) { events <- e })
+	tracks := numberedTracks(1, 3)
+	tracks[1].Position = 9
+	tracks[1].Total = 12
+	tracks[1].Artist = "Original Artist"
+	j := begin(t, p, context.Background(), tracks, func(_ context.Context, tr media.Track, _ bool) (media.Track, error) {
+		if tr.Title == "2" {
+			return media.Track{}, &media.MatchError{Status: media.MatchUncertain, Reason: "ambiguous_candidates"}
+		}
+		return matched(tr), nil
+	})
+	firstResult(t, j)
+	jobDone(t, j)
+	select {
+	case e := <-events:
+		if e.Track.Position != 9 || e.Track.Artist != "Original Artist" || e.SkippedReason == "" {
+			t.Fatal(e)
+		}
+	default:
+		t.Fatal("missing skipped track event")
+	}
+	select {
+	case e := <-events:
+		t.Fatal("duplicate skip", e)
+	default:
+	}
+}

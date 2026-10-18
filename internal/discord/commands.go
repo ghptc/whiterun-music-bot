@@ -325,7 +325,7 @@ func queuePageText(state player.State, page int) string {
 		return fmt.Sprintf("Queue has %d page(s). Use /queue page:1 through page:%d.", pages, pages)
 	}
 	var out strings.Builder
-	out.WriteString(currentText(state.Current, state.Paused) + "\n")
+	out.WriteString(currentStateText(state) + "\n")
 	if state.ProviderBlocked {
 		out.WriteString("Playback blocked by YouTube. Queue retained; use /resume to retry the same track.\n")
 	}
@@ -423,7 +423,7 @@ func nowText(g *guild) string {
 	if state.ProviderBlocked {
 		return "Playback is blocked by YouTube. The next track is retained; use /resume to retry it."
 	}
-	text := currentText(state.Current, state.Paused)
+	text := currentStateText(state)
 	if state.Current == nil {
 		return text
 	}
@@ -472,4 +472,11 @@ func resolutionStage(err error) string {
 	default:
 		return "metadata_resolution"
 	}
+}
+
+func currentStateText(state player.State) string {
+	if state.Current != nil && !state.CurrentStarted && !state.Paused {
+		return "Starting: " + trackTitle(*state.Current)
+	}
+	return currentText(state.Current, state.Paused)
 }

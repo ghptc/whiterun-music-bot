@@ -47,6 +47,7 @@ type GuildPlayer struct {
 	pause            *pauseGate
 	trackCause       context.CancelCauseFunc
 	onStart          func(PlaybackEvent)
+	onSkip           func(PlaybackEvent)
 	sequence         uint64
 	halted           bool
 	failures         int
@@ -232,6 +233,9 @@ func (p *GuildPlayer) run() {
 		}
 		close(done)
 		p.mu.Unlock()
+		if err != nil && !expectedCancel {
+			p.announceSkip(t, err)
+		}
 	}
 }
 

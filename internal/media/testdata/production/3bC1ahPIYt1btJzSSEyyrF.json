@@ -1,0 +1,71 @@
+{
+  "id": "3bC1ahPIYt1btJzSSEyyrF",
+  "name": "Whistle",
+  "artists": [
+    {
+      "external_urls": {
+        "spotify": "https://open.spotify.com/artist/0jnsk9HBra6NMjO2oANoPY"
+      },
+      "href": "https://api.spotify.com/v1/artists/0jnsk9HBra6NMjO2oANoPY",
+      "id": "0jnsk9HBra6NMjO2oANoPY",
+      "name": "Flo Rida",
+      "type": "artist",
+      "uri": "spotify:artist:0jnsk9HBra6NMjO2oANoPY"
+    }
+  ],
+  "album": {
+    "album_type": "album",
+    "artists": [
+      {
+        "external_urls": {
+          "spotify": "https://open.spotify.com/artist/0jnsk9HBra6NMjO2oANoPY"
+        },
+        "href": "https://api.spotify.com/v1/artists/0jnsk9HBra6NMjO2oANoPY",
+        "id": "0jnsk9HBra6NMjO2oANoPY",
+        "name": "Flo Rida",
+        "type": "artist",
+        "uri": "spotify:artist:0jnsk9HBra6NMjO2oANoPY"
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/album/7eLwoxxWs6lfkVYJGkGNbk"
+    },
+    "href": "https://api.spotify.com/v1/albums/7eLwoxxWs6lfkVYJGkGNbk",
+    "id": "7eLwoxxWs6lfkVYJGkGNbk",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab67616d0000b27315785fa4f22f8c50902b3a42",
+        "width": 640,
+        "height": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616d00001e0215785fa4f22f8c50902b3a42",
+        "width": 300,
+        "height": 300
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616d0000485115785fa4f22f8c50902b3a42",
+        "width": 64,
+        "height": 64
+      }
+    ],
+    "is_playable": true,
+    "name": "Wild Ones",
+    "release_date": "2012-06-22",
+    "release_date_precision": "day",
+    "total_tracks": 10,
+    "type": "album",
+    "uri": "spotify:album:7eLwoxxWs6lfkVYJGkGNbk"
+  },
+  "duration_ms": 224653,
+  "explicit": false,
+  "external_ids": {
+    "isrc": "USAT21201745"
+  },
+  "is_local": false,
+  "is_playable": true,
+  "external_urls": {
+    "spotify": "https://open.spotify.com/track/3bC1ahPIYt1btJzSSEyyrF"
+  },
+  "type": "track"
+}

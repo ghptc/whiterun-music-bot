@@ -1,0 +1,91 @@
+{
+  "id": "3SMVk8c3YOVv6DcTn8ABXa",
+  "name": "Bring The Noise Remix - Pumpkin Edit",
+  "artists": [
+    {
+      "external_urls": {
+        "spotify": "https://open.spotify.com/artist/6Mo9PoU6svvhgEum7wh2Nd"
+      },
+      "href": "https://api.spotify.com/v1/artists/6Mo9PoU6svvhgEum7wh2Nd",
+      "id": "6Mo9PoU6svvhgEum7wh2Nd",
+      "name": "Public Enemy",
+      "type": "artist",
+      "uri": "spotify:artist:6Mo9PoU6svvhgEum7wh2Nd"
+    },
+    {
+      "external_urls": {
+        "spotify": "https://open.spotify.com/artist/4Ws2otunReOa6BbwxxpCt6"
+      },
+      "href": "https://api.spotify.com/v1/artists/4Ws2otunReOa6BbwxxpCt6",
+      "id": "4Ws2otunReOa6BbwxxpCt6",
+      "name": "Benny Benassi",
+      "type": "artist",
+      "uri": "spotify:artist:4Ws2otunReOa6BbwxxpCt6"
+    }
+  ],
+  "album": {
+    "album_type": "single",
+    "artists": [
+      {
+        "external_urls": {
+          "spotify": "https://open.spotify.com/artist/6Mo9PoU6svvhgEum7wh2Nd"
+        },
+        "href": "https://api.spotify.com/v1/artists/6Mo9PoU6svvhgEum7wh2Nd",
+        "id": "6Mo9PoU6svvhgEum7wh2Nd",
+        "name": "Public Enemy",
+        "type": "artist",
+        "uri": "spotify:artist:6Mo9PoU6svvhgEum7wh2Nd"
+      },
+      {
+        "external_urls": {
+          "spotify": "https://open.spotify.com/artist/4Ws2otunReOa6BbwxxpCt6"
+        },
+        "href": "https://api.spotify.com/v1/artists/4Ws2otunReOa6BbwxxpCt6",
+        "id": "4Ws2otunReOa6BbwxxpCt6",
+        "name": "Benny Benassi",
+        "type": "artist",
+        "uri": "spotify:artist:4Ws2otunReOa6BbwxxpCt6"
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/album/4F9KRSBOCz3LhGcKhMx40L"
+    },
+    "href": "https://api.spotify.com/v1/albums/4F9KRSBOCz3LhGcKhMx40L",
+    "id": "4F9KRSBOCz3LhGcKhMx40L",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab67616d0000b273e0022081664af62c9db2fbcd",
+        "width": 640,
+        "height": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616d00001e02e0022081664af62c9db2fbcd",
+        "width": 300,
+        "height": 300
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616d00004851e0022081664af62c9db2fbcd",
+        "width": 64,
+        "height": 64
+      }
+    ],
+    "is_playable": true,
+    "name": "Bring The Noise Remix",
+    "release_date": "2007-09-11",
+    "release_date_precision": "day",
+    "total_tracks": 6,
+    "type": "album",
+    "uri": "spotify:album:4F9KRSBOCz3LhGcKhMx40L"
+  },
+  "duration_ms": 217142,
+  "explicit": false,
+  "external_ids": {
+    "isrc": "USUS10700062"
+  },
+  "is_local": false,
+  "is_playable": true,
+  "external_urls": {
+    "spotify": "https://open.spotify.com/track/3SMVk8c3YOVv6DcTn8ABXa"
+  },
+  "type": "track"
+}
