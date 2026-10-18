@@ -183,3 +183,37 @@ func TestSpotifyLaterPageFailureIsAtomic(t *testing.T) {
 		t.Fatal(got, err, pages)
 	}
 }
+
+func TestSpotifyIdentityPositionsAndTruncatedPagination(t *testing.T) {
+	for _, truncated := range []bool{false, true} {
+		s := &Spotify{ClientID: "id", ClientSecret: "secret", Client: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+			if r.URL.Host == "accounts.spotify.com" {
+				return jsonResponse(200, `{"access_token":"access","expires_in":3600}`), nil
+			}
+			if !strings.HasSuffix(r.URL.Path, "/items") {
+				return jsonResponse(200, `{"name":"collection"}`), nil
+			}
+			item := `{"item":{"id":"1234567890123456789012","name":"Song","type":"track","duration_ms":210000,"explicit":true,"external_ids":{"isrc":"US1234567890"},"artists":[{"name":"Artist"}]}}`
+			total := 3
+			if truncated {
+				total = 4
+			}
+			return jsonResponse(200, fmt.Sprintf(`{"total":%d,"items":[%s,null,%s],"next":null}`, total, item, item)), nil
+		})}}
+		got, err := s.Collection(context.Background(), "playlist", "1234567890123456789012")
+		if truncated {
+			if !errors.Is(err, ErrSpotifyIncomplete) {
+				t.Fatal(err)
+			}
+			continue
+		}
+		if err != nil || len(got.Tracks) != 2 || got.Skipped != 1 {
+			t.Fatal(got, err)
+		}
+		for i, track := range got.Tracks {
+			if track.Position != i*2+1 || track.Total != 3 || track.SpotifyID != "1234567890123456789012" || track.ISRC != "US1234567890" || track.Explicit == nil || !*track.Explicit {
+				t.Fatal(track)
+			}
+		}
+	}
+}

@@ -186,6 +186,7 @@ func (s *Spotify) apiCollection(ctx context.Context, kind, id string) (Collectio
 		endpoint = "items"
 	}
 	// Construct pagination URLs ourselves; never forward credentials to a next URL.
+	expectedTotal := -1
 	for offset := 0; ; {
 		params := url.Values{"limit": {"50"}, "offset": {fmt.Sprint(offset)}}
 		if s.Market != "" {
@@ -198,6 +199,12 @@ func (s *Spotify) apiCollection(ctx context.Context, kind, id string) (Collectio
 		}
 		if err := s.get(ctx, root+"/"+endpoint+"?"+params.Encode(), &page); err != nil {
 			return Collection{}, err
+		}
+		if expectedTotal >= 0 && page.Total != expectedTotal {
+			return Collection{}, ErrSpotifyIncomplete
+		}
+		if page.Total > 0 {
+			expectedTotal = page.Total
 		}
 		if page.Total > MaxCollectionTracks || offset+len(page.Items) > MaxCollectionTracks {
 			return Collection{}, ErrCollectionTooLarge
@@ -236,6 +243,9 @@ func (s *Spotify) apiCollection(ctx context.Context, kind, id string) (Collectio
 		}
 		offset += len(page.Items)
 		if page.Next == nil || *page.Next == "" {
+			if expectedTotal >= 0 && offset != expectedTotal {
+				return Collection{}, ErrSpotifyIncomplete
+			}
 			break
 		}
 		if len(page.Items) == 0 {

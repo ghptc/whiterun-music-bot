@@ -85,3 +85,83 @@ func TestFidelityPolicyAndOriginalMetadata(t *testing.T) {
 		t.Fatal("accepted invalid policy")
 	}
 }
+
+func TestFidelityDoesNotInferSimilarArtistOrMissingGuest(t *testing.T) {
+	track := Track{Title: "Song", Artist: "Artist", Artists: []string{"Artist"}, Duration: 210 * time.Second}
+	for _, c := range []Candidate{
+		{ID: "abcdefghijk", Title: "Song", Channel: "Artist Junior", Duration: 210},
+		{ID: "abcdefghijk", Title: "Artist Junior - Song", Channel: "Archive", Duration: 210},
+	} {
+		if d := CompareSpotify(track, c, DefaultMatchPolicy()); d.Status == MatchConfirmed {
+			t.Fatal(d, c)
+		}
+	}
+	track.Artists = append(track.Artists, "Guest")
+	c := Candidate{ID: "abcdefghijk", Title: "Song", Channel: "Artist", Duration: 210}
+	if d := CompareSpotify(track, c, DefaultMatchPolicy()); d.Status == MatchConfirmed {
+		t.Fatal("missing collaborator", d)
+	}
+}
+func TestSpotifyCacheIdentityCannotBeMutated(t *testing.T) {
+	cache := &SearchCache{}
+	original := Track{Artists: []string{"Artist"}, Explicit: new(true)}
+	cache.put("key", original, time.Now())
+	original.Artists[0] = "outside"
+	*original.Explicit = false
+	got, _ := cache.get("key", time.Now())
+	if got.Artists[0] != "Artist" || !*got.Explicit {
+		t.Fatal(got)
+	}
+	got.Artists[0] = "reader"
+	*got.Explicit = false
+	again, _ := cache.get("key", time.Now())
+	if again.Artists[0] != "Artist" || !*again.Explicit {
+		t.Fatal(again)
+	}
+}
+
+func TestIncompleteVerifiedMetadataIsUncertain(t *testing.T) {
+	track := Track{Title: "Song", Artist: "Artist", Duration: 210 * time.Second}
+	c := Candidate{ID: "abcdefghijk", Title: "Song", Channel: "Artist"}
+	_, err := selectSpotify(context.Background(), track, []Candidate{c}, func(c Candidate) (Candidate, error) { return c, nil })
+	var decision *MatchError
+	if !errors.As(err, &decision) || decision.Status != MatchUncertain {
+		t.Fatal(err)
+	}
+}
+
+func TestStructuredSpotifyIdentityConstrainsDirectResolver(t *testing.T) {
+	r, _ := resolverFixture(t, `{"id":"abcdefghijk","title":"Song Live","channel":"Artist","duration":210}`)
+	r.Match = &Track{Title: "Song", Artist: "Artist", Duration: 210 * time.Second}
+	if _, err := r.Resolve(context.Background(), "https://www.youtube.com/watch?v=abcdefghijk"); !errors.Is(err, ErrSpotifyMatch) {
+		t.Fatal("direct path bypassed identity", err)
+	}
+}
+
+func TestCandidateVerificationFailureCannotBecomeARejectionOrFallback(t *testing.T) {
+	track := Track{Title: "Song", Artist: "Artist", Duration: 210 * time.Second}
+	a := Candidate{ID: "abcdefghijk", Title: "Song", Channel: "Artist", Duration: 210}
+	b := a
+	b.ID = "lmnopqrstuv"
+	unavailable := errors.New("Sign in to confirm you're not a bot")
+	_, err := selectSpotify(context.Background(), track, []Candidate{a, b}, func(c Candidate) (Candidate, error) {
+		if c.ID == a.ID {
+			return Candidate{}, unavailable
+		}
+		return c, nil
+	})
+	var decision *MatchError
+	if !errors.Is(err, unavailable) || !errors.As(err, &decision) || decision.Status != MatchUncertain {
+		t.Fatal(err)
+	}
+}
+
+func TestUnstructuredGuestNamesDoNotConfirmSimilarCollaborators(t *testing.T) {
+	track := Track{Title: "Song (feat. Guest)", Artist: "Artist", Artists: []string{"Artist", "Guest"}, Duration: 210 * time.Second}
+	for _, title := range []string{"Artist - Song feat Guest", "Artist - Song feat Guest Junior"} {
+		c := Candidate{ID: "abcdefghijk", Title: title, Channel: "Artist", Duration: 210}
+		if d := CompareSpotify(track, c, DefaultMatchPolicy()); d.Status == MatchConfirmed {
+			t.Fatal("unverified collaborator", d)
+		}
+	}
+}

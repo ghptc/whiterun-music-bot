@@ -173,6 +173,17 @@ func rankSpotifyPolicy(t Track, c Candidate, provisional bool, policy MatchPolic
 		artistEvidence = c.Channel + " " + c.Uploader + " " + c.Title
 	}
 	b.Artist = coverage(t.Artist, artistEvidence)
+	if artists == "" {
+		b.Artist = 0
+		if channelIdentity(normalized(c.Channel)) == channelIdentity(normalized(t.Artist)) || channelIdentity(normalized(c.Uploader)) == channelIdentity(normalized(t.Artist)) {
+			b.Artist = 1
+		}
+		for _, separator := range []string{" - ", " — ", " – "} {
+			if prefix, _, ok := strings.Cut(c.Title, separator); ok && normalized(recordingTitle(prefix)) == normalized(t.Artist) {
+				b.Artist = 1
+			}
+		}
+	}
 	if artists != "" {
 		b.Artist = 0
 		actualArtists := c.Artists
@@ -198,6 +209,9 @@ func rankSpotifyPolicy(t Track, c Candidate, provisional bool, policy MatchPolic
 	if len(credited) == 0 {
 		credited = []string{t.Artist}
 	}
+	if !provisional && len(credited) > 1 && len(c.Artists) == 0 {
+		return reject("credits_unknown")
+	}
 	for _, artist := range credited {
 		evidence := coverage(artist, artistEvidence+" "+c.Title)
 		if len(c.Artists) > 0 {
@@ -213,7 +227,7 @@ func rankSpotifyPolicy(t Track, c Candidate, provisional bool, policy MatchPolic
 	}
 	b.Credits /= float64(len(credited))
 	// Explicit recording credits must not contradict the requested collaborators.
-	if artists != "" && b.Credits < 1 {
+	if (!provisional || artists != "") && b.Credits < 1 {
 		return reject("credited_artist_mismatch")
 	}
 	durationScore := 0
@@ -270,6 +284,26 @@ func deduplicateCandidates(pools ...[]*Candidate) []Candidate {
 	return result
 }
 func (r Resolver) resolveSpotify(ctx context.Context, query string) (Candidate, error) {
+	key := mappingKey(*r.Match, r.matchPolicy())
+	if r.Mappings != nil {
+		cached, ok, err := r.Mappings.LoadMapping(ctx, key)
+		if err != nil {
+			return Candidate{}, err
+		}
+		if ok {
+			full, err := r.extract(ctx, "https://www.youtube.com/watch?v="+cached.ID, "spotify_mapping_revalidation", false)
+			if err == nil && full.ID == cached.ID && CompareSpotify(*r.Match, full.Candidate, r.matchPolicy()).Status == MatchConfirmed {
+				return full.Candidate, nil
+			}
+			if err := r.Mappings.DeleteMapping(ctx, key); err != nil {
+				return Candidate{}, err
+			}
+			if ctx.Err() != nil {
+				return Candidate{}, ctx.Err()
+			}
+		}
+	}
+
 	music, musicErr := r.extract(ctx, "https://music.youtube.com/search?q="+url.QueryEscape(query)+"#songs", "spotify_music_search", true)
 	if ctx.Err() != nil {
 		return Candidate{}, ctx.Err()
@@ -286,13 +320,19 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (Candidate, 
 	if musicErr != nil && regularErr != nil {
 		return Candidate{}, errors.Join(musicErr, regularErr)
 	}
-	return selectSpotifyPolicy(ctx, *r.Match, r.matchPolicy(), deduplicateCandidates(music.Entries, regular.Entries), func(c Candidate) (Candidate, error) {
+	chosen, err := selectSpotifyPolicy(ctx, *r.Match, r.matchPolicy(), deduplicateCandidates(music.Entries, regular.Entries), func(c Candidate) (Candidate, error) {
 		full, err := r.extract(ctx, "https://www.youtube.com/watch?v="+c.ID, "spotify_candidate_verification", false)
 		if err == nil && full.ID != c.ID {
 			err = errors.New("YouTube returned a different video ID")
 		}
 		return full.Candidate, err
 	})
+	if err == nil && r.Mappings != nil {
+		if saveErr := r.Mappings.SaveMapping(ctx, key, chosen); saveErr != nil {
+			return Candidate{}, saveErr
+		}
+	}
+	return chosen, err
 }
 func selectSpotify(ctx context.Context, track Track, candidates []Candidate, verify func(Candidate) (Candidate, error)) (Candidate, error) {
 	return selectSpotifyPolicy(ctx, track, DefaultMatchPolicy(), candidates, verify)
@@ -309,7 +349,7 @@ func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, c
 	timing := TimingFrom(ctx)
 	logRank := func(c Candidate, b spotifyRank, stage string) {
 		if timing != nil {
-			timing.log.DebugContext(ctx, "spotify_candidate", "video_id", c.ID, "stage", stage, "title_similarity", b.Title, "title_precision", b.TitlePrecision, "artist_similarity", b.Artist, "credited_artist_similarity", b.Credits, "duration_delta_ms", b.DurationDeltaMS, "source_class", b.SourceClass, "version_compatible", b.VersionCompatible, "negative_markers", b.NegativeMarkers, "ranking_score", b.Score, "reason", b.Reason)
+			timing.log.InfoContext(ctx, "spotify_candidate", "video_id", c.ID, "stage", stage, "title_similarity", b.Title, "title_precision", b.TitlePrecision, "artist_similarity", b.Artist, "credited_artist_similarity", b.Credits, "duration_delta_ms", b.DurationDeltaMS, "source_class", b.SourceClass, "version_compatible", b.VersionCompatible, "negative_markers", b.NegativeMarkers, "ranking_score", b.Score, "reason", b.Reason)
 		}
 	}
 	for _, c := range candidates {
@@ -322,6 +362,8 @@ func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, c
 	sort.SliceStable(shortlist, func(i, j int) bool { return shortlist[i].rank.Score > shortlist[j].rank.Score })
 	bestScore := -1
 	runnerUp := -1
+	sawUncertain := false
+	var verificationErrors []error
 	var best Candidate
 	var bestRank spotifyRank
 	// Sparse Music summaries must get a verification opportunity even when
@@ -350,9 +392,13 @@ func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, c
 		}
 		full, err := verify(item.candidate)
 		if err != nil {
+			verificationErrors = append(verificationErrors, err)
 			continue
 		}
 		b := rankSpotifyPolicy(track, full, false, policy)
+		if CompareSpotify(track, full, policy).Status == MatchUncertain {
+			sawUncertain = true
+		}
 		logRank(full, b, "verified")
 		if b.Reason == "accepted" {
 			if b.Score > bestScore {
@@ -366,7 +412,13 @@ func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, c
 	if ctx.Err() != nil {
 		return Candidate{}, ctx.Err()
 	}
+	if len(verificationErrors) > 0 {
+		return Candidate{}, errors.Join(append([]error{&MatchError{Status: MatchUncertain, Reason: "candidate_verification_failed"}}, verificationErrors...)...)
+	}
 	if bestScore < 0 {
+		if sawUncertain {
+			return Candidate{}, &MatchError{Status: MatchUncertain, Reason: "insufficient_metadata"}
+		}
 		return Candidate{}, &MatchError{Status: MatchRejected, Reason: "no_acceptable_candidate"}
 	}
 	if runnerUp >= 0 && bestScore-runnerUp < policy.MinScoreMargin {

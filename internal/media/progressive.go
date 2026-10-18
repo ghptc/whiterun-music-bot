@@ -81,6 +81,11 @@ func (r CollectionResolver) spotifyMetadata(ctx context.Context, kind, id string
 	if len(c.Tracks) > MaxCollectionTracks {
 		return Collection{}, ErrCollectionTooLarge
 	}
+	for i := range c.Tracks {
+		if c.Tracks[i].Position == 0 {
+			c.Tracks[i].Position, c.Tracks[i].Total = i+1, len(c.Tracks)+c.Skipped
+		}
+	}
 	c.IsCollection = kind != "track"
 	return c, nil
 }

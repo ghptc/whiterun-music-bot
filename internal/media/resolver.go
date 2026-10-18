@@ -62,8 +62,9 @@ type Resolver struct {
 	Binary string
 	Cache  *SearchCache
 	// Match is immutable structured metadata for a Spotify-originated search.
-	Match  *Track
-	Policy *MatchPolicy
+	Match    *Track
+	Policy   *MatchPolicy
+	Mappings MappingStore
 }
 
 func (r Resolver) Resolve(ctx context.Context, query string) (Track, error) {
@@ -90,11 +91,7 @@ func (r Resolver) Resolve(ctx context.Context, query string) (Track, error) {
 		key = direct
 	}
 	if r.Match != nil {
-		metadata, _ := json.Marshal(struct {
-			Track  *Track
-			Policy MatchPolicy
-		}{r.Match, r.matchPolicy()})
-		key = "spotify:" + string(metadata)
+		key = "spotify:" + MappingKey(*r.Match, r.Policy)
 	}
 	if track, ok := r.Cache.get(key, time.Now()); ok {
 		track.Timing = timing
@@ -226,6 +223,12 @@ func (r Resolver) resolveUncached(ctx context.Context, query, direct string, isU
 			return Track{}, err
 		}
 	}
+	if r.Match != nil {
+		decision := CompareSpotify(*r.Match, chosen, r.matchPolicy())
+		if decision.Status != MatchConfirmed {
+			return Track{}, &MatchError{Status: decision.Status, Reason: decision.Reason}
+		}
+	}
 	if !videoID.MatchString(chosen.ID) {
 		return Track{}, ErrNoSong
 	}
@@ -287,4 +290,13 @@ func YouTubeURL(s string) (string, bool, error) {
 		return "", true, bad
 	}
 	return "https://www.youtube.com/watch?v=" + id, true, nil
+}
+
+// CloneTrack detaches mutable identity fields at ownership boundaries.
+func CloneTrack(t Track) Track {
+	t.Artists = append([]string(nil), t.Artists...)
+	if t.Explicit != nil {
+		t.Explicit = new(*t.Explicit)
+	}
+	return t
 }

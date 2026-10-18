@@ -35,7 +35,7 @@ func (c *SearchCache) get(query string, now time.Time) (Track, bool) {
 		delete(c.entries, query)
 		return Track{}, false
 	}
-	return entry.track, true
+	return CloneTrack(entry.track), true
 }
 
 func (c *SearchCache) put(query string, track Track, now time.Time) {
@@ -66,6 +66,7 @@ func (c *SearchCache) putLocked(query string, track Track, now time.Time) {
 		}
 		delete(c.entries, oldest)
 	}
+	track = CloneTrack(track)
 	track.Timing = nil // A cache hit must belong to the new interaction.
 	c.entries[query] = cacheEntry{track: track, expires: now.Add(searchCacheTTL)}
 }
@@ -94,7 +95,7 @@ func (c *SearchCache) resolve(ctx context.Context, key string, work func(context
 	c.mu.Lock()
 	if entry, ok := c.entries[key]; ok && time.Now().Before(entry.expires) {
 		c.mu.Unlock()
-		return entry.track, nil
+		return CloneTrack(entry.track), nil
 	}
 	if c.flights == nil {
 		c.flights = make(map[string]*searchFlight)
@@ -146,6 +147,6 @@ func (c *SearchCache) resolve(ctx context.Context, key string, work func(context
 		if err := ctx.Err(); err != nil {
 			return Track{}, err
 		}
-		return flight.track, flight.err
+		return CloneTrack(flight.track), flight.err
 	}
 }

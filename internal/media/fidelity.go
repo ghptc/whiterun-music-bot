@@ -63,7 +63,7 @@ func CompareSpotify(t Track, c Candidate, p MatchPolicy) MatchDecision {
 	status := MatchRejected
 	if b.Reason == "accepted" {
 		status = MatchConfirmed
-	} else if b.Reason == "duration_unknown" || b.Reason == "primary_artist_mismatch" && c.Artist == "" && len(c.Artists) == 0 && c.Channel == "" && c.Uploader == "" {
+	} else if b.Reason == "duration_unknown" || b.Reason == "credits_unknown" || b.Reason == "primary_artist_mismatch" && c.Artist == "" && len(c.Artists) == 0 && c.Channel == "" && c.Uploader == "" {
 		status = MatchUncertain
 	}
 	return MatchDecision{Status: status, Reason: b.Reason, Score: b.Score}
