@@ -369,3 +369,46 @@ func TestRestartDuring123TrackResolution(t *testing.T) {
 		}
 	}
 }
+
+func TestArtworkSurvivesDatabaseAndPlayerRestart(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "artwork.db")
+	ctx := context.Background()
+	db, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	art := "https://i.scdn.co/image/cover"
+	thumb := "https://i.ytimg.com/vi/abcdefghijk/default.jpg"
+	track := media.Track{Title: "Paranoid", Artist: "Black Sabbath", SpotifyID: "original", SpotifyArtworkURL: art, YouTubeThumbnailURL: thumb, RequestedSource: "spotify", RequestedBy: "listener", Position: 3, Total: 8}
+	if err = db.SaveGuild(ctx, "1", player.DurableState{Queue: []media.Track{track}}); err != nil {
+		t.Fatal(err)
+	}
+	if err = db.SaveGuild(ctx, "2", player.DurableState{Queue: []media.Track{{Title: "Other guild"}}}); err != nil {
+		t.Fatal(err)
+	}
+	if err = db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	db, err = Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	p := player.New(ctx, slog.New(slog.NewTextHandler(io.Discard, nil)), nil)
+	defer p.Close(ctx)
+	if err = p.ConfigureStore(db, "1"); err != nil {
+		t.Fatal(err)
+	}
+	snapshot := p.State()
+	if snapshot.Current != nil || len(snapshot.Entries) != 1 {
+		t.Fatal(snapshot)
+	}
+	got := snapshot.Entries[0].Track
+	if got.SpotifyID != track.SpotifyID || got.SpotifyArtworkURL != art || got.YouTubeThumbnailURL != thumb || got.RequestedBy != "listener" || got.Position != 3 || media.ArtworkURL(got) != art {
+		t.Fatal(got)
+	}
+	other, err := db.LoadGuild(ctx, "2")
+	if err != nil || media.ArtworkURL(other.Queue[0]) != "" {
+		t.Fatal(other, err)
+	}
+}

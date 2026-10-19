@@ -93,7 +93,11 @@ func TestAnyChannelMemberControlsPlaybackAndAddsCollections(t *testing.T) {
 	receive("one")
 	for _, tc := range []struct{ name, want string }{{"pause", "Playback paused"}, {"resume", "Playback resumed"}, {"now", "one"}, {"queue", "two"}, {"skip", "Skipped"}} {
 		b.command(qualityInteraction(t, tc.name, 4, ""))
-		if !strings.Contains(r.response, tc.want) {
+		response := r.response
+		if tc.name == "queue" {
+			response += queueAttachment(t, r.update, "queue.txt")
+		}
+		if !strings.Contains(response, tc.want) {
 			t.Fatal(tc.name, r.response)
 		}
 	}
@@ -228,7 +232,11 @@ func TestAnnouncementRESTFailureDoesNotStopAudio(t *testing.T) {
 }
 func TestQueueReportsImportOutcomes(t *testing.T) {
 	state := player.State{Imports: []player.CollectionProgress{{Total: 6, Resolved: 2, Failed: 3, Uncertain: 1, MetadataSkipped: 1, Skipped: 1}}}
-	text := queuePageText(state, 1)
+	v, err := buildQueueView(state, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := v.Content
 	for _, part := range []string{"2 matched", "1 uncertain", "2 rejected", "1 unavailable", "1 skipped"} {
 		if !strings.Contains(text, part) {
 			t.Fatal(text)

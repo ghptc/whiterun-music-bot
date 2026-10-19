@@ -207,6 +207,9 @@ func parseSpotifyPlaylist(body []byte, id string) (Collection, error) {
 		track := spotifyTrack{Type: "track"}
 		var visit func(*html.Node)
 		visit = func(n *html.Node) {
+			if n.Data == "img" {
+				track.Album.Images = append(track.Album.Images, spotifyImage{URL: attr(n, "src")})
+			}
 			if n.Data == "a" {
 				if tid := spotifyLinkID(attr(n, "href"), "track"); tid != "" {
 					if track.ID != "" && track.ID != tid {

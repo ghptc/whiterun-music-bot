@@ -115,13 +115,15 @@ type spotifyTrack struct {
 	} `json:"external_ids"`
 	DurationMS int `json:"duration_ms"`
 	Album      struct {
-		Name string `json:"name"`
+		Name   string         `json:"name"`
+		Images []spotifyImage `json:"images"`
 	} `json:"album"`
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Local    bool   `json:"is_local"`
-	Playable *bool  `json:"is_playable"`
+	Images   []spotifyImage `json:"images"`
+	ID       string         `json:"id"`
+	Name     string         `json:"name"`
+	Type     string         `json:"type"`
+	Local    bool           `json:"is_local"`
+	Playable *bool          `json:"is_playable"`
 	Artists  []struct {
 		Name string `json:"name"`
 	} `json:"artists"`
@@ -238,6 +240,7 @@ func (s *Spotify) apiCollection(ctx context.Context, kind, id string) (Collectio
 			metadata.Position, metadata.Total = offset+pageIndex+1, page.Total
 			if kind == "album" {
 				metadata.Album = meta.Name
+				metadata.SpotifyArtworkURL = spotifyArtwork(meta.Images)
 			}
 			result.Tracks = append(result.Tracks, metadata)
 		}
@@ -268,5 +271,5 @@ func spotifyMetadata(track *spotifyTrack) (Track, bool) {
 			artists = append(artists, artist.Name)
 		}
 	}
-	return Track{SpotifyID: track.ID, ISRC: track.ExternalIDs.ISRC, Explicit: track.Explicit, Artists: artists, Title: track.Name, Artist: track.Artists[0].Name, Album: track.Album.Name, Duration: time.Duration(track.DurationMS) * time.Millisecond, RequestedSource: "spotify", SourceURL: "https://open.spotify.com/track/" + track.ID}, true
+	return Track{SpotifyArtworkURL: spotifyArtwork(track.Album.Images), SpotifyID: track.ID, ISRC: track.ExternalIDs.ISRC, Explicit: track.Explicit, Artists: artists, Title: track.Name, Artist: track.Artists[0].Name, Album: track.Album.Name, Duration: time.Duration(track.DurationMS) * time.Millisecond, RequestedSource: "spotify", SourceURL: "https://open.spotify.com/track/" + track.ID}, true
 }

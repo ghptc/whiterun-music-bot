@@ -28,7 +28,7 @@ func commands() []d.ApplicationCommandCreate {
 			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionString{Name: "query", Description: "Song and artist, YouTube video/playlist, or Spotify track/playlist/album URL", Required: true, MaxLength: new(500)}}
 		}
 		if c.name == "queue" {
-			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionInt{Name: "page", Description: "Upcoming queue page (10 tracks per page)", MinValue: new(1), MaxValue: new(player.MaxQueueTracks / queuePageSize)}}
+			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionInt{Name: "limit", Description: "Maximum upcoming tracks to show (omit for the complete queue)", MinValue: new(1)}}
 		}
 		if c.name == "skip" {
 			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionInt{Name: "count", Description: "Tracks to skip, including the current track (default 1)", MinValue: new(1), MaxValue: new(player.MaxSkipTracks)}}
@@ -89,11 +89,11 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 		return
 	}
 	if data.CommandName() == "queue" {
-		page := 1
-		if value, present := data.OptInt("page"); present {
-			page = value
+		var limit *int
+		if value, present := data.OptInt("limit"); present {
+			limit = &value
 		}
-		reply(queuePageText(g.player.State(), page))
+		b.replyQueue(e, g.player.State(), limit)
 		return
 	}
 	g.mu.Lock()
@@ -308,77 +308,6 @@ func title(s string) string {
 	return s
 }
 
-const queuePageSize = 10
-
-func queueText(g *guild) string { return queuePageText(g.player.State(), 1) }
-
-// Render a single bounded page from one snapshot, outside guild/player locks.
-func queuePageText(state player.State, page int) string {
-	queued := state.Entries
-	if queued == nil {
-		for _, track := range state.Queued {
-			queued = append(queued, player.QueueEntry{Track: track})
-		}
-	}
-	pages := max(1, (len(queued)+queuePageSize-1)/queuePageSize)
-	if page < 1 || page > pages {
-		return fmt.Sprintf("Queue has %d page(s). Use /queue page:1 through page:%d.", pages, pages)
-	}
-	var out strings.Builder
-	out.WriteString(currentStateText(state) + "\n")
-	if state.ProviderBlocked {
-		out.WriteString("Playback blocked by YouTube. Queue retained; use /resume to retry the same track.\n")
-	}
-	if state.Halted {
-		out.WriteString("Playback halted after 5 consecutive failures. Queue retained; use /resume or /play.\n")
-	}
-	if len(queued) == 0 {
-		out.WriteString("The queue is empty.")
-	} else {
-		start, end := (page-1)*queuePageSize, min(page*queuePageSize, len(queued))
-		out.WriteString("Up next:\n")
-		for i := start; i < end; i++ {
-			label := trackTitle(queued[i].Track)
-			if len(state.Resolving) > 0 || len(state.Imports) > 0 || state.PersistenceError != "" {
-				r := []rune(label)
-				if len(r) > 60 {
-					label = string(r[:57]) + "..."
-				}
-			}
-			if queued[i].Pending {
-				label += " [resolving]"
-			}
-			fmt.Fprintf(&out, "%d. %s\n", i+1, label)
-		}
-		if end < len(queued) {
-			fmt.Fprintf(&out, "…and %d more.\n", len(queued)-end)
-		}
-	}
-	if state.PersistenceError != "" {
-		out.WriteString("\n" + state.PersistenceError + "\n")
-	}
-	for _, summary := range state.Imports {
-		fmt.Fprintf(&out, "\nLast import: %d matched; %d uncertain; %d rejected; %d unavailable; %d skipped.\n", summary.Resolved, summary.Uncertain, summary.Failed-summary.Uncertain, summary.MetadataSkipped, summary.Skipped)
-	}
-	total := len(queued)
-	if state.Current != nil {
-		total++
-	}
-	fmt.Fprintf(&out, "\n%d tracks remaining. %d total including current. Page %d/%d.", len(queued), total, page, pages)
-	if pages > 1 {
-		out.WriteString("\nInspect any page with /queue page:N.")
-	}
-	if len(state.Resolving) > 0 {
-		total, resolved, failed := 0, 0, 0
-		for _, job := range state.Resolving {
-			total += job.Total
-			resolved += job.Resolved
-			failed += job.Failed
-		}
-		fmt.Fprintf(&out, "\nResolving collections: %d/%d matched; %d failed. Pending entries are not playable yet.", resolved, total, failed)
-	}
-	return out.String()
-}
 func skipText(result player.SkipResult) string {
 	if result.Skipped == 0 {
 		return "The Bard is not playing. The queue is empty."

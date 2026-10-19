@@ -115,6 +115,7 @@ func (r CollectionResolver) MatchSpotify(ctx context.Context, original Track, fi
 	}
 	// Spotify remains the identity source; only audio locator fields come from YouTube.
 	original.VideoID, original.URL, original.Channel = track.VideoID, track.URL, track.Channel
+	original.YouTubeThumbnailURL = track.YouTubeThumbnailURL
 	original.identityProof = track.identityProof
 	original.RequestedSource = "spotify"
 	if original.SpotifyID == "" {

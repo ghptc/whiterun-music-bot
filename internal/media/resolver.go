@@ -14,29 +14,32 @@ import (
 var ErrNoSong = errors.New("The Bard could find no song worthy of playing.")
 
 type Track struct {
-	identityProof    *Candidate
-	SpotifyID        string
-	ISRC             string
-	Explicit         *bool
-	RequestedBy      string
-	MatchStatus      MatchStatus
-	MatchReason      string
-	Live             bool
-	Position, Total  int
-	RequestedSource  string
-	SourceURL        string
-	Artist           string
-	Artists          []string
-	Album            string
-	VerifyBeforePlay bool
-	VideoID          string
-	Channel          string
-	Title            string
-	URL              string
-	Duration         time.Duration
-	Timing           *Timing `json:"-"`
+	identityProof       *Candidate
+	SpotifyArtworkURL   string `json:",omitempty"`
+	YouTubeThumbnailURL string `json:",omitempty"`
+	SpotifyID           string
+	ISRC                string
+	Explicit            *bool
+	RequestedBy         string
+	MatchStatus         MatchStatus
+	MatchReason         string
+	Live                bool
+	Position, Total     int
+	RequestedSource     string
+	SourceURL           string
+	Artist              string
+	Artists             []string
+	Album               string
+	VerifyBeforePlay    bool
+	VideoID             string
+	Channel             string
+	Title               string
+	URL                 string
+	Duration            time.Duration
+	Timing              *Timing `json:"-"`
 }
 type Candidate struct {
+	Thumbnail    string    `json:"thumbnail"`
 	CheckedAt    time.Time `json:"bard_checked_at,omitempty"`
 	ISRC         string    `json:"isrc"`
 	Explicit     *bool     `json:"explicit"`
@@ -243,7 +246,7 @@ func (r Resolver) resolveUncached(ctx context.Context, query, direct string, isU
 		return Track{}, err
 	}
 	timing.Event("candidate_selected", started, "selected", chosen.Title, "video_id", chosen.ID)
-	return Track{identityProof: &chosen, RequestedSource: "youtube", Live: chosen.Live || chosen.LiveStatus == "is_live", VideoID: chosen.ID, Channel: chosen.Channel, Timing: timing, Title: chosen.Title, URL: "https://www.youtube.com/watch?v=" + chosen.ID, Duration: time.Duration(chosen.Duration * float64(time.Second))}, nil
+	return Track{YouTubeThumbnailURL: SafeArtworkURL(chosen.Thumbnail), identityProof: &chosen, RequestedSource: "youtube", Live: chosen.Live || chosen.LiveStatus == "is_live", VideoID: chosen.ID, Channel: chosen.Channel, Timing: timing, Title: chosen.Title, URL: "https://www.youtube.com/watch?v=" + chosen.ID, Duration: time.Duration(chosen.Duration * float64(time.Second))}, nil
 }
 
 // MetadataArgs is used only for direct videos and selected candidates whose

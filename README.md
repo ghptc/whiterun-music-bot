@@ -33,7 +33,7 @@ Logs: `docker compose logs -f bard`. Shut down: `docker compose down`. To update
 
 ## Commands
 
-Join a regular voice channel first. Commands that change playback require you to be in the Bard's channel; `/queue` and `/now` can be used by anyone in the server. Responses are concise and visible only to the invoker.
+Join a regular voice channel first. Commands that change playback require you to be in the Bard's channel; `/queue` and `/now` can be used by anyone in the server. Playback control responses are visible only to the invoker; `/play` and `/queue` responses are public.
 
 | Command | Behavior |
 | --- | --- |
@@ -43,7 +43,7 @@ Join a regular voice channel first. Commands that change playback require you to
 | `/play query:Nutshell Alice in Chains unplugged` | Prefer the unplugged version |
 | `/play query:https://www.youtube.com/watch?v=VIDEO_ID` | Play that exact video, including unofficial uploads and live streams |
 | `/skip [count]` | Skip 1–1001 tracks atomically, including the current track; default 1 |
-| `/queue [page]` | Show the current song and pause state, plus ten upcoming tracks per page; default page 1 |
+| `/queue [limit]` | Show current plus the complete upcoming queue; optional positive integer limits future tracks |
 | `/now` | Show only the current track, pause state, duration, album when available, and source/channel |
 | `/pause` | Hold the current track and keep the queue intact |
 | `/resume` | Continue paused audio, or release a consecutive-failure halt |
@@ -51,7 +51,7 @@ Join a regular voice channel first. Commands that change playback require you to
 | `/stop` | Stop playback, cancel searches, clear the queue, remain in voice |
 | `/leave` | Stop, cancel searches, clear the queue, and disconnect |
 
-`/queue` keeps the concise first-ten view. Use `/queue page:2`, `/queue page:3`, and so on to inspect every upcoming track. Pages have fixed ten-position boundaries, retain absolute upcoming position numbers, and show the current track separately plus upcoming/total counts. Each command takes a fresh consistent snapshot, so positions can change as playback advances or someone edits the queue. Responses remain below Discord's 2,000-character limit, including emoji; no track positions are silently omitted.
+`/queue` selects the full queue. `/queue limit:10` and `/queue limit:50` select only the next 10 or 50 future tracks; the current track is always separate. Zero and negative limits are rejected. One consistent snapshot produces up to ten artwork cards in Discord plus complete `queue.txt` and `queue.html` attachments. Download and open the HTML file for the full artwork gallery; the text file keeps every selected position accessible. Spotify album covers take priority over YouTube thumbnails, including pending tracks. There is no manual pagination. Rendering does not fetch images or resolve music. Attachment budgets and send failures are reported explicitly; see [queue experience and limits](docs/queue-experience.md).
 
 `/skip count:50` skips the current track plus the next 49 queued entries in one operation. For current track 1 and queued tracks 2–123, track 51 is selected next and tracks 52–123 remain queued. Omitted count means 1. Counts beyond the available tracks skip everything available; 0, negative values, and values above 1001 are rejected. During cancellation cleanup, further skips advance queued successors rather than recounting the cancelled track. With queued tracks but no active track, counting starts at the queue head. Replies report the selected **Next** track, not a claim that audio has started. The operation also works while paused or starting playback, and does not cancel pending searches.
 
@@ -63,7 +63,7 @@ A finished or failed track advances automatically. Playback failures are logged.
 
 ## Collections and Spotify setup
 
-`/play` accepts YouTube playlists (including album playlists), Spotify tracks, Spotify playlists, and Spotify albums. Normal `https://open.spotify.com/track/...`, `/album/...`, and `/playlist/...` links accept share parameters such as `?si=...` and localized `intl-...` paths. Malformed or unsupported Spotify links are rejected, never searched as song text. Spotify short/redirect links and URIs are not supported. Collections append atomically in source order and start automatically when idle. `/queue` displays the current track, the next ten tracks, and the total upcoming count. `/clear` removes only upcoming tracks; `/stop` also cancels playback and pending searches.
+`/play` accepts YouTube playlists (including album playlists), Spotify tracks, Spotify playlists, and Spotify albums. Normal `https://open.spotify.com/track/...`, `/album/...`, and `/playlist/...` links accept share parameters such as `?si=...` and localized `intl-...` paths. Malformed or unsupported Spotify links are rejected, never searched as song text. Spotify short/redirect links and URIs are not supported. Collections append atomically in source order and start automatically when idle. `/queue` displays the current track and provides the complete upcoming queue through native previews and attached exports. `/clear` removes only upcoming tracks; `/stop` also cancels playback and pending searches.
 
 YouTube playlist URLs use flat metadata, preserve video IDs/order/duplicates, and skip known unavailable entries. Each exact video is verified when its turn arrives; no alternate recording is searched. Explicit video URLs (even with a playlist share parameter) play that video without a music/category/duration filter. Direct live URLs are supported with no fixed playback-duration deadline. Audio streams are extracted fresh only at playback. Individual failures advance; five consecutive failures halt with the remaining queue retained for `/resume` or an accepted `/play`.
 
@@ -88,7 +88,7 @@ Live metadata checks on 2026-09-23 passed for `35m4wmHSlcS2RNsafX4dEg` (123/123,
 
 Spotify matching combines bounded YouTube Music song search and normal YouTube search, deduplicates video IDs, and verifies up to four candidates per round (eight unique IDs total). Two bounded alternative searches can broaden discovery; corroborated recording groups are compared before choosing an upload. It requires title/artist evidence, bidirectional version compatibility, and close duration where Spotify supplies it. Source authority breaks ties only among compatible recordings; “Official Audio” in a title is not proof. Failed matches are skipped in original logical order. See [the source-selection and lifecycle policy](docs/source-selection-and-lifecycle.md) for thresholds, pinned yt-dlp research, failure recovery, and investigation evidence.
 
-Collections are limited to 500 entries and queues to 1,000 upcoming logical positions, including pending tracks. Oversized collections or batches that do not fit are rejected in full. Commands acknowledge immediately. Spotify collections validate complete metadata, reserve ordered queue positions, and start the first matched track without waiting for the rest. Three workers per collection resolve remaining tracks; a shared limiter allows at most three background matches and four total matches, retaining capacity for first tracks. Results become playable only in contiguous playlist order; failed matches are skipped. Concurrent plays reserve whole batches atomically in metadata-completion order. `/queue` and `/queue page:N` are public channel responses showing pending positions and matching progress. `/skip count:N` counts both playable and pending positions; `/clear` cancels unfinished loading and preserves the current song. Stop, leave, and voice disconnection cancel loading too. The ten-minute collection deadline discards unresolved positions while retaining already committed tracks. Queues are held in memory and are lost on restart or leave.
+Collections are limited to 500 entries and queues to 1,000 upcoming logical positions, including pending tracks. Oversized collections or batches that do not fit are rejected in full. Commands acknowledge immediately. Spotify collections validate complete metadata, reserve ordered queue positions, and start the first matched track without waiting for the rest. Three workers per collection resolve remaining tracks; a shared limiter allows at most three background matches and four total matches, retaining capacity for first tracks. Results become playable only in contiguous playlist order; failed matches are skipped. Concurrent plays reserve whole batches atomically in metadata-completion order. `/queue` and `/queue limit:N` are public channel responses showing pending positions and matching progress. `/skip count:N` counts both playable and pending positions; `/clear` cancels unfinished loading and preserves the current song. Stop, leave, and voice disconnection cancel loading too. The ten-minute collection deadline discards unresolved positions while retaining already committed tracks. Queue metadata is persisted in SQLite; voice attachment after restart is explicit. Leave clears the queue.
 
 `/play` and `/queue` responses are public. Every actual first voice frame triggers one compact public Now Playing/Next message; pending next positions say “resolving…”. The latest accepted `/play` sets the text channel for future announcements. Spotify requests are labeled as Spotify metadata with YouTube audio.
 
@@ -145,7 +145,7 @@ After installation, manually check `/summon`, text and URL `/play`, Spotify trac
 
 ## Limitations
 
-- Restarting loses queues. One voice channel per guild; no seek, volume, persistent history, or Stage channels.
+- After restart, persisted queue metadata is recovered; voice must be attached explicitly and the interrupted track restarts from the beginning. One voice channel per guild; no seek, volume or Stage channels.
 - Long pauses keep the existing stream open; upstream connection expiry or network failure can still end a track. Track-local playback errors advance the queue; a classified YouTube challenge or rate limit blocks playback, retains the logical queue, and waits for `/resume` to retry the same position.
 - Search can take up to 90 seconds; concurrent searches enqueue in resolution-completion order. Selection is heuristic, not a guarantee of the canonical recording.
 - YouTube can block server IPs, impose regional restrictions or login requirements, and change extraction behavior. V1 has no cookies, authentication, proxy, or PO-token configuration. Classified provider challenges retain the queue and require an explicit `/resume`; the command does not make the provider available.

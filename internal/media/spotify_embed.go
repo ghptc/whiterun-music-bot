@@ -114,6 +114,9 @@ type spotifyEmbedEnvelope struct {
 	} `json:"props"`
 }
 type spotifyEmbedEntity struct {
+	CoverArt struct {
+		Sources []spotifyImage `json:"sources"`
+	} `json:"coverArt"`
 	Type     string `json:"type"`
 	URI      string `json:"uri"`
 	Name     string `json:"name"`
@@ -123,6 +126,7 @@ type spotifyEmbedEntity struct {
 		Name string `json:"name"`
 	} `json:"artists"`
 	Tracks []struct {
+		ImageURI string `json:"imageUri"`
 		URI      string `json:"uri"`
 		UID      string `json:"uid"`
 		Title    string `json:"title"`
@@ -164,6 +168,7 @@ func parseSpotifyEmbed(body []byte, id string, evidence playlistEvidence) (Colle
 			return Collection{}, fmt.Errorf("%w: malformed Embed entry %d", ErrSpotifyPageParse, i+1)
 		}
 		track := spotifyTrack{ID: strings.TrimPrefix(entry.URI, "spotify:track:"), Type: entry.Type, Name: entry.Title, DurationMS: entry.Duration}
+		track.Album.Images = []spotifyImage{{URL: entry.ImageURI}}
 		// Spotify separates artist credits with comma + NBSP, not ordinary commas
 		// (which may be part of an artist's name). Do not normalize before splitting.
 		for _, artist := range strings.Split(entry.Subtitle, ",\u00a0") {

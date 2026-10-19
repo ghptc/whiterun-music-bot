@@ -42,7 +42,7 @@ does not mean a focused unit test is useless.
 | R3 challenge/rate-limit preservation | sourceFailure, player.run, job.commit | No old requirement test; soak injects HTTP 403 | Existing assertions reward skipping and continuing | No challenge/429 classification, retention, cooldown or suspension oracle | Yes, directly |
 | R4 halt/recovery | player.run, SetPaused | TestConsecutiveFailuresHaltAndResume | Five instantaneous injected errors then nil returns, exact remaining count | Implementation's threshold is expectation; no processes, provider state, retry/cooldown | Yes; encodes consumption of five failures |
 | P5 Discord controls | command/guild session orchestration | TestControlsAndSearchCancellation; TestPlayCollectionAndClearCommands; TestPauseResumeNowAndLeaveCommands | Parsed commands, fake REST/cache, search reset, queue state, dummy close | Pre-attached dummy connection, replaced PlayFunc, no real gateway join/voice/processes | Yes |
-| Q1/Q2 Discord presentation | queuePageText/skipText | queue_skip_test.go; queue-limit/registration tests | Logical positions, pending labels, pagination, count, response semantics | State fixtures or fake players; no audio | Yes; correctly avoids claiming Skip itself started playback |
+| Q1/Q2 Discord presentation | buildQueueView/replyQueue/skipText | queue_skip_test.go; queue-limit/registration tests | Logical positions, pending labels, complete exports, limits, count, response semantics | State fixtures or fake players; no audio | Yes; correctly avoids claiming Skip itself started playback |
 | V1 first-frame announcements | startVoice, announceStart, announcement worker | announcements_test.go | Fake WriteFrame then once-only REST message for EOF/skip and each source | One arbitrary fake byte; synthetic completion; dummy transport | Yes; real send can fail |
 | V1 DAVE recovery | waitVoiceReady | readiness_test.go | Fake readiness channel and deadline propagation | No DAVE epochs/crypto/network; separately scoped contexts | Yes |
 | C1 guild isolation | player maps/state, voice watcher | TestLeaveAndGuildIsolation; TestPauseIsolationAndConcurrentState; progressive isolation | Independent fake players, queue/close/cancel isolation, concurrent reads | Global provider pressure, real gateway transports absent | Yes |
@@ -100,14 +100,11 @@ The boundary assessments above, rather than test names, define each guarantee.
 
 ### [internal/discord/queue_skip_test.go](../internal/discord/queue_skip_test.go)
 
-- `TestQueuePagesExposeEveryPosition`
-- `TestQueuePageWorstCaseDiscordSize`
 - `TestQueueAndSkipOptionRegistration`
-- `TestQueuePageAndBulkSkipCommands`
+- `TestQueueAndBulkSkipCommands`
 - `TestSkipResponseDoesNotClaimPlaybackStarted`
 - `TestPublicQueueDuringProgressiveLoading`
 - `TestOtherCommandResponsesRemainEphemeral`
-- `TestPendingQueueWorstCaseDiscordSize`
 
 ### [internal/discord/readiness_test.go](../internal/discord/readiness_test.go)
 
@@ -319,3 +316,8 @@ The boundary assessments above, rather than test names, define each guarantee.
 
 See [Bard search intent](bard-search-intent.md) for BARD-SEARCH-001 through
 BARD-SEARCH-008, deterministic fixtures, mutation evidence and scope limits.
+
+## CR-001 queue presentation
+
+See [queue experience](queue-experience.md) for the twenty required scenarios,
+artwork persistence, hybrid full-list delivery, rate-limit and failure tests.

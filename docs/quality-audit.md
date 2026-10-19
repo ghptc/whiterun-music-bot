@@ -8,7 +8,7 @@ internal/player e internal/discord. Não há AGENTS.md aplicável no repositóri
 Credenciais em .env não foram lidas.
 
 Comandos realmente registrados: summon, play, now, pause, resume, skip (count),
-queue (page), clear, stop, leave. Previous não existe. Consultas now/queue são
+queue (formato anterior ao CR-001), clear, stop, leave. Previous não existe. Consultas now/queue são
 permitidas sem conexão de voz; mutações consultam o canal do usuário e do bot,
 sem restrição ao solicitante original. Play revalida o canal após a busca.
 

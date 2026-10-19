@@ -17,6 +17,7 @@ type MappingStore interface {
 func mappingKey(t Track, p MatchPolicy) string {
 	t.Position, t.Total = 0, 0
 	t.RequestedBy = ""
+	t.SpotifyArtworkURL, t.YouTubeThumbnailURL = "", ""
 	t.Timing = nil
 	t.VideoID, t.URL, t.Channel = "", "", ""
 	t.MatchStatus, t.MatchReason = "", ""

@@ -132,7 +132,7 @@ progress. These remain heuristics, not proof that two recordings are identical.
 
 ## Public Discord state
 
-`/play` acknowledgements and success responses, `/queue`, and `/queue page:N` are
+`/play` acknowledgements and success responses, `/queue`, and `/queue limit:N` are
 public. Other command response visibility is unchanged. Accepted `/play` chooses
 the text channel for future track announcements, in acceptance order; failures do
 not change it. Only channel/session identifiers are retained, never interaction

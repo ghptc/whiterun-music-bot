@@ -25,11 +25,13 @@ import (
 type recordingRest struct {
 	rest.Rest
 	response string
+	update   d.MessageUpdate
 	messages chan sentMessage
 }
 
 func (r *recordingRest) UpdateInteractionResponse(_ snowflake.ID, _ string, m d.MessageUpdate, _ ...rest.RequestOpt) (*d.Message, error) {
 	r.response = *m.Content
+	r.update = m
 	return &d.Message{}, nil
 }
 
@@ -134,12 +136,17 @@ func TestQueueResponseStaysWithinDiscordLimit(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if n := len(utf16.Encode([]rune(queueText(g)))); n > 2000 {
-		t.Fatalf("response has %d UTF-16 units", n)
+	v, err := buildQueueView(g.player.State(), nil)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if !strings.Contains(queueText(g), "more") {
-		t.Fatal("missing overflow count")
+	if n := len(utf16.Encode([]rune(v.Content))); n > 2000 {
+		t.Fatal(n)
 	}
+	if !strings.Contains(v.Content, "queue.txt") || v.Text == "" {
+		t.Fatal("missing complete export")
+	}
+
 }
 
 func TestPlayAcknowledgesWithContentBeforeGuildWork(t *testing.T) {
@@ -223,7 +230,7 @@ func TestPlayCollectionAndClearCommands(t *testing.T) {
 	}
 	waitForCollections(t, g.player)
 	b.command(interaction(t, "queue", true))
-	if !strings.Contains(r.response, "Artist — First") || !strings.Contains(r.response, "Artist — Last") || !strings.Contains(r.response, "1 tracks remaining") {
+	if !strings.Contains(r.response, "Artist — First") || !strings.Contains(queueAttachment(t, r.update, "queue.txt"), "Artist — Last") || !strings.Contains(r.response, "1 tracks remaining") {
 		t.Fatal(r.response)
 	}
 	// A second playlist appends without interrupting the first, preserving duplicates.

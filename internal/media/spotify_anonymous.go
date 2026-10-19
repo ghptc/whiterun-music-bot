@@ -333,5 +333,6 @@ func parseSpotifyTrackEmbed(body []byte, uri string) (Track, error) {
 	if !ok {
 		return Track{}, ErrSpotifyPageParse
 	}
+	t.SpotifyArtworkURL = spotifyArtwork(e.CoverArt.Sources)
 	return t, nil
 }

@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"unicode/utf16"
 
 	d "github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
@@ -17,70 +16,6 @@ import (
 	"whiterun/internal/player"
 )
 
-func TestQueuePagesExposeEveryPosition(t *testing.T) {
-	for _, size := range []int{0, 1, 10, 11, 122, 123, 1000} {
-		t.Run(fmt.Sprint(size), func(t *testing.T) {
-			state := player.State{Current: &media.Track{Title: "Current track"}, Paused: true}
-			for i := range size {
-				state.Queued = append(state.Queued, media.Track{Title: fmt.Sprintf("Song %04d", i+1)})
-			}
-			pages := max(1, (size+queuePageSize-1)/queuePageSize)
-			for page := 1; page <= pages; page++ {
-				text := queuePageText(state, page)
-				if !strings.Contains(text, "Paused: Current track") || !strings.Contains(text, fmt.Sprintf("%d tracks remaining", size)) || !strings.Contains(text, fmt.Sprintf("%d total including current", size+1)) {
-					t.Fatal(text)
-				}
-				if !strings.Contains(text, fmt.Sprintf("Page %d/%d", page, pages)) {
-					t.Fatal("wrong page count")
-				}
-				for i := range size {
-					want := i >= (page-1)*queuePageSize && i < page*queuePageSize
-					if strings.Contains(text, fmt.Sprintf("%d. Song %04d\n", i+1, i+1)) != want {
-						t.Fatalf("position %d on page %d", i+1, page)
-					}
-				}
-				if len(utf16.Encode([]rune(text))) > 2000 {
-					t.Fatal("Discord content limit exceeded")
-				}
-			}
-			for _, page := range []int{0, -1, pages + 1, 1000000} {
-				if !strings.Contains(queuePageText(state, page), "Queue has") {
-					t.Fatal("invalid page accepted")
-				}
-			}
-		})
-	}
-	if text := queuePageText(player.State{}, 1); !strings.Contains(text, "nothing playing") || !strings.Contains(text, "queue is empty") {
-		t.Fatal(text)
-	}
-}
-
-func TestQueueShowsProviderBlockedState(t *testing.T) {
-	state := player.State{
-		ProviderBlocked: true,
-		ProviderReason:  "youtube_auth_challenge",
-		Entries:         []player.QueueEntry{{Track: media.Track{Title: "Track two"}, Position: 2}},
-	}
-	text := queuePageText(state, 1)
-	if !strings.Contains(text, "Playback blocked by YouTube") || !strings.Contains(text, "use /resume") || !strings.Contains(text, "1. Track two") {
-		t.Fatal(text)
-	}
-}
-
-func TestQueuePageWorstCaseDiscordSize(t *testing.T) {
-	for _, count := range []int{123, 1000} {
-		long := strings.Repeat("🎵", 200) + " @everyone\n**markup**"
-		state := player.State{Current: &media.Track{Title: long, RequestedSource: "spotify"}}
-		for range count {
-			state.Queued = append(state.Queued, media.Track{Title: long, Artist: long})
-		}
-		for page := 1; page <= max(1, (count+9)/10); page++ {
-			if text := queuePageText(state, page); len(utf16.Encode([]rune(text))) > 2000 {
-				t.Fatalf("page %d too large: %d", page, len(utf16.Encode([]rune(text))))
-			}
-		}
-	}
-}
 func intInteraction(t *testing.T, command, option string, value int) *events.ApplicationCommandInteractionCreate {
 	t.Helper()
 	e := interaction(t, command, true)
@@ -102,13 +37,13 @@ func TestQueueAndSkipOptionRegistration(t *testing.T) {
 			t.Fatal(c)
 		}
 		opt, ok := c.Options[0].(d.ApplicationCommandOptionInt)
-		if !ok || opt.Required || opt.MinValue == nil || *opt.MinValue != 1 || opt.MaxValue == nil {
+		if !ok || opt.Required || opt.MinValue == nil || *opt.MinValue != 1 {
 			t.Fatal(opt)
 		}
-		if c.Name == "skip" && (opt.Name != "count" || *opt.MaxValue != 1001) {
+		if c.Name == "skip" && (opt.Name != "count" || opt.MaxValue == nil || *opt.MaxValue != 1001) {
 			t.Fatal(opt)
 		}
-		if c.Name == "queue" && (opt.Name != "page" || *opt.MaxValue != 100) {
+		if c.Name == "queue" && (opt.Name != "limit" || opt.MaxValue != nil) {
 			t.Fatal(opt)
 		}
 	}
@@ -116,7 +51,7 @@ func TestQueueAndSkipOptionRegistration(t *testing.T) {
 		t.Fatal(found)
 	}
 }
-func TestQueuePageAndBulkSkipCommands(t *testing.T) {
+func TestQueueAndBulkSkipCommands(t *testing.T) {
 	for _, count := range []int{0, 1, 2, 50, 123, 1001, -1} {
 		t.Run(fmt.Sprint(count), func(t *testing.T) {
 			b, r := testBot(t)
@@ -147,8 +82,8 @@ func TestQueuePageAndBulkSkipCommands(t *testing.T) {
 			case <-time.After(time.Second):
 				t.Fatal("not playing")
 			}
-			b.command(intInteraction(t, "queue", "page", 13))
-			if !strings.Contains(r.response, "121. Song 122") || !strings.Contains(r.response, "122. Song 123") || !strings.Contains(r.response, "123 total including current") {
+			b.command(interaction(t, "queue", true))
+			if !strings.Contains(queueAttachment(t, r.update, "queue.txt"), "121.  — Song 122") || !strings.Contains(queueAttachment(t, r.update, "queue.txt"), "122.  — Song 123") || !strings.Contains(r.response, "123 total including current") {
 				t.Fatal(r.response)
 			}
 			if count == 0 {
@@ -219,32 +154,36 @@ func TestPublicQueueDuringProgressiveLoading(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("first track blocked")
 	}
-	for _, page := range []int{0, 1, 2, 13} {
+	for _, limit := range []int{0, 1, 10, 500} {
 		e := interaction(t, "queue", true)
-		if page > 0 {
-			e = intInteraction(t, "queue", "page", page)
+		if limit > 0 {
+			e = intInteraction(t, "queue", "limit", limit)
 		}
 		acknowledged := false
 		e.Respond = func(typ d.InteractionResponseType, data d.InteractionResponseData, _ ...rest.RequestOpt) error {
 			message, ok := data.(d.MessageCreate)
 			if typ != d.InteractionResponseTypeDeferredCreateMessage || (data != nil && (!ok || message.Flags&d.MessageFlagEphemeral != 0)) {
-				t.Fatalf("queue is not public: %v %#v", typ, data)
+				t.Fatal("queue is not public")
 			}
 			acknowledged = true
 			return nil
 		}
 		b.command(e)
-		actualPage := max(1, page)
-		if !acknowledged || !strings.Contains(r.response, "1/123 matched") || !strings.Contains(r.response, "122 tracks remaining") || !strings.Contains(r.response, fmt.Sprintf("Page %d/13", actualPage)) {
+		if !acknowledged || !strings.Contains(r.response, "1/123 matched") || !strings.Contains(r.response, "122 tracks remaining") {
 			t.Fatal(r.response)
 		}
+		text := queueAttachment(t, r.update, "queue.txt")
+		end := 122
+		if limit > 0 {
+			end = min(end, limit)
+		}
 		for i := 1; i <= 122; i++ {
-			want := i > (actualPage-1)*10 && i <= actualPage*10
-			if strings.Contains(r.response, fmt.Sprintf("%d. Song %03d [resolving]\n", i, i+1)) != want {
-				t.Fatalf("incorrect pending position %d: %s", i, r.response)
+			if strings.Contains(text, fmt.Sprintf("%d.  — Song %03d [resolving]", i, i+1)) != (i <= end) {
+				t.Fatalf("incorrect pending position %d", i)
 			}
 		}
 	}
+
 	g.player.Clear()
 	select {
 	case <-job.Done:
@@ -265,18 +204,5 @@ func TestOtherCommandResponsesRemainEphemeral(t *testing.T) {
 			return nil
 		}
 		b.command(e)
-	}
-}
-
-func TestPendingQueueWorstCaseDiscordSize(t *testing.T) {
-	state := player.State{Current: &media.Track{Title: strings.Repeat("🎵", 200)}, Resolving: []player.CollectionProgress{{Total: 1000, Resolved: 1}}}
-	for i := range 1000 {
-		state.Entries = append(state.Entries, player.QueueEntry{Track: media.Track{Title: strings.Repeat("🎵", 200)}, Pending: true, Position: i + 1})
-	}
-	for page := 1; page <= 100; page++ {
-		text := queuePageText(state, page)
-		if len(utf16.Encode([]rune(text))) > 2000 || !strings.Contains(text, "1/1000 matched") {
-			t.Fatalf("invalid pending page %d: %s", page, text)
-		}
 	}
 }
