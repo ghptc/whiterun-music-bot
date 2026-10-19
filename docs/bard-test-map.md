@@ -314,3 +314,8 @@ The boundary assessments above, rather than test names, define each guarantee.
 ### [cmd/bot/spotify_diagnose_test.go](../cmd/bot/spotify_diagnose_test.go)
 
 - `TestConfiguredSpotify`
+
+## Search intent and album/track disambiguation
+
+See [Bard search intent](bard-search-intent.md) for BARD-SEARCH-001 through
+BARD-SEARCH-008, deterministic fixtures, mutation evidence and scope limits.

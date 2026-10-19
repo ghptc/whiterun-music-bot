@@ -16,7 +16,7 @@ func musicShape(c Candidate) bool {
 		return false
 	}
 	text := c.Title + " " + c.Channel + " " + c.Uploader
-	for _, term := range []string{"podcast", "interview", "reaction", "reacts", "review", "tutorial", "documentary", "gameplay", "news", "shorts", "short"} {
+	for _, term := range []string{"podcast", "interview", "reaction", "reacts", "review", "tutorial", "documentary", "gameplay", "news", "shorts", "short", "full album", "complete album"} {
 		if has(text, term) {
 			return false
 		}

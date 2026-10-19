@@ -574,3 +574,53 @@ func TestCollectionFailureAnnouncesOriginalPositionOnce(t *testing.T) {
 	default:
 	}
 }
+
+func TestBardAlbumUnavailableRecordingReportsPosition(t *testing.T) {
+	// BARD-SEARCH-008: position 2 was unavailable in metadata; position 3
+	// fails recording resolution. Neither may renumber the surviving position 4.
+	p, _ := newTestPlayer(t, func(ctx context.Context, _ media.Track, _ Voice) error { <-ctx.Done(); return ctx.Err() })
+	events := make(chan PlaybackEvent, 2)
+	p.SetOnSkip(func(e PlaybackEvent) { events <- e })
+	tracks := []media.Track{}
+	for _, pos := range []int{1, 3, 4} {
+		tracks = append(tracks, media.Track{Title: fmt.Sprint(pos), Album: "Paranoid", Artist: "Black Sabbath", SpotifyID: fmt.Sprint(pos), Position: pos, Total: 4})
+	}
+	j, err := p.BeginCollection(context.Background(), media.Collection{Title: "Paranoid", IsCollection: true, Tracks: tracks, Skipped: 1}, func(_ context.Context, tr media.Track, _ bool) (media.Track, error) {
+		if tr.Position == 3 {
+			return media.Track{}, media.ErrSpotifyMatch
+		}
+		return matched(tr), nil
+	}, p.Ticket())
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstResult(t, j)
+	jobDone(t, j)
+	select {
+	case e := <-events:
+		if e.Track.Position != 3 || e.Track.Total != 4 || e.Track.Album != "Paranoid" || e.SkippedReason == "" {
+			t.Fatal(e)
+		}
+	default:
+		t.Fatal("missing unavailable recording report")
+	}
+	state := p.State()
+	found := false
+	for _, e := range state.Entries {
+		if e.Track.SpotifyID == "4" {
+			found = true
+			if e.Track.Position != 4 || e.Track.Total != 4 {
+				t.Fatal(e)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("lost album successor", state)
+	}
+	p.mu.Lock()
+	progress := p.completedImports[0]
+	p.mu.Unlock()
+	if progress.Resolved != 2 || progress.Failed != 1 || progress.MetadataSkipped != 1 {
+		t.Fatal(progress)
+	}
+}
