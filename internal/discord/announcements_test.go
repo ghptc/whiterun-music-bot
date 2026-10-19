@@ -215,3 +215,13 @@ func TestSkippedAnnouncementKeepsIdentityAndPosition(t *testing.T) {
 		t.Fatal("missing confirmed playback")
 	}
 }
+
+func TestFailureAnnouncementsDistinguishResolutionAndInterruptedPlayback(t *testing.T) {
+	for _, tc := range []struct{ stage, label string }{{"resolution", "Unavailable:"}, {"starting", "Playback failed to start:"}, {"playing", "Playback interrupted:"}} {
+		event := player.PlaybackEvent{Track: media.Track{SpotifyID: "original-id", Title: "Little Bad Girl", Position: 9, Total: 123}, FailureStage: tc.stage, SkippedReason: "injected"}
+		text := playbackText(event)
+		if !strings.Contains(text, tc.label) || strings.Contains(text, "Skipped:") || !strings.Contains(text, "original-id") || !strings.Contains(text, "9/123") {
+			t.Fatal(text)
+		}
+	}
+}

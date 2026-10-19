@@ -1,0 +1,8 @@
+{
+  "version": "baseline",
+  "wall_seconds": 2.4603067179996287,
+  "user_seconds": 2.726872,
+  "system_seconds": 0.159273,
+  "max_rss_kib": 26100,
+  "benchmark": "goos: linux\ngoarch: amd64\npkg: whiterun/internal/media\ncpu: AMD Ryzen 7 9800X3D 8-Core Processor           \nBenchmarkFastMatchRealFixture-8   \t   10000\t    245783 ns/op\t  411173 B/op\t    6192 allocs/op\nPASS\n"
+}

@@ -63,6 +63,14 @@ func discoverSpotify(ctx context.Context, t Track, p MatchPolicy, query string, 
 		return full, e
 	}
 	lookup("https://music.youtube.com/search?q="+url.QueryEscape(query)+"#songs", "spotify_music_search", true)
+	// Resolve the official Music pool before paying for a second search. Only
+	// independently corroborated releases may terminate this fast pass.
+	if len(pools) > 0 {
+		fast, fastErr := selectSpotifyPolicyMode(ctx, t, p, deduplicateCandidates(pools...), check, true)
+		if fastErr == nil {
+			return fast, nil
+		}
+	}
 	lookup("ytsearch10:"+query, "spotify_video_search", false)
 	for round := 0; round < 3; round++ {
 		if ctx.Err() != nil {

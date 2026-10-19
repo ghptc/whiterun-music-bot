@@ -50,6 +50,11 @@ func TestValidatedMappingReusedAndInconsistentVideoInvalidated(t *testing.T) {
 	if err != nil || strings.Contains(string(raw), "ytsearch") || !strings.Contains(string(raw), "watch?v=abcdefghijk") {
 		t.Fatal(string(raw), err)
 	}
+	// Expire the availability lease before simulating changed provider metadata.
+	candidate.CheckedAt = time.Now().Add(-11 * time.Minute)
+	if err := db.SaveMapping(ctx, key, candidate); err != nil {
+		t.Fatal(err)
+	}
 	candidate.Title = "Song Live"
 	write(candidate)
 	if _, err = resolver.Resolve(ctx, "Artist Song"); err == nil {
@@ -67,5 +72,34 @@ func TestValidatedMappingReusedAndInconsistentVideoInvalidated(t *testing.T) {
 	write(candidate)
 	if err := resolver.VerifySpotify(ctx, track); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestFreshPersistentMappingAvoidsMetadataProcessAcrossReopen(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "fresh.sqlite")
+	db, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	track := media.Track{SpotifyID: "spotify-id", Title: "Song", Artist: "Artist", Duration: 210 * time.Second}
+	c := media.Candidate{ID: "abcdefghijk", Title: "Song", Channel: "Artist - Topic", Duration: 210, CheckedAt: time.Now()}
+	key := media.MappingKey(track, nil)
+	if !strings.HasPrefix(key, "spotify:spotify-id:") {
+		t.Fatal(key)
+	}
+	if err := db.SaveMapping(ctx, key, c); err != nil {
+		t.Fatal(err)
+	}
+	db.Close()
+	db, err = Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	r := media.Resolver{Binary: "/nonexistent/bard-test-yt-dlp", Mappings: db, Match: &track}
+	got, err := r.Resolve(ctx, "Artist Song")
+	if err != nil || got.VideoID != c.ID {
+		t.Fatal(got, err)
 	}
 }

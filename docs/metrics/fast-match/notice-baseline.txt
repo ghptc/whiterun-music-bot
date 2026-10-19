@@ -1,0 +1,7 @@
+=== RUN   TestFailureNoticeIsNotUserSkip
+    failure_notice_regression_test.go:13: failure misreported as user skip: Skipped: Little Bad Girl • position 8/123
+        Audio unavailable; playback could not complete.
+--- FAIL: TestFailureNoticeIsNotUserSkip (0.00s)
+FAIL
+FAIL	whiterun/internal/discord	0.002s
+FAIL

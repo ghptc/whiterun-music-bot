@@ -13,6 +13,11 @@ func exactRequestedRelease(t Track, c Candidate) bool {
 	if rankSpotify(t, c, false).Reason != "accepted" {
 		return false
 	}
+	return requestedReleaseEvidence(t, c)
+}
+
+// Caller must first validate full metadata against the active policy.
+func requestedReleaseEvidence(t Track, c Candidate) bool {
 	class, _ := sourceClass(t, c)
 	if class != "verified_artist" && class != "topic" && class != "artist_vevo" && class != "release" {
 		return false

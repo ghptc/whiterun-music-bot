@@ -87,9 +87,24 @@ func watchActivity(ctx context.Context, cancel context.CancelCauseFunc, last *at
 	}
 }
 
+type AttemptState string
+
+const (
+	Pending   AttemptState = "PENDING"
+	Resolving AttemptState = "RESOLVING"
+	Ready     AttemptState = "READY"
+	Starting  AttemptState = "STARTING"
+	Playing   AttemptState = "PLAYING"
+	Finished  AttemptState = "FINISHED"
+	Failed    AttemptState = "FAILED"
+	Canceled  AttemptState = "CANCELED"
+)
+
 // PlaybackEvent is a copied snapshot. Start events follow the first successful
 // voice frame; skip events carry SkippedReason and never announce a start.
 type PlaybackEvent struct {
+	State         AttemptState
+	FailureStage  string
 	SkippedReason string
 	Track         media.Track
 	Next          *media.Track
@@ -116,7 +131,7 @@ func (p *GuildPlayer) SetOnStart(fn func(PlaybackEvent)) {
 }
 func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequence uint64) {
 	p.mu.Lock()
-	if ctx.Err() != nil || p.current == nil {
+	if ctx.Err() != nil || p.current == nil || p.sequence != sequence || p.startedSequence == sequence {
 		p.mu.Unlock()
 		return
 	}
@@ -125,7 +140,7 @@ func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequ
 	if len(p.history) > 100 {
 		p.history = append([]media.Track(nil), p.history[len(p.history)-100:]...)
 	}
-	event := PlaybackEvent{Track: copyTrack(track), Sequence: sequence}
+	event := PlaybackEvent{Track: copyTrack(track), Sequence: sequence, State: Playing}
 	if len(p.queue) > 0 {
 		next := copyTrack(p.queue[0].Track)
 		event.Next = &next
@@ -176,10 +191,16 @@ func (p *GuildPlayer) SetOnSkip(fn func(PlaybackEvent)) {
 	p.onSkip = fn
 }
 func (p *GuildPlayer) announceSkip(t media.Track, err error) {
+	p.announceFailure(t, err, "resolution", 0)
+}
+func (p *GuildPlayer) announceFailure(t media.Track, err error, stage string, sequence uint64) {
 	p.mu.Lock()
 	fn := p.onSkip
 	p.mu.Unlock()
 	reason := "Search failed; the recording could not be verified."
+	if stage == "playing" || stage == "starting" {
+		reason = "Audio unavailable; playback could not complete."
+	}
 	var match *media.MatchError
 	switch {
 	case providerFailureCategory(err) != "":
@@ -199,6 +220,6 @@ func (p *GuildPlayer) announceSkip(t media.Track, err error) {
 		}
 	}
 	if fn != nil {
-		fn(PlaybackEvent{Track: copyTrack(t), SkippedReason: reason})
+		fn(PlaybackEvent{Track: copyTrack(t), SkippedReason: reason, FailureStage: stage, Sequence: sequence, State: Failed})
 	}
 }

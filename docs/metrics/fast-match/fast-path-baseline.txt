@@ -1,0 +1,6 @@
+=== RUN   TestFastMatchStopsAfterCorroboratedRelease
+    fast_match_test.go:41: got=MOIwxOYdhrk err=<nil> searches=2 checks=1
+--- FAIL: TestFastMatchStopsAfterCorroboratedRelease (0.00s)
+FAIL
+FAIL	whiterun/internal/media	0.003s
+FAIL

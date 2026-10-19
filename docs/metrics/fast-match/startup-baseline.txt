@@ -1,0 +1,5 @@
+=== RUN   TestProgressive123StartupMeasurement
+    collection_test.go:477: 123 tracks; fake 10ms metadata + 10ms/YouTube target; old atomic first-playable=331.474599ms; progressive first fake audio frame=20.420154ms; unresolved at frame=122
+--- PASS: TestProgressive123StartupMeasurement (0.35s)
+PASS
+ok  	whiterun/internal/player	0.354s

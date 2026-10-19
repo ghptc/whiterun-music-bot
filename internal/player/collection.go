@@ -22,6 +22,7 @@ type queueEntry struct {
 	position int
 }
 type QueueEntry struct {
+	State        AttemptState
 	Track        media.Track
 	Pending      bool
 	CollectionID uint64
@@ -183,6 +184,9 @@ func (j *CollectionJob) resolve(index int, first bool) collectionResolution {
 	if blocked {
 		return collectionResolution{index: index, blocked: true}
 	}
+	if err == nil && j.metadata[index].SpotifyID != "" && track.SpotifyID != j.metadata[index].SpotifyID {
+		err = &media.MatchError{Status: media.MatchRejected, Reason: "spotify_identity_mismatch"}
+	}
 	if err == nil && track.URL == "" {
 		err = media.ErrSpotifyMatch
 	}
@@ -252,6 +256,9 @@ func (j *CollectionJob) record(r collectionResolution) {
 	if j.recorded[r.index] {
 		p.mu.Unlock()
 		return
+	}
+	if !j.wanted[r.index] || j.ctx.Err() != nil {
+		r.skipped = true
 	}
 	j.recorded[r.index] = true
 	if r.skipped {

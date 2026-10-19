@@ -46,7 +46,13 @@ func (b *Bot) setupAnnouncements(id snowflake.ID, g *guild) {
 func playbackText(event player.PlaybackEvent) string {
 	track := event.Track
 	if event.SkippedReason != "" {
-		return fmt.Sprintf("Skipped: %s • position %d/%d\n%s", trackTitle(track), track.Position, track.Total, event.SkippedReason)
+		label := "Unavailable"
+		if event.FailureStage == "playing" {
+			label = "Playback interrupted"
+		} else if event.FailureStage == "starting" {
+			label = "Playback failed to start"
+		}
+		return fmt.Sprintf("%s: %s • position %d/%d • Spotify ID: %s\n%s", label, trackTitle(track), track.Position, track.Total, track.SpotifyID, event.SkippedReason)
 	}
 	icon, source := "▶", "YouTube"
 	if track.Live {
@@ -56,6 +62,9 @@ func playbackText(event player.PlaybackEvent) string {
 	}
 	if track.Total > 1 {
 		source += fmt.Sprintf(" • %d/%d", track.Position, track.Total)
+	}
+	if track.SpotifyID != "" {
+		source += " • Spotify ID: " + track.SpotifyID
 	}
 	next := "—"
 	if event.NextPending {

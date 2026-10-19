@@ -1,0 +1,6 @@
+ok  	whiterun/cmd/bot	0.002s
+?   	whiterun/cmd/profile	[no test files]
+ok  	whiterun/internal/discord	0.405s
+ok  	whiterun/internal/media	0.207s
+ok  	whiterun/internal/player	21.466s
+ok  	whiterun/internal/storage	0.041s

@@ -15,6 +15,7 @@ func (p *GuildPlayer) Snapshot() (*media.Track, []media.Track) {
 }
 
 type State struct {
+	PlaybackState    AttemptState
 	CurrentStarted   bool
 	PersistenceError string
 	Imports          []CollectionProgress
@@ -38,9 +39,22 @@ func (p *GuildPlayer) State() State {
 		current = &t
 	}
 	state := State{CurrentStarted: p.current != nil && p.startedSequence == p.sequence, PersistenceError: p.persistenceError, Imports: append([]CollectionProgress(nil), p.completedImports...), Current: current, Paused: p.pause.paused(), Halted: p.halted, ProviderBlocked: p.providerBlocked, ProviderReason: p.providerReason}
+	if current != nil {
+		state.PlaybackState = Starting
+		if state.CurrentStarted {
+			state.PlaybackState = Playing
+		}
+	}
 	for _, entry := range p.queue {
+		phase := Ready
+		if entry.Pending {
+			phase = Pending
+			if job := p.jobs[entry.jobID]; job != nil && job.searches[entry.position] != nil {
+				phase = Resolving
+			}
+		}
 		track := copyTrack(entry.Track)
-		state.Entries = append(state.Entries, QueueEntry{Track: track, Pending: entry.Pending, CollectionID: entry.jobID, Position: entry.position + 1})
+		state.Entries = append(state.Entries, QueueEntry{State: phase, Track: track, Pending: entry.Pending, CollectionID: entry.jobID, Position: entry.position + 1})
 		if !entry.Pending {
 			state.Queued = append(state.Queued, copyTrack(track))
 		}

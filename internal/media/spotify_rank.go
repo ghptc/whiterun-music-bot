@@ -300,11 +300,18 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (Candidate, 
 			return Candidate{}, err
 		}
 		if ok {
+			if freshIdentity(cached, time.Now()) && CompareSpotify(*r.Match, cached, r.matchPolicy()).Status == MatchConfirmed {
+				TimingFrom(ctx).Event("spotify_mapping_cache_hit", time.Now(), "spotify_track_id", r.Match.SpotifyID, "video_id", cached.ID)
+				return cached, nil
+			}
 			full, err := r.extract(ctx, "https://www.youtube.com/watch?v="+cached.ID, "spotify_mapping_revalidation", false)
 			if err != nil {
 				return Candidate{}, err
 			}
 			if full.ID == cached.ID && CompareSpotify(*r.Match, full.Candidate, r.matchPolicy()).Status == MatchConfirmed {
+				if err := r.Mappings.SaveMapping(ctx, key, full.Candidate); err != nil {
+					return Candidate{}, err
+				}
 				return full.Candidate, nil
 			}
 			if err := r.Mappings.DeleteMapping(ctx, key); err != nil {
@@ -342,6 +349,10 @@ func selectSpotify(ctx context.Context, track Track, candidates []Candidate, ver
 	return selectSpotifyPolicy(ctx, track, DefaultMatchPolicy(), candidates, verify)
 }
 func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, candidates []Candidate, verify func(Candidate) (Candidate, error)) (Candidate, error) {
+	return selectSpotifyPolicyMode(ctx, track, policy, candidates, verify, false)
+}
+
+func selectSpotifyPolicyMode(ctx context.Context, track Track, policy MatchPolicy, candidates []Candidate, verify func(Candidate) (Candidate, error), fast bool) (Candidate, error) {
 	if err := policy.Validate(); err != nil {
 		return Candidate{}, err
 	}
@@ -387,7 +398,21 @@ func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, c
 			used[candidate.candidate.ID] = true
 		}
 	}
-	for _, item := range selected {
+	// Explicit contradictory identifiers in discovery prevent early selection.
+	// Missing evidence alone does not veto an independently proven release.
+	if fast {
+		for _, a := range shortlist {
+			for _, b := range shortlist {
+				if a.candidate.ID != b.candidate.ID && a.candidate.ISRC != "" && b.candidate.ISRC != "" && !strings.EqualFold(a.candidate.ISRC, b.candidate.ISRC) {
+					fast = false
+				}
+			}
+		}
+	}
+	for index, item := range selected {
+		if fast && index > 0 {
+			break
+		}
 		if ctx.Err() != nil {
 			return Candidate{}, ctx.Err()
 		}
@@ -403,11 +428,18 @@ func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, c
 		}
 		logRank(full, b, "verified")
 		if b.Reason == "accepted" {
+			if fast && requestedReleaseEvidence(track, full) {
+				timing.Event("spotify_fast_match", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", full.ID, "evidence", "exact_requested_release")
+				return full, nil
+			}
 			accepted = append(accepted, rankedCandidate{full, b})
 		}
 	}
 	if ctx.Err() != nil {
 		return Candidate{}, ctx.Err()
+	}
+	if fast {
+		return Candidate{}, &MatchError{Status: MatchUncertain, Reason: "fast_match_requires_release_identity"}
 	}
 	if len(verificationErrors) > 0 {
 		return Candidate{}, fmt.Errorf("candidate verification infrastructure failed: %w", errors.Join(verificationErrors...))

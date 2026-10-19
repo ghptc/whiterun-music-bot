@@ -1,0 +1,9 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/media
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor           
+BenchmarkCachedSpotifyIdentity-8   	   18001	     66897 ns/op	  104596 B/op	    1597 allocs/op
+BenchmarkCachedSpotifyIdentity-8   	   18192	     65828 ns/op	  104713 B/op	    1597 allocs/op
+BenchmarkCachedSpotifyIdentity-8   	   18375	     65793 ns/op	  104602 B/op	    1597 allocs/op
+PASS
+ok  	whiterun/internal/media	3.614s

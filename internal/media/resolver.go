@@ -14,6 +14,7 @@ import (
 var ErrNoSong = errors.New("The Bard could find no song worthy of playing.")
 
 type Track struct {
+	identityProof    *Candidate
 	SpotifyID        string
 	ISRC             string
 	Explicit         *bool
@@ -36,26 +37,27 @@ type Track struct {
 	Timing           *Timing `json:"-"`
 }
 type Candidate struct {
-	ISRC         string   `json:"isrc"`
-	Explicit     *bool    `json:"explicit"`
-	Type         string   `json:"_type"`
-	Artists      []string `json:"artists"`
-	Album        string   `json:"album"`
-	MusicSearch  bool     `json:"-"`
-	ChannelID    string   `json:"channel_id"`
-	ID           string   `json:"id"`
-	Title        string   `json:"title"`
-	Channel      string   `json:"channel"`
-	Uploader     string   `json:"uploader"`
-	Description  string   `json:"description"`
-	Categories   []string `json:"categories"`
-	Duration     float64  `json:"duration"`
-	Artist       string   `json:"artist"`
-	Track        string   `json:"track"`
-	Verified     bool     `json:"channel_is_verified"`
-	Availability string   `json:"availability"`
-	Live         bool     `json:"is_live"`
-	LiveStatus   string   `json:"live_status"`
+	CheckedAt    time.Time `json:"bard_checked_at,omitempty"`
+	ISRC         string    `json:"isrc"`
+	Explicit     *bool     `json:"explicit"`
+	Type         string    `json:"_type"`
+	Artists      []string  `json:"artists"`
+	Album        string    `json:"album"`
+	MusicSearch  bool      `json:"-"`
+	ChannelID    string    `json:"channel_id"`
+	ID           string    `json:"id"`
+	Title        string    `json:"title"`
+	Channel      string    `json:"channel"`
+	Uploader     string    `json:"uploader"`
+	Description  string    `json:"description"`
+	Categories   []string  `json:"categories"`
+	Duration     float64   `json:"duration"`
+	Artist       string    `json:"artist"`
+	Track        string    `json:"track"`
+	Verified     bool      `json:"channel_is_verified"`
+	Availability string    `json:"availability"`
+	Live         bool      `json:"is_live"`
+	LiveStatus   string    `json:"live_status"`
 }
 
 type Resolver struct {
@@ -139,6 +141,11 @@ func (r Resolver) extract(ctx context.Context, target, purpose string, flat bool
 	var result searchResult
 	if err := json.Unmarshal(out.Data, &result); err != nil {
 		return result, fmt.Errorf("invalid YouTube metadata: %w", err)
+	}
+	// Provider JSON cannot set the trusted validation timestamp.
+	result.CheckedAt = time.Time{}
+	if !flat {
+		result.CheckedAt = time.Now()
 	}
 	timing.Event("candidate_parsing_complete", parseStart, "entries", len(result.Entries), "purpose", purpose)
 	return result, nil
@@ -236,7 +243,7 @@ func (r Resolver) resolveUncached(ctx context.Context, query, direct string, isU
 		return Track{}, err
 	}
 	timing.Event("candidate_selected", started, "selected", chosen.Title, "video_id", chosen.ID)
-	return Track{RequestedSource: "youtube", Live: chosen.Live || chosen.LiveStatus == "is_live", VideoID: chosen.ID, Channel: chosen.Channel, Timing: timing, Title: chosen.Title, URL: "https://www.youtube.com/watch?v=" + chosen.ID, Duration: time.Duration(chosen.Duration * float64(time.Second))}, nil
+	return Track{identityProof: &chosen, RequestedSource: "youtube", Live: chosen.Live || chosen.LiveStatus == "is_live", VideoID: chosen.ID, Channel: chosen.Channel, Timing: timing, Title: chosen.Title, URL: "https://www.youtube.com/watch?v=" + chosen.ID, Duration: time.Duration(chosen.Duration * float64(time.Second))}, nil
 }
 
 // MetadataArgs is used only for direct videos and selected candidates whose

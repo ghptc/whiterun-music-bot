@@ -188,9 +188,9 @@ func (p *GuildPlayer) run() {
 		p.sequence++
 		sequence := p.sequence
 		if t.Timing != nil {
-			t.Timing = t.Timing.Child("sequence", sequence, "position", t.Position, "video_id", t.VideoID)
+			t.Timing = t.Timing.Child("sequence", sequence, "spotify_id", t.SpotifyID, "position", t.Position, "video_id", t.VideoID)
 		} else {
-			t.Timing = media.NewTiming(p.log.With("sequence", sequence, "position", t.Position, "video_id", t.VideoID))
+			t.Timing = media.NewTiming(p.log.With("sequence", sequence, "spotify_id", t.SpotifyID, "position", t.Position, "video_id", t.VideoID))
 		}
 		done := make(chan struct{})
 		p.trackDone = done
@@ -214,6 +214,14 @@ func (p *GuildPlayer) run() {
 		cancel()
 		p.mu.Lock()
 		expectedCancel = expectedCancel || p.current == nil || p.ctx.Err() != nil
+		played := p.startedSequence == sequence
+		terminal := Finished
+		if expectedCancel {
+			terminal = Canceled
+		} else if err != nil {
+			terminal = Failed
+		}
+		p.log.Info("playback_attempt_terminal", "sequence", sequence, "spotify_id", t.SpotifyID, "position", t.Position, "state", terminal, "started", played)
 		p.lastTransition = time.Now()
 		p.current = nil
 		p.pause = nil
@@ -234,7 +242,11 @@ func (p *GuildPlayer) run() {
 		close(done)
 		p.mu.Unlock()
 		if err != nil && !expectedCancel {
-			p.announceSkip(t, err)
+			stage := "starting"
+			if played {
+				stage = "playing"
+			}
+			p.announceFailure(t, err, stage, sequence)
 		}
 	}
 }
