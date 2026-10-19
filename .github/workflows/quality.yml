@@ -45,3 +45,21 @@ jobs:
           go-version-file: go.mod
       - name: Real SQLite files, migrations, rollback and recovery
         run: go test -race ./internal/storage -count=1 -v -timeout=3m
+  reliability-adversarial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Repeat deterministic adversarial scenarios under race detector
+        run: go test -race ./internal/player ./internal/media ./internal/storage ./internal/discord -run Quality -count=20 -timeout=5m
+      - name: Behavioral mutation checks in disposable copies
+        run: python3 scripts/qa_mutations.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reliability-mutations
+          path: docs/qa/evidence/mutations.json
