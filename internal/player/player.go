@@ -21,6 +21,8 @@ type PlayFunc func(context.Context, media.Track, Voice) error
 const MaxQueueTracks = 1000
 
 type GuildPlayer struct {
+	loop             string
+	autoplay         bool
 	store            Store
 	guildID          string
 	persistenceError string
@@ -119,6 +121,7 @@ func (p *GuildPlayer) Stop() {
 	p.cancelJobsLocked()
 	p.resetProviderLocked()
 	p.queue = nil
+	p.loop = "off"
 	p.halted, p.failures = false, 0
 	p.generation++
 	p.cancelTrackLocked("stop")
@@ -134,6 +137,7 @@ func (p *GuildPlayer) Leave(ctx context.Context) {
 	p.cancelJobsLocked()
 	p.resetProviderLocked()
 	p.queue = nil
+	p.loop = "off"
 	p.halted, p.failures = false, 0
 	p.generation++
 	p.cancelTrackLocked("leave")
@@ -229,6 +233,19 @@ func (p *GuildPlayer) run() {
 			terminal = Failed
 		}
 		p.log.Info("playback_attempt_terminal", "sequence", sequence, "spotify_id", t.SpotifyID, "position", t.Position, "state", terminal, "started", played)
+		if !expectedCancel && err == nil && played && len(p.queue) < MaxQueueTracks {
+			repeatedTrack := t
+			if p.current != nil {
+				repeatedTrack = *p.current
+			}
+			repeated := queueEntry{Track: copyTrack(repeatedTrack)}
+			if p.loop == "track" {
+				p.queue = append([]queueEntry{repeated}, p.queue...)
+			}
+			if p.loop == "queue" {
+				p.queue = append(p.queue, repeated)
+			}
+		}
 		p.lastTransition = time.Now()
 		p.current = nil
 		p.pause = nil

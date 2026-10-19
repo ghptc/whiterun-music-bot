@@ -12,6 +12,8 @@ import (
 const persistenceTimeout = 3 * time.Second
 
 type DurableState struct {
+	Loop           string
+	Autoplay       bool
 	Current        *media.Track
 	CurrentStarted bool
 	Queue          []media.Track
@@ -35,6 +37,7 @@ func (p *GuildPlayer) ConfigureStore(store Store, guildID string) error {
 	if err != nil {
 		return err
 	}
+	p.loop, p.autoplay = state.Loop, state.Autoplay
 	tracks := state.Queue
 	if state.Current != nil {
 		tracks = append([]media.Track{*state.Current}, tracks...)
@@ -55,7 +58,7 @@ func (p *GuildPlayer) ConfigureStore(store Store, guildID string) error {
 	return nil
 }
 func (p *GuildPlayer) durableLocked() DurableState {
-	s := DurableState{CurrentStarted: p.current != nil && p.startedSequence == p.sequence}
+	s := DurableState{Loop: p.loop, Autoplay: p.autoplay, CurrentStarted: p.current != nil && p.startedSequence == p.sequence}
 	if p.current != nil {
 		t := copyTrack(*p.current)
 		t.Timing = nil

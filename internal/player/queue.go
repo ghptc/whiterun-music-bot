@@ -15,6 +15,8 @@ func (p *GuildPlayer) Snapshot() (*media.Track, []media.Track) {
 }
 
 type State struct {
+	Loop             string
+	Autoplay         bool
 	PlaybackState    AttemptState
 	CurrentStarted   bool
 	PersistenceError string
@@ -38,7 +40,7 @@ func (p *GuildPlayer) State() State {
 		t := copyTrack(*p.current)
 		current = &t
 	}
-	state := State{CurrentStarted: p.current != nil && p.startedSequence == p.sequence, PersistenceError: p.persistenceError, Imports: append([]CollectionProgress(nil), p.completedImports...), Current: current, Paused: p.pause.paused(), Halted: p.halted, ProviderBlocked: p.providerBlocked, ProviderReason: p.providerReason}
+	state := State{Loop: p.loop, Autoplay: p.autoplay, CurrentStarted: p.current != nil && p.startedSequence == p.sequence, PersistenceError: p.persistenceError, Imports: append([]CollectionProgress(nil), p.completedImports...), Current: current, Paused: p.pause.paused(), Halted: p.halted, ProviderBlocked: p.providerBlocked, ProviderReason: p.providerReason}
 	if current != nil {
 		state.PlaybackState = Starting
 		if state.CurrentStarted {
@@ -76,6 +78,7 @@ func (p *GuildPlayer) Clear() int {
 	p.cancelJobsLocked()
 	p.generation++
 	p.queue = nil
+	p.loop = "off"
 	p.halted, p.failures = false, 0
 	return n
 }
