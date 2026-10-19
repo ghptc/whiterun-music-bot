@@ -37,11 +37,8 @@ func nextAnnouncement(t *testing.T, r *recordingRest) sentMessage {
 	t.Helper()
 	select {
 	case m := <-r.messages:
-		if len(m.message.Embeds) > 0 {
-			embed := m.message.Embeds[0]
-			m.message.Content = strings.ReplaceAll(embed.Title, " · ", "\n") + "\n" + embed.Description
-		}
-		if m.message.Flags&d.MessageFlagEphemeral != 0 || m.message.AllowedMentions == nil || !strings.Contains(m.message.Content, "Now Playing") || !strings.Contains(m.message.Content, "Next:") {
+		m.message.Content = messageText(m.message)
+		if m.message.Flags&d.MessageFlagEphemeral != 0 || m.message.AllowedMentions == nil || !strings.Contains(m.message.Content, "THE BARD · NOW PLAYING") {
 			t.Fatal(m)
 		}
 		return m
@@ -70,18 +67,18 @@ func TestAnnouncementsExactlyOnceOnEOFAndSkip(t *testing.T) {
 		t.Fatal(err)
 	}
 	first := nextAnnouncement(t, r)
-	if first.channel != 9 || !strings.Contains(first.message.Content, "First") || !strings.Contains(first.message.Content, "Next: Second") {
+	if first.channel != 9 || !strings.Contains(first.message.Content, "First") || !strings.Contains(first.message.Content, "Up next: Second") {
 		t.Fatal(first)
 	}
 	g.announcementChannel.Store(10)
 	eof <- struct{}{}
 	second := nextAnnouncement(t, r)
-	if second.channel != 10 || !strings.Contains(second.message.Content, "Second") || !strings.Contains(second.message.Content, "Next: Third") {
+	if second.channel != 10 || !strings.Contains(second.message.Content, "Second") || !strings.Contains(second.message.Content, "Up next: Third") {
 		t.Fatal(second)
 	}
 	g.player.SkipN(1)
 	third := nextAnnouncement(t, r)
-	if !strings.Contains(third.message.Content, "🔴 Now Playing\nThird") || !strings.Contains(third.message.Content, "YouTube Live") || !strings.Contains(third.message.Content, "Next: —") {
+	if !strings.Contains(third.message.Content, "Third") || strings.Contains(third.message.Content, "YouTube Live") || strings.Contains(third.message.Content, "Up next:") {
 		t.Fatal(third)
 	}
 	g.player.Stop()
@@ -117,7 +114,7 @@ func TestAnnouncementPendingNextAndNoResolutionSpam(t *testing.T) {
 		t.Fatal(err)
 	}
 	message := nextAnnouncement(t, r).message.Content
-	if !strings.Contains(message, "Next: resolving…") || !strings.Contains(message, "Spotify metadata • YouTube audio • 1/3") {
+	if !strings.Contains(message, "Up next: Second") || strings.Contains(message, "resolving") || strings.Contains(message, "Spotify metadata") {
 		t.Fatal(message)
 	}
 	close(gate)
@@ -133,7 +130,7 @@ func TestAnnouncementPendingNextAndNoResolutionSpam(t *testing.T) {
 	}
 	g.player.SkipN(2)
 	message = nextAnnouncement(t, r).message.Content
-	if !strings.Contains(message, "Third") || !strings.Contains(message, "3/3") {
+	if !strings.Contains(message, "Third") || strings.Contains(message, "3/3") {
 		t.Fatal(message)
 	}
 }
@@ -202,7 +199,7 @@ func TestSuccessfulPlayPublicForEachSource(t *testing.T) {
 
 func TestSkippedAnnouncementKeepsIdentityAndPosition(t *testing.T) {
 	text := playbackText(player.PlaybackEvent{Track: media.Track{Title: "Bring The Noise Remix - Pumpkin Edit", Artist: "Public Enemy", Position: 7, Total: 20}, SkippedReason: "External provider blocked access to audio."})
-	for _, want := range []string{"Public Enemy", "Pumpkin Edit", "7/20", "External provider"} {
+	for _, want := range []string{"Public Enemy", "Pumpkin Edit"} {
 		if !strings.Contains(text, want) {
 			t.Fatal(text)
 		}
@@ -211,11 +208,11 @@ func TestSkippedAnnouncementKeepsIdentityAndPosition(t *testing.T) {
 		t.Fatal(text)
 	}
 	state := player.State{Current: &media.Track{Title: "Waiting"}}
-	if strings.Contains(currentStateText(state), "Now playing") {
+	if strings.Contains(componentText([]d.LayoutComponent{nowContainer(state)}), "-# Playing") {
 		t.Fatal("announced before first frame")
 	}
 	state.CurrentStarted = true
-	if !strings.Contains(currentStateText(state), "Now playing") {
+	if !strings.Contains(componentText([]d.LayoutComponent{nowContainer(state)}), "-# Playing") {
 		t.Fatal("missing confirmed playback")
 	}
 }
@@ -224,7 +221,7 @@ func TestFailureAnnouncementsDistinguishResolutionAndInterruptedPlayback(t *test
 	for _, tc := range []struct{ stage, label string }{{"resolution", "Unavailable:"}, {"starting", "Playback failed to start:"}, {"playing", "Playback interrupted:"}} {
 		event := player.PlaybackEvent{Track: media.Track{SpotifyID: "original-id", Title: "Little Bad Girl", Position: 9, Total: 123}, FailureStage: tc.stage, SkippedReason: "injected"}
 		text := playbackText(event)
-		if !strings.Contains(text, tc.label) || strings.Contains(text, "Skipped:") || !strings.Contains(text, "original-id") || !strings.Contains(text, "9/123") {
+		if !strings.Contains(text, tc.label) || strings.Contains(text, "Skipped:") || strings.Contains(text, "original-id") || strings.Contains(text, "9/123") || strings.Contains(text, "injected") {
 			t.Fatal(text)
 		}
 	}

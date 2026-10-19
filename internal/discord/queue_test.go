@@ -2,47 +2,117 @@ package discord
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	d "github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/snowflake/v2"
-	"io"
 	"strings"
 	"testing"
 	"unicode/utf16"
-
-	d "github.com/disgoorg/disgo/discord"
 	"whiterun/internal/media"
 	"whiterun/internal/player"
 )
 
-func queueAttachment(t *testing.T, m d.MessageUpdate, name string) string {
-	t.Helper()
-	for _, f := range m.Files {
-		if f.Name == name {
-			// Production uses fresh readers per delivery; tests restore after inspecting.
-			b, err := io.ReadAll(f.Reader)
-			if err != nil {
-				t.Fatal(err)
+func componentText(components []d.LayoutComponent) string {
+	var out strings.Builder
+	var walk func(d.Component)
+	walk = func(c d.Component) {
+		switch v := c.(type) {
+		case d.ContainerComponent:
+			for _, child := range v.Components {
+				walk(child)
 			}
-			f.Reader = strings.NewReader(string(b))
-			return string(b)
+		case d.SectionComponent:
+			for _, child := range v.Components {
+				walk(child)
+			}
+		case d.TextDisplayComponent:
+			out.WriteString(v.Content + "\n")
 		}
 	}
-	t.Fatalf("missing %s", name)
+	for _, c := range components {
+		walk(c)
+	}
+	return out.String()
+}
+func updateText(update d.MessageUpdate) string {
+	if update.Components != nil {
+		return componentText(*update.Components)
+	}
+	if update.Content != nil {
+		return *update.Content
+	}
 	return ""
+}
+func messageText(message d.MessageCreate) string {
+	return message.Content + componentText(message.Components)
+}
+func viewText(view queueView) string {
+	var out strings.Builder
+	for _, block := range view.Blocks {
+		out.WriteString(componentText([]d.LayoutComponent{block.Container}))
+	}
+	return out.String()
+}
+func queueSections(view queueView) []d.SectionComponent {
+	var rows []d.SectionComponent
+	for _, block := range view.Blocks {
+		for _, child := range block.Container.Components {
+			if row, ok := child.(d.SectionComponent); ok {
+				rows = append(rows, row)
+			}
+		}
+	}
+	return rows
 }
 func queueFixture(n int) player.State {
 	s := player.State{}
 	for i := range n {
-		s.Entries = append(s.Entries, player.QueueEntry{Track: media.Track{Title: fmt.Sprintf("Song %04d", i+1), Artist: "Artist", SpotifyID: fmt.Sprint(i), SpotifyArtworkURL: "https://i.scdn.co/image/album", RequestedBy: "listener"}, Pending: i%2 == 0})
+		s.Entries = append(s.Entries, player.QueueEntry{Track: media.Track{Title: fmt.Sprintf("Song %04d", i+1), Artist: "Artist", SpotifyID: fmt.Sprint(i), SpotifyArtworkURL: fmt.Sprintf("https://i.scdn.co/image/album%d", i), RequestedBy: "listener"}, Pending: i%2 == 0})
 	}
 	return s
+}
+func assertV2Budget(t *testing.T, container d.ContainerComponent) {
+	t.Helper()
+	raw, err := json.Marshal(container)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var value map[string]any
+	if err := json.Unmarshal(raw, &value); err != nil {
+		t.Fatal(err)
+	}
+	count, text := 0, 0
+	var walk func(map[string]any)
+	walk = func(c map[string]any) {
+		count++
+		typ := int(c["type"].(float64))
+		if typ == 10 {
+			text += len(utf16.Encode([]rune(c["content"].(string))))
+		}
+		if typ != 17 && typ != 14 && typ != 9 && typ != 10 && typ != 11 {
+			t.Fatal("unexpected component", typ)
+		}
+		if children, ok := c["components"].([]any); ok {
+			for _, child := range children {
+				walk(child.(map[string]any))
+			}
+		}
+		if accessory, ok := c["accessory"].(map[string]any); ok {
+			walk(accessory)
+		}
+	}
+	walk(value)
+	if count > 40 || text > 4000 {
+		t.Fatal("V2 budget", count, text)
+	}
 }
 func TestQueueCompleteAndLimitedSnapshots(t *testing.T) {
 	for _, size := range []int{0, 1, 10, 123, 500, 1000} {
 		for _, limit := range []*int{nil, new(1), new(10), new(50), new(2000)} {
 			t.Run(fmt.Sprintf("%d/%v", size, limit), func(t *testing.T) {
-				s := queueFixture(size)
-				v, err := buildQueueView(s, limit)
+				state := queueFixture(size)
+				view, err := buildQueueView(state, limit)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -50,88 +120,84 @@ func TestQueueCompleteAndLimitedSnapshots(t *testing.T) {
 				if limit != nil {
 					want = min(want, *limit)
 				}
-				if v.Shown != want || v.Total != size {
-					t.Fatal(v.Shown, v.Total)
+				rows := queueSections(view)
+				if view.Shown != want || view.Total != size || len(rows) != want {
+					t.Fatal(view.Shown, view.Total, len(rows), want)
 				}
-				prev := -1
-				for i := range size {
-					label := fmt.Sprintf("Song %04d", i+1)
-					at := strings.Index(v.HTML, label)
-					if (at >= 0) != (i < want) {
-						t.Fatal("omitted or extra position", i)
+				for i, row := range rows {
+					text := row.Components[0].(d.TextDisplayComponent).Content
+					if !strings.HasPrefix(text, fmt.Sprintf("**%d. Song %04d**", i+1, i+1)) {
+						t.Fatal("order/position", text)
 					}
-					if i < want {
-						if at <= prev || !strings.Contains(v.Text, label) {
-							t.Fatal("order or text omission", i)
-						}
-						prev = at
+					art := row.Accessory.(d.ThumbnailComponent).Media.URL
+					if art != state.Entries[i].Track.SpotifyArtworkURL {
+						t.Fatal("wrong artwork", i, art)
 					}
 				}
-				if len(v.Embeds) != min(want, 10) {
-					t.Fatal(len(v.Embeds))
+				expectedBlocks := max(1, (want+11)/12)
+				if len(view.Blocks) != expectedBlocks {
+					t.Fatal("message count", len(view.Blocks), expectedBlocks)
 				}
-				if size == 0 && (!strings.Contains(v.Content, "queue is empty") || !strings.Contains(v.Content, "nothing playing")) {
-					t.Fatal(v.Content)
+				for _, block := range view.Blocks {
+					assertV2Budget(t, block.Container)
+					update := block.update("")
+					if len(update.Files) > 0 || update.Embeds != nil || update.Content != nil || update.Flags == nil || *update.Flags&d.MessageFlagIsComponentsV2 == 0 || len(*update.Components) != 1 {
+						t.Fatal("invalid V2 message", update)
+					}
 				}
-				if limit != nil && !strings.Contains(v.Content, fmt.Sprintf("Showing %d of %d", want, size)) {
-					t.Fatal(v.Content)
+				if size == 0 && !strings.Contains(viewText(view), "queue is empty") {
+					t.Fatal(viewText(view))
 				}
 			})
 		}
 	}
 }
 func TestQueueCurrentPendingAndArtwork(t *testing.T) {
-	s := queueFixture(1)
-	s.Current = &media.Track{Title: "Current", Artist: "Current artist", YouTubeThumbnailURL: "https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg"}
-	s.Paused = true
-	v, err := buildQueueView(s, new(1))
+	state := queueFixture(123)
+	state.Current = &media.Track{Title: "Current", Artist: "Current artist", YouTubeThumbnailURL: "https://i.ytimg.com/current"}
+	state.Paused = true
+	state.Entries[1].Track = media.Track{Title: "Missing", SpotifyArtworkURL: "javascript:bad"}
+	view, err := buildQueueView(state, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(v.Embeds) != 2 || v.Embeds[0].Color == v.Embeds[1].Color || !strings.Contains(v.Embeds[0].Title, "Current") || !strings.Contains(v.Embeds[0].Description, "paused") {
-		t.Fatal(v.Embeds)
+	rows := queueSections(view)
+	if len(rows) != 124 || strings.Count(viewText(view), "**Current**") != 1 {
+		t.Fatal("current duplicated/omitted")
 	}
-	if v.Embeds[0].Thumbnail.URL != s.Current.YouTubeThumbnailURL || v.Embeds[1].Thumbnail.URL != s.Entries[0].Track.SpotifyArtworkURL || !strings.Contains(v.HTML, "resolving") || !strings.Contains(v.Text, "listener") {
-		t.Fatal(v)
+	if rows[0].Accessory.(d.ThumbnailComponent).Media.URL != state.Current.YouTubeThumbnailURL || rows[1].Accessory.(d.ThumbnailComponent).Media.URL != state.Entries[0].Track.SpotifyArtworkURL || rows[2].Accessory.(d.ThumbnailComponent).Media.URL != fallbackArtwork || view.Missing != 1 {
+		t.Fatal("artwork policy")
 	}
-	v, err = buildQueueView(player.State{Current: s.Current}, nil)
-	if err != nil || len(v.Embeds) != 1 || !strings.Contains(v.Content, "1 total including current") {
-		t.Fatal(v, err)
-	}
-	v, err = buildQueueView(player.State{Entries: []player.QueueEntry{{Track: media.Track{Title: "No image"}}}}, nil)
-	if err != nil || v.Embeds[0].Thumbnail != nil || !strings.Contains(v.HTML, "No artwork") {
-		t.Fatal(v, err)
-	}
-}
-func TestQueueNativeLimitsAndSafeGallery(t *testing.T) {
-	s := queueFixture(1000)
-	long := strings.Repeat("🎵", 200) + ` <script>alert(1)</script> @everyone **markup**`
-	s.Current = &media.Track{Title: long, Artist: long, RequestedBy: long}
-	s.Resolving = []player.CollectionProgress{{Total: 1000, Resolved: 1}}
-	for i := range s.Entries {
-		s.Entries[i].Track.Title = long
-		s.Entries[i].Track.Artist = long
-		s.Entries[i].Track.RequestedBy = long
-	}
-	v, err := buildQueueView(s, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(utf16.Encode([]rune(v.Content))) > 2000 || len(v.Embeds) > 10 {
-		t.Fatal("message size")
-	}
-	units := 0
-	for _, embed := range v.Embeds {
-		units += len(utf16.Encode([]rune(embed.Title + embed.Description)))
-		if len(utf16.Encode([]rune(embed.Title))) > 256 {
-			t.Fatal(embed)
+	for _, forbidden := range []string{"ready", "pending", "PLAYING", "Spotify metadata", "YouTube audio", "listener", "resolving"} {
+		if strings.Contains(viewText(view), forbidden) {
+			t.Fatal(forbidden)
 		}
 	}
-	if units > 6000 {
-		t.Fatal("embed budget", units)
+	view, err = buildQueueView(player.State{Current: state.Current}, new(1))
+	if err != nil || len(queueSections(view)) != 1 {
+		t.Fatal(view, err)
 	}
-	if len(v.HTML) > 8<<20 || len(v.Text) > 8<<20 || strings.Contains(v.HTML, "<script>") || !strings.Contains(v.HTML, "&lt;script&gt;") || !strings.Contains(v.Text, long) {
-		t.Fatal("export size/escaping/completeness")
+}
+func TestQueueNativeLimitsAndUntrustedLabels(t *testing.T) {
+	state := queueFixture(1000)
+	long := strings.Repeat("🎵", 200) + "\n# @everyone [link](https://bad.example) **markup**"
+	for i := range state.Entries {
+		state.Entries[i].Track.Title = long
+		state.Entries[i].Track.Artist = long
+	}
+	state.Current = &media.Track{Title: long, Artist: long}
+	view, err := buildQueueView(state, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(queueSections(view)) != 1001 {
+		t.Fatal("silent truncation")
+	}
+	for _, block := range view.Blocks {
+		assertV2Budget(t, block.Container)
+	}
+	if strings.Contains(viewText(view), "@everyone") {
+		t.Fatal("mention not neutralized")
 	}
 }
 func TestQueueLimitValidationAndGuildIsolation(t *testing.T) {
@@ -144,60 +210,51 @@ func TestQueueLimitValidationAndGuildIsolation(t *testing.T) {
 	}
 	for _, id := range []snowflake.ID{1, 2} {
 		p := b.getGuild(id).player
-		if err := p.Attach(transport{conn: &dummyConn{}}); err != nil {
+		if err := p.Attach(announcementVoice{}); err != nil {
 			t.Fatal(err)
 		}
-		name := "Guild one"
-		if id == 2 {
-			name = "Guild two"
-		}
-		if _, err := p.BeginCollection(b.ctx, media.Collection{Tracks: []media.Track{{Title: name}}}, func(ctx context.Context, _ media.Track, _ bool) (media.Track, error) {
+		name := fmt.Sprintf("Guild %d", id)
+		_, err := p.BeginCollection(b.ctx, media.Collection{Tracks: []media.Track{{Title: name}}}, func(ctx context.Context, _ media.Track, _ bool) (media.Track, error) {
 			<-ctx.Done()
 			return media.Track{}, ctx.Err()
-		}, p.Ticket()); err != nil {
+		}, p.Ticket())
+		if err != nil {
 			t.Fatal(err)
 		}
 	}
-
 	b.command(interaction(t, "queue", true))
-	text := queueAttachment(t, r.update, "queue.txt")
-	if !strings.Contains(text, "Guild one") || strings.Contains(text, "Guild two") {
-		t.Fatal(text)
-	}
-	for _, limit := range []int{1, 10, 50} {
-		b.command(intInteraction(t, "queue", "limit", limit))
-		if !strings.Contains(r.response, "Showing 1 of 1") {
-			t.Fatal(r.response)
-		}
+	if !strings.Contains(r.response, "Guild 1") || strings.Contains(r.response, "Guild 2") {
+		t.Fatal(r.response)
 	}
 }
-func TestQueueBlockedAndImportState(t *testing.T) {
-	s := queueFixture(1)
-	s.ProviderBlocked = true
-	s.Halted = true
-	s.PersistenceError = "Save failed."
-	s.Imports = []player.CollectionProgress{{Resolved: 2, Failed: 3, Uncertain: 1, MetadataSkipped: 1, Skipped: 1}}
-	v, err := buildQueueView(s, nil)
+func TestQueueInternalDiagnosticsStayOutOfUI(t *testing.T) {
+	state := queueFixture(1)
+	state.ProviderBlocked = true
+	state.Halted = true
+	state.PersistenceError = "Save failed"
+	state.Imports = []player.CollectionProgress{{Resolved: 2, Failed: 3}}
+	state.Resolving = []player.CollectionProgress{{Total: 100, Resolved: 1}}
+	view, err := buildQueueView(state, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, part := range []string{"Playback blocked", "use /resume", "Playback halted", "Save failed", "2 matched", "1 uncertain", "2 rejected", "1 unavailable", "1 skipped"} {
-		if !strings.Contains(v.Content, part) {
-			t.Fatal(v.Content)
+	text := viewText(view)
+	for _, word := range []string{"blocked", "halted", "Save failed", "matched", "failed", "pending", "resolving"} {
+		if strings.Contains(text, word) {
+			t.Fatal(text)
 		}
 	}
 }
 func TestQueueSnapshotDuringConcurrentResolution(t *testing.T) {
 	b, _ := testBot(t)
 	p := b.getGuild(1).player
-	if err := p.Attach(transport{conn: &dummyConn{}}); err != nil {
+	if err := p.Attach(announcementVoice{}); err != nil {
 		t.Fatal(err)
 	}
 	gate := make(chan struct{})
-	rows := queueFixture(123)
 	tracks := []media.Track{}
-	for _, e := range rows.Entries {
-		tracks = append(tracks, e.Track)
+	for _, entry := range queueFixture(123).Entries {
+		tracks = append(tracks, entry.Track)
 	}
 	job, err := p.BeginCollection(b.ctx, media.Collection{Tracks: tracks}, func(ctx context.Context, tr media.Track, _ bool) (media.Track, error) {
 		select {
@@ -215,23 +272,55 @@ func TestQueueSnapshotDuringConcurrentResolution(t *testing.T) {
 	close(gate)
 	for range 30 {
 		state := p.State()
-		v, err := buildQueueView(state, nil)
+		view, err := buildQueueView(state, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
-		expected := len(state.Entries)
+		want := len(state.Entries)
 		if state.Current != nil {
-			expected++
+			want++
 		}
-		if strings.Count(v.HTML, "<li") != expected {
+		if len(queueSections(view)) != want {
 			t.Fatal("inconsistent snapshot")
 		}
 	}
-	// An earlier snapshot remains detached even after matching/clear.
 	p.Clear()
 	<-job.Done
-	v, err := buildQueueView(snapshot, nil)
-	if err != nil || strings.Count(v.HTML, "<li") != 123 || !strings.Contains(v.HTML, "resolving") {
+	view, err := buildQueueView(snapshot, nil)
+	if err != nil || len(queueSections(view)) != 123 {
 		t.Fatal("snapshot mutated", err)
+	}
+}
+
+func TestNowAndAnnouncementShareLayoutWithoutTechnicalMetadata(t *testing.T) {
+	track := media.Track{Title: "War Pigs", Artist: "Black Sabbath", Duration: 475 * 1e9, SpotifyID: "secret-id", RequestedBy: "listener", SpotifyArtworkURL: "https://i.scdn.co/image/album", YouTubeThumbnailURL: "https://i.ytimg.com/other"}
+	next := media.Track{Title: "Paranoid"}
+	state := player.State{Current: &track, CurrentStarted: true, Entries: []player.QueueEntry{{Track: next, Pending: true}}}
+	event := player.PlaybackEvent{Track: track, Next: &next, NextPending: true}
+	rawNow, _ := json.Marshal(nowContainer(state))
+	rawAnnouncement, _ := json.Marshal(playbackMessage(event).Components[0])
+	if string(rawNow) != string(rawAnnouncement) {
+		t.Fatal("inconsistent layout")
+	}
+	text := componentText([]d.LayoutComponent{nowContainer(state)})
+	for _, forbidden := range []string{"secret-id", "listener", "Spotify metadata", "YouTube audio", "pending", "resolving", "ready", "PLAYING:"} {
+		if strings.Contains(text, forbidden) {
+			t.Fatal(forbidden)
+		}
+	}
+	b, r := testBot(t)
+	b.replyNow(interaction(t, "now", true), state)
+	if updateText(r.update) != text {
+		t.Fatal("handler did not use common layout")
+	}
+	state.Paused = true
+	paused := componentText([]d.LayoutComponent{nowContainer(state)})
+	if !strings.Contains(paused, "Paused · 07:55") {
+		t.Fatal(paused)
+	}
+	state.CurrentStarted = false
+	state.Paused = false
+	if strings.Contains(componentText([]d.LayoutComponent{nowContainer(state)}), "Playing ·") {
+		t.Fatal("claims playback before audio")
 	}
 }

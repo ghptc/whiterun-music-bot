@@ -23,6 +23,9 @@ import (
 )
 
 type guild struct {
+	queueMu             sync.Mutex
+	queueDeliveries     map[snowflake.ID]queueDelivery
+	queueSequence       uint64
 	mu                  sync.Mutex // voice orchestration only; searches never hold this lock
 	player              *player.GuildPlayer
 	conn                voice.Conn

@@ -1,58 +1,67 @@
 package discord
 
 import (
+	"context"
 	"fmt"
-	"strings"
+	"time"
 
 	d "github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/events"
+	"github.com/disgoorg/disgo/rest"
 	"whiterun/internal/media"
 	"whiterun/internal/player"
 )
 
-func playbackMessage(event player.PlaybackEvent) d.MessageCreate {
-	m := d.MessageCreate{AllowedMentions: &d.AllowedMentions{}}
-	if event.SkippedReason != "" {
-		m.Content = playbackText(event)
-		return m
+func nowContainer(state player.State) d.ContainerComponent {
+	if state.Current == nil {
+		return musicContainer("THE BARD · NOW PLAYING", d.TextDisplayComponent{Content: "Nothing playing."})
 	}
-	t := event.Track
-	source := "YouTube"
-	if t.Live {
-		source = "YouTube Live"
+	detail := "Playing"
+	if state.Paused {
+		detail = "Paused"
+	} else if !state.CurrentStarted {
+		detail = ""
 	}
-	if t.RequestedSource == "spotify" {
-		source = "Spotify metadata • YouTube audio"
+	if state.Current.Duration > 0 {
+		seconds := int(state.Current.Duration.Seconds())
+		duration := fmt.Sprintf("%02d:%02d", seconds/60, seconds%60)
+		if seconds >= 3600 {
+			duration = fmt.Sprintf("%d:%02d:%02d", seconds/3600, seconds/60%60, seconds%60)
+		}
+		if detail != "" {
+			detail += " · "
+		}
+		detail += duration
 	}
-	if t.Total > 0 {
-		source += fmt.Sprintf(" • %d/%d", t.Position, t.Total)
+	body := []d.ContainerSubComponent{songSection(*state.Current, "", detail)}
+	entries := queueEntries(state)
+	if len(entries) > 0 {
+		next := musicLabel(entries[0].Track.Title, 100)
+		if next != "" {
+			body = append(body, d.TextDisplayComponent{Content: "-# Up next: " + next})
+		}
 	}
-	next := "—"
-	if event.NextPending {
-		next = "resolving…"
-	} else if event.Next != nil {
-		next = trackTitle(*event.Next)
-	}
-	description := queueClip(t.Artist, 256)
-	if description == "" {
-		description = queueClip(t.Channel, 256)
-	}
-	description += "\n" + source
-	if t.RequestedBy != "" {
-		description += "\nRequested by: " + queueClip(t.RequestedBy, 80)
-	}
-	description += "\nNext: " + queueClip(next, 400)
-	title := "▶ Now Playing · " + t.Title
-	if t.Live {
-		title = "🔴 Now Playing · " + t.Title
-	}
-	embed := d.Embed{Title: queueClip(title, 256), Description: strings.TrimSpace(description), Color: 0xd6ad60}
-	if art := media.ArtworkURL(t); art != "" {
-		embed.Thumbnail = &d.EmbedResource{URL: art}
-	}
-	m.Embeds = []d.Embed{embed}
-	return m
+	return musicContainer("THE BARD · NOW PLAYING", body...)
 }
-
+func playbackMessage(event player.PlaybackEvent) d.MessageCreate {
+	if event.SkippedReason != "" {
+		return d.MessageCreate{Content: playbackText(event), AllowedMentions: &d.AllowedMentions{}}
+	}
+	state := player.State{Current: &event.Track, CurrentStarted: true}
+	if event.Next != nil {
+		state.Entries = []player.QueueEntry{{Track: *event.Next}}
+	}
+	message := d.NewMessageCreateV2(nowContainer(state))
+	message.AllowedMentions = &d.AllowedMentions{}
+	return message
+}
+func (b *Bot) replyNow(e *events.ApplicationCommandInteractionCreate, state player.State) {
+	ctx, cancel := context.WithTimeout(b.ctx, 5*time.Second)
+	defer cancel()
+	if _, err := b.client.Rest.UpdateInteractionResponse(b.client.ApplicationID, e.Token(), componentUpdate(nowContainer(state)), rest.WithCtx(ctx)); err != nil {
+		b.log.Warn("now_delivery_failed", "error", err)
+	}
+}
 func artworkInvalid(t media.Track) bool {
 	return (t.SpotifyArtworkURL != "" && media.SafeArtworkURL(t.SpotifyArtworkURL) == "") || (t.YouTubeThumbnailURL != "" && media.SafeArtworkURL(t.YouTubeThumbnailURL) == "")
 }

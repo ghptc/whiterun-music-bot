@@ -95,7 +95,7 @@ func TestAnyChannelMemberControlsPlaybackAndAddsCollections(t *testing.T) {
 		b.command(qualityInteraction(t, tc.name, 4, ""))
 		response := r.response
 		if tc.name == "queue" {
-			response += queueAttachment(t, r.update, "queue.txt")
+			response += updateText(r.update)
 		}
 		if !strings.Contains(response, tc.want) {
 			t.Fatal(tc.name, r.response)
@@ -166,7 +166,7 @@ func TestAnnouncementBackpressureDoesNotBlockAudio(t *testing.T) {
 		t.Fatal("full announcement queue blocked audio")
 	}
 	text := playbackText(player.PlaybackEvent{Track: media.Track{Title: "Song", Artist: "Artist", RequestedBy: "4"}})
-	if !strings.Contains(text, "<@4>") || !strings.Contains(text, "Artist") {
+	if strings.Contains(text, "<@4>") || !strings.Contains(text, "Artist") {
 		t.Fatal(text)
 	}
 }
@@ -234,16 +234,13 @@ func TestAnnouncementRESTFailureDoesNotStopAudio(t *testing.T) {
 	default:
 	}
 }
-func TestQueueReportsImportOutcomes(t *testing.T) {
-	state := player.State{Imports: []player.CollectionProgress{{Total: 6, Resolved: 2, Failed: 3, Uncertain: 1, MetadataSkipped: 1, Skipped: 1}}}
-	v, err := buildQueueView(state, nil)
+func TestQueueDoesNotExposeImportOutcomes(t *testing.T) {
+	state := player.State{Imports: []player.CollectionProgress{{Total: 6, Resolved: 2, Failed: 3, Uncertain: 1}}}
+	view, err := buildQueueView(state, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	text := v.Content
-	for _, part := range []string{"2 matched", "1 uncertain", "2 rejected", "1 unavailable", "1 skipped"} {
-		if !strings.Contains(text, part) {
-			t.Fatal(text)
-		}
+	if strings.Contains(viewText(view), "matched") || strings.Contains(viewText(view), "uncertain") {
+		t.Fatal(viewText(view))
 	}
 }

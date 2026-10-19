@@ -108,7 +108,7 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 		return
 	}
 	if data.CommandName() == "now" {
-		reply(nowText(g))
+		b.replyNow(e, g.player.State())
 		return
 	}
 	if data.CommandName() == "queue" {
@@ -391,47 +391,6 @@ func trackTitle(t media.Track) string {
 	return title(t.Title)
 }
 
-func currentText(current *media.Track, paused bool) string {
-	if current == nil {
-		return "Now: nothing playing."
-	}
-	label := "Now playing: "
-	if paused {
-		label = "Paused: "
-	}
-	text := label + trackTitle(*current)
-	if current.RequestedSource == "spotify" {
-		text += " · Spotify"
-	}
-	return text
-}
-func nowText(g *guild) string {
-	state := g.player.State()
-	if state.ProviderBlocked {
-		return "Playback is blocked by YouTube. The next track is retained; use /resume to retry it."
-	}
-	text := currentStateText(state)
-	if state.Current == nil {
-		return text
-	}
-	t := state.Current
-	if t.Duration > 0 {
-		seconds := int(t.Duration.Seconds())
-		text += fmt.Sprintf(" · %d:%02d", seconds/60, seconds%60)
-	}
-	if t.Album != "" {
-		text += "\nAlbum: " + title(t.Album)
-	}
-	if t.RequestedSource == "spotify" {
-		text += "\nSpotify metadata · YouTube audio"
-	} else {
-		text += "\nYouTube"
-	}
-	if t.Channel != "" {
-		text += " · " + title(t.Channel)
-	}
-	return text
-}
 func spotifyErrorText(err error) string {
 	for _, known := range []error{media.ErrSpotifyIncomplete, media.ErrSpotifyPageParse, media.ErrSpotifyPageFetch, media.ErrSpotifyURL, media.ErrSpotifyConfig, media.ErrSpotifyAuth, media.ErrSpotifyAccess, media.ErrSpotifyMatch} {
 		if errors.Is(err, known) {
@@ -459,13 +418,6 @@ func resolutionStage(err error) string {
 	default:
 		return "metadata_resolution"
 	}
-}
-
-func currentStateText(state player.State) string {
-	if state.Current != nil && !state.CurrentStarted && !state.Paused {
-		return "Starting: " + trackTitle(*state.Current)
-	}
-	return currentText(state.Current, state.Paused)
 }
 
 func queuedTrackText(track media.Track) string {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	d "github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/snowflake/v2"
-	"html/template"
 	"io"
 	"net/http"
 	"strings"
@@ -83,38 +83,36 @@ func TestCommandSyncUpsertsAndReadsBackWithoutDeleting(t *testing.T) {
 	}
 }
 
-func TestNowPlayingEmbedArtworkAndNativeLimits(t *testing.T) {
+func TestNowPlayingComponentsArtworkAndNativeLimits(t *testing.T) {
 	for _, tc := range []struct {
 		name  string
 		track media.Track
 		art   string
 	}{
 		{"spotify", media.Track{SpotifyArtworkURL: "https://i.scdn.co/image/a", YouTubeThumbnailURL: "https://i.ytimg.com/a"}, "https://i.scdn.co/image/a"},
-		{"spotify fallback", media.Track{RequestedSource: "spotify", VideoID: "abcdefghijk"}, "https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg"},
-		{"youtube", media.Track{YouTubeThumbnailURL: "https://i.ytimg.com/a"}, "https://i.ytimg.com/a"},
-		{"invalid", media.Track{SpotifyArtworkURL: "javascript:alert(1)"}, ""},
-		{"none", media.Track{}, ""},
+		{"youtube", media.Track{VideoID: "abcdefghijk"}, "https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg"},
+		{"invalid", media.Track{SpotifyArtworkURL: "javascript:bad"}, fallbackArtwork},
+		{"missing", media.Track{}, fallbackArtwork},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.track.Title = strings.Repeat("🎵", 400)
 			tc.track.Artist = "Artist"
-			tc.track.RequestedBy = "listener"
-			tc.track.Position = 2
-			tc.track.Total = 10
-			m := playbackMessage(player.PlaybackEvent{Track: tc.track, Next: &media.Track{Title: "Next track"}})
-			if len(m.Embeds) != 1 || m.Content != "" || m.AllowedMentions == nil {
-				t.Fatal(m)
+			tc.track.Duration = 475 * time.Second
+			message := playbackMessage(player.PlaybackEvent{Track: tc.track, Next: &media.Track{Title: "Next track"}, NextPending: true})
+			if len(message.Components) != 1 || len(message.Embeds) != 0 || message.Content != "" || message.Flags&d.MessageFlagIsComponentsV2 == 0 || message.AllowedMentions == nil {
+				t.Fatal(message)
 			}
-			e := m.Embeds[0]
-			if queueClip(e.Title, 256) != e.Title || !strings.Contains(e.Description, "Artist") || !strings.Contains(e.Description, "2/10") || !strings.Contains(e.Description, "Next track") {
-				t.Fatal(e)
+			container := message.Components[0].(d.ContainerComponent)
+			assertV2Budget(t, container)
+			row := container.Components[2].(d.SectionComponent)
+			if row.Accessory.(d.ThumbnailComponent).Media.URL != tc.art {
+				t.Fatal("wrong artwork")
 			}
-			if tc.art == "" {
-				if e.Thumbnail != nil {
-					t.Fatal(e)
+			text := messageText(message)
+			for _, part := range []string{"Artist", "07:55", "Up next: Next track"} {
+				if !strings.Contains(text, part) {
+					t.Fatal(text)
 				}
-			} else if e.Thumbnail == nil || e.Thumbnail.URL != tc.art {
-				t.Fatal(e)
 			}
 		})
 	}
@@ -144,8 +142,9 @@ func BenchmarkQueue500(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		b.ReportMetric(float64(len(v.HTML)), "html-bytes")
-		b.ReportMetric(float64(len(v.Text)), "txt-bytes")
+		b.ReportMetric(float64(len(v.Blocks)), "messages")
+		b.ReportMetric(float64(v.Components), "components")
+		b.ReportAllocs()
 	}
 }
 
@@ -180,32 +179,16 @@ func TestSimultaneousGuildEmbedsUseFinalPlaybackMetadata(t *testing.T) {
 	for range 2 {
 		select {
 		case m := <-r.messages:
-			if seen[m.channel] || len(m.message.Embeds) != 1 {
+			if seen[m.channel] || len(m.message.Components) != 1 {
 				t.Fatal(m)
 			}
-			e := m.message.Embeds[0]
-			if !strings.Contains(e.Title, fmt.Sprint("started ", m.channel-10)) || e.Thumbnail == nil {
-				t.Fatal(e)
+			if !strings.Contains(messageText(m.message), fmt.Sprint("started ", m.channel-10)) {
+				t.Fatal(m)
 			}
 			seen[m.channel] = true
 		case <-time.After(time.Second):
 			t.Fatal("guild announcement missing")
 		}
-	}
-}
-
-func TestQueueHTMLFailureRetainsCompleteText(t *testing.T) {
-	original := queueGallery
-	queueGallery = template.Must(template.New("broken").Parse("{{.MissingField}}"))
-	defer func() { queueGallery = original }()
-	v, err := buildQueueView(queueFixture(500), nil)
-	if err == nil || !strings.Contains(v.Text, "Song 0500") {
-		t.Fatal(v.Text, err)
-	}
-	b, r := testBot(t)
-	b.replyQueue(interaction(t, "queue", true), queueFixture(500), nil)
-	if len(r.update.Files) != 1 || r.update.Files[0].Name != "queue.txt" || !strings.Contains(queueAttachment(t, r.update, "queue.txt"), "Song 0500") {
-		t.Fatal(r.update)
 	}
 }
 
@@ -233,7 +216,7 @@ func TestQueueDoesNotResolvePendingMedia(t *testing.T) {
 	b.ConfigureStore(db)
 	g := b.getGuild(1)
 	b.command(interaction(t, "queue", true))
-	if len(*r.update.Embeds) != 1 || (*r.update.Embeds)[0].Thumbnail == nil || g.player.State().Entries[0].Track.URL != "" {
+	if r.update.Components == nil || len(*r.update.Components) != 1 || g.player.State().Entries[0].Track.URL != "" {
 		t.Fatal(r.update)
 	}
 }

@@ -83,7 +83,7 @@ func TestQueueAndBulkSkipCommands(t *testing.T) {
 				t.Fatal("not playing")
 			}
 			b.command(interaction(t, "queue", true))
-			if !strings.Contains(queueAttachment(t, r.update, "queue.txt"), "121.  — Song 122") || !strings.Contains(queueAttachment(t, r.update, "queue.txt"), "122.  — Song 123") || !strings.Contains(r.response, "123 total including current") {
+			if !strings.Contains(r.queueText(), "121. Song 122") || !strings.Contains(r.queueText(), "122. Song 123") || !strings.Contains(r.response, "122 songs up next") {
 				t.Fatal(r.response)
 			}
 			if count == 0 {
@@ -155,6 +155,7 @@ func TestPublicQueueDuringProgressiveLoading(t *testing.T) {
 		t.Fatal("first track blocked")
 	}
 	for _, limit := range []int{0, 1, 10, 500} {
+		r.followups = nil
 		e := interaction(t, "queue", true)
 		if limit > 0 {
 			e = intInteraction(t, "queue", "limit", limit)
@@ -169,16 +170,16 @@ func TestPublicQueueDuringProgressiveLoading(t *testing.T) {
 			return nil
 		}
 		b.command(e)
-		if !acknowledged || !strings.Contains(r.response, "1/123 matched") || !strings.Contains(r.response, "122 tracks remaining") {
+		if !acknowledged || !strings.Contains(r.response, "songs up next") {
 			t.Fatal(r.response)
 		}
-		text := queueAttachment(t, r.update, "queue.txt")
+		text := r.queueText()
 		end := 122
 		if limit > 0 {
 			end = min(end, limit)
 		}
 		for i := 1; i <= 122; i++ {
-			if strings.Contains(text, fmt.Sprintf("%d.  — Song %03d [resolving]", i, i+1)) != (i <= end) {
+			if strings.Contains(text, fmt.Sprintf("**%d. Song %03d**", i, i+1)) != (i <= end) {
 				t.Fatalf("incorrect pending position %d", i)
 			}
 		}

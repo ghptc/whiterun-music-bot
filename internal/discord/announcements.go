@@ -44,7 +44,7 @@ func (b *Bot) setupAnnouncements(id snowflake.ID, g *guild) {
 				ctx, cancel := context.WithTimeout(b.ctx, 5*time.Second)
 				_, err := b.client.Rest.CreateMessage(item.channel, playbackMessage(item.event), rest.WithCtx(ctx))
 				cancel()
-				b.log.Info("playback_announcement_delivery", "guild_id", id, "sequence", item.event.Sequence, "first_frame_to_announcement_ms", time.Since(frameAt).Milliseconds(), "artwork_present", media.ArtworkURL(item.event.Track) != "", "artwork_metadata_invalid", artworkInvalid(item.event.Track), "success", err == nil)
+				b.log.Info("playback_announcement_delivery", "guild_id", id, "sequence", item.event.Sequence, "first_frame_to_announcement_ms", time.Since(frameAt).Milliseconds(), "artwork_present", media.ArtworkURL(item.event.Track) != "", "spotify_id", item.event.Track.SpotifyID, "video_id", item.event.Track.VideoID, "position", item.event.Track.Position, "failure_stage", item.event.FailureStage, "reason", item.event.SkippedReason, "artwork_metadata_invalid", artworkInvalid(item.event.Track), "success", err == nil)
 				if err != nil {
 					b.log.Warn("playback_announcement_failed", "guild_id", id, "channel_id", item.channel, "sequence", item.event.Sequence, "error", err)
 				}
@@ -53,38 +53,16 @@ func (b *Bot) setupAnnouncements(id snowflake.ID, g *guild) {
 	}()
 }
 func playbackText(event player.PlaybackEvent) string {
-	track := event.Track
+	label := "Now playing"
 	if event.SkippedReason != "" {
-		label := "Unavailable"
+		label = "Unavailable"
 		if event.FailureStage == "playing" {
 			label = "Playback interrupted"
 		} else if event.FailureStage == "starting" {
 			label = "Playback failed to start"
 		}
-		return fmt.Sprintf("%s: %s • position %d/%d • Spotify ID: %s\n%s", label, trackTitle(track), track.Position, track.Total, track.SpotifyID, event.SkippedReason)
 	}
-	icon, source := "▶", "YouTube"
-	if track.Live {
-		icon, source = "🔴", "YouTube Live"
-	} else if track.RequestedSource == "spotify" {
-		source = "Spotify metadata • YouTube audio"
-	}
-	if track.Total > 1 {
-		source += fmt.Sprintf(" • %d/%d", track.Position, track.Total)
-	}
-	if track.SpotifyID != "" {
-		source += " • Spotify ID: " + track.SpotifyID
-	}
-	next := "—"
-	if event.NextPending {
-		next = "resolving…"
-	} else if event.Next != nil {
-		next = trackTitle(*event.Next)
-	}
-	if track.RequestedBy != "" {
-		source += " • Requested by <@" + track.RequestedBy + ">"
-	}
-	return fmt.Sprintf("%s Now Playing\n%s\n%s\nNext: %s", icon, trackTitle(track), source, next)
+	return fmt.Sprintf("%s: %s", label, trackTitle(event.Track))
 }
 
 func (b *Bot) bindAnnouncements(g *guild) {

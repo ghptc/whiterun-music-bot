@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"unicode/utf16"
 	"whiterun/internal/media"
 	"whiterun/internal/player"
 
@@ -24,15 +23,29 @@ import (
 
 type recordingRest struct {
 	rest.Rest
-	response string
-	update   d.MessageUpdate
-	messages chan sentMessage
+	response  string
+	followups []d.MessageCreate
+	update    d.MessageUpdate
+	messages  chan sentMessage
 }
 
 func (r *recordingRest) UpdateInteractionResponse(_ snowflake.ID, _ string, m d.MessageUpdate, _ ...rest.RequestOpt) (*d.Message, error) {
-	r.response = *m.Content
+	r.response = updateText(m)
 	r.update = m
 	return &d.Message{}, nil
+}
+
+func (r *recordingRest) CreateFollowupMessage(_ snowflake.ID, _ string, m d.MessageCreate, _ ...rest.RequestOpt) (*d.Message, error) {
+	r.followups = append(r.followups, m)
+	return &d.Message{}, nil
+}
+
+func (r *recordingRest) queueText() string {
+	out := r.response
+	for _, m := range r.followups {
+		out += messageText(m)
+	}
+	return out
 }
 
 type dummyConn struct {
@@ -140,11 +153,11 @@ func TestQueueResponseStaysWithinDiscordLimit(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if n := len(utf16.Encode([]rune(v.Content))); n > 2000 {
-		t.Fatal(n)
+	for _, block := range v.Blocks {
+		assertV2Budget(t, block.Container)
 	}
-	if !strings.Contains(v.Content, "queue.txt") || v.Text == "" {
-		t.Fatal("missing complete export")
+	if len(queueSections(v)) != len(queueEntries(g.player.State()))+1 {
+		t.Fatal("missing songs")
 	}
 
 }
@@ -230,7 +243,7 @@ func TestPlayCollectionAndClearCommands(t *testing.T) {
 	}
 	waitForCollections(t, g.player)
 	b.command(interaction(t, "queue", true))
-	if !strings.Contains(r.response, "Artist — First") || !strings.Contains(queueAttachment(t, r.update, "queue.txt"), "Artist — Last") || !strings.Contains(r.response, "1 tracks remaining") {
+	if !strings.Contains(r.response, "First") || !strings.Contains(r.response, "Last") || !strings.Contains(r.response, "1 songs up next") {
 		t.Fatal(r.response)
 	}
 	// A second playlist appends without interrupting the first, preserving duplicates.
@@ -297,13 +310,13 @@ func TestPauseResumeNowAndLeaveCommands(t *testing.T) {
 		t.Fatal("not playing")
 	}
 	for _, tt := range []struct{ command, want string }{
-		{"pause", "Playback paused."}, {"pause", "already paused"}, {"now", "Paused: Arctic Monkeys — 505"}, {"queue", "Paused: Arctic Monkeys — 505"}, {"resume", "Playback resumed."}, {"resume", "already playing"}, {"pause", "Playback paused."}, {"leave", "takes his leave"},
+		{"pause", "Playback paused."}, {"pause", "already paused"}, {"now", "505"}, {"queue", "505"}, {"resume", "Playback resumed."}, {"resume", "already playing"}, {"pause", "Playback paused."}, {"leave", "takes his leave"},
 	} {
 		b.command(interaction(t, tt.command, true))
 		if !strings.Contains(r.response, tt.want) {
 			t.Fatalf("%s: %s", tt.command, r.response)
 		}
-		if tt.command == "now" && (!strings.Contains(r.response, "Spotify metadata") || !strings.Contains(r.response, "4:13") || strings.Contains(r.response, "Next")) {
+		if tt.command == "now" && (strings.Contains(r.response, "Spotify metadata") || !strings.Contains(r.response, "04:13")) {
 			t.Fatal(r.response)
 		}
 	}
@@ -327,7 +340,7 @@ func TestNewCommandsRegisteredAndNowNeedsNoVoice(t *testing.T) {
 	}
 	b, r := testBot(t)
 	b.command(interaction(t, "now", true))
-	if !strings.Contains(r.response, "nothing playing") {
+	if !strings.Contains(strings.ToLower(r.response), "nothing playing") {
 		t.Fatal(r.response)
 	}
 }
