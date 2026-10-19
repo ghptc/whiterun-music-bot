@@ -14,6 +14,7 @@ import (
 var ErrNoSong = errors.New("The Bard could find no song worthy of playing.")
 
 type Track struct {
+	ForcedYouTube       bool `json:",omitempty"`
 	identityProof       *Candidate
 	SpotifyArtworkURL   string `json:",omitempty"`
 	YouTubeThumbnailURL string `json:",omitempty"`

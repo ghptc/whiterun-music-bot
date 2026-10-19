@@ -94,6 +94,13 @@ func (b *Bot) ConfigureMatchPolicy(policy media.MatchPolicy) error {
 func (b *Bot) ConfigureSpotify(s *media.Spotify) { b.resolver.Spotify = s }
 
 func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) error {
+	if track.ForcedYouTube {
+		direct, ok, err := media.YouTubeURL(track.URL)
+		if err != nil || !ok || direct != "https://www.youtube.com/watch?v="+track.VideoID || track.RequestedSource != "youtube" {
+			return media.ErrForceURL
+		}
+		track.URL = direct
+	}
 	if track.RequestedSource == "spotify" {
 		if track.URL == "" {
 			var err error

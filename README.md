@@ -180,3 +180,14 @@ reproduzidos. `SPOTIFY_MATCH_POLICY` permite configurar os critérios documentad
 - [Matriz, CI e testes externos](docs/test-matrix.md)
 
 Os testes locais não comprovam áudio audível no Discord real.
+
+
+### Exact YouTube video
+
+Use `/play query:<YouTube-video-URL> force:true` to queue exactly the selected
+video. The Bard confirms `Queued: <title> — Direct YouTube`, preserves its
+thumbnail and never searches for a replacement recording. Spotify URLs, text
+searches and playlist-only URLs are rejected with force. Video links containing
+playlist parameters still select only that video. Omitting force or choosing
+false keeps the existing behavior. Queue order and voice permissions apply
+normally. See [Force Play](docs/force-play.md) for validation and limitations.

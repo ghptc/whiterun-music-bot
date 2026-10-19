@@ -412,3 +412,37 @@ func TestArtworkSurvivesDatabaseAndPlayerRestart(t *testing.T) {
 		t.Fatal(other, err)
 	}
 }
+
+func TestForcedYouTubeRecoveryAndSpotifyCacheIsolation(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "force.db")
+	db, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	tr := media.Track{ForcedYouTube: true, RequestedSource: "youtube", VideoID: "abcdefghijk", URL: "https://www.youtube.com/watch?v=abcdefghijk", Title: "Interview", Duration: 17 * time.Second, RequestedBy: "listener", YouTubeThumbnailURL: "https://i.ytimg.com/vi/abcdefghijk/default.jpg"}
+	if err = db.SaveGuild(ctx, "1", player.DurableState{Queue: []media.Track{{Title: "before"}, tr, {Title: "after"}}}); err != nil {
+		t.Fatal(err)
+	}
+	db.Close()
+	db, err = Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	p := player.New(ctx, slog.New(slog.NewTextHandler(io.Discard, nil)), nil)
+	defer p.Close(ctx)
+	if err = p.ConfigureStore(db, "1"); err != nil {
+		t.Fatal(err)
+	}
+	got := p.State().Queued
+	if len(got) != 3 || got[0].Title != "before" || got[2].Title != "after" || got[1].VideoID != tr.VideoID || got[1].URL != tr.URL || !got[1].ForcedYouTube || got[1].RequestedBy != tr.RequestedBy || got[1].YouTubeThumbnailURL != tr.YouTubeThumbnailURL || got[1].Duration != tr.Duration {
+		t.Fatal(got)
+	}
+	for _, table := range []string{"mappings", "music_catalog"} {
+		var count int
+		if err = db.db.QueryRow("SELECT count(*) FROM " + table).Scan(&count); err != nil || count != 0 {
+			t.Fatal(count, err)
+		}
+	}
+}

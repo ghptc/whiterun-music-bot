@@ -25,7 +25,7 @@ func commands() []d.ApplicationCommandCreate {
 	} {
 		command := d.SlashCommandCreate{Name: c.name, Description: c.description, Contexts: []d.InteractionContextType{d.InteractionContextTypeGuild}}
 		if c.name == "play" {
-			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionString{Name: "query", Description: "Song and artist, YouTube video/playlist, or Spotify track/playlist/album URL", Required: true, MaxLength: new(500)}}
+			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionString{Name: "query", Description: "Song and artist, YouTube video/playlist, or Spotify track/playlist/album URL", Required: true, MaxLength: new(500)}, d.ApplicationCommandOptionBool{Name: "force", Description: "Play exactly this YouTube video; requires a video URL"}}
 		}
 		if c.name == "queue" {
 			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionInt{Name: "limit", Description: "Maximum upcoming tracks to show (omit for the complete queue)", MinValue: new(1)}}
@@ -160,14 +160,14 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 		releaseSearch := sync.OnceFunc(func() { <-b.searches })
 		defer releaseSearch()
 		resolveCtx := media.WithTiming(searchCtx, timing)
-		result, progressive, err := b.resolver.Prepare(resolveCtx, data.String("query"))
+		result, progressive, err := b.resolver.PreparePlay(resolveCtx, data.String("query"), data.Bool("force"))
 		if err != nil {
 			b.log.Warn("media resolution failed", "guild_id", id, "stage", resolutionStage(err), "error", err)
 			if searchCtx.Err() != nil {
 				reply("Playback changed while searching. Ask the Bard again.")
 			} else if message := spotifyErrorText(err); message != "" {
 				reply(message)
-			} else if errors.Is(err, media.ErrNoTracks) || errors.Is(err, media.ErrCollectionTooLarge) {
+			} else if errors.Is(err, media.ErrForceURL) || errors.Is(err, media.ErrNoTracks) || errors.Is(err, media.ErrCollectionTooLarge) {
 				reply(err.Error())
 			} else if errors.Is(err, media.ErrNoSong) {
 				reply(media.ErrNoSong.Error())
@@ -234,7 +234,7 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 			}
 			reply(message)
 		} else {
-			reply("Queued: " + trackTitle(result.Tracks[0]))
+			reply(queuedTrackText(result.Tracks[0]))
 		}
 	case "pause", "resume":
 		paused := name == "pause"
@@ -411,4 +411,11 @@ func currentStateText(state player.State) string {
 		return "Starting: " + trackTitle(*state.Current)
 	}
 	return currentText(state.Current, state.Paused)
+}
+
+func queuedTrackText(track media.Track) string {
+	if track.ForcedYouTube {
+		return "Queued: " + title(track.Title) + " — Direct YouTube"
+	}
+	return "Queued: " + trackTitle(track)
 }

@@ -3,6 +3,7 @@ package media
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 )
 
@@ -142,3 +143,31 @@ func (r CollectionResolver) MatchSpotify(ctx context.Context, original Track, fi
 	track = original
 	return track, nil
 }
+
+// PreparePlay preserves the ordinary path unless direct selection is explicit.
+func (r CollectionResolver) PreparePlay(ctx context.Context, query string, force bool) (Collection, bool, error) {
+	if !force {
+		return r.Prepare(ctx, query)
+	}
+	if len(query) > 500 {
+		return Collection{}, false, ErrForceURL
+	}
+	direct, ok, err := YouTubeURL(strings.TrimSpace(query))
+	if err != nil || !ok {
+		return Collection{}, false, ErrForceURL
+	}
+	resolver := r.YouTube
+	// A manual selection must never inherit Spotify identity or cache keys.
+	resolver.Match = nil
+	track, err := resolver.Resolve(ctx, direct)
+	if err != nil {
+		return Collection{}, false, err
+	}
+	if track.URL != direct || "https://www.youtube.com/watch?v="+track.VideoID != direct {
+		return Collection{}, false, ErrNoSong
+	}
+	track.ForcedYouTube = true
+	return Collection{Tracks: []Track{track}}, false, nil
+}
+
+var ErrForceURL = errors.New("Force requires a direct YouTube video URL. Spotify, searches and playlists are not supported.")
