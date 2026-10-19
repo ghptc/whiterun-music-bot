@@ -77,3 +77,28 @@ func MappingKey(t Track, p *MatchPolicy) string {
 	}
 	return mappingKey(t, policy)
 }
+
+// InvalidateSpotify drops both metadata cache layers after playback failure.
+// Cleanup ignores a track cancellation, but is bounded and cannot mask playback.
+func (r Resolver) InvalidateSpotify(ctx context.Context, t Track) {
+	if t.RequestedSource != "spotify" {
+		return
+	}
+	key := MappingKey(t, r.Policy)
+	r.Cache.invalidate("spotify:" + key)
+	if r.Mappings != nil {
+		bounded, cancel := catalogContext(context.WithoutCancel(ctx))
+		defer cancel()
+		err := deleteMappingVideo(bounded, r.Mappings, key, t.VideoID)
+		TimingFrom(ctx).Event("spotify_mapping_invalidated", time.Now(), "success", err == nil)
+	}
+}
+
+func deleteMappingVideo(ctx context.Context, store MappingStore, key, id string) error {
+	if conditional, ok := store.(interface {
+		DeleteMappingForVideo(context.Context, string, string) error
+	}); ok {
+		return conditional.DeleteMappingForVideo(ctx, key, id)
+	}
+	return store.DeleteMapping(ctx, key)
+}

@@ -294,30 +294,42 @@ func deduplicateCandidates(pools ...[]*Candidate) []Candidate {
 func (r Resolver) resolveSpotify(ctx context.Context, query string) (Candidate, error) {
 	key := mappingKey(*r.Match, r.matchPolicy())
 	if r.Mappings != nil {
-		cached, ok, err := r.Mappings.LoadMapping(ctx, key)
-		if err != nil {
-			return Candidate{}, err
+		started := time.Now()
+		bounded, cancel := catalogContext(ctx)
+		cached, ok, cacheErr := r.Mappings.LoadMapping(bounded, key)
+		cancel()
+		TimingFrom(ctx).Event("spotify_mapping_lookup", started, "hit", ok, "success", cacheErr == nil)
+		if cacheErr != nil {
+			TimingFrom(ctx).Event("mapping_read_failed", started)
 		}
-		if ok {
+		if cacheErr == nil && ok && videoID.MatchString(cached.ID) {
 			if freshIdentity(cached, time.Now()) && CompareSpotify(*r.Match, cached, r.matchPolicy()).Status == MatchConfirmed {
-				TimingFrom(ctx).Event("spotify_mapping_cache_hit", time.Now(), "spotify_track_id", r.Match.SpotifyID, "video_id", cached.ID)
+				TimingFrom(ctx).Event("spotify_mapping_cache_hit", started, "external_searches_avoided", 1, "external_verifications_avoided", 1)
 				return cached, nil
 			}
-			full, err := r.extract(ctx, "https://www.youtube.com/watch?v="+cached.ID, "spotify_mapping_revalidation", false)
-			if err != nil {
-				return Candidate{}, err
-			}
-			if full.ID == cached.ID && CompareSpotify(*r.Match, full.Candidate, r.matchPolicy()).Status == MatchConfirmed {
-				if err := r.Mappings.SaveMapping(ctx, key, full.Candidate); err != nil {
-					return Candidate{}, err
+			full, verifyErr := r.extract(ctx, "https://www.youtube.com/watch?v="+cached.ID, "spotify_mapping_revalidation", false)
+			if verifyErr == nil && full.ID == cached.ID && CompareSpotify(*r.Match, full.Candidate, r.matchPolicy()).Status == MatchConfirmed {
+				bounded, cancel = catalogContext(ctx)
+				saveErr := r.Mappings.SaveMapping(bounded, key, full.Candidate)
+				cancel()
+				if saveErr != nil {
+					TimingFrom(ctx).Event("mapping_write_failed", time.Now())
 				}
 				return full.Candidate, nil
 			}
-			if err := r.Mappings.DeleteMapping(ctx, key); err != nil {
-				return Candidate{}, err
+			bounded, cancel = catalogContext(ctx)
+			deleteErr := deleteMappingVideo(bounded, r.Mappings, key, cached.ID)
+			cancel()
+			if deleteErr != nil {
+				TimingFrom(ctx).Event("mapping_invalidation_failed", time.Now())
 			}
 			if ctx.Err() != nil {
 				return Candidate{}, ctx.Err()
+			}
+			// Fail closed on an extraction error, but invalidate the stale locator.
+			// Identity mismatch retains the existing discovery fallback.
+			if verifyErr != nil {
+				return Candidate{}, verifyErr
 			}
 		}
 	}
@@ -338,8 +350,11 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (Candidate, 
 			return full.Candidate, err
 		})
 	if err == nil && r.Mappings != nil {
-		if saveErr := r.Mappings.SaveMapping(ctx, key, chosen); saveErr != nil {
-			return Candidate{}, saveErr
+		bounded, cancel := catalogContext(ctx)
+		saveErr := r.Mappings.SaveMapping(bounded, key, chosen)
+		cancel()
+		if saveErr != nil {
+			TimingFrom(ctx).Event("mapping_write_failed", time.Now())
 		}
 	}
 	return chosen, err

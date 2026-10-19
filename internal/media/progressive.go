@@ -65,6 +65,21 @@ func (r CollectionResolver) Prepare(ctx context.Context, query string) (Collecti
 	return c, true, nil
 }
 func (r CollectionResolver) spotifyMetadata(ctx context.Context, kind, id string) (Collection, error) {
+
+	if store, ok := r.YouTube.Mappings.(CatalogStore); ok && kind == "track" {
+		started := time.Now()
+		bounded, cancel := catalogContext(ctx)
+		t, hit, cacheErr := store.LoadCatalog(bounded, id)
+		cancel()
+		TimingFrom(ctx).Event("catalog_lookup", started, "hit", hit, "success", cacheErr == nil, "external_metadata_calls_avoided", map[bool]int{true: 1, false: 0}[hit && cacheErr == nil])
+		if cacheErr != nil && r.Log != nil {
+			r.Log.Warn("catalog_read_failed", "error", cacheErr)
+		}
+		if cacheErr == nil && hit && t.SpotifyID == id && t.RequestedSource == "spotify" {
+			t.Position, t.Total = 1, 1
+			return Collection{Tracks: []Track{t}, SourceURL: t.SourceURL}, nil
+		}
+	}
 	if r.Spotify == nil {
 		return Collection{}, ErrSpotifyConfig
 	}
@@ -82,6 +97,7 @@ func (r CollectionResolver) spotifyMetadata(ctx context.Context, kind, id string
 		return Collection{}, ErrCollectionTooLarge
 	}
 	for i := range c.Tracks {
+		r.saveCatalog(ctx, c.Tracks[i])
 		if c.Tracks[i].Position == 0 {
 			c.Tracks[i].Position, c.Tracks[i].Total = i+1, len(c.Tracks)+c.Skipped
 		}

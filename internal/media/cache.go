@@ -150,3 +150,12 @@ func (c *SearchCache) resolve(ctx context.Context, key string, work func(context
 		return CloneTrack(flight.track), flight.err
 	}
 }
+
+func (c *SearchCache) invalidate(key string) {
+	if c == nil {
+		return
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	delete(c.entries, key)
+}
