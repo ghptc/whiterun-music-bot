@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http/httptrace"
 	"strings"
 	"sync"
 	"time"
@@ -38,10 +39,13 @@ func commands() []d.ApplicationCommandCreate {
 	return append(result, expansionCommands()...)
 }
 func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
-	started := time.Now()
+	b.commandAt(e, time.Now())
+}
+
+func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started time.Time) {
 	data, slash := e.Data.(d.SlashCommandInteractionData)
 	if slash {
-		b.log.Info("command_received", "name", data.CommandName(), "command_id", data.CommandID(), "guild_id", e.GuildID())
+		b.log.Info("command_received", "interaction_id", e.ID(), "name", data.CommandName(), "command_id", data.CommandID(), "guild_id", e.GuildID())
 	}
 	var timing *media.Timing
 	if slash && data.CommandName() == "play" {
@@ -49,7 +53,22 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 		timing.Event("play_request_start", started, "query", data.String("query"))
 		defer func() { timing.Event("play_request_total", started) }()
 	}
-	ack, cancel := context.WithTimeout(b.ctx, 2*time.Second)
+	// Leave 300ms for gateway transit and Discord processing. The budget starts
+	// at command entry, so local scheduling/logging cannot extend the deadline.
+	ack, cancel := context.WithDeadline(b.ctx, started.Add(2700*time.Millisecond))
+	ackStarted := time.Now()
+	ack = httptrace.WithClientTrace(ack, &httptrace.ClientTrace{
+		GotConn: func(info httptrace.GotConnInfo) {
+			b.log.Info("command_ack_http_connection", "interaction_id", e.ID(), "elapsed_us", time.Since(ackStarted).Microseconds(), "reused", info.Reused)
+		},
+		GotFirstResponseByte: func() {
+			b.log.Info("command_ack_http_first_byte", "interaction_id", e.ID(), "elapsed_us", time.Since(ackStarted).Microseconds())
+		},
+	})
+	b.log.Info("command_ack_start", "interaction_id", e.ID(), "elapsed_us", time.Since(started).Microseconds())
+	defer func() {
+		b.log.Info("command_total", "interaction_id", e.ID(), "elapsed_us", time.Since(started).Microseconds())
+	}()
 	var err error
 	if timing != nil {
 		err = e.CreateMessage(d.MessageCreate{Content: "The Bard searches Skyrim for your song...", AllowedMentions: &d.AllowedMentions{}}, rest.WithCtx(ack))
@@ -57,9 +76,10 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 		err = e.DeferCreateMessage(!(slash && data.CommandName() == "queue"), rest.WithCtx(ack))
 	}
 	cancel()
+	b.log.Info("command_ack_complete", "interaction_id", e.ID(), "elapsed_us", time.Since(ackStarted).Microseconds(), "error", err)
 	timing.Event("discord_acknowledged", started, "error", err)
 	if err != nil {
-		b.log.Warn("command acknowledgement failed", "interaction_id", e.ID(), "guild_id", e.GuildID(), "error", err)
+		b.log.Warn("command acknowledgement failed", "interaction_id", e.ID(), "guild_id", e.GuildID(), "elapsed_us", time.Since(ackStarted).Microseconds(), "error", err)
 		return
 	}
 	reply := func(content string) {
@@ -116,7 +136,10 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 		if value, present := data.OptInt("limit"); present {
 			limit = &value
 		}
-		b.replyQueue(e, g.player.State(), limit)
+		snapshotStarted := time.Now()
+		state := g.player.State()
+		b.log.Info("queue_snapshot", "interaction_id", e.ID(), "elapsed_us", time.Since(snapshotStarted).Microseconds(), "entries", len(state.Entries))
+		b.replyQueue(e, state, limit)
 		return
 	}
 	g.mu.Lock()

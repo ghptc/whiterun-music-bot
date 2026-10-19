@@ -201,7 +201,7 @@ func (g *guild) beginQueueDelivery(parent context.Context, channel snowflake.ID)
 func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state player.State, limit *int) {
 	started := time.Now()
 	view, err := buildQueueView(state, limit)
-	b.log.Info("queue_render", "elapsed_us", time.Since(started).Microseconds(), "components", view.Components, "messages", len(view.Blocks), "shown", view.Shown, "total", view.Total, "artwork_missing", view.Missing)
+	b.log.Info("queue_plan", "interaction_id", e.ID(), "elapsed_us", time.Since(started).Microseconds(), "components", view.Components, "messages", len(view.Blocks), "shown", view.Shown, "total", view.Total, "artwork_missing", view.Missing)
 	if err != nil {
 		view.Blocks = []queueBlock{{Container: musicContainer("THE BARD · QUEUE", d.TextDisplayComponent{Content: err.Error()})}}
 	}
@@ -223,8 +223,19 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 		}
 	}
 	defer finish()
+	render := func(block *queueBlock) error {
+		queueImages.warm(ctx, block.Rows)
+		renderStarted := time.Now()
+		bounded, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+		err := queueImages.render(bounded, block)
+		b.log.Info("queue_png", "interaction_id", e.ID(), "elapsed_us", time.Since(renderStarted).Microseconds(), "error", err)
+		return err
+	}
+	var renderErr error
 	if len(view.Blocks[0].Rows) > 0 {
-		if err := queueImages.render(ctx, &view.Blocks[0]); err != nil {
+		if err := render(&view.Blocks[0]); err != nil {
+			renderErr = err
 			b.log.Warn("queue_render_failed", "error", err)
 			view.Blocks = []queueBlock{{Container: musicContainer("THE BARD · QUEUE", d.TextDisplayComponent{Content: "Could not draw the queue. Try /queue again."})}}
 		}
@@ -232,7 +243,9 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 	sendUpdate := func(update d.MessageUpdate, parent context.Context) error {
 		bounded, cancel := context.WithTimeout(parent, 20*time.Second)
 		defer cancel()
+		sendStarted := time.Now()
 		_, err := b.client.Rest.UpdateInteractionResponse(b.client.ApplicationID, e.Token(), update, rest.WithCtx(bounded))
+		b.log.Info("queue_response", "interaction_id", e.ID(), "elapsed_us", time.Since(sendStarted).Microseconds(), "error", err)
 		return err
 	}
 	delivered := 0
@@ -251,15 +264,17 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 			err = ctx.Err()
 			break
 		}
-		if err = queueImages.render(ctx, &view.Blocks[i]); err != nil {
+		if err = render(&view.Blocks[i]); err != nil {
 			break
 		}
 		bounded, cancel := context.WithTimeout(ctx, 20*time.Second)
 		message := d.NewMessageCreateV2(view.Blocks[i].Container)
 		message.AllowedMentions = &d.AllowedMentions{}
 		message.Files = []*d.File{d.NewFile("queue.png", "Music queue", bytes.NewReader(view.Blocks[i].PNG))}
+		sendStarted := time.Now()
 		_, err = b.client.Rest.CreateFollowupMessage(b.client.ApplicationID, e.Token(), message, rest.WithCtx(bounded))
 		cancel()
+		b.log.Info("queue_response", "interaction_id", e.ID(), "elapsed_us", time.Since(sendStarted).Microseconds(), "error", err)
 		if err == nil {
 			sent++
 			delivered = view.Blocks[i].Last
@@ -274,15 +289,18 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 		}
 		fallback, cancel := context.WithTimeout(b.ctx, 3*time.Second)
 		defer cancel()
-		if failure := sendUpdate(view.Blocks[0].update(notice), fallback); failure != nil {
-			b.log.Warn("queue_delivery_notice_failed", "error", failure)
+		if ctx.Err() == nil {
+			if failure := sendUpdate(view.Blocks[0].update(notice), fallback); failure != nil {
+				b.log.Warn("queue_delivery_notice_failed", "error", failure)
+			}
 		}
 	} else if len(view.Blocks) > 1 {
 		if failure := sendUpdate(view.Blocks[0].update(""), ctx); failure != nil {
+			err = failure
 			b.log.Warn("queue_completion_notice_failed", "error", failure)
 		}
 	}
-	b.log.Info("queue_delivery_complete", "elapsed_ms", time.Since(started).Milliseconds(), "messages_sent", sent, "positions_sent", delivered, "success", err == nil)
+	b.log.Info("queue_delivery_complete", "interaction_id", e.ID(), "elapsed_ms", time.Since(started).Milliseconds(), "messages_sent", sent, "positions_sent", delivered, "success", err == nil && renderErr == nil, "error", err, "render_error", renderErr)
 }
 
 func (block queueBlock) rangeLabel() string {

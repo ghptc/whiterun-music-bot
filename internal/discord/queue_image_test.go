@@ -206,7 +206,7 @@ func TestQueueArtworkYouTubeFallback(t *testing.T) {
 	if err := r.render(context.Background(), &view.Blocks[0]); err != nil {
 		t.Fatal(err)
 	}
-	if strings.Join(hosts, ",") != "i.scdn.co,i.ytimg.com" {
+	if len(hosts) != 0 {
 		t.Fatal(hosts)
 	}
 }

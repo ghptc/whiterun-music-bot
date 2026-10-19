@@ -298,6 +298,7 @@ func (v transport) Close(ctx context.Context) { v.conn.Close(ctx) }
 
 // Keep event handling short enough to acknowledge within Discord's deadline.
 func (b *Bot) handle(e *events.ApplicationCommandInteractionCreate) {
+	received := time.Now()
 	b.mu.Lock()
 	if b.closing {
 		b.mu.Unlock()
@@ -305,7 +306,7 @@ func (b *Bot) handle(e *events.ApplicationCommandInteractionCreate) {
 	}
 	b.workers.Add(1)
 	b.mu.Unlock()
-	go func() { defer b.workers.Done(); b.command(e) }()
+	go func() { defer b.workers.Done(); b.commandAt(e, received) }()
 }
 
 // Caller holds g.mu. Cancel pending resolutions as well as invalidating tickets.

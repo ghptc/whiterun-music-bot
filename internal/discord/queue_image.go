@@ -41,14 +41,15 @@ type cachedQueueArt struct {
 	expires time.Time
 }
 type queueImageRenderer struct {
-	slots  chan struct{}
-	mu     sync.Mutex
-	cache  map[string]cachedQueueArt
-	client *http.Client
+	warmSlots chan struct{}
+	slots     chan struct{}
+	mu        sync.Mutex
+	cache     map[string]cachedQueueArt
+	client    *http.Client
 }
 
 func newQueueImageRenderer() *queueImageRenderer {
-	return &queueImageRenderer{slots: make(chan struct{}, 2), cache: make(map[string]cachedQueueArt), client: &http.Client{Timeout: 800 * time.Millisecond, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}
+	return &queueImageRenderer{warmSlots: make(chan struct{}, 2), slots: make(chan struct{}, 2), cache: make(map[string]cachedQueueArt), client: &http.Client{Timeout: 800 * time.Millisecond, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}
 }
 
 var queueImages = newQueueImageRenderer()
@@ -117,6 +118,37 @@ func (r *queueImageRenderer) artwork(ctx context.Context, raw string) image.Imag
 	return thumb
 }
 
+// Warm artwork separately; admission is nonblocking and bounds goroutines,
+// HTTP concurrency and decoded image memory even across many guilds.
+func (r *queueImageRenderer) warm(ctx context.Context, rows []queueRow) {
+	select {
+	case r.warmSlots <- struct{}{}:
+	default:
+		return
+	}
+	go func() {
+		defer func() { <-r.warmSlots }()
+		ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+		defer cancel()
+		for _, row := range rows {
+			if ctx.Err() != nil {
+				return
+			}
+			r.artwork(ctx, media.ArtworkURL(row.Track))
+		}
+	}()
+}
+
+func (r *queueImageRenderer) cachedArtwork(raw string) image.Image {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	hit := r.cache[raw]
+	if time.Now().Before(hit.expires) {
+		return hit.image
+	}
+	return nil
+}
+
 func imageLabel(s string) string { return queueClip(strings.Join(strings.Fields(s), " "), 512) }
 func drawQueueText(dst draw.Image, face font.Face, x, y, width int, text string, ink color.Color) {
 	text = imageLabel(text)
@@ -175,10 +207,6 @@ func (r *queueImageRenderer) render(ctx context.Context, block *queueBlock) erro
 	draw.Draw(dst, dst.Bounds(), image.NewUniform(bg), image.Point{}, draw.Src)
 	drawQueueText(dst, title, 24, 34, 900, "THE BARD · QUEUE", white)
 	drawQueueText(dst, subtitle, 24, 63, 900, block.rangeLabel(), gray)
-	// One budget for all artwork in a block. A slow provider never delays each row
-	// independently; remaining rows use cached art or a local placeholder.
-	artCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
-	defer cancel()
 	for i, row := range block.Rows {
 		if err := ctx.Err(); err != nil {
 			return err
@@ -191,11 +219,11 @@ func (r *queueImageRenderer) render(ctx context.Context, block *queueBlock) erro
 			ink = green
 		}
 		drawQueueText(dst, subtitle, 24, y+31, 48, position, ink)
-		art := r.artwork(artCtx, media.ArtworkURL(row.Track))
+		art := r.cachedArtwork(media.ArtworkURL(row.Track))
 		if art == nil && row.Track.SpotifyArtworkURL != "" {
 			fallback := row.Track
 			fallback.SpotifyArtworkURL = ""
-			art = r.artwork(artCtx, media.ArtworkURL(fallback))
+			art = r.cachedArtwork(media.ArtworkURL(fallback))
 		}
 		rect := image.Rect(80, y, 128, y+48)
 		if art != nil {
@@ -216,7 +244,10 @@ func (r *queueImageRenderer) render(ctx context.Context, block *queueBlock) erro
 		drawQueueText(dst, subtitle, 148, y+45, queueWidth-172, artist, gray)
 	}
 	var encoded cappedPNG
-	if err := png.Encode(&encoded, dst); err != nil {
+	if err := (&png.Encoder{CompressionLevel: png.BestSpeed}).Encode(&encoded, dst); err != nil {
+		return err
+	}
+	if err := ctx.Err(); err != nil {
 		return err
 	}
 	block.PNG = encoded.Bytes()
