@@ -1,0 +1,1482 @@
+[
+  {
+    "file": "cmd/bot/spotify_diagnose_test.go",
+    "test": "TestConfiguredSpotify",
+    "line": 9
+  },
+  {
+    "file": "internal/discord/announcements_test.go",
+    "test": "TestAnnouncementsExactlyOnceOnEOFAndSkip",
+    "line": 50
+  },
+  {
+    "file": "internal/discord/announcements_test.go",
+    "test": "TestAnnouncementPendingNextAndNoResolutionSpam",
+    "line": 91
+  },
+  {
+    "file": "internal/discord/announcements_test.go",
+    "test": "TestSuccessfulPlayPublicForEachSource",
+    "line": 143
+  },
+  {
+    "file": "internal/discord/announcements_test.go",
+    "test": "TestSkippedAnnouncementKeepsIdentityAndPosition",
+    "line": 200
+  },
+  {
+    "file": "internal/discord/announcements_test.go",
+    "test": "TestFailureAnnouncementsDistinguishResolutionAndInterruptedPlayback",
+    "line": 220
+  },
+  {
+    "file": "internal/discord/commands_test.go",
+    "test": "TestCommandsRequireGuildAndVoice",
+    "line": 89
+  },
+  {
+    "file": "internal/discord/commands_test.go",
+    "test": "TestControlsAndSearchCancellation",
+    "line": 104
+  },
+  {
+    "file": "internal/discord/commands_test.go",
+    "test": "TestQueueResponseStaysWithinDiscordLimit",
+    "line": 138
+  },
+  {
+    "file": "internal/discord/commands_test.go",
+    "test": "TestPlayAcknowledgesWithContentBeforeGuildWork",
+    "line": 170
+  },
+  {
+    "file": "internal/discord/commands_test.go",
+    "test": "TestPlayCollectionAndClearCommands",
+    "line": 202
+  },
+  {
+    "file": "internal/discord/commands_test.go",
+    "test": "TestClearRegistered",
+    "line": 283
+  },
+  {
+    "file": "internal/discord/commands_test.go",
+    "test": "TestPauseResumeNowAndLeaveCommands",
+    "line": 292
+  },
+  {
+    "file": "internal/discord/commands_test.go",
+    "test": "TestNewCommandsRegisteredAndNowNeedsNoVoice",
+    "line": 336
+  },
+  {
+    "file": "internal/discord/commands_test.go",
+    "test": "TestSpotifyErrorsHideDiagnosticDetails",
+    "line": 352
+  },
+  {
+    "file": "internal/discord/cr002_test.go",
+    "test": "TestCommandSyncUpsertsAndReadsBackWithoutDeleting",
+    "line": 20
+  },
+  {
+    "file": "internal/discord/cr002_test.go",
+    "test": "TestNowPlayingComponentsArtworkAndNativeLimits",
+    "line": 86
+  },
+  {
+    "file": "internal/discord/cr002_test.go",
+    "test": "TestSupersededStartAnnouncementIsDropped",
+    "line": 127
+  },
+  {
+    "file": "internal/discord/cr002_test.go",
+    "test": "TestSimultaneousGuildEmbedsUseFinalPlaybackMetadata",
+    "line": 157
+  },
+  {
+    "file": "internal/discord/cr002_test.go",
+    "test": "TestQueueDoesNotResolvePendingMedia",
+    "line": 207
+  },
+  {
+    "file": "internal/discord/expansion_test.go",
+    "test": "TestRootsHelpCompleteStaticAndWithinLimits",
+    "line": 20
+  },
+  {
+    "file": "internal/discord/expansion_test.go",
+    "test": "TestExpandedPermissionsAndUnavailableProviders",
+    "line": 60
+  },
+  {
+    "file": "internal/discord/expansion_test.go",
+    "test": "TestExpandedHandlersWithPlayerAndSQLite",
+    "line": 90
+  },
+  {
+    "file": "internal/discord/failure_notice_regression_test.go",
+    "test": "TestFailureNoticeIsNotUserSkip",
+    "line": 10
+  },
+  {
+    "file": "internal/discord/force_test.go",
+    "test": "TestForceCommandQueueAndControls",
+    "line": 32
+  },
+  {
+    "file": "internal/discord/force_test.go",
+    "test": "TestForceCommandRequiresSameChannel",
+    "line": 99
+  },
+  {
+    "file": "internal/discord/force_test.go",
+    "test": "TestForceSlashContract",
+    "line": 110
+  },
+  {
+    "file": "internal/discord/force_test.go",
+    "test": "TestForcePublishedJSONContract",
+    "line": 133
+  },
+  {
+    "file": "internal/discord/force_test.go",
+    "test": "TestForcedNowPlayingKeepsThumbnail",
+    "line": 179
+  },
+  {
+    "file": "internal/discord/force_test.go",
+    "test": "TestForcedBotPlaybackFailureKeepsExactURL",
+    "line": 187
+  },
+  {
+    "file": "internal/discord/idle_test.go",
+    "test": "TestEmptyChannelTimeoutAndIsolation",
+    "line": 34
+  },
+  {
+    "file": "internal/discord/idle_test.go",
+    "test": "TestRejoinCancelsEmptyDeadline",
+    "line": 70
+  },
+  {
+    "file": "internal/discord/idle_test.go",
+    "test": "TestVoiceEventResetsBriefRejoin",
+    "line": 87
+  },
+  {
+    "file": "internal/discord/idle_test.go",
+    "test": "TestManualLeaveCancelsIdleAndResummonIsClean",
+    "line": 104
+  },
+  {
+    "file": "internal/discord/idle_test.go",
+    "test": "TestUnknownListenerAndShutdownAreConservative",
+    "line": 126
+  },
+  {
+    "file": "internal/discord/idle_test.go",
+    "test": "TestWatchVoiceDisconnectClearsPausedSession",
+    "line": 150
+  },
+  {
+    "file": "internal/discord/idle_test.go",
+    "test": "TestBotShutdownWhilePausedCancelsIdleWatcher",
+    "line": 183
+  },
+  {
+    "file": "internal/discord/idle_test.go",
+    "test": "TestVoiceEventCachesBotWithGuildScope",
+    "line": 202
+  },
+  {
+    "file": "internal/discord/idle_test.go",
+    "test": "TestTransientGatewayStateRetainsPlayback",
+    "line": 219
+  },
+  {
+    "file": "internal/discord/playback_integrity_test.go",
+    "test": "TestBotPlaybackRejectsWrongRecordingBeforeStreaming",
+    "line": 27
+  },
+  {
+    "file": "internal/discord/playback_integrity_test.go",
+    "test": "TestBotRestoresGuildSettingsAndMetadataWithoutVoice",
+    "line": 73
+  },
+  {
+    "file": "internal/discord/quality_test.go",
+    "test": "TestChannelAuthorizationForEveryMutation",
+    "line": 35
+  },
+  {
+    "file": "internal/discord/quality_test.go",
+    "test": "TestAnyChannelMemberControlsPlaybackAndAddsCollections",
+    "line": 57
+  },
+  {
+    "file": "internal/discord/quality_test.go",
+    "test": "TestAnnouncementBackpressureDoesNotBlockAudio",
+    "line": 141
+  },
+  {
+    "file": "internal/discord/quality_test.go",
+    "test": "TestAnnouncementRESTFailureDoesNotStopAudio",
+    "line": 183
+  },
+  {
+    "file": "internal/discord/quality_test.go",
+    "test": "TestQueueDoesNotExposeImportOutcomes",
+    "line": 237
+  },
+  {
+    "file": "internal/discord/queue_delivery_test.go",
+    "test": "TestQueuePartialDeliveryPreservesFirstCardAndReportsProgress",
+    "line": 39
+  },
+  {
+    "file": "internal/discord/queue_delivery_test.go",
+    "test": "TestQueueCompleteDeliveryUsesOneContainerPerBlock",
+    "line": 57
+  },
+  {
+    "file": "internal/discord/queue_delivery_test.go",
+    "test": "TestQueueRateLimitRetriesSameJSONBlock",
+    "line": 86
+  },
+  {
+    "file": "internal/discord/queue_delivery_test.go",
+    "test": "TestQueueLongRateLimitStopsWithoutBurst",
+    "line": 135
+  },
+  {
+    "file": "internal/discord/queue_delivery_test.go",
+    "test": "TestQueueSlowDeliveryDoesNotHoldPlayerLock",
+    "line": 165
+  },
+  {
+    "file": "internal/discord/queue_delivery_test.go",
+    "test": "TestQueueCancellationIsScopedToGuildAndChannel",
+    "line": 187
+  },
+  {
+    "file": "internal/discord/queue_delivery_test.go",
+    "test": "TestQueuePersonalInstallRefusesOversizedDeliveryExplicitly",
+    "line": 208
+  },
+  {
+    "file": "internal/discord/queue_delivery_test.go",
+    "test": "TestQueueInitialSendAndNoticeFailureStopDelivery",
+    "line": 251
+  },
+  {
+    "file": "internal/discord/queue_native_test.go",
+    "test": "TestQueueNativeIndividualArtwork",
+    "line": 13
+  },
+  {
+    "file": "internal/discord/queue_native_test.go",
+    "test": "TestQueueCompactContinuations",
+    "line": 53
+  },
+  {
+    "file": "internal/discord/queue_reliability_test.go",
+    "test": "TestQueueAcknowledgementHTTPBudget",
+    "line": 20
+  },
+  {
+    "file": "internal/discord/queue_reliability_test.go",
+    "test": "TestQueueDuringSpotifyImportAndSkip",
+    "line": 90
+  },
+  {
+    "file": "internal/discord/queue_skip_test.go",
+    "test": "TestQueueAndSkipOptionRegistration",
+    "line": 28
+  },
+  {
+    "file": "internal/discord/queue_skip_test.go",
+    "test": "TestQueueAndBulkSkipCommands",
+    "line": 54
+  },
+  {
+    "file": "internal/discord/queue_skip_test.go",
+    "test": "TestSkipResponseDoesNotClaimPlaybackStarted",
+    "line": 114
+  },
+  {
+    "file": "internal/discord/queue_skip_test.go",
+    "test": "TestPublicQueueDuringProgressiveLoading",
+    "line": 124
+  },
+  {
+    "file": "internal/discord/queue_skip_test.go",
+    "test": "TestOtherCommandResponsesRemainEphemeral",
+    "line": 196
+  },
+  {
+    "file": "internal/discord/queue_test.go",
+    "test": "TestQueueCompleteAndLimitedSnapshots",
+    "line": 110
+  },
+  {
+    "file": "internal/discord/queue_test.go",
+    "test": "TestQueueCurrentPendingAndArtwork",
+    "line": 150
+  },
+  {
+    "file": "internal/discord/queue_test.go",
+    "test": "TestQueueNativeLimitsAndUntrustedLabels",
+    "line": 177
+  },
+  {
+    "file": "internal/discord/queue_test.go",
+    "test": "TestQueueLimitValidationAndGuildIsolation",
+    "line": 199
+  },
+  {
+    "file": "internal/discord/queue_test.go",
+    "test": "TestQueueInternalDiagnosticsStayOutOfUI",
+    "line": 226
+  },
+  {
+    "file": "internal/discord/queue_test.go",
+    "test": "TestQueueSnapshotDuringConcurrentResolution",
+    "line": 244
+  },
+  {
+    "file": "internal/discord/queue_test.go",
+    "test": "TestNowAndAnnouncementShareLayoutWithoutTechnicalMetadata",
+    "line": 291
+  },
+  {
+    "file": "internal/discord/readiness_test.go",
+    "test": "TestVoiceRecoveryWait",
+    "line": 25
+  },
+  {
+    "file": "internal/discord/readiness_test.go",
+    "test": "TestVoiceRecoveryFailureAndCancellation",
+    "line": 39
+  },
+  {
+    "file": "internal/media/artwork_test.go",
+    "test": "TestArtworkPriorityAndInvalidURLs",
+    "line": 13
+  },
+  {
+    "file": "internal/media/artwork_test.go",
+    "test": "TestSpotifyArtworkMetadataAndMatching",
+    "line": 38
+  },
+  {
+    "file": "internal/media/artwork_test.go",
+    "test": "TestYouTubeArtworkCapturedDuringResolution",
+    "line": 82
+  },
+  {
+    "file": "internal/media/artwork_test.go",
+    "test": "TestSpotifyTrackEmbedArtwork",
+    "line": 94
+  },
+  {
+    "file": "internal/media/artwork_test.go",
+    "test": "TestArtworkDoesNotChangeRecordingMappingKey",
+    "line": 102
+  },
+  {
+    "file": "internal/media/artwork_test.go",
+    "test": "TestSpotifyPlaylistEmbedIndividualArtwork",
+    "line": 112
+  },
+  {
+    "file": "internal/media/artwork_test.go",
+    "test": "TestCatalogArtworkRecoveryValidatesIdentityAndPreservesMetadata",
+    "line": 151
+  },
+  {
+    "file": "internal/media/cache_failure_regression_test.go",
+    "test": "TestMappingIOFailuresDoNotInterruptConfirmedResolution",
+    "line": 32
+  },
+  {
+    "file": "internal/media/cache_failure_regression_test.go",
+    "test": "TestUnavailableMappingExtractionInvalidatesLocator",
+    "line": 55
+  },
+  {
+    "file": "internal/media/cache_test.go",
+    "test": "TestSearchCacheExpiryBoundAndRequestIsolation",
+    "line": 15
+  },
+  {
+    "file": "internal/media/cache_test.go",
+    "test": "TestResolverCacheReusesMetadataButKeepsVariantsSeparate",
+    "line": 38
+  },
+  {
+    "file": "internal/media/cache_test.go",
+    "test": "TestResolverDoesNotCacheFailure",
+    "line": 63
+  },
+  {
+    "file": "internal/media/cache_test.go",
+    "test": "TestSearchCacheConcurrentAccess",
+    "line": 74
+  },
+  {
+    "file": "internal/media/cache_test.go",
+    "test": "TestNormalizedQueryKeepsVariantsAndURLCase",
+    "line": 91
+  },
+  {
+    "file": "internal/media/cache_test.go",
+    "test": "TestCoalescedSearchHasIndependentCancellation",
+    "line": 138
+  },
+  {
+    "file": "internal/media/cache_test.go",
+    "test": "TestAllWaitersCancelSearchAndFailuresAreNotCached",
+    "line": 181
+  },
+  {
+    "file": "internal/media/canonical_test.go",
+    "test": "TestCanonicalFixtures",
+    "line": 14
+  },
+  {
+    "file": "internal/media/canonical_test.go",
+    "test": "TestSpotifyStructuredMatchAndCacheIsolation",
+    "line": 39
+  },
+  {
+    "file": "internal/media/canonical_test.go",
+    "test": "TestSpotifyRejectsWrongTitleAndArtist",
+    "line": 59
+  },
+  {
+    "file": "internal/media/canonical_test.go",
+    "test": "TestCanonicalDiscoveryBroadensSearchWhenReleaseMissing",
+    "line": 69
+  },
+  {
+    "file": "internal/media/canonical_test.go",
+    "test": "TestSpotifyAlbumVariantAndConflictingArtist",
+    "line": 101
+  },
+  {
+    "file": "internal/media/collection_test.go",
+    "test": "TestYouTubeCollectionPartialAndLazy",
+    "line": 11
+  },
+  {
+    "file": "internal/media/collection_test.go",
+    "test": "TestCollectionEmptyAndLimit",
+    "line": 34
+  },
+  {
+    "file": "internal/media/collection_test.go",
+    "test": "TestSpotifyMatchingPartialOrderAndMetadata",
+    "line": 52
+  },
+  {
+    "file": "internal/media/collection_test.go",
+    "test": "TestCollectionCancellation",
+    "line": 72
+  },
+  {
+    "file": "internal/media/collection_test.go",
+    "test": "TestCollectionURL",
+    "line": 81
+  },
+  {
+    "file": "internal/media/collection_test.go",
+    "test": "TestReportedSpotifyPlaylistURL",
+    "line": 103
+  },
+  {
+    "file": "internal/media/collection_test.go",
+    "test": "TestSpotifyURLKindsAndMalformedNeverSearch",
+    "line": 117
+  },
+  {
+    "file": "internal/media/collection_test.go",
+    "test": "TestInaccessibleSpotifyCollectionDoesNotMatch",
+    "line": 144
+  },
+  {
+    "file": "internal/media/collection_test.go",
+    "test": "TestSpotifySingleTrackMatchFailure",
+    "line": 154
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestDiscoveryVerifiesUncertainMusic",
+    "line": 15
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestDiscoveryRejectsNonMusicBeforeVerification",
+    "line": 31
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestDiscoveryDoesNotTreatMissingCategoryAsMusic",
+    "line": 41
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestDiscoveryPrefersCanonicalAndRequestedVariants",
+    "line": 49
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestDiscoveryReRanksUnconfirmedOfficialChannel",
+    "line": 71
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestDiscoveryTriesNextCandidateAfterVerificationFailure",
+    "line": 100
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestDiscoveryDoesNotPromoteUnrelatedVerifiedChannel",
+    "line": 124
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestDiscoveryWithCompleteMetadataMatchesExistingSelection",
+    "line": 140
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestDiscoveryPreservesVerificationError",
+    "line": 159
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestCapturedDiscoveryPreservesSelection",
+    "line": 169
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestDiscoveryRegressionQueries",
+    "line": 212
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestDiscoveryStates",
+    "line": 242
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestDiscoveryVerificationBudget",
+    "line": 262
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "test": "TestLiveResolverTiming",
+    "line": 293
+  },
+  {
+    "file": "internal/media/fast_match_test.go",
+    "test": "TestFastMatchStopsAfterCorroboratedRelease",
+    "line": 34
+  },
+  {
+    "file": "internal/media/fast_match_test.go",
+    "test": "TestFastMatchAdversarialAndSecondCandidate",
+    "line": 46
+  },
+  {
+    "file": "internal/media/fast_match_test.go",
+    "test": "TestIdentityLeaseBoundariesAndTrackBinding",
+    "line": 83
+  },
+  {
+    "file": "internal/media/fast_match_test.go",
+    "test": "TestMisleadingFirstSummaryRequiresSecondVerification",
+    "line": 118
+  },
+  {
+    "file": "internal/media/fast_match_test.go",
+    "test": "TestFirstConfirmationStillEnforcesRequestedRecordingIdentifier",
+    "line": 136
+  },
+  {
+    "file": "internal/media/fidelity_real_test.go",
+    "test": "TestRealSpotifyFalseRejectionInvestigation",
+    "line": 14
+  },
+  {
+    "file": "internal/media/fidelity_test.go",
+    "test": "TestFidelityAdversarialDecisions",
+    "line": 10
+  },
+  {
+    "file": "internal/media/fidelity_test.go",
+    "test": "TestFidelityAmbiguityAndAbsence",
+    "line": 47
+  },
+  {
+    "file": "internal/media/fidelity_test.go",
+    "test": "TestFidelityPolicyAndOriginalMetadata",
+    "line": 67
+  },
+  {
+    "file": "internal/media/fidelity_test.go",
+    "test": "TestFidelityDoesNotInferSimilarArtistOrMissingGuest",
+    "line": 89
+  },
+  {
+    "file": "internal/media/fidelity_test.go",
+    "test": "TestSpotifyCacheIdentityCannotBeMutated",
+    "line": 105
+  },
+  {
+    "file": "internal/media/fidelity_test.go",
+    "test": "TestIncompleteVerifiedMetadataIsUncertain",
+    "line": 123
+  },
+  {
+    "file": "internal/media/fidelity_test.go",
+    "test": "TestStructuredSpotifyIdentityConstrainsDirectResolver",
+    "line": 133
+  },
+  {
+    "file": "internal/media/fidelity_test.go",
+    "test": "TestCandidateVerificationFailureDoesNotVetoLaterConfirmation",
+    "line": 141
+  },
+  {
+    "file": "internal/media/fidelity_test.go",
+    "test": "TestUnstructuredGuestNamesDoNotConfirmSimilarCollaborators",
+    "line": 158
+  },
+  {
+    "file": "internal/media/first_confirmed_process_test.go",
+    "test": "TestCanceledSpotifyMetadataProcessIsReaped",
+    "line": 15
+  },
+  {
+    "file": "internal/media/first_confirmed_test.go",
+    "test": "TestFirstConfirmedProgressiveSelection",
+    "line": 11
+  },
+  {
+    "file": "internal/media/first_confirmed_test.go",
+    "test": "TestTwoOfficialCompatibleVideosStopAtFirstConfirmation",
+    "line": 48
+  },
+  {
+    "file": "internal/media/first_confirmed_test.go",
+    "test": "TestFirstConfirmationAfterThirteenCandidates",
+    "line": 62
+  },
+  {
+    "file": "internal/media/first_confirmed_test.go",
+    "test": "TestCancellationDuringVerificationCannotPublishConfirmation",
+    "line": 92
+  },
+  {
+    "file": "internal/media/first_confirmed_test.go",
+    "test": "TestFirstConfirmedMetadataLatencyMeasurement",
+    "line": 121
+  },
+  {
+    "file": "internal/media/force_test.go",
+    "test": "TestForceDirectSelection",
+    "line": 34
+  },
+  {
+    "file": "internal/media/force_test.go",
+    "test": "TestForceRejectsInputsBeforeExtraction",
+    "line": 80
+  },
+  {
+    "file": "internal/media/force_test.go",
+    "test": "TestForceFailureNeverSubstitutes",
+    "line": 90
+  },
+  {
+    "file": "internal/media/production_regressions_test.go",
+    "test": "TestProductionRegressions",
+    "line": 11
+  },
+  {
+    "file": "internal/media/progressive_test.go",
+    "test": "TestMatchLimiterReservesFirstCapacityAndReleasesCanceledWaiters",
+    "line": 9
+  },
+  {
+    "file": "internal/media/ranking_test.go",
+    "test": "TestCanonicalSelection",
+    "line": 11
+  },
+  {
+    "file": "internal/media/ranking_test.go",
+    "test": "TestRequestedVariants",
+    "line": 25
+  },
+  {
+    "file": "internal/media/ranking_test.go",
+    "test": "TestCanonicalSourceOrder",
+    "line": 42
+  },
+  {
+    "file": "internal/media/ranking_test.go",
+    "test": "TestNonMusicRejection",
+    "line": 59
+  },
+  {
+    "file": "internal/media/ranking_test.go",
+    "test": "TestURLValidation",
+    "line": 83
+  },
+  {
+    "file": "internal/media/ranking_test.go",
+    "test": "TestExactSongTitleRelevance",
+    "line": 100
+  },
+  {
+    "file": "internal/media/ranking_test.go",
+    "test": "TestTokenMatchStrength",
+    "line": 125
+  },
+  {
+    "file": "internal/media/ranking_test.go",
+    "test": "TestTypoScoreRemainsUseful",
+    "line": 152
+  },
+  {
+    "file": "internal/media/ranking_test.go",
+    "test": "TestOfficialVideoIsStillCredibleFallback",
+    "line": 166
+  },
+  {
+    "file": "internal/media/recording_identity_test.go",
+    "test": "TestRecordingEquivalenceIsSeparateFromFirstConfirmation",
+    "line": 11
+  },
+  {
+    "file": "internal/media/recording_identity_test.go",
+    "test": "TestProgressiveSpotifyDiscovery",
+    "line": 67
+  },
+  {
+    "file": "internal/media/recording_identity_test.go",
+    "test": "TestLaterUploadsCannotReopenConfirmedSelection",
+    "line": 95
+  },
+  {
+    "file": "internal/media/recording_identity_test.go",
+    "test": "TestProgressiveDiscoveryPreservesInfrastructureFailure",
+    "line": 108
+  },
+  {
+    "file": "internal/media/recording_identity_test.go",
+    "test": "TestEquivalentUploadsDoNotBypassVersionChecks",
+    "line": 119
+  },
+  {
+    "file": "internal/media/recording_identity_test.go",
+    "test": "TestDiscoveryVerifiesEveryCandidateWithinResourceDeadline",
+    "line": 139
+  },
+  {
+    "file": "internal/media/release_identity_test.go",
+    "test": "TestRequestedReleaseSelectionDoesNotAssertUploadEquivalence",
+    "line": 9
+  },
+  {
+    "file": "internal/media/release_identity_test.go",
+    "test": "TestMusicDistributorSummaryMustBeVerified",
+    "line": 51
+  },
+  {
+    "file": "internal/media/resolver_test.go",
+    "test": "TestResolverSearchesMultipleCandidates",
+    "line": 23
+  },
+  {
+    "file": "internal/media/resolver_test.go",
+    "test": "TestResolverDirectVideoRetainsIntent",
+    "line": 37
+  },
+  {
+    "file": "internal/media/resolver_test.go",
+    "test": "TestResolverInvalidAndEmptyMetadata",
+    "line": 53
+  },
+  {
+    "file": "internal/media/resolver_test.go",
+    "test": "TestResolverFlatSearchExtractsOnlySelectedVideo",
+    "line": 62
+  },
+  {
+    "file": "internal/media/search_intent_test.go",
+    "test": "TestBardTextSearchIntent",
+    "line": 16
+  },
+  {
+    "file": "internal/media/search_intent_test.go",
+    "test": "TestBardSpotifyResourceIntent",
+    "line": 51
+  },
+  {
+    "file": "internal/media/search_intent_test.go",
+    "test": "TestBardInvalidLink",
+    "line": 89
+  },
+  {
+    "file": "internal/media/search_intent_test.go",
+    "test": "TestBardRecordingDisambiguation",
+    "line": 99
+  },
+  {
+    "file": "internal/media/search_intent_test.go",
+    "test": "TestBardYouTubeMusicAlbumIntent",
+    "line": 123
+  },
+  {
+    "file": "internal/media/search_intent_test.go",
+    "test": "TestBardTextNeverFallsBackToAlbum",
+    "line": 131
+  },
+  {
+    "file": "internal/media/search_intent_test.go",
+    "test": "TestBardAlbumUnavailableMetadataPositions",
+    "line": 139
+  },
+  {
+    "file": "internal/media/source_intent_test.go",
+    "test": "TestDirectSourceIntent",
+    "line": 12
+  },
+  {
+    "file": "internal/media/source_intent_test.go",
+    "test": "TestPlaylistPreservesIDsOrderDuplicatesAndLive",
+    "line": 35
+  },
+  {
+    "file": "internal/media/source_intent_test.go",
+    "test": "TestSpotifyRecordingFidelity",
+    "line": 54
+  },
+  {
+    "file": "internal/media/source_intent_test.go",
+    "test": "TestSpotifyUnicodeCreditsAndFeatures",
+    "line": 110
+  },
+  {
+    "file": "internal/media/source_intent_test.go",
+    "test": "TestSpotifyCandidatePoolsAndVerificationBound",
+    "line": 133
+  },
+  {
+    "file": "internal/media/source_intent_test.go",
+    "test": "TestMusicPoolCannotBeStarvedByRichVideoResults",
+    "line": 160
+  },
+  {
+    "file": "internal/media/source_intent_test.go",
+    "test": "TestSpotifyRejectsConcertWithoutLiveWord",
+    "line": 180
+  },
+  {
+    "file": "internal/media/source_intent_test.go",
+    "test": "TestSpotifyRemixIdentityAndCreditsInQuery",
+    "line": 187
+  },
+  {
+    "file": "internal/media/spotify_anonymous_test.go",
+    "test": "TestAnonymousCompletePagination",
+    "line": 106
+  },
+  {
+    "file": "internal/media/spotify_anonymous_test.go",
+    "test": "TestAnonymousDuplicateEntriesAndCollectionOrder",
+    "line": 132
+  },
+  {
+    "file": "internal/media/spotify_anonymous_test.go",
+    "test": "TestAnonymousRejectsIncompleteAndMalformed",
+    "line": 155
+  },
+  {
+    "file": "internal/media/spotify_anonymous_test.go",
+    "test": "TestAnonymousExpiryAndRefresh",
+    "line": 244
+  },
+  {
+    "file": "internal/media/spotify_anonymous_test.go",
+    "test": "TestAnonymousCancellationAndTransportPrivacy",
+    "line": 284
+  },
+  {
+    "file": "internal/media/spotify_anonymous_test.go",
+    "test": "TestSpotifyPublicLargeLiveRegression",
+    "line": 316
+  },
+  {
+    "file": "internal/media/spotify_anonymous_test.go",
+    "test": "TestAnonymousHTTPFailuresNeverRetryOrFollowRedirects",
+    "line": 320
+  },
+  {
+    "file": "internal/media/spotify_anonymous_test.go",
+    "test": "TestAnonymousRefreshBetweenPages",
+    "line": 346
+  },
+  {
+    "file": "internal/media/spotify_anonymous_test.go",
+    "test": "TestAnonymousBootstrapRefreshFailure",
+    "line": 371
+  },
+  {
+    "file": "internal/media/spotify_diagnostics_test.go",
+    "test": "TestSpotifyProductionDiagnostics",
+    "line": 17
+  },
+  {
+    "file": "internal/media/spotify_diagnostics_test.go",
+    "test": "TestSpotifySafeTransportCause",
+    "line": 93
+  },
+  {
+    "file": "internal/media/spotify_embed_test.go",
+    "test": "TestSpotifyEmbedComplete",
+    "line": 50
+  },
+  {
+    "file": "internal/media/spotify_embed_test.go",
+    "test": "TestSpotifyEmbedValidation",
+    "line": 66
+  },
+  {
+    "file": "internal/media/spotify_embed_test.go",
+    "test": "TestSpotifyEmbedEvidence",
+    "line": 122
+  },
+  {
+    "file": "internal/media/spotify_embed_test.go",
+    "test": "TestSpotifyEmbedFallbackAndOrdering",
+    "line": 161
+  },
+  {
+    "file": "internal/media/spotify_embed_test.go",
+    "test": "TestSpotifyEmbedCancellation",
+    "line": 192
+  },
+  {
+    "file": "internal/media/spotify_embed_test.go",
+    "test": "TestSpotifyEmbedLiveRegression",
+    "line": 212
+  },
+  {
+    "file": "internal/media/spotify_public_test.go",
+    "test": "TestSpotifyPublicParser",
+    "line": 32
+  },
+  {
+    "file": "internal/media/spotify_public_test.go",
+    "test": "TestSpotifyPublicFallbackConditions",
+    "line": 110
+  },
+  {
+    "file": "internal/media/spotify_public_test.go",
+    "test": "TestSpotifyPublicHTTP",
+    "line": 145
+  },
+  {
+    "file": "internal/media/spotify_public_test.go",
+    "test": "TestSpotifyPublicCanonicalResolver",
+    "line": 184
+  },
+  {
+    "file": "internal/media/spotify_public_test.go",
+    "test": "TestSpotifyObservedTruncationNeverMatches",
+    "line": 200
+  },
+  {
+    "file": "internal/media/spotify_test.go",
+    "test": "TestSpotifyPaginationAndTokenReuse",
+    "line": 22
+  },
+  {
+    "file": "internal/media/spotify_test.go",
+    "test": "TestSpotifyFailures",
+    "line": 72
+  },
+  {
+    "file": "internal/media/spotify_test.go",
+    "test": "TestSpotifyUnavailableEntriesAndBounds",
+    "line": 98
+  },
+  {
+    "file": "internal/media/spotify_test.go",
+    "test": "TestSpotifySingleTrack",
+    "line": 132
+  },
+  {
+    "file": "internal/media/spotify_test.go",
+    "test": "TestSpotifyTokenAuthorizationError",
+    "line": 151
+  },
+  {
+    "file": "internal/media/spotify_test.go",
+    "test": "TestSpotifyLaterPageFailureIsAtomic",
+    "line": 159
+  },
+  {
+    "file": "internal/media/spotify_test.go",
+    "test": "TestSpotifyIdentityPositionsAndTruncatedPagination",
+    "line": 187
+  },
+  {
+    "file": "internal/player/attempt_regression_test.go",
+    "test": "TestStartedAttemptFailureIsInterrupted",
+    "line": 10
+  },
+  {
+    "file": "internal/player/attempt_regression_test.go",
+    "test": "TestStaleStartCannotAnnounceCurrentAttempt",
+    "line": 33
+  },
+  {
+    "file": "internal/player/attempt_regression_test.go",
+    "test": "TestCollectionCannotCommitAnotherSpotifyIdentity",
+    "line": 60
+  },
+  {
+    "file": "internal/player/collection_test.go",
+    "test": "TestProgressiveFirstStartsWith122Unresolved",
+    "line": 60
+  },
+  {
+    "file": "internal/player/collection_test.go",
+    "test": "TestProgressiveOutOfOrderContiguousPrefix",
+    "line": 123
+  },
+  {
+    "file": "internal/player/collection_test.go",
+    "test": "TestProgressiveFailureSemantics",
+    "line": 179
+  },
+  {
+    "file": "internal/player/collection_test.go",
+    "test": "TestProgressiveCancellation",
+    "line": 223
+  },
+  {
+    "file": "internal/player/collection_test.go",
+    "test": "TestProgressiveSkipFiftyWithBoundedPrefetch",
+    "line": 286
+  },
+  {
+    "file": "internal/player/collection_test.go",
+    "test": "TestProgressiveMultiplePlaysReserveOrder",
+    "line": 336
+  },
+  {
+    "file": "internal/player/collection_test.go",
+    "test": "TestProgressiveConcurrentReservationsAndGuildIsolation",
+    "line": 372
+  },
+  {
+    "file": "internal/player/collection_test.go",
+    "test": "TestProgressive123StartupMeasurement",
+    "line": 429
+  },
+  {
+    "file": "internal/player/collection_test.go",
+    "test": "TestProgressiveSnapshotsDuringResolutionAndControls",
+    "line": 482
+  },
+  {
+    "file": "internal/player/collection_test.go",
+    "test": "TestFirstCollectionPositionUnavailableAdvances",
+    "line": 531
+  },
+  {
+    "file": "internal/player/collection_test.go",
+    "test": "TestCollectionFailureAnnouncesOriginalPositionOnce",
+    "line": 547
+  },
+  {
+    "file": "internal/player/collection_test.go",
+    "test": "TestBardAlbumUnavailableRecordingReportsPosition",
+    "line": 578
+  },
+  {
+    "file": "internal/player/controls_test.go",
+    "test": "TestQueueEditsModelAndMutation",
+    "line": 18
+  },
+  {
+    "file": "internal/player/controls_test.go",
+    "test": "TestConcurrentQueueControls",
+    "line": 88
+  },
+  {
+    "file": "internal/player/controls_test.go",
+    "test": "TestPendingEditsKeepResolverIdentity",
+    "line": 121
+  },
+  {
+    "file": "internal/player/controls_test.go",
+    "test": "TestLoopReplaySkipAndFailures",
+    "line": 161
+  },
+  {
+    "file": "internal/player/controls_test.go",
+    "test": "TestTimestampAndPausedSeek",
+    "line": 214
+  },
+  {
+    "file": "internal/player/controls_test.go",
+    "test": "TestConcurrentReplaySkipNeverOverlapsStreams",
+    "line": 245
+  },
+  {
+    "file": "internal/player/force_test.go",
+    "test": "TestForcedFailureReportsOriginalAndAdvances",
+    "line": 11
+  },
+  {
+    "file": "internal/player/lifecycle_test.go",
+    "test": "TestSourceSurvivesAudioEOFCleanup",
+    "line": 26
+  },
+  {
+    "file": "internal/player/lifecycle_test.go",
+    "test": "TestPipelineSoak125Transitions",
+    "line": 45
+  },
+  {
+    "file": "internal/player/lifecycle_test.go",
+    "test": "TestConsecutiveFailuresDrainWithoutHalt",
+    "line": 151
+  },
+  {
+    "file": "internal/player/lifecycle_test.go",
+    "test": "TestNaturalEOFRacesWithSkipAndStop",
+    "line": 169
+  },
+  {
+    "file": "internal/player/lifecycle_test.go",
+    "test": "TestProgressiveWorkerPanicFailsPositionAndAdvances",
+    "line": 213
+  },
+  {
+    "file": "internal/player/lifecycle_test.go",
+    "test": "TestAudioStallAndDecoderAfterEOF",
+    "line": 230
+  },
+  {
+    "file": "internal/player/lifecycle_test.go",
+    "test": "TestActivityDeadlineHonorsPause",
+    "line": 257
+  },
+  {
+    "file": "internal/player/lifecycle_test.go",
+    "test": "TestPanicReapsPipeline",
+    "line": 283
+  },
+  {
+    "file": "internal/player/lifecycle_test.go",
+    "test": "TestExitedSourceLeaderCannotLeakPipeHoldingHelper",
+    "line": 301
+  },
+  {
+    "file": "internal/player/lifecycle_test.go",
+    "test": "TestSkipReasonsPreserveOriginalMetadata",
+    "line": 330
+  },
+  {
+    "file": "internal/player/ogg_test.go",
+    "test": "TestOggPackets",
+    "line": 15
+  },
+  {
+    "file": "internal/player/ogg_test.go",
+    "test": "TestOggRejectsInvalidAndTruncated",
+    "line": 28
+  },
+  {
+    "file": "internal/player/pause_test.go",
+    "test": "TestPauseResumeSameTrackAndQueue",
+    "line": 13
+  },
+  {
+    "file": "internal/player/pause_test.go",
+    "test": "TestCancellationWhilePaused",
+    "line": 67
+  },
+  {
+    "file": "internal/player/pause_test.go",
+    "test": "TestPauseIsolationAndConcurrentState",
+    "line": 124
+  },
+  {
+    "file": "internal/player/pause_test.go",
+    "test": "TestPausedGateCancellation",
+    "line": 159
+  },
+  {
+    "file": "internal/player/player_test.go",
+    "test": "TestQueueAdvanceSkipFailureAndStop",
+    "line": 50
+  },
+  {
+    "file": "internal/player/player_test.go",
+    "test": "TestLeaveAndGuildIsolation",
+    "line": 98
+  },
+  {
+    "file": "internal/player/player_test.go",
+    "test": "TestConcurrentQueueAccess",
+    "line": 140
+  },
+  {
+    "file": "internal/player/player_test.go",
+    "test": "TestBatchOrderClearAndCapacity",
+    "line": 166
+  },
+  {
+    "file": "internal/player/previous_test.go",
+    "test": "TestPreviousHistoryAndQueueOrder",
+    "line": 10
+  },
+  {
+    "file": "internal/player/previous_test.go",
+    "test": "TestPreviousConcurrentControls",
+    "line": 58
+  },
+  {
+    "file": "internal/player/reliability_test.go",
+    "test": "TestTwoTracksNaturalEOFDeliverIndependentAudio",
+    "line": 190
+  },
+  {
+    "file": "internal/player/reliability_test.go",
+    "test": "TestProviderChallengeAdvancesWithoutRetryLoop",
+    "line": 223
+  },
+  {
+    "file": "internal/player/reliability_test.go",
+    "test": "TestProviderFailureDoesNotBlockProgressiveResolution",
+    "line": 251
+  },
+  {
+    "file": "internal/player/reliability_test.go",
+    "test": "TestStopAndLeaveReleaseOldProviderBlock",
+    "line": 271
+  },
+  {
+    "file": "internal/player/skip_test.go",
+    "test": "TestBulkSkipPositions",
+    "line": 21
+  },
+  {
+    "file": "internal/player/skip_test.go",
+    "test": "TestBulkSkipInvalidEmptyAndStarting",
+    "line": 96
+  },
+  {
+    "file": "internal/player/skip_test.go",
+    "test": "TestBulkSkipPaused",
+    "line": 115
+  },
+  {
+    "file": "internal/player/skip_test.go",
+    "test": "TestConcurrentBulkSkipDoesNotRecountCancelledTrack",
+    "line": 139
+  },
+  {
+    "file": "internal/player/skip_test.go",
+    "test": "TestBulkSkipStopClearEnqueueRaces",
+    "line": 182
+  },
+  {
+    "file": "internal/player/skip_test.go",
+    "test": "TestSnapshotCopiesMetadataAndConsistentBatch",
+    "line": 240
+  },
+  {
+    "file": "internal/player/skip_test.go",
+    "test": "TestBulkSkipDuringPlaybackStartup",
+    "line": 263
+  },
+  {
+    "file": "internal/player/spotify_public_test.go",
+    "test": "TestPublicSpotifyOrderedAtomicQueue",
+    "line": 20
+  },
+  {
+    "file": "internal/player/stall_regression_test.go",
+    "test": "TestNextReadyDoesNotWaitForDistantVerification",
+    "line": 15
+  },
+  {
+    "file": "internal/player/stall_regression_test.go",
+    "test": "TestCollectionPerPositionTimeoutAndCancellation",
+    "line": 43
+  },
+  {
+    "file": "internal/player/stall_regression_test.go",
+    "test": "Test123UnavailablePlaybackAttemptsTerminate",
+    "line": 73
+  },
+  {
+    "file": "internal/player/stream_test.go",
+    "test": "TestStreamerLocalFFmpeg",
+    "line": 60
+  },
+  {
+    "file": "internal/player/stream_test.go",
+    "test": "TestStreamerFailuresAndCancellation",
+    "line": 77
+  },
+  {
+    "file": "internal/player/stream_test.go",
+    "test": "TestStreamerMissingExecutable",
+    "line": 105
+  },
+  {
+    "file": "internal/player/stream_test.go",
+    "test": "TestStreamResolutionMarkerAcrossWrites",
+    "line": 114
+  },
+  {
+    "file": "internal/player/stream_test.go",
+    "test": "TestStartupDeadlinesEndAtFirstOpus",
+    "line": 134
+  },
+  {
+    "file": "internal/player/stream_test.go",
+    "test": "TestStreamerReportsStagesBeforeVoiceFailure",
+    "line": 174
+  },
+  {
+    "file": "internal/player/stream_test.go",
+    "test": "TestStreamerDrainsAfterProducerExit",
+    "line": 214
+  },
+  {
+    "file": "internal/player/stream_test.go",
+    "test": "TestStreamerPauseResumeAndCancel",
+    "line": 240
+  },
+  {
+    "file": "internal/storage/catalog_test.go",
+    "test": "TestCatalogReuseAcrossRestartGuildsAndMappingEvidence",
+    "line": 25
+  },
+  {
+    "file": "internal/storage/catalog_test.go",
+    "test": "TestCatalogConcurrentUpsertExpiryConstraintsAndArtworkRefresh",
+    "line": 71
+  },
+  {
+    "file": "internal/storage/catalog_test.go",
+    "test": "TestCatalogCacheFailuresFallbackToProviderAndResolver",
+    "line": 140
+  },
+  {
+    "file": "internal/storage/catalog_test.go",
+    "test": "TestOldStreamFailureCannotDeleteReplacementMapping",
+    "line": 160
+  },
+  {
+    "file": "internal/storage/catalog_test.go",
+    "test": "TestMissingProviderCoverReusesExactSpotifyCatalogIdentity",
+    "line": 182
+  },
+  {
+    "file": "internal/storage/controls_test.go",
+    "test": "TestControlsRestartAndHistoryIsolation",
+    "line": 13
+  },
+  {
+    "file": "internal/storage/controls_test.go",
+    "test": "TestEditedQueueSurvivesRestart",
+    "line": 68
+  },
+  {
+    "file": "internal/storage/existing_database_test.go",
+    "test": "TestExistingDatabaseUpgrade",
+    "line": 11
+  },
+  {
+    "file": "internal/storage/mapping_test.go",
+    "test": "TestValidatedMappingReusedAndInconsistentVideoInvalidated",
+    "line": 14
+  },
+  {
+    "file": "internal/storage/mapping_test.go",
+    "test": "TestFreshPersistentMappingAvoidsMetadataProcessAcrossReopen",
+    "line": 78
+  },
+  {
+    "file": "internal/storage/mapping_test.go",
+    "test": "TestFirstConfirmedMappingIsPersistedAndReused",
+    "line": 107
+  },
+  {
+    "file": "internal/storage/sqlite_test.go",
+    "test": "TestSQLiteMigrationsTransactionsAndIsolation",
+    "line": 25
+  },
+  {
+    "file": "internal/storage/sqlite_test.go",
+    "test": "TestSQLiteReopenAndMappingInvalidation",
+    "line": 76
+  },
+  {
+    "file": "internal/storage/sqlite_test.go",
+    "test": "TestSQLitePlayerRecoveryWithoutVoice",
+    "line": 127
+  },
+  {
+    "file": "internal/storage/sqlite_test.go",
+    "test": "TestSQLiteConcurrentGuildTransactions",
+    "line": 190
+  },
+  {
+    "file": "internal/storage/sqlite_test.go",
+    "test": "TestDurabilityFailureIsVisibleAndTransactionRetainsOldQueue",
+    "line": 212
+  },
+  {
+    "file": "internal/storage/sqlite_test.go",
+    "test": "TestPlaybackHistoryIsAppendOnlyAndGuildScoped",
+    "line": 247
+  },
+  {
+    "file": "internal/storage/sqlite_test.go",
+    "test": "TestNewerSchemaRejected",
+    "line": 279
+  },
+  {
+    "file": "internal/storage/sqlite_test.go",
+    "test": "TestRecoveryDuringPreparationPreservesPreviousHistory",
+    "line": 289
+  },
+  {
+    "file": "internal/storage/sqlite_test.go",
+    "test": "TestRestartDuring123TrackResolution",
+    "line": 307
+  },
+  {
+    "file": "internal/storage/sqlite_test.go",
+    "test": "TestArtworkSurvivesDatabaseAndPlayerRestart",
+    "line": 373
+  },
+  {
+    "file": "internal/storage/sqlite_test.go",
+    "test": "TestForcedYouTubeRecoveryAndSpotifyCacheIsolation",
+    "line": 416
+  }
+]
