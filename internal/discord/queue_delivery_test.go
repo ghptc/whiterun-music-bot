@@ -8,6 +8,7 @@ import (
 	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/snowflake/v2"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"strings"
 	"testing"
@@ -48,7 +49,7 @@ func TestQueuePartialDeliveryPreservesFirstCardAndReportsProgress(t *testing.T) 
 			}
 			failure := sender.updates[1]
 			text := updateText(failure)
-			if !strings.Contains(text, fmt.Sprintf("Delivery incomplete · %d/500", failAt*12)) || !strings.Contains(text, "Song 0001") || len(failure.Files) > 0 || failure.Embeds != nil {
+			if !strings.Contains(text, fmt.Sprintf("Delivery incomplete · %d/500", failAt*12)) || !strings.Contains(text, "Song 0001") || len(failure.Files) != 1 || failure.Embeds != nil {
 				t.Fatal(text)
 			}
 		})
@@ -63,14 +64,19 @@ func TestQueueCompleteDeliveryUsesOneContainerPerBlock(t *testing.T) {
 			if len(r.followups) != want-1 {
 				t.Fatal(len(r.followups), want)
 			}
+			if len(r.update.Files) != 1 {
+				t.Fatal("missing first PNG")
+			}
+
 			text := r.queueText()
 			for i := 1; i <= n; i++ {
-				if strings.Count(text, fmt.Sprintf("**%d. Song %04d**", i, i)) != 1 {
-					t.Fatal("omitted/duplicated", i)
+				if strings.Count(text, fmt.Sprintf("%d. Song %04d ·", i, i)) != 1 {
+					t.Fatal("omitted/duplicated position", i)
 				}
 			}
+
 			for _, message := range r.followups {
-				if len(message.Components) != 1 || len(message.Embeds) > 0 || len(message.Files) > 0 || message.Content != "" || message.Flags&d.MessageFlagIsComponentsV2 == 0 || message.Flags&d.MessageFlagEphemeral != 0 || message.AllowedMentions == nil {
+				if len(message.Components) != 1 || len(message.Embeds) > 0 || len(message.Files) != 1 || message.Content != "" || message.Flags&d.MessageFlagIsComponentsV2 == 0 || message.Flags&d.MessageFlagEphemeral != 0 || message.AllowedMentions == nil {
 					t.Fatal(message)
 				}
 				assertV2Budget(t, message.Components[0].(d.ContainerComponent))
@@ -88,7 +94,11 @@ func TestQueueRateLimitRetriesSameJSONBlock(t *testing.T) {
 		if _, ok := req.Context().Deadline(); !ok {
 			t.Fatal("unbounded REST call")
 		}
-		raw, err := io.ReadAll(req.Body)
+		var raw []byte
+		reader, err := multipart.NewReader(req.Body, strings.TrimPrefix(req.Header.Get("Content-Type"), "multipart/form-data; boundary=")).NextPart()
+		if err == nil {
+			raw, err = io.ReadAll(reader)
+		}
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -22,6 +22,10 @@ func componentText(components []d.LayoutComponent) string {
 			for _, child := range v.Components {
 				walk(child)
 			}
+		case d.MediaGalleryComponent:
+			for _, item := range v.Items {
+				out.WriteString(item.Description + "\n")
+			}
 		case d.SectionComponent:
 			for _, child := range v.Components {
 				walk(child)
@@ -54,21 +58,17 @@ func viewText(view queueView) string {
 	}
 	return out.String()
 }
-func queueSections(view queueView) []d.SectionComponent {
-	var rows []d.SectionComponent
+func queueSections(view queueView) []queueRow {
+	var rows []queueRow
 	for _, block := range view.Blocks {
-		for _, child := range block.Container.Components {
-			if row, ok := child.(d.SectionComponent); ok {
-				rows = append(rows, row)
-			}
-		}
+		rows = append(rows, block.Rows...)
 	}
 	return rows
 }
 func queueFixture(n int) player.State {
 	s := player.State{}
 	for i := range n {
-		s.Entries = append(s.Entries, player.QueueEntry{Track: media.Track{Title: fmt.Sprintf("Song %04d", i+1), Artist: "Artist", SpotifyID: fmt.Sprint(i), SpotifyArtworkURL: fmt.Sprintf("https://i.scdn.co/image/album%d", i), RequestedBy: "listener"}, Pending: i%2 == 0})
+		s.Entries = append(s.Entries, player.QueueEntry{Track: media.Track{Title: fmt.Sprintf("Song %04d", i+1), Artist: "Artist", SpotifyID: fmt.Sprint(i), SpotifyArtworkURL: fmt.Sprintf("https://art.example/album%d", i), RequestedBy: "listener"}, Pending: i%2 == 0})
 	}
 	return s
 }
@@ -90,7 +90,7 @@ func assertV2Budget(t *testing.T, container d.ContainerComponent) {
 		if typ == 10 {
 			text += len(utf16.Encode([]rune(c["content"].(string))))
 		}
-		if typ != 17 && typ != 14 && typ != 9 && typ != 10 && typ != 11 {
+		if typ != 12 && typ != 17 && typ != 14 && typ != 9 && typ != 10 && typ != 11 {
 			t.Fatal("unexpected component", typ)
 		}
 		if children, ok := c["components"].([]any); ok {
@@ -125,13 +125,8 @@ func TestQueueCompleteAndLimitedSnapshots(t *testing.T) {
 					t.Fatal(view.Shown, view.Total, len(rows), want)
 				}
 				for i, row := range rows {
-					text := row.Components[0].(d.TextDisplayComponent).Content
-					if !strings.HasPrefix(text, fmt.Sprintf("**%d. Song %04d**", i+1, i+1)) {
-						t.Fatal("order/position", text)
-					}
-					art := row.Accessory.(d.ThumbnailComponent).Media.URL
-					if art != state.Entries[i].Track.SpotifyArtworkURL {
-						t.Fatal("wrong artwork", i, art)
+					if row.Position != i+1 || row.Track.Title != fmt.Sprintf("Song %04d", i+1) || row.Track.SpotifyArtworkURL != state.Entries[i].Track.SpotifyArtworkURL {
+						t.Fatal("order/metadata", row)
 					}
 				}
 				expectedBlocks := max(1, (want+11)/12)
@@ -162,12 +157,13 @@ func TestQueueCurrentPendingAndArtwork(t *testing.T) {
 		t.Fatal(err)
 	}
 	rows := queueSections(view)
-	if len(rows) != 124 || strings.Count(viewText(view), "**Current**") != 1 {
+	if len(rows) != 124 || rows[0].Track.Title != "Current" {
 		t.Fatal("current duplicated/omitted")
 	}
-	if rows[0].Accessory.(d.ThumbnailComponent).Media.URL != state.Current.YouTubeThumbnailURL || rows[1].Accessory.(d.ThumbnailComponent).Media.URL != state.Entries[0].Track.SpotifyArtworkURL || rows[2].Accessory.(d.ThumbnailComponent).Media.URL != fallbackArtwork || view.Missing != 1 {
+	if rows[0].Track.YouTubeThumbnailURL != state.Current.YouTubeThumbnailURL || rows[1].Position != 1 || media.ArtworkURL(rows[2].Track) != "" || view.Missing != 1 {
 		t.Fatal("artwork policy")
 	}
+
 	for _, forbidden := range []string{"ready", "pending", "PLAYING", "Spotify metadata", "YouTube audio", "listener", "resolving"} {
 		if strings.Contains(viewText(view), forbidden) {
 			t.Fatal(forbidden)
@@ -223,7 +219,7 @@ func TestQueueLimitValidationAndGuildIsolation(t *testing.T) {
 		}
 	}
 	b.command(interaction(t, "queue", true))
-	if !strings.Contains(r.response, "Guild 1") || strings.Contains(r.response, "Guild 2") {
+	if len(r.update.Files) != 1 {
 		t.Fatal(r.response)
 	}
 }

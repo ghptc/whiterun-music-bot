@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"strings"
@@ -15,13 +16,14 @@ import (
 	"whiterun/internal/player"
 )
 
-// One container + heading + separator + footer leaves 36 components for
-// twelve sections (each section, its text display, and thumbnail count).
+// Twelve fixed-height rows keep each PNG small and readable.
 const queueBlockSize = 12
 const fallbackArtwork = "https://cdn.discordapp.com/embed/avatars/1.png"
 
 type queueBlock struct {
 	Container   d.ContainerComponent
+	Rows        []queueRow
+	PNG         []byte
 	First, Last int // upcoming positions; current never consumes a position
 }
 type queueView struct {
@@ -100,8 +102,8 @@ func songSection(t media.Track, prefix, detail string) d.SectionComponent {
 	return d.SectionComponent{Components: []d.SectionSubComponent{d.TextDisplayComponent{Content: text}}, Accessory: d.ThumbnailComponent{Media: d.UnfurledMediaItem{URL: art}, Description: description}}
 }
 
-// Pure render: all metadata comes from one detached snapshot. No catalog reads,
-// image downloads, resolver calls, filesystem operations, or player locks.
+// Build a lightweight plan from one detached player snapshot. Rendering and
+// artwork I/O happen later, one block at a time, without player locks.
 func buildQueueView(state player.State, limit *int) (queueView, error) {
 	if limit != nil && *limit < 1 {
 		return queueView{}, fmt.Errorf("Queue limit must be at least 1.")
@@ -112,16 +114,15 @@ func buildQueueView(state player.State, limit *int) (queueView, error) {
 		shown = min(shown, *limit)
 	}
 	view := queueView{Shown: shown, Total: len(entries)}
-	rows := make([]d.ContainerSubComponent, 0, shown+1)
+	rows := make([]queueRow, 0, shown+1)
 	if state.Current != nil {
-		rows = append(rows, songSection(*state.Current, "", "Now playing"))
-		if media.ArtworkURL(*state.Current) == "" {
-			view.Missing++
-		}
+		rows = append(rows, queueRow{Track: *state.Current})
 	}
 	for i, e := range entries[:shown] {
-		rows = append(rows, songSection(e.Track, fmt.Sprintf("%d. ", i+1), ""))
-		if media.ArtworkURL(e.Track) == "" {
+		rows = append(rows, queueRow{Track: e.Track, Position: i + 1})
+	}
+	for _, row := range rows {
+		if media.ArtworkURL(row.Track) == "" {
 			view.Missing++
 		}
 	}
@@ -130,30 +131,15 @@ func buildQueueView(state player.State, limit *int) (queueView, error) {
 		view.Components = 4
 		return view, nil
 	}
-	count := (len(rows) + queueBlockSize - 1) / queueBlockSize
 	for offset := 0; offset < len(rows); offset += queueBlockSize {
 		end := min(offset+queueBlockSize, len(rows))
-		first, last := offset+1, end
-		if state.Current != nil {
-			first = max(1, first-1)
-			last--
+		block := queueBlock{Rows: rows[offset:end], First: rows[offset].Position, Last: rows[end-1].Position}
+		if block.First == 0 && end-offset > 1 {
+			block.First = 1
 		}
-		if last == 0 {
-			first = 0
-		}
-		heading := fmt.Sprintf("### THE BARD · QUEUE\n-# %d songs up next", shown)
-		if shown < len(entries) {
-			heading = fmt.Sprintf("### THE BARD · QUEUE\n-# %d of %d songs up next", shown, len(entries))
-		}
-		components := []d.ContainerSubComponent{d.TextDisplayComponent{Content: heading}, d.SeparatorComponent{Divider: new(false), Spacing: d.SeparatorSpacingSizeSmall}}
-		components = append(components, rows[offset:end]...)
-		footer := fmt.Sprintf("-# Block %d/%d", len(view.Blocks)+1, count)
-		if last > 0 {
-			footer = fmt.Sprintf("-# %d–%d · Block %d/%d", first, last, len(view.Blocks)+1, count)
-		}
-		components = append(components, d.TextDisplayComponent{Content: footer})
-		view.Blocks = append(view.Blocks, queueBlock{Container: d.ContainerComponent{Components: components}, First: first, Last: last})
-		view.Components += 4 + 3*(end-offset)
+		block.Container = musicContainer("THE BARD · QUEUE", d.TextDisplayComponent{Content: fmt.Sprintf("%s · %d of %d songs up next", block.rangeLabel(), shown, len(entries))})
+		view.Blocks = append(view.Blocks, block)
+		view.Components += 3
 	}
 	return view, nil
 }
@@ -177,7 +163,12 @@ func (block queueBlock) update(note string) d.MessageUpdate {
 			container.Components[i] = footer
 		}
 	}
-	return componentUpdate(container)
+	update := componentUpdate(container)
+	if len(block.PNG) > 0 {
+		update.Files = []*d.File{d.NewFile("queue.png", "Music queue", bytes.NewReader(block.PNG))}
+		update.Attachments = &[]d.AttachmentUpdate{}
+	}
+	return update
 }
 
 type queueDelivery struct {
@@ -232,6 +223,12 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 		}
 	}
 	defer finish()
+	if len(view.Blocks[0].Rows) > 0 {
+		if err := queueImages.render(ctx, &view.Blocks[0]); err != nil {
+			b.log.Warn("queue_render_failed", "error", err)
+			view.Blocks = []queueBlock{{Container: musicContainer("THE BARD · QUEUE", d.TextDisplayComponent{Content: "Could not draw the queue. Try /queue again."})}}
+		}
+	}
 	sendUpdate := func(update d.MessageUpdate, parent context.Context) error {
 		bounded, cancel := context.WithTimeout(parent, 20*time.Second)
 		defer cancel()
@@ -254,14 +251,19 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 			err = ctx.Err()
 			break
 		}
+		if err = queueImages.render(ctx, &view.Blocks[i]); err != nil {
+			break
+		}
 		bounded, cancel := context.WithTimeout(ctx, 20*time.Second)
 		message := d.NewMessageCreateV2(view.Blocks[i].Container)
 		message.AllowedMentions = &d.AllowedMentions{}
+		message.Files = []*d.File{d.NewFile("queue.png", "Music queue", bytes.NewReader(view.Blocks[i].PNG))}
 		_, err = b.client.Rest.CreateFollowupMessage(b.client.ApplicationID, e.Token(), message, rest.WithCtx(bounded))
 		cancel()
 		if err == nil {
 			sent++
 			delivered = view.Blocks[i].Last
+			view.Blocks[i].PNG = nil
 		}
 	}
 	if err != nil {
@@ -281,4 +283,11 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 		}
 	}
 	b.log.Info("queue_delivery_complete", "elapsed_ms", time.Since(started).Milliseconds(), "messages_sent", sent, "positions_sent", delivered, "success", err == nil)
+}
+
+func (block queueBlock) rangeLabel() string {
+	if block.Last == 0 {
+		return "Now playing"
+	}
+	return fmt.Sprintf("%d–%d", block.First, block.Last)
 }

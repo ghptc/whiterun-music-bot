@@ -7,6 +7,7 @@ require (
 	github.com/disgoorg/godave v0.2.0
 	github.com/disgoorg/snowflake/v2 v2.0.3
 	github.com/thomas-vilte/dave-go v0.5.1
+	golang.org/x/image v0.40.0
 	golang.org/x/net v0.56.0
 	golang.org/x/text v0.40.0
 	modernc.org/sqlite v1.39.1

@@ -149,14 +149,19 @@ func TestQueueResponseStaysWithinDiscordLimit(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	v, err := buildQueueView(g.player.State(), nil)
+	snapshot := g.player.State()
+	v, err := buildQueueView(snapshot, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, block := range v.Blocks {
 		assertV2Budget(t, block.Container)
 	}
-	if len(queueSections(v)) != len(queueEntries(g.player.State()))+1 {
+	want := len(queueEntries(snapshot))
+	if snapshot.Current != nil {
+		want++
+	}
+	if len(queueSections(v)) != want {
 		t.Fatal("missing songs")
 	}
 
@@ -243,7 +248,7 @@ func TestPlayCollectionAndClearCommands(t *testing.T) {
 	}
 	waitForCollections(t, g.player)
 	b.command(interaction(t, "queue", true))
-	if !strings.Contains(r.response, "First") || !strings.Contains(r.response, "Last") || !strings.Contains(r.response, "1 songs up next") {
+	if !strings.Contains(r.response, "First") || !strings.Contains(r.response, "Last") || !strings.Contains(r.response, "1 of 1 songs up next") {
 		t.Fatal(r.response)
 	}
 	// A second playlist appends without interrupting the first, preserving duplicates.
