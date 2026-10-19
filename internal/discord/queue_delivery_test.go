@@ -55,7 +55,7 @@ func TestQueuePartialDeliveryPreservesFirstCardAndReportsProgress(t *testing.T) 
 	}
 }
 func TestQueueCompleteDeliveryUsesOneContainerPerBlock(t *testing.T) {
-	for _, n := range []int{10, 123, 500, 1000} {
+	for _, n := range []int{1, 10, 20, 123, 500, 1000} {
 		t.Run(fmt.Sprint(n), func(t *testing.T) {
 			b, r := testBot(t)
 			b.replyQueue(interaction(t, "queue", true), queueFixture(n), nil)
@@ -218,7 +218,7 @@ func TestQueuePersonalInstallRefusesOversizedDeliveryExplicitly(t *testing.T) {
 	}
 }
 func BenchmarkQueueV2(b *testing.B) {
-	for _, n := range []int{10, 123, 500, 1000} {
+	for _, n := range []int{1, 10, 20, 123, 500, 1000} {
 		b.Run(fmt.Sprint(n), func(b *testing.B) {
 			state := queueFixture(n)
 			b.ReportAllocs()

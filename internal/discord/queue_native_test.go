@@ -49,3 +49,42 @@ func TestQueueNativeIndividualArtwork(t *testing.T) {
 		}
 	}
 }
+
+func TestQueueCompactContinuations(t *testing.T) {
+	for _, n := range []int{1, 10, 20, 123, 500} {
+		state := queueFixture(n)
+		state.Current = &media.Track{Title: "Current", Artist: "Artist", SpotifyArtworkURL: "https://art.example/current?size=48"}
+		view, err := buildQueueView(state, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		text := viewText(view)
+		if strings.Count(text, "Bardão · Queue") != 1 || strings.Count(text, "songs up next") != 1 || strings.Count(text, "Now playing · **Current**") != 1 {
+			t.Fatalf("repeated heading/count/current for %d: %s", n, text)
+		}
+		for i, block := range view.Blocks {
+			assertV2Budget(t, block.Container)
+			start := 0
+			if i == 0 {
+				start = 1
+			}
+			if len(block.Container.Components) != start+len(block.Rows)+1 || block.Container.AccentColor != whiterunAccent {
+				t.Fatal("extra spacing, decoration or inconsistent accent")
+			}
+			for j, row := range block.Rows {
+				section := block.Container.Components[start+j].(d.SectionComponent)
+				label := section.Components[0].(d.TextDisplayComponent).Content
+				if len(section.Components) != 1 || strings.Count(label, "\n") != 1 || strings.Contains(label, "\n\n") {
+					t.Fatal("row must contain only title and artist", label)
+				}
+				if section.Accessory.(d.ThumbnailComponent).Media.URL != media.ArtworkURL(row.Track) {
+					t.Fatal("artwork URL was rewritten")
+				}
+			}
+			footer := block.Container.Components[len(block.Container.Components)-1].(d.TextDisplayComponent).Content
+			if !strings.HasPrefix(footer, "-# "+block.rangeLabel()) {
+				t.Fatal("missing discreet position range", footer)
+			}
+		}
+	}
+}

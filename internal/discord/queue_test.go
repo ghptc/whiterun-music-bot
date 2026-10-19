@@ -108,7 +108,7 @@ func assertV2Budget(t *testing.T, container d.ContainerComponent) {
 	}
 }
 func TestQueueCompleteAndLimitedSnapshots(t *testing.T) {
-	for _, size := range []int{0, 1, 10, 123, 500, 1000} {
+	for _, size := range []int{0, 1, 10, 20, 123, 500, 1000} {
 		for _, limit := range []*int{nil, new(1), new(10), new(50), new(2000)} {
 			t.Run(fmt.Sprintf("%d/%v", size, limit), func(t *testing.T) {
 				state := queueFixture(size)

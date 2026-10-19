@@ -142,7 +142,7 @@ func buildQueueView(state player.State, limit *int) (queueView, error) {
 			block.First = 1
 		}
 		body := make([]d.ContainerSubComponent, 0, len(block.Rows)+1)
-		count := 3 // container, heading, footer
+		count := 2 // container and footer; only the first block has a heading
 		for _, row := range block.Rows {
 			prefix := fmt.Sprintf("%d · ", row.Position)
 			if row.Position == 0 {
@@ -154,8 +154,18 @@ func buildQueueView(state player.State, limit *int) (queueView, error) {
 				count += 2
 			}
 		}
-		body = append(body, d.TextDisplayComponent{Content: fmt.Sprintf("-# %s · %d of %d songs up next", block.rangeLabel(), shown, len(entries))})
-		block.Container = musicContainer("Bardão · Queue", body...)
+		footer := "-# " + block.rangeLabel()
+		if offset == 0 {
+			footer += fmt.Sprintf(" · %d of %d songs up next", shown, len(entries))
+		}
+		body = append(body, d.TextDisplayComponent{Content: footer})
+		if offset == 0 {
+			block.Container = musicContainer("Bardão · Queue", body...)
+			count++
+		} else {
+			// Continue directly with songs; the discreet footer identifies the range.
+			block.Container = d.ContainerComponent{AccentColor: whiterunAccent, Components: body}
+		}
 		view.Blocks = append(view.Blocks, block)
 		view.Components += count
 	}
