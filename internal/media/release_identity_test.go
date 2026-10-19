@@ -15,7 +15,7 @@ func TestRequestedReleaseSelectionDoesNotAssertUploadEquivalence(t *testing.T) {
 	}
 	for _, pool := range [][]Candidate{{generic, release}, {release, generic}} {
 		got, err := selectSpotify(context.Background(), tr, pool, func(c Candidate) (Candidate, error) { return c, nil })
-		if err != nil || got.ID != release.ID {
+		if err != nil || got.ID != pool[0].ID {
 			t.Fatal(got, err)
 		}
 	}
@@ -41,8 +41,10 @@ func TestRequestedReleaseSelectionDoesNotAssertUploadEquivalence(t *testing.T) {
 	other.ID = "zzzzzzzzzzz"
 	other.ISRC = "USAAA1200002"
 	release.ISRC = "USAAA1200001"
-	if _, err := selectSpotify(context.Background(), tr, []Candidate{release, other}, func(c Candidate) (Candidate, error) { return c, nil }); err == nil {
-		t.Fatal("conflicting releases accepted")
+	tr.ISRC = release.ISRC
+	got, err := selectSpotify(context.Background(), tr, []Candidate{other, release}, func(c Candidate) (Candidate, error) { return c, nil })
+	if err != nil || got.ID != release.ID {
+		t.Fatal("requested ISRC not enforced", got, err)
 	}
 }
 

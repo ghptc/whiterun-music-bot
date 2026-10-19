@@ -15,7 +15,7 @@ func TestFidelityAdversarialDecisions(t *testing.T) {
 		mutate func(*Candidate)
 		want   MatchStatus
 	}{
-		{"correct unofficial", func(c *Candidate) { c.Channel = "Archive" }, MatchConfirmed},
+		{"plausible unofficial", func(c *Candidate) { c.Channel = "Archive" }, MatchUncertain},
 		{"official wrong artist", func(c *Candidate) { c.Artist = "Beyonce Tribute"; c.Channel = "Beyonce"; c.Verified = true }, MatchRejected},
 		{"same title other artist", func(c *Candidate) { c.Artist = "Other" }, MatchRejected},
 		{"similar artist", func(c *Candidate) { c.Artist = "Beyonce Junior" }, MatchRejected},
@@ -138,21 +138,20 @@ func TestStructuredSpotifyIdentityConstrainsDirectResolver(t *testing.T) {
 	}
 }
 
-func TestCandidateVerificationFailureCannotBecomeARejectionOrFallback(t *testing.T) {
+func TestCandidateVerificationFailureDoesNotVetoLaterConfirmation(t *testing.T) {
 	track := Track{Title: "Song", Artist: "Artist", Duration: 210 * time.Second}
-	a := Candidate{ID: "abcdefghijk", Title: "Song", Channel: "Artist", Duration: 210}
+	a := Candidate{ID: "abcdefghijk", Title: "Song", Channel: "Artist", Verified: true, Duration: 210}
 	b := a
 	b.ID = "lmnopqrstuv"
 	unavailable := errors.New("Sign in to confirm you're not a bot")
-	_, err := selectSpotify(context.Background(), track, []Candidate{a, b}, func(c Candidate) (Candidate, error) {
+	got, err := selectSpotify(context.Background(), track, []Candidate{a, b}, func(c Candidate) (Candidate, error) {
 		if c.ID == a.ID {
 			return Candidate{}, unavailable
 		}
 		return c, nil
 	})
-	var decision *MatchError
-	if !errors.Is(err, unavailable) || errors.As(err, &decision) {
-		t.Fatal(err)
+	if err != nil || got.ID != b.ID {
+		t.Fatal(got, err)
 	}
 }
 

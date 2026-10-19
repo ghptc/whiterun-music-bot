@@ -14,7 +14,7 @@ import (
 func TestRealSpotifyFalseRejectionInvestigation(t *testing.T) {
 	for _, tc := range []struct{ id, song, want string }{
 		{"3bC1ahPIYt1btJzSSEyyrF", "Whistle", "MOIwxOYdhrk"},
-		{"6Knv6wdA0luoMUuuoYi2i1", "My_House", "z9boCCK7M8c"},
+		{"6Knv6wdA0luoMUuuoYi2i1", "My_House", "uo35R9zQsAI"},
 	} {
 		t.Run(tc.id, func(t *testing.T) {
 			read := func(name string, dst any) {

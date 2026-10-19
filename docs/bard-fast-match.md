@@ -1,5 +1,9 @@
 # Bard Fast Match: diagnóstico, arquitetura e medições
 
+Registro histórico do commit 2924731. A estratégia atual é
+[First Confirmed Match Wins](first-confirmed-match.md), que substitui os cortes
+de candidatos e a comparação posterior entre uploads descritos abaixo.
+
 Execução: 18/10/2026. Baseline desta mudança: `47e8e6b`. As fixtures de produção
 já existiam no repositório, com proveniência descrita em
 [fidelity-production-regressions.md](fidelity-production-regressions.md).

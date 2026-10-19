@@ -1,0 +1,31 @@
+=== RUN   TestProductionRegressions
+=== RUN   TestProductionRegressions/55VzNhbcf0Gxf6qRCUAV01
+    production_regressions_test.go:31: Spotify identity: David Guetta — Little Bad Girl (feat. Taio Cruz & Ludacris)
+    production_regressions_test.go:53: candidate SzVSTyxQ0rk "Little Bad Girl": {Title:1 TitlePrecision:1 Artist:1 Credits:1 DurationDeltaMS:724 SourceClass:verified_artist Reason:accepted VersionCompatible:true NegativeMarkers:[] Score:838}
+    production_regressions_test.go:53: candidate kCsPOHn-bs0 "Little Bad Girl": {Title:1 TitlePrecision:1 Artist:0 Credits:0 DurationDeltaMS:0 SourceClass: Reason:primary_artist_mismatch VersionCompatible:true NegativeMarkers:[] Score:0}
+    production_regressions_test.go:53: candidate _ynF5yvMr58 "David Guetta - Little Bad Girl ft. Taio Cruz & Ludacris (Lyric Video)": {Title:1 TitlePrecision:1 Artist:1 Credits:0 DurationDeltaMS:0 SourceClass: Reason:credits_unknown VersionCompatible:true NegativeMarkers:[] Score:0}
+    production_regressions_test.go:53: candidate -Gv6DMMHnME "David Guetta feat. Taio Cruz & Ludacris - Little Bad Girl [HQ]": {Title:1 TitlePrecision:1 Artist:1 Credits:0 DurationDeltaMS:0 SourceClass: Reason:credits_unknown VersionCompatible:true NegativeMarkers:[] Score:0}
+    production_regressions_test.go:56: selected=SzVSTyxQ0rk error=<nil> searches=2 checks=4
+=== RUN   TestProductionRegressions/3bC1ahPIYt1btJzSSEyyrF
+    production_regressions_test.go:31: Spotify identity: Flo Rida — Whistle
+    production_regressions_test.go:53: candidate MOIwxOYdhrk "Whistle": {Title:1 TitlePrecision:1 Artist:1 Credits:1 DurationDeltaMS:347 SourceClass:verified_artist Reason:accepted VersionCompatible:true NegativeMarkers:[] Score:839}
+    production_regressions_test.go:56: selected=MOIwxOYdhrk error=<nil> searches=1 checks=1
+=== RUN   TestProductionRegressions/6Knv6wdA0luoMUuuoYi2i1
+    production_regressions_test.go:31: Spotify identity: Flo Rida — My House
+    production_regressions_test.go:53: candidate taXoKRkQlg8 "Flo Rida - My House": {Title:1 TitlePrecision:1 Artist:1 Credits:1 DurationDeltaMS:189 SourceClass:verified_artist Reason:accepted VersionCompatible:true NegativeMarkers:[] Score:840}
+    production_regressions_test.go:53: candidate uo35R9zQsAI "Flo Rida - My House [Official Video]": {Title:1 TitlePrecision:1 Artist:1 Credits:1 DurationDeltaMS:3810 SourceClass:verified_artist Reason:accepted VersionCompatible:true NegativeMarkers:[] Score:825}
+    production_regressions_test.go:53: candidate TuxMwALL_S4 "Flo Rida - My House (Official Audio)": {Title:1 TitlePrecision:1 Artist:1 Credits:1 DurationDeltaMS:810 SourceClass:other Reason:accepted VersionCompatible:true NegativeMarkers:[] Score:777}
+    production_regressions_test.go:53: candidate RMmEtcIW_WA "Flo Rida - My House | Lyrics": {Title:1 TitlePrecision:1 Artist:1 Credits:1 DurationDeltaMS:189 SourceClass:lyrics Reason:accepted VersionCompatible:true NegativeMarkers:[] Score:770}
+    production_regressions_test.go:53: candidate z9boCCK7M8c "My House": {Title:1 TitlePrecision:1 Artist:1 Credits:1 DurationDeltaMS:189 SourceClass:verified_artist Reason:accepted VersionCompatible:true NegativeMarkers:[] Score:840}
+    production_regressions_test.go:56: selected=z9boCCK7M8c error=<nil> searches=4 checks=5
+=== RUN   TestProductionRegressions/3SMVk8c3YOVv6DcTn8ABXa
+    production_regressions_test.go:31: Spotify identity: Public Enemy — Bring The Noise Remix - Pumpkin Edit
+    production_regressions_test.go:53: candidate 55hB6dwU3yQ "Bring The Noise Remix (Pumpkin Edit)": {Title:1 TitlePrecision:1 Artist:1 Credits:1 DurationDeltaMS:141 SourceClass:release Reason:accepted VersionCompatible:true NegativeMarkers:[] Score:835}
+    production_regressions_test.go:56: selected=55hB6dwU3yQ error=<nil> searches=1 checks=1
+--- PASS: TestProductionRegressions (0.02s)
+    --- PASS: TestProductionRegressions/55VzNhbcf0Gxf6qRCUAV01 (0.00s)
+    --- PASS: TestProductionRegressions/3bC1ahPIYt1btJzSSEyyrF (0.00s)
+    --- PASS: TestProductionRegressions/6Knv6wdA0luoMUuuoYi2i1 (0.01s)
+    --- PASS: TestProductionRegressions/3SMVk8c3YOVv6DcTn8ABXa (0.00s)
+PASS
+ok  	whiterun/internal/media	0.019s

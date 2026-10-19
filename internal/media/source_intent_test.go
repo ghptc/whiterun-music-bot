@@ -68,7 +68,7 @@ func TestSpotifyRecordingFidelity(t *testing.T) {
 			track.Title = tc.title
 			wrong := candidate(tc.badTitle, "Artist")
 			wrong.Verified = true
-			good := candidate(tc.goodTitle, "Music Archive")
+			good := candidate(tc.goodTitle, "Artist - Topic")
 			good.ID = "lmnopqrstuv"
 			got, err := selectSpotify(context.Background(), track, []Candidate{wrong, good}, func(c Candidate) (Candidate, error) { return c, nil })
 			if err != nil || got.ID != good.ID {
@@ -140,7 +140,7 @@ func TestSpotifyCandidatePoolsAndVerificationBound(t *testing.T) {
 	}
 	raw, _ := os.ReadFile(calls)
 	text := string(raw)
-	if !strings.Contains(text, "music.youtube.com/search?q=Artist+Song+Name#songs") || !strings.Contains(text, "ytsearch10:Artist Song Name") || strings.Count(text, "watch?v=correct0001") != 1 {
+	if !strings.Contains(text, "music.youtube.com/search?q=Artist+Song+Name#songs") || strings.Contains(text, "ytsearch10:Artist Song Name") || strings.Count(text, "watch?v=correct0001") != 1 {
 		t.Fatal(text)
 	}
 	c := Candidate{ID: "abcdefghijk", Title: "Song Name", MusicSearch: true}

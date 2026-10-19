@@ -2,6 +2,7 @@ package media
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -19,7 +20,7 @@ type MatchPolicy struct {
 	MaxDurationDelta    time.Duration
 	MaxDurationFraction float64
 	MinScore            int
-	MinScoreMargin      int
+	MinScoreMargin      int // Legacy configuration; never gates a confirmed candidate.
 }
 
 func DefaultMatchPolicy() MatchPolicy {
@@ -62,7 +63,20 @@ func CompareSpotify(t Track, c Candidate, p MatchPolicy) MatchDecision {
 	b := rankSpotifyPolicy(t, c, false, p)
 	status := MatchRejected
 	if b.Reason == "accepted" {
-		status = MatchConfirmed
+		// Independent provenance is required in addition to mandatory identity
+		// checks. A title, score or artist-looking channel alone is plausible.
+		class, _ := sourceClass(t, c)
+		sharedISRC := validISRC.MatchString(strings.ToUpper(t.ISRC)) && strings.EqualFold(t.ISRC, c.ISRC)
+		if sharedISRC || class == "verified_artist" || class == "topic" || class == "artist_vevo" || class == "release" {
+			status = MatchConfirmed
+			b.Reason = class + "_and_identity"
+			if sharedISRC {
+				b.Reason = "matching_isrc_and_identity"
+			}
+		} else {
+			status = MatchUncertain
+			b.Reason = "recording_provenance_unknown"
+		}
 	} else if b.Reason == "duration_unknown" || b.Reason == "credits_unknown" || b.Reason == "primary_artist_mismatch" && c.Artist == "" && len(c.Artists) == 0 && c.Channel == "" && c.Uploader == "" {
 		status = MatchUncertain
 	}

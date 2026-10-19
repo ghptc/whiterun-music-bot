@@ -7,9 +7,12 @@ import (
 	"time"
 )
 
-// Four discovery requests, at most eight unique full extractions, under the
+// Four bounded discovery requests and sequential unique full extractions under the
 // resolver's existing 90s deadline. No player/queue locks are acquired here.
 func discoverSpotify(ctx context.Context, t Track, p MatchPolicy, query string, search func(string, string) ([]*Candidate, error), verify func(Candidate) (Candidate, error)) (chosen Candidate, err error) {
+	if err := p.Validate(); err != nil {
+		return Candidate{}, err
+	}
 	started := time.Now()
 	attempts, verified := 0, 0
 	timing := TimingFrom(ctx)
@@ -35,12 +38,15 @@ func discoverSpotify(ctx context.Context, t Track, p MatchPolicy, query string, 
 			failures = append(failures, e)
 			return
 		}
+		pool := make([]*Candidate, 0, len(entries))
 		for _, c := range entries {
-			if c != nil && music {
-				c.MusicSearch = true
+			if c != nil {
+				copy := *c
+				copy.MusicSearch = copy.MusicSearch || music
+				pool = append(pool, &copy)
 			}
 		}
-		pools = append(pools, entries)
+		pools = append(pools, pool)
 	}
 	type verification struct {
 		c   Candidate
@@ -51,9 +57,6 @@ func discoverSpotify(ctx context.Context, t Track, p MatchPolicy, query string, 
 		if v, ok := cache[c.ID]; ok {
 			return v.c, v.err
 		}
-		if verified >= 8 {
-			return Candidate{}, &MatchError{Status: MatchUncertain, Reason: "verification_budget_exhausted"}
-		}
 		verified++
 		full, e := verify(c)
 		if e == nil && full.ID != c.ID {
@@ -62,43 +65,43 @@ func discoverSpotify(ctx context.Context, t Track, p MatchPolicy, query string, 
 		cache[c.ID] = verification{full, e}
 		return full, e
 	}
-	lookup("https://music.youtube.com/search?q="+url.QueryEscape(query)+"#songs", "spotify_music_search", true)
-	// Resolve the official Music pool before paying for a second search. Only
-	// independently corroborated releases may terminate this fast pass.
-	if len(pools) > 0 {
-		fast, fastErr := selectSpotifyPolicyMode(ctx, t, p, deduplicateCandidates(pools...), check, true)
-		if fastErr == nil {
-			return fast, nil
-		}
+	queries := []struct {
+		target, purpose string
+		music           bool
+	}{
+		{"https://music.youtube.com/search?q=" + url.QueryEscape(query) + "#songs", "spotify_music_search", true},
+		{"ytsearch10:" + query, "spotify_video_search", false},
+		{"ytsearch10:" + t.Artist + " - " + t.Title + " official audio", "spotify_alternative_search", false},
+		{"ytsearch10:\"" + t.Title + "\" \"" + t.Artist + "\" \"Topic\"", "spotify_alternative_search", false},
 	}
-	lookup("ytsearch10:"+query, "spotify_video_search", false)
-	for round := 0; round < 3; round++ {
+	var uncertain bool
+	for _, q := range queries {
 		if ctx.Err() != nil {
 			return Candidate{}, ctx.Err()
 		}
+		lookup(q.target, q.purpose, q.music)
 		if len(pools) == 0 {
-			return Candidate{}, errors.Join(failures...)
+			continue
 		}
 		chosen, err = selectSpotifyPolicy(ctx, t, p, deduplicateCandidates(pools...), check)
 		if err == nil {
 			return chosen, nil
 		}
+		if ctx.Err() != nil {
+			return Candidate{}, ctx.Err()
+		}
 		var decision *MatchError
-		if !errors.As(err, &decision) {
-			return Candidate{}, err
+		if errors.As(err, &decision) {
+			uncertain = uncertain || decision.Status == MatchUncertain
+		} else {
+			failures = append(failures, err)
 		}
-		if round == 2 {
-			break
-		}
-		alternative := t.Artist + " - " + t.Title + " official audio"
-		if round == 1 {
-			alternative = "\"" + t.Title + "\" \"" + t.Artist + "\" \"Topic\""
-		}
-		lookup("ytsearch10:"+alternative, "spotify_alternative_search", false)
 	}
-	// Failed discovery cannot prove absence or resolve an existing ambiguity.
 	if len(failures) > 0 {
 		return Candidate{}, errors.Join(failures...)
 	}
-	return Candidate{}, err
+	if uncertain {
+		return Candidate{}, &MatchError{Status: MatchUncertain, Reason: "insufficient_metadata"}
+	}
+	return Candidate{}, &MatchError{Status: MatchRejected, Reason: "no_acceptable_candidate"}
 }

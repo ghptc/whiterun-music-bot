@@ -24,7 +24,7 @@ func mappingKey(t Track, p MatchPolicy) string {
 		Version int
 		Track   Track
 		Policy  MatchPolicy
-	}{3, t, p})
+	}{4, t, p})
 	if t.SpotifyID != "" {
 		return fmt.Sprintf("spotify:%s:%x", t.SpotifyID, sha256.Sum256(b))
 	}

@@ -1,0 +1,9 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/media
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor           
+BenchmarkFirstConfirmedOfficialPool-8   	    2532	    424775 ns/op	  718076 B/op	   11136 allocs/op
+BenchmarkFirstConfirmedOfficialPool-8   	    2782	    408583 ns/op	  718514 B/op	   11136 allocs/op
+BenchmarkFirstConfirmedOfficialPool-8   	    2689	    431310 ns/op	  718855 B/op	   11136 allocs/op
+PASS
+ok  	whiterun/internal/media	3.376s

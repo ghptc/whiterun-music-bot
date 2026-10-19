@@ -103,3 +103,41 @@ func TestFreshPersistentMappingAvoidsMetadataProcessAcrossReopen(t *testing.T) {
 		t.Fatal(got, err)
 	}
 }
+
+func TestFirstConfirmedMappingIsPersistedAndReused(t *testing.T) {
+	db := openTest(t)
+	dir := t.TempDir()
+	binary := filepath.Join(dir, "yt-dlp")
+	calls := filepath.Join(dir, "calls")
+	first := media.Candidate{ID: "abcdefghijk", Title: "Song", Channel: "Artist", Verified: true, Duration: 210}
+	second := first
+	second.ID = "lmnopqrstuv"
+	entries, _ := json.Marshal(map[string]any{"entries": []media.Candidate{first, second}})
+	full, _ := json.Marshal(first)
+	script := "#!/bin/sh\nfor arg do target=\"$arg\"; done\nprintf '%s\\n' \"$target\" >> '" + calls + "'\ncase \"$target\" in\n*watch?v=abcdefghijk)\ncat <<'JSON'\n" + string(full) + "\nJSON\n;;\n*watch?v=*) exit 19;;\n*)\ncat <<'JSON'\n" + string(entries) + "\nJSON\n;;\nesac\n"
+	if err := os.WriteFile(binary, []byte(script), 0700); err != nil {
+		t.Fatal(err)
+	}
+	original := media.Track{SpotifyID: "requested-id", Title: "Song", Artist: "Artist", Duration: 210 * time.Second}
+	resolver := media.CollectionResolver{YouTube: media.Resolver{Binary: binary, Mappings: db}}
+	ctx := context.Background()
+	got, err := resolver.MatchSpotify(ctx, original, true)
+	if err != nil || got.VideoID != first.ID || got.SpotifyID != original.SpotifyID {
+		t.Fatal(got, err)
+	}
+	saved, ok, err := db.LoadMapping(ctx, media.MappingKey(original, nil))
+	if err != nil || !ok || saved.ID != first.ID || saved.CheckedAt.IsZero() {
+		t.Fatal(saved, ok, err)
+	}
+	raw, _ := os.ReadFile(calls)
+	if strings.Count(string(raw), "\n") != 2 || strings.Contains(string(raw), "watch?v="+second.ID) {
+		t.Fatal(string(raw))
+	}
+	// A fresh persisted result must survive an unavailable metadata executable.
+	resolver.YouTube.Binary = "/nonexistent/bard-test-yt-dlp"
+	original.Position, original.Total = 12, 123
+	cached, err := resolver.MatchSpotify(ctx, original, true)
+	if err != nil || cached.VideoID != first.ID || cached.Position != 12 || cached.SpotifyID != original.SpotifyID {
+		t.Fatal(cached, err)
+	}
+}

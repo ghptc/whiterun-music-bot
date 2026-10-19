@@ -133,15 +133,16 @@ func TestMisleadingFirstSummaryRequiresSecondVerification(t *testing.T) {
 	}
 }
 
-func TestFastDiscoveryDoesNotHideKnownConflictingRecordings(t *testing.T) {
+func TestFirstConfirmationStillEnforcesRequestedRecordingIdentifier(t *testing.T) {
 	track, c := fastFixture(t)
 	other := c
 	other.ID = "abcdefghijk"
 	c.ISRC = "USAAA1200001"
+	track.ISRC = "USAAA1200002"
 	other.ISRC = "USAAA1200002"
-	_, err := discoverSpotify(context.Background(), track, DefaultMatchPolicy(), spotifyQuery(track), func(string, string) ([]*Candidate, error) { return []*Candidate{&c, &other}, nil }, func(v Candidate) (Candidate, error) { return v, nil })
-	if err == nil {
-		t.Fatal("known conflicting recordings selected")
+	got, err := discoverSpotify(context.Background(), track, DefaultMatchPolicy(), spotifyQuery(track), func(string, string) ([]*Candidate, error) { return []*Candidate{&c, &other}, nil }, func(v Candidate) (Candidate, error) { return v, nil })
+	if err != nil || got.ID != other.ID {
+		t.Fatal("requested recording identifier ignored", got, err)
 	}
 }
 

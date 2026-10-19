@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func TestRecordingGroups(t *testing.T) {
+func TestRecordingEquivalenceIsSeparateFromFirstConfirmation(t *testing.T) {
 	track := Track{Title: "Song", Artist: "Artist", Artists: []string{"Artist"}, Album: "Album", Duration: 210 * time.Second}
 	base := Candidate{ID: "abcdefghijk", Title: "Artist - Song (Official Audio)", Track: "Song", Artists: []string{"Artist"}, Album: "Album", Channel: "Artist", Verified: true, Duration: 210}
 	for _, tc := range []struct {
@@ -45,14 +45,19 @@ func TestRecordingGroups(t *testing.T) {
 			b.ID = "lmnopqrstuv"
 			tc.mutate(&tr, &a, &b)
 			for _, pool := range [][]Candidate{{a, b}, {b, a}, {a, a, b}} {
-				got, err := selectSpotify(context.Background(), tr, pool, func(c Candidate) (Candidate, error) { return c, nil })
-				if tc.uncertain {
+				// Equivalence between uploads cannot veto an independently confirmed candidate.
+				if equivalent := recordingEquivalence(tr, a, b) != ""; equivalent == tc.uncertain {
+					t.Fatal("unexpected equivalence evidence", equivalent)
+				}
+				checks := 0
+				got, err := selectSpotify(context.Background(), tr, pool, func(c Candidate) (Candidate, error) { checks++; return c, nil })
+				if CompareSpotify(tr, pool[0], DefaultMatchPolicy()).Status != MatchConfirmed {
 					var m *MatchError
 					if !errors.As(err, &m) || m.Status != MatchUncertain {
 						t.Fatalf("got %v %v", got, err)
 					}
-				} else if err != nil {
-					t.Fatal(err)
+				} else if err != nil || got.ID != pool[0].ID || checks != 1 {
+					t.Fatal(got, err, checks)
 				}
 			}
 		})
@@ -61,7 +66,7 @@ func TestRecordingGroups(t *testing.T) {
 
 func TestProgressiveSpotifyDiscovery(t *testing.T) {
 	tr := Track{Title: "Song", Artist: "Artist", Album: "Album", Duration: 210 * time.Second}
-	good := Candidate{ID: "abcdefghijk", Title: "Song", Channel: "Artist", Duration: 210}
+	good := Candidate{ID: "abcdefghijk", Title: "Song", Channel: "Artist", Verified: true, Duration: 210}
 	calls, checks := 0, 0
 	got, err := discoverSpotify(context.Background(), tr, DefaultMatchPolicy(), "initial", func(target, purpose string) ([]*Candidate, error) {
 		calls++
@@ -87,18 +92,16 @@ func TestProgressiveSpotifyDiscovery(t *testing.T) {
 	}
 }
 
-func TestRecordingGroupingCannotBridgeContradictions(t *testing.T) {
-	tr := Track{Title: "Song", Artist: "Artist", Album: "Album", Duration: 210 * time.Second}
-	a := Candidate{ID: "abcdefghijk", Title: "Song", Track: "Song", Artists: []string{"Artist"}, Album: "Album", Channel: "Artist", Verified: true, Duration: 210, ISRC: "USAAA1200001"}
+func TestLaterUploadsCannotReopenConfirmedSelection(t *testing.T) {
+	tr := Track{Title: "Song", Artist: "Artist", Album: "Album", Duration: 210 * time.Second, ISRC: "USAAA1200001"}
+	a := Candidate{ID: "abcdefghijk", Title: "Song", Track: "Song", Artists: []string{"Artist"}, Album: "Album", Channel: "Artist", Verified: true, Duration: 210, ISRC: tr.ISRC}
 	b, c := a, a
-	b.ID = "lmnopqrstuv"
-	b.ISRC = ""
-	c.ID = "12345678901"
-	c.ISRC = "USAAA1200002"
-	_, err := selectSpotify(context.Background(), tr, []Candidate{a, b, c}, func(c Candidate) (Candidate, error) { return c, nil })
-	var m *MatchError
-	if !errors.As(err, &m) || m.Status != MatchUncertain {
-		t.Fatal(err)
+	b.ID, b.ISRC = "lmnopqrstuv", ""
+	c.ID, c.ISRC = "12345678901", "USAAA1200002"
+	checks := 0
+	got, err := selectSpotify(context.Background(), tr, []Candidate{a, b, c}, func(c Candidate) (Candidate, error) { checks++; return c, nil })
+	if err != nil || got.ID != a.ID || checks != 1 {
+		t.Fatal(got, err, checks)
 	}
 }
 
@@ -108,7 +111,7 @@ func TestProgressiveDiscoveryPreservesInfrastructureFailure(t *testing.T) {
 	blocked := errors.New("provider blocked")
 	searches := 0
 	_, err := discoverSpotify(context.Background(), tr, DefaultMatchPolicy(), "query", func(string, string) ([]*Candidate, error) { searches++; return []*Candidate{&c}, nil }, func(Candidate) (Candidate, error) { return Candidate{}, blocked })
-	if !errors.Is(err, blocked) || searches != 2 {
+	if !errors.Is(err, blocked) || searches != 4 {
 		t.Fatal(err, searches)
 	}
 }
@@ -133,7 +136,7 @@ func TestEquivalentUploadsDoNotBypassVersionChecks(t *testing.T) {
 	}
 }
 
-func TestProgressiveVerificationBudget(t *testing.T) {
+func TestDiscoveryVerifiesEveryCandidateWithinResourceDeadline(t *testing.T) {
 	tr := Track{Title: "Song", Artist: "Artist", Duration: 210 * time.Second}
 	calls, checks := 0, 0
 	_, err := discoverSpotify(context.Background(), tr, DefaultMatchPolicy(), "query", func(string, string) ([]*Candidate, error) {
@@ -152,7 +155,7 @@ func TestProgressiveVerificationBudget(t *testing.T) {
 		}
 		return pool, nil
 	}, func(c Candidate) (Candidate, error) { checks++; c.Duration = 400; return c, nil })
-	if err == nil || checks != 8 || calls != 4 {
+	if err == nil || checks != 16 || calls != 4 {
 		t.Fatal(err, checks, calls)
 	}
 }

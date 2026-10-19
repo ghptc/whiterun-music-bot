@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
 	"unicode"
@@ -348,178 +347,58 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (Candidate, 
 func selectSpotify(ctx context.Context, track Track, candidates []Candidate, verify func(Candidate) (Candidate, error)) (Candidate, error) {
 	return selectSpotifyPolicy(ctx, track, DefaultMatchPolicy(), candidates, verify)
 }
-func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, candidates []Candidate, verify func(Candidate) (Candidate, error)) (Candidate, error) {
-	return selectSpotifyPolicyMode(ctx, track, policy, candidates, verify, false)
-}
 
-func selectSpotifyPolicyMode(ctx context.Context, track Track, policy MatchPolicy, candidates []Candidate, verify func(Candidate) (Candidate, error), fast bool) (Candidate, error) {
+// selectSpotifyPolicy evaluates one candidate at a time in discovery order.
+// Summary metadata only authorizes verification; only full confirmation selects.
+func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, candidates []Candidate, verify func(Candidate) (Candidate, error)) (Candidate, error) {
 	if err := policy.Validate(); err != nil {
 		return Candidate{}, err
 	}
-	type rankedCandidate struct {
-		candidate Candidate
-		rank      spotifyRank
-	}
-	var shortlist []rankedCandidate
 	timing := TimingFrom(ctx)
-	logRank := func(c Candidate, b spotifyRank, stage string) {
-		if timing != nil {
-			timing.log.InfoContext(ctx, "spotify_candidate", "spotify_track_id", track.SpotifyID, "video_id", c.ID, "candidate_title", c.Title, "recording_title", c.Track, "recording_artists", c.Artists, "recording_album", c.Album, "duration_seconds", c.Duration, "recording_isrc", c.ISRC, "channel_id", c.ChannelID, "channel_verified", c.Verified, "stage", stage, "title_similarity", b.Title, "title_precision", b.TitlePrecision, "artist_similarity", b.Artist, "credited_artist_similarity", b.Credits, "duration_delta_ms", b.DurationDeltaMS, "source_class", b.SourceClass, "version_compatible", b.VersionCompatible, "negative_markers", b.NegativeMarkers, "ranking_score", b.Score, "reason", b.Reason)
-		}
-	}
-	for _, c := range candidates {
-		b := rankSpotifyPolicy(track, c, true, policy)
-		logRank(c, b, "discovery")
-		if b.Reason == "accepted" {
-			shortlist = append(shortlist, rankedCandidate{c, b})
-		}
-	}
-	sort.SliceStable(shortlist, func(i, j int) bool { return shortlist[i].rank.Score > shortlist[j].rank.Score })
-	var accepted []rankedCandidate
 	sawUncertain := false
 	var verificationErrors []error
-	// Sparse Music summaries must get a verification opportunity even when
-	// normal search has many richly described but noncanonical reuploads.
-	var selected []rankedCandidate
-	used := map[string]bool{}
-	for _, music := range []bool{true, false} {
-		count := 0
-		for _, candidate := range shortlist {
-			if candidate.candidate.MusicSearch == music && count < 2 {
-				selected = append(selected, candidate)
-				used[candidate.candidate.ID] = true
-				count++
-			}
+	seen := make(map[string]bool)
+	for _, candidate := range candidates {
+		if err := ctx.Err(); err != nil {
+			return Candidate{}, err
 		}
-	}
-	for _, candidate := range shortlist {
-		if len(selected) < 4 && !used[candidate.candidate.ID] {
-			selected = append(selected, candidate)
-			used[candidate.candidate.ID] = true
-		}
-	}
-	// Explicit contradictory identifiers in discovery prevent early selection.
-	// Missing evidence alone does not veto an independently proven release.
-	if fast {
-		for _, a := range shortlist {
-			for _, b := range shortlist {
-				if a.candidate.ID != b.candidate.ID && a.candidate.ISRC != "" && b.candidate.ISRC != "" && !strings.EqualFold(a.candidate.ISRC, b.candidate.ISRC) {
-					fast = false
-				}
-			}
-		}
-	}
-	for index, item := range selected {
-		if fast && index > 0 {
-			break
-		}
-		if ctx.Err() != nil {
-			return Candidate{}, ctx.Err()
-		}
-		full, err := verify(item.candidate)
-		if err != nil {
-			timing.Event("spotify_candidate_verification_failed", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", item.candidate.ID, "reason", "verification_failed")
-			verificationErrors = append(verificationErrors, err)
+		if seen[candidate.ID] {
 			continue
 		}
-		b := rankSpotifyPolicy(track, full, false, policy)
-		if CompareSpotify(track, full, policy).Status == MatchUncertain {
+		seen[candidate.ID] = true
+		provisional := rankSpotifyPolicy(track, candidate, true, policy)
+		timing.Event("spotify_candidate_discovery", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", candidate.ID, "reason", provisional.Reason)
+		if provisional.Reason != "accepted" {
+			continue
+		}
+		full, err := verify(candidate)
+		if err := ctx.Err(); err != nil {
+			return Candidate{}, err
+		}
+		if err != nil {
+			verificationErrors = append(verificationErrors, err)
+			timing.Event("spotify_candidate_verification_failed", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", candidate.ID)
+			continue
+		}
+		if full.ID != candidate.ID {
+			verificationErrors = append(verificationErrors, errors.New("YouTube returned a different video ID"))
+			continue
+		}
+		decision := CompareSpotify(track, full, policy)
+		timing.Event("spotify_candidate_decision", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", full.ID, "status", decision.Status, "reason", decision.Reason, "ranking_score", decision.Score, "candidate_title", full.Title, "recording_title", full.Track, "recording_artists", full.Artists, "recording_album", full.Album, "duration_seconds", full.Duration, "recording_isrc", full.ISRC, "channel_id", full.ChannelID)
+		switch decision.Status {
+		case MatchConfirmed:
+			timing.Event("spotify_first_confirmed", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", full.ID, "evidence", decision.Reason)
+			return full, nil
+		case MatchUncertain:
 			sawUncertain = true
 		}
-		logRank(full, b, "verified")
-		if b.Reason == "accepted" {
-			if fast && requestedReleaseEvidence(track, full) {
-				timing.Event("spotify_fast_match", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", full.ID, "evidence", "exact_requested_release")
-				return full, nil
-			}
-			accepted = append(accepted, rankedCandidate{full, b})
-		}
-	}
-	if ctx.Err() != nil {
-		return Candidate{}, ctx.Err()
-	}
-	if fast {
-		return Candidate{}, &MatchError{Status: MatchUncertain, Reason: "fast_match_requires_release_identity"}
 	}
 	if len(verificationErrors) > 0 {
 		return Candidate{}, fmt.Errorf("candidate verification infrastructure failed: %w", errors.Join(verificationErrors...))
 	}
-	if len(accepted) == 0 {
-		if sawUncertain {
-			return Candidate{}, &MatchError{Status: MatchUncertain, Reason: "insufficient_metadata"}
-		}
-		return Candidate{}, &MatchError{Status: MatchRejected, Reason: "no_acceptable_candidate"}
+	if sawUncertain {
+		return Candidate{}, &MatchError{Status: MatchUncertain, Reason: "insufficient_metadata"}
 	}
-	// Complete-link grouping prevents A~B~C from hiding an A/C contradiction.
-	sort.Slice(accepted, func(i, j int) bool {
-		if accepted[i].rank.Score == accepted[j].rank.Score {
-			return accepted[i].candidate.ID < accepted[j].candidate.ID
-		}
-		return accepted[i].rank.Score > accepted[j].rank.Score
-	})
-	var groups [][]rankedCandidate
-	for _, candidate := range accepted {
-		placed := false
-		for gi, group := range groups {
-			compatible := true
-			for _, member := range group {
-				if recordingEquivalence(track, candidate.candidate, member.candidate) == "" {
-					compatible = false
-					break
-				}
-			}
-			if compatible {
-				groups[gi] = append(groups[gi], candidate)
-				placed = true
-				break
-			}
-		}
-		if !placed {
-			groups = append(groups, []rankedCandidate{candidate})
-		}
-	}
-	best, bestRank, bestScore := groups[0][0].candidate, groups[0][0].rank, groups[0][0].rank.Score
-	runnerUp := -1
-	if len(groups) > 1 {
-		runnerUp = groups[1][0].rank.Score
-	}
-
-	for gi, group := range groups {
-		ids := make([]string, 0, len(group))
-		evidence := []string{}
-		for _, member := range group {
-			ids = append(ids, member.candidate.ID)
-			if member.candidate.ID != group[0].candidate.ID {
-				evidence = append(evidence, recordingEquivalence(track, group[0].candidate, member.candidate))
-			}
-		}
-		timing.Event("spotify_recording_group", time.Now(), "spotify_track_id", track.SpotifyID, "group", gi, "video_ids", ids, "evidence", evidence)
-	}
-	// Prefer a uniquely identified requested release without merging unrelated
-	// uploads. Two conflicting release groups remain uncertain regardless of score.
-	releaseGroup := -1
-	var releaseCandidate Candidate
-	for gi, group := range groups {
-		for _, member := range group {
-			if exactRequestedRelease(track, member.candidate) {
-				if releaseGroup >= 0 && releaseGroup != gi {
-					return Candidate{}, &MatchError{Status: MatchUncertain, Reason: "conflicting_release_identity"}
-				}
-				if releaseGroup < 0 {
-					releaseCandidate = member.candidate
-				}
-				releaseGroup = gi
-			}
-		}
-	}
-	if releaseGroup >= 0 {
-		timing.Event("spotify_release_selected", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", releaseCandidate.ID, "evidence", "exact_requested_release", "groups", len(groups))
-		return releaseCandidate, nil
-	}
-	if runnerUp >= 0 && bestScore-runnerUp < policy.MinScoreMargin {
-		timing.Event("spotify_recording_ambiguous", time.Now(), "spotify_track_id", track.SpotifyID, "reason", "ambiguous_candidates", "groups", len(groups))
-		return Candidate{}, &MatchError{Status: MatchUncertain, Reason: "ambiguous_candidates"}
-	}
-	timing.Event("spotify_recording_selected", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", best.ID, "source_class", bestRank.SourceClass, "duration_delta_ms", bestRank.DurationDeltaMS, "ranking_score", bestRank.Score)
-	return best, nil
+	return Candidate{}, &MatchError{Status: MatchRejected, Reason: "no_acceptable_candidate"}
 }

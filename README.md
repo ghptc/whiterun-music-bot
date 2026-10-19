@@ -172,6 +172,7 @@ reproduzidos. `SPOTIFY_MATCH_POLICY` permite configurar os critérios documentad
 
 - [Auditoria e limites reais](docs/quality-audit.md)
 - [Política Spotify → YouTube](docs/spotify-fidelity.md)
+- [First Confirmed Match Wins: arquitetura e medições](docs/first-confirmed-match.md)
 - [Matriz, CI e testes externos](docs/test-matrix.md)
 
 Os testes locais não comprovam áudio audível no Discord real.

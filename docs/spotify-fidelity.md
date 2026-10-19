@@ -14,8 +14,9 @@ representado por nil, não false.
 
 - `MATCH_CONFIRMED`: comparação completa atende às regras abaixo. É uma decisão
   baseada em metadados, não prova de identidade acústica.
-- `MATCH_UNCERTAIN`: faltam evidências verificáveis ou os melhores candidatos
-  verificados têm pontuações próximas. Não pode ser reproduzido.
+- `MATCH_UNCERTAIN`: faltam evidências verificáveis de identidade/proveniência.
+  Não pode ser reproduzido. Pontuações próximas entre uploads não geram incerteza
+  depois que um candidato foi confirmado.
 - `MATCH_REJECTED`: incompatibilidade relevante, indisponibilidade, ausência de
   candidato aceitável ou configuração inválida. Não pode ser reproduzido.
 
@@ -51,24 +52,31 @@ exemplo). Não é uma probabilidade. Os defaults e regras são:
 | Duração Spotify ausente | Título/artistas/versão ainda obrigatórios; candidato acima de 20 minutos é rejeitado; não se inventa uma duração Spotify |
 | ISRC / explicit | Se ambos os lados fornecem, divergência rejeita; ausência não é evidência positiva |
 | Pontuação | Título ×400, artista ×200, créditos ×100, penalidade de imprecisão, duração e bônus de fonte; mínimo 650 |
-| Ambiguidade | Diferença entre representantes de grupos de gravação verificados inferior a 20 impede a seleção |
+| Proveniência independente | ISRC válido correspondente ao solicitado ou fonte de artista verificado, Topic, VEVO ou lançamento distribuído compatível; todos os outros critérios continuam obrigatórios |
+| Seleção | Primeiro candidato completamente verificado com MATCH_CONFIRMED vence; não existe comparação posterior entre uploads |
 
-Bônus de canal oficial/topic/VEVO apenas ordena candidatos que já passaram pelos
-critérios de identidade. Visualizações não são utilizadas. Remaster não é um
+O score serve como filtro auxiliar, sem comprovar identidade. Uma fonte oficial
+não anula incompatibilidades de artista, créditos, título, versão ou duração.
+Visualizações não são utilizadas. `MinScoreMargin` permanece aceito na configuração
+por compatibilidade, mas não participa da seleção. Remaster não é um
 substituto automático do original: o rótulo é bilateral; anos e nomes de remix
 continuam sendo tokens obrigatórios. Letras de nomes artísticos, como `2 Live
 Crew`, são removidas do texto de versão antes de classificar a variante.
 
-As pesquisas Music e YouTube normal são combinadas e deduplicadas por VideoID.
-A verificação completa contempla no máximo quatro candidatos por rodada e oito
-IDs únicos na resolução, reservando espaço para os dois pools. Até duas buscas
-alternativas ampliam os pools sob o deadline global de 90 s. Evidências estritas
-de equivalência permitem agrupar uploads antes de comparar a margem; consulte
-[as regras e a investigação real](spotify-fidelity-false-rejections.md). Não é garantia de encontrar todos os candidatos existentes.
-Candidatos não verificados não são autorizados. Falha na verificação de um
-candidato plausível gera incerteza com a causa original preservada, inclusive
-para suspender a fila em bloqueios globais do provedor. A identidade também é aplicada
-quando a resolução recebe diretamente uma URL de vídeo.
+O resolver consulta Music, avalia candidatos na ordem recebida e extrai cada um
+sequencialmente. No primeiro `MATCH_CONFIRMED`, retorna imediatamente. Candidatos
+rejeitados ou incertos permitem continuar; nenhum outro resultado pode reabrir a
+seleção. Não há ordenação global por score, agrupamento ou exigência de margem.
+Sem confirmação, amplia para YouTube normal, official audio e Topic, deduplicando
+IDs e reutilizando extrações completas. O plano tem quatro consultas com até dez
+resumos cada, sob o deadline global de 90 s e 15 s por extração. Esses são limites
+operacionais; não existe corte adicional de quatro/oito candidatos como regra de
+fidelidade. Todos os candidatos recuperados podem ser verificados enquanto houver
+tempo. Uma confirmação posterior pode superar um erro anterior de infraestrutura;
+sem confirmação, a causa de infraestrutura é preservada.
+
+Os [resultados e testes de First Confirmed Match Wins](first-confirmed-match.md)
+documentam a mudança. A identidade também é aplicada a uma URL de vídeo direta.
 
 ## Integridade de coleções
 
@@ -95,18 +103,20 @@ não concluídas, identificadas nos logs. Não há spam de mensagens por candida
 
 ## Mapeamentos duráveis e reprodução
 
-SQLite guarda o candidato validado por hash da identidade completa, política e
-versão do algoritmo. Solicitante e posição não fazem parte da chave. A validade
-é de 24 horas. Um hit sempre consulta novamente o mesmo VideoID e compara
-metadados atuais. Ausência, erro ou inconsistência invalida o mapeamento; uma nova
-busca precisa satisfazer os mesmos critérios. Trocar a política muda a chave.
-O cache de busca em memória expira em dez minutos e copia campos mutáveis.
+SQLite guarda o primeiro candidato confirmado em uma chave com Spotify Track ID,
+hash da identidade completa, política e versão do algoritmo (atualmente 4).
+Solicitante e posição não fazem parte da chave. A retenção é de 24 horas. Um
+mapeamento com extração completa feita há menos de dez minutos pode ser reutilizado
+após comparação local da identidade/proveniência. Um timestamp antigo, futuro ou
+ausente exige revalidação do mesmo vídeo. Metadados incompatíveis invalidam o
+mapeamento; falha de rede preserva a causa e não autoriza substituição silenciosa.
+O cache em RAM também expira em dez minutos e coalesce resoluções concorrentes.
 
-Antes de iniciar áudio Spotify, `Bot.play` revalida o VideoID exato com deadline
-de 45 segundos, inclusive após recuperação e cache em memória. Falha impede
-streaming e invalida o mapeamento; não se troca o vídeo silenciosamente. Faixas
-pendentes recuperadas são resolvidas antes da reprodução. URLs assinadas de áudio
-não são persistidas.
+Antes do áudio, uma prova interna fresca ligada ao vídeo evita consulta redundante.
+Sem ela, `Bot.play` revalida o VideoID exato com deadline de 45 s. Recuperação durável
+da fila não restaura essa prova interna. A extração de formatos para streaming
+continua necessária e pode falhar. Faixas pendentes recuperadas são resolvidas
+antes da reprodução. URLs assinadas de áudio não são persistidas.
 
 ## Limitações verificáveis
 
