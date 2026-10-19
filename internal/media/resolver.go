@@ -246,7 +246,10 @@ func (r Resolver) resolveUncached(ctx context.Context, query, direct string, isU
 		return Track{}, err
 	}
 	timing.Event("candidate_selected", started, "selected", chosen.Title, "video_id", chosen.ID)
-	return Track{YouTubeThumbnailURL: SafeArtworkURL(chosen.Thumbnail), identityProof: &chosen, RequestedSource: "youtube", Live: chosen.Live || chosen.LiveStatus == "is_live", VideoID: chosen.ID, Channel: chosen.Channel, Timing: timing, Title: chosen.Title, URL: "https://www.youtube.com/watch?v=" + chosen.ID, Duration: time.Duration(chosen.Duration * float64(time.Second))}, nil
+	if chosen.Artist == "" {
+		chosen.Artist = chosen.Channel
+	}
+	return Track{Artist: chosen.Artist, Artists: chosen.Artists, Album: chosen.Album, YouTubeThumbnailURL: SafeArtworkURL(chosen.Thumbnail), identityProof: &chosen, RequestedSource: "youtube", Live: chosen.Live || chosen.LiveStatus == "is_live", VideoID: chosen.ID, Channel: chosen.Channel, Timing: timing, Title: chosen.Title, URL: "https://www.youtube.com/watch?v=" + chosen.ID, Duration: time.Duration(chosen.Duration * float64(time.Second))}, nil
 }
 
 // MetadataArgs is used only for direct videos and selected candidates whose

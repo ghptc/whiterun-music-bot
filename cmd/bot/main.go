@@ -48,6 +48,16 @@ func run(log *slog.Logger) error {
 			return fmt.Errorf("DISCORD_GUILD_ID must be a valid guild ID")
 		}
 	}
+	if len(os.Args) > 1 && os.Args[1] == "commands-sync" {
+		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+		defer cancel()
+		b, err := discord.New(ctx, token, app, log)
+		if err != nil {
+			return err
+		}
+		defer b.Close(context.Background())
+		return b.SyncCommands(ctx, guild)
+	}
 	for _, binary := range []string{"yt-dlp", "ffmpeg", "deno"} {
 		if _, err := exec.LookPath(binary); err != nil {
 			return fmt.Errorf("required runtime %s: %w", binary, err)

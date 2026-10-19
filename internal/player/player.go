@@ -204,7 +204,14 @@ func (p *GuildPlayer) run() {
 		started := time.Now()
 		p.log.Info("next_track_selected", "sequence", sequence, "collection_id", entry.jobID, "position", t.Position, "spotify_id", t.SpotifyID, "title", t.Title, "video_id", t.VideoID)
 		p.log.Info("track_playback_start", "sequence", sequence, "position", t.Position, "video_id", t.VideoID)
-		err := callPlay(p.play, ctx, t, &startVoice{Voice: v, start: func() { p.announceStart(ctx, t, sequence) }})
+		err := callPlay(p.play, ctx, t, &startVoice{Voice: v, start: func() { p.announceStart(ctx, t, sequence) }, metadata: func(resolved media.Track) {
+			p.mu.Lock()
+			defer p.mu.Unlock()
+			if ctx.Err() == nil && p.current != nil && p.sequence == sequence && p.startedSequence != sequence {
+				final := copyTrack(resolved)
+				p.current = &final
+			}
+		}})
 		category := failureCategory(err)
 		if ctx.Err() != nil {
 			category = "canceled"

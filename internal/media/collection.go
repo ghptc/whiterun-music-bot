@@ -243,7 +243,7 @@ func (r CollectionResolver) youtube(ctx context.Context, id string) (Collection,
 			result.Skipped++
 			continue
 		}
-		result.Tracks = append(result.Tracks, Track{YouTubeThumbnailURL: SafeArtworkURL(c.Thumbnail), Live: c.Live || c.LiveStatus == "is_live", Title: c.Title, Channel: c.Channel, VideoID: c.ID, URL: "https://www.youtube.com/watch?v=" + c.ID, Duration: time.Duration(c.Duration * float64(time.Second)), RequestedSource: "youtube", VerifyBeforePlay: true})
+		result.Tracks = append(result.Tracks, Track{Artist: c.Artist, Artists: c.Artists, Album: c.Album, YouTubeThumbnailURL: SafeArtworkURL(c.Thumbnail), Live: c.Live || c.LiveStatus == "is_live", Title: c.Title, Channel: c.Channel, VideoID: c.ID, URL: "https://www.youtube.com/watch?v=" + c.ID, Duration: time.Duration(c.Duration * float64(time.Second)), RequestedSource: "youtube", VerifyBeforePlay: true})
 	}
 	if len(result.Tracks) == 0 {
 		return Collection{}, ErrNoTracks

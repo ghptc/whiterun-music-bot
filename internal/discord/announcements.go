@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	d "github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/snowflake/v2"
+	"whiterun/internal/media"
 	"whiterun/internal/player"
 )
 
@@ -15,6 +15,7 @@ type announcement struct {
 	channel snowflake.ID
 	epoch   uint64
 	event   player.PlaybackEvent
+	queued  time.Time
 }
 
 // One bounded worker per guild isolates REST latency from audio. The latest
@@ -33,9 +34,17 @@ func (b *Bot) setupAnnouncements(id snowflake.ID, g *guild) {
 				if item.epoch != g.announcementEpoch.Load() {
 					continue
 				}
+				if item.event.SkippedReason == "" && !g.player.IsCurrentPlayback(item.event.Sequence) {
+					continue
+				}
+				frameAt := item.event.StartedAt
+				if frameAt.IsZero() {
+					frameAt = item.queued
+				}
 				ctx, cancel := context.WithTimeout(b.ctx, 5*time.Second)
-				_, err := b.client.Rest.CreateMessage(item.channel, d.MessageCreate{Content: playbackText(item.event), AllowedMentions: &d.AllowedMentions{}}, rest.WithCtx(ctx))
+				_, err := b.client.Rest.CreateMessage(item.channel, playbackMessage(item.event), rest.WithCtx(ctx))
 				cancel()
+				b.log.Info("playback_announcement_delivery", "guild_id", id, "sequence", item.event.Sequence, "first_frame_to_announcement_ms", time.Since(frameAt).Milliseconds(), "artwork_present", media.ArtworkURL(item.event.Track) != "", "artwork_metadata_invalid", artworkInvalid(item.event.Track), "success", err == nil)
 				if err != nil {
 					b.log.Warn("playback_announcement_failed", "guild_id", id, "channel_id", item.channel, "sequence", item.event.Sequence, "error", err)
 				}
@@ -81,7 +90,7 @@ func playbackText(event player.PlaybackEvent) string {
 func (b *Bot) bindAnnouncements(g *guild) {
 	send := func(event player.PlaybackEvent) {
 		g.announcementMu.Lock()
-		item := announcement{snowflake.ID(g.announcementChannel.Load()), g.announcementEpoch.Load(), event}
+		item := announcement{snowflake.ID(g.announcementChannel.Load()), g.announcementEpoch.Load(), event, time.Now()}
 		g.announcementMu.Unlock()
 		if item.channel == 0 {
 			return

@@ -321,3 +321,7 @@ BARD-SEARCH-008, deterministic fixtures, mutation evidence and scope limits.
 
 See [queue experience](queue-experience.md) for the twenty required scenarios,
 artwork persistence, hybrid full-list delivery, rate-limit and failure tests.
+
+## CR-002
+
+See [queue/artwork audit and regression matrix](queue-artwork-hotfix.md) and [persistent catalog](persistent-music-cache.md). `cr002_test.go` covers command HTTP upserts/readback/idempotence, native embeds, final playback metadata, concurrent guilds and HTML failure with TXT retained. Storage catalog tests cover real SQLite restart/concurrency/isolation/expiry/constraints and conditional mapping invalidation; cache-failure regression tests fail on `762fbb5`.

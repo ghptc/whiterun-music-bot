@@ -40,6 +40,9 @@ func commands() []d.ApplicationCommandCreate {
 func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 	started := time.Now()
 	data, slash := e.Data.(d.SlashCommandInteractionData)
+	if slash {
+		b.log.Info("command_received", "name", data.CommandName(), "command_id", data.CommandID(), "guild_id", e.GuildID())
+	}
 	var timing *media.Timing
 	if slash && data.CommandName() == "play" {
 		timing = media.NewTiming(b.log.With("interaction_id", e.ID(), "guild_id", e.GuildID()))
@@ -56,7 +59,7 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 	cancel()
 	timing.Event("discord_acknowledged", started, "error", err)
 	if err != nil {
-		b.log.Warn("command acknowledgement failed", "error", err)
+		b.log.Warn("command acknowledgement failed", "interaction_id", e.ID(), "guild_id", e.GuildID(), "error", err)
 		return
 	}
 	reply := func(content string) {

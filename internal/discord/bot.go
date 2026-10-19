@@ -14,7 +14,6 @@ import (
 	"github.com/disgoorg/disgo/cache"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/gateway"
-	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/disgo/voice"
 	"github.com/disgoorg/godave"
 	"github.com/disgoorg/snowflake/v2"
@@ -104,8 +103,8 @@ func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) e
 			}
 		}
 		if err := b.resolver.YouTube.VerifySpotify(ctx, track); err != nil {
-			if errors.Is(err, media.ErrSpotifyMatch) && b.resolver.YouTube.Mappings != nil {
-				_ = b.resolver.YouTube.Mappings.DeleteMapping(ctx, media.MappingKey(track, b.resolver.YouTube.Policy))
+			if ctx.Err() == nil {
+				b.resolver.YouTube.InvalidateSpotify(ctx, track)
 			}
 			return err
 		}
@@ -120,22 +119,23 @@ func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) e
 		verified.RequestedBy = track.RequestedBy
 		track = verified
 	}
-	return b.streamer.Play(ctx, track, voice)
+	if metadata, ok := voice.(interface{ SetPlaybackTrack(media.Track) }); ok {
+		metadata.SetPlaybackTrack(track)
+	}
+	err := b.streamer.Play(ctx, track, voice)
+	if err != nil && ctx.Err() == nil {
+		b.resolver.YouTube.InvalidateSpotify(ctx, track)
+	}
+	return err
 }
 
 func (b *Bot) Start(scope snowflake.ID) error {
-	ctx, cancel := context.WithTimeout(b.ctx, 30*time.Second)
-	defer cancel()
-	var err error
-	if scope != 0 {
-		_, err = b.client.Rest.SetGuildCommands(b.client.ApplicationID, scope, commands(), rest.WithCtx(ctx))
-	} else {
-		_, err = b.client.Rest.SetGlobalCommands(b.client.ApplicationID, commands(), rest.WithCtx(ctx))
-	}
-	if err != nil {
+	if err := b.SyncCommands(b.ctx, scope); err != nil {
 		return err
 	}
-	if err = b.client.OpenGateway(ctx); err != nil {
+	ctx, cancel := context.WithTimeout(b.ctx, 30*time.Second)
+	defer cancel()
+	if err := b.client.OpenGateway(ctx); err != nil {
 		return err
 	}
 	b.workers.Add(1)

@@ -193,6 +193,10 @@ func TestAnnouncementRESTFailureDoesNotStopAudio(t *testing.T) {
 			}
 		}
 		frames <- track.Title
+		if track.Title == "two" {
+			<-ctx.Done()
+			return ctx.Err()
+		}
 		select {
 		case <-release:
 			return nil

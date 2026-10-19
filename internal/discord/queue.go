@@ -23,11 +23,12 @@ type queueRow struct {
 	Title, Artist, Album, Requester, Status, Artwork, Source string
 }
 type queueView struct {
-	Summary      string
-	Content      string
-	Embeds       []d.Embed
-	HTML, Text   string
-	Shown, Total int // future positions only; current is always separate
+	Summary         string
+	Content         string
+	Embeds          []d.Embed
+	HTML, Text      string
+	GalleryDuration time.Duration
+	Shown, Total    int // future positions only; current is always separate
 }
 
 func queueEntries(state player.State) []player.QueueEntry {
@@ -100,6 +101,9 @@ func queueClip(s string, maxUnits int) string {
 	return string([]rune(s)[:n]) + "…"
 }
 func queueRowFor(t media.Track) queueRow {
+	if t.Artist == "" {
+		t.Artist = t.Channel
+	}
 	return queueRow{Title: t.Title, Artist: t.Artist, Album: t.Album, Requester: t.RequestedBy, Artwork: media.ArtworkURL(t), Source: t.RequestedSource, Status: "ready"}
 }
 
@@ -178,12 +182,14 @@ func buildQueueView(state player.State, limit *int) (queueView, error) {
 	}
 	v.Text = text.String()
 	var html strings.Builder
+	galleryStarted := time.Now()
 	if err := queueGallery.Execute(&html, struct {
 		Summary string
 		Rows    []queueRow
 	}{v.Summary, rows}); err != nil {
-		return queueView{}, err
+		return v, fmt.Errorf("queue gallery: %w", err)
 	}
+	v.GalleryDuration = time.Since(galleryStarted)
 	v.HTML = html.String()
 	return v, nil
 }
@@ -218,7 +224,21 @@ func (v queueView) update(rich bool) d.MessageUpdate {
 // A single bounded multipart edit avoids per-track sends. disgo's REST limiter
 // owns bucket waits/429 retries; the shared deadline bounds the entire delivery.
 func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state player.State, limit *int) {
+	started := time.Now()
 	v, err := buildQueueView(state, limit)
+	missing, invalid := 0, 0
+	for _, entry := range queueEntries(state) {
+		if media.ArtworkURL(entry.Track) == "" {
+			missing++
+		}
+		if artworkInvalid(entry.Track) {
+			invalid++
+		}
+	}
+	b.log.Info("queue_render", "elapsed_ms", float64(time.Since(started).Microseconds())/1000, "gallery_elapsed_ms", float64(v.GalleryDuration.Microseconds())/1000, "html_bytes", len(v.HTML), "text_bytes", len(v.Text), "artwork_missing", missing, "artwork_metadata_invalid", invalid, "preview_cards", len(v.Embeds), "total", v.Total)
+	defer func() {
+		b.log.Info("queue_delivery_complete", "elapsed_ms", float64(time.Since(started).Microseconds())/1000)
+	}()
 	if err != nil {
 		v.Content = err.Error()
 	}
@@ -226,7 +246,10 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 	if advertised := e.AttachmentSizeLimit(); advertised > 0 {
 		budget = min(budget, advertised)
 	}
-	rich := true
+	rich := err == nil || v.Text == ""
+	if err != nil {
+		b.log.Warn("queue_render_failed", "error", err, "text_available", v.Text != "")
+	}
 	if len(v.HTML)+len(v.Text) > budget && len(v.Text) <= budget {
 		rich = false
 	}

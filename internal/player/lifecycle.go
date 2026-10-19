@@ -103,6 +103,7 @@ const (
 // PlaybackEvent is a copied snapshot. Start events follow the first successful
 // voice frame; skip events carry SkippedReason and never announce a start.
 type PlaybackEvent struct {
+	StartedAt     time.Time
 	State         AttemptState
 	FailureStage  string
 	SkippedReason string
@@ -113,8 +114,9 @@ type PlaybackEvent struct {
 }
 type startVoice struct {
 	Voice
-	once  sync.Once
-	start func()
+	once     sync.Once
+	start    func()
+	metadata func(media.Track)
 }
 
 func (v *startVoice) WriteFrame(ctx context.Context, frame []byte) error {
@@ -130,17 +132,19 @@ func (p *GuildPlayer) SetOnStart(fn func(PlaybackEvent)) {
 	p.onStart = fn
 }
 func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequence uint64) {
+	startedAt := time.Now()
 	p.mu.Lock()
 	if ctx.Err() != nil || p.current == nil || p.sequence != sequence || p.startedSequence == sequence {
 		p.mu.Unlock()
 		return
 	}
+	track = copyTrack(*p.current)
 	p.startedSequence = sequence
 	p.history = append(p.history, copyTrack(track))
 	if len(p.history) > 100 {
 		p.history = append([]media.Track(nil), p.history[len(p.history)-100:]...)
 	}
-	event := PlaybackEvent{Track: copyTrack(track), Sequence: sequence, State: Playing}
+	event := PlaybackEvent{StartedAt: startedAt, Track: copyTrack(track), Sequence: sequence, State: Playing}
 	if len(p.queue) > 0 {
 		next := copyTrack(p.queue[0].Track)
 		event.Next = &next
@@ -221,5 +225,19 @@ func (p *GuildPlayer) announceFailure(t media.Track, err error, stage string, se
 	}
 	if fn != nil {
 		fn(PlaybackEvent{Track: copyTrack(t), SkippedReason: reason, FailureStage: stage, Sequence: sequence, State: Failed})
+	}
+}
+
+// IsCurrentPlayback suppresses queued announcements superseded by skip/stop.
+func (p *GuildPlayer) IsCurrentPlayback(sequence uint64) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.current != nil && p.sequence == sequence && p.startedSequence == sequence
+}
+
+// SetPlaybackTrack accepts final locator/display metadata before audio begins.
+func (v *startVoice) SetPlaybackTrack(t media.Track) {
+	if v.metadata != nil {
+		v.metadata(t)
 	}
 }

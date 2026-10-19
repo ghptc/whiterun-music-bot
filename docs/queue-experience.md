@@ -11,9 +11,11 @@ Pending tracks count as future positions. There is no manual pagination and no
 text-command interface; Unix flags are not accepted as slash options.
 
 The response stays public, available to guild members without joining voice.
-Registration replaces the previous queue option on the next normal command sync;
-restart the updated bot to register the new schema. Other commands retain their
-contracts and visibility.
+Registration inventories the selected scope, upserts changed Bard definitions and
+verifies all contracts by readback. It preserves command IDs and unrelated commands.
+Restart the bot or run `bard commands-sync` with the normal Discord environment.
+Failures are logged and fail startup/the CLI. See [CR-002 findings](queue-artwork-hotfix.md)
+for the real REST audit and the remaining client acceptance.
 
 ## Presentation and complete delivery
 

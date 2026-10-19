@@ -37,6 +37,10 @@ func nextAnnouncement(t *testing.T, r *recordingRest) sentMessage {
 	t.Helper()
 	select {
 	case m := <-r.messages:
+		if len(m.message.Embeds) > 0 {
+			embed := m.message.Embeds[0]
+			m.message.Content = strings.ReplaceAll(embed.Title, " · ", "\n") + "\n" + embed.Description
+		}
 		if m.message.Flags&d.MessageFlagEphemeral != 0 || m.message.AllowedMentions == nil || !strings.Contains(m.message.Content, "Now Playing") || !strings.Contains(m.message.Content, "Next:") {
 			t.Fatal(m)
 		}
