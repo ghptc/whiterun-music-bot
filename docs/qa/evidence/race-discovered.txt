@@ -1,0 +1,129 @@
+ok  	whiterun/cmd/bot	1.008s
+?   	whiterun/cmd/profile	[no test files]
+2026/10/19 20:24:33 WARN rate limit exceeded name=rest_rate_limiter endpoint=/webhooks/2/test/messages/@original retry_after=1
+2026/10/19 20:24:34 WARN rate limit exceeded name=rest_rate_limiter endpoint=/webhooks/2/test/messages/@original retry_after=60
+2026/10/19 20:24:36 WARN rate limit exceeded name=rest_rate_limiter endpoint=/interactions/10/test/callback retry_after=60
+==================
+WARNING: DATA RACE
+Write at 0x00c000548b50 by goroutine 777:
+  whiterun/internal/discord.(*recordingRest).UpdateInteractionResponse()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands_test.go:33 +0x98
+  whiterun/internal/discord.(*Bot).replyQueue.func2()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue.go:266 +0x345
+  whiterun/internal/discord.(*Bot).replyQueue()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue.go:276 +0xeaf
+  whiterun/internal/discord.(*Bot).replyQueue()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue.go:258 +0xc10
+  whiterun/internal/discord.(*Bot).commandAt()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands.go:142 +0x2324
+  context.WithDeadline()
+      /usr/lib/go/src/context/context.go:627 +0x997
+  whiterun/internal/discord.(*Bot).commandAt()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands.go:58 +0x90c
+  whiterun/internal/discord.(*Bot).command()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands.go:42 +0x44
+  whiterun/internal/discord.TestQueueDuringSpotifyImportAndSkip.func4()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue_reliability_test.go:150 +0x89
+
+Previous write at 0x00c000548b50 by goroutine 778:
+  whiterun/internal/discord.(*recordingRest).UpdateInteractionResponse()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands_test.go:33 +0x98
+  whiterun/internal/discord.(*Bot).replyQueue.func2()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue.go:266 +0x345
+  whiterun/internal/discord.(*Bot).replyQueue()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue.go:276 +0xeaf
+  whiterun/internal/discord.(*Bot).replyQueue()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue.go:258 +0xc10
+  whiterun/internal/discord.(*Bot).commandAt()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands.go:142 +0x2324
+  context.WithDeadline()
+      /usr/lib/go/src/context/context.go:627 +0x997
+  whiterun/internal/discord.(*Bot).commandAt()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands.go:58 +0x90c
+  whiterun/internal/discord.(*Bot).command()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands.go:42 +0x44
+  whiterun/internal/discord.TestQueueDuringSpotifyImportAndSkip.func5()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue_reliability_test.go:165 +0x89
+
+Goroutine 777 (running) created at:
+  whiterun/internal/discord.TestQueueDuringSpotifyImportAndSkip()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue_reliability_test.go:150 +0xd9c
+  testing.tRunner()
+      /usr/lib/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/go/src/testing/testing.go:2258 +0x38
+
+Goroutine 778 (running) created at:
+  whiterun/internal/discord.TestQueueDuringSpotifyImportAndSkip()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue_reliability_test.go:165 +0x125c
+  testing.tRunner()
+      /usr/lib/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/go/src/testing/testing.go:2258 +0x38
+==================
+==================
+WARNING: DATA RACE
+Write at 0x00c000548b78 by goroutine 777:
+  whiterun/internal/discord.(*recordingRest).UpdateInteractionResponse()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands_test.go:34 +0xe7
+  whiterun/internal/discord.(*Bot).replyQueue.func2()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue.go:266 +0x345
+  whiterun/internal/discord.(*Bot).replyQueue()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue.go:276 +0xeaf
+  whiterun/internal/discord.(*Bot).replyQueue()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue.go:258 +0xc10
+  whiterun/internal/discord.(*Bot).commandAt()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands.go:142 +0x2324
+  context.WithDeadline()
+      /usr/lib/go/src/context/context.go:627 +0x997
+  whiterun/internal/discord.(*Bot).commandAt()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands.go:58 +0x90c
+  whiterun/internal/discord.(*Bot).command()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands.go:42 +0x44
+  whiterun/internal/discord.TestQueueDuringSpotifyImportAndSkip.func4()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue_reliability_test.go:150 +0x89
+
+Previous write at 0x00c000548b78 by goroutine 778:
+  whiterun/internal/discord.(*recordingRest).UpdateInteractionResponse()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands_test.go:34 +0xe7
+  whiterun/internal/discord.(*Bot).replyQueue.func2()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue.go:266 +0x345
+  whiterun/internal/discord.(*Bot).replyQueue()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue.go:276 +0xeaf
+  whiterun/internal/discord.(*Bot).replyQueue()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue.go:258 +0xc10
+  whiterun/internal/discord.(*Bot).commandAt()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands.go:142 +0x2324
+  context.WithDeadline()
+      /usr/lib/go/src/context/context.go:627 +0x997
+  whiterun/internal/discord.(*Bot).commandAt()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands.go:58 +0x90c
+  whiterun/internal/discord.(*Bot).command()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/commands.go:42 +0x44
+  whiterun/internal/discord.TestQueueDuringSpotifyImportAndSkip.func5()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue_reliability_test.go:165 +0x89
+
+Goroutine 777 (running) created at:
+  whiterun/internal/discord.TestQueueDuringSpotifyImportAndSkip()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue_reliability_test.go:150 +0xd9c
+  testing.tRunner()
+      /usr/lib/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/go/src/testing/testing.go:2258 +0x38
+
+Goroutine 778 (running) created at:
+  whiterun/internal/discord.TestQueueDuringSpotifyImportAndSkip()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/queue_reliability_test.go:165 +0x125c
+  testing.tRunner()
+      /usr/lib/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/go/src/testing/testing.go:2258 +0x38
+==================
+--- FAIL: TestQueueDuringSpotifyImportAndSkip (0.00s)
+    testing.go:1865: race detected during execution of test
+FAIL
+FAIL	whiterun/internal/discord	7.435s
+ok  	whiterun/internal/media	2.490s
+ok  	whiterun/internal/player	23.706s
+ok  	whiterun/internal/storage	3.202s
+FAIL

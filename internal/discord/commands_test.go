@@ -7,6 +7,7 @@ import (
 	"io"
 	"log/slog"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 	"whiterun/internal/media"
@@ -22,6 +23,7 @@ import (
 )
 
 type recordingRest struct {
+	mu sync.Mutex
 	rest.Rest
 	response  string
 	followups []d.MessageCreate
@@ -30,17 +32,23 @@ type recordingRest struct {
 }
 
 func (r *recordingRest) UpdateInteractionResponse(_ snowflake.ID, _ string, m d.MessageUpdate, _ ...rest.RequestOpt) (*d.Message, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	r.response = updateText(m)
 	r.update = m
 	return &d.Message{}, nil
 }
 
 func (r *recordingRest) CreateFollowupMessage(_ snowflake.ID, _ string, m d.MessageCreate, _ ...rest.RequestOpt) (*d.Message, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	r.followups = append(r.followups, m)
 	return &d.Message{}, nil
 }
 
 func (r *recordingRest) queueText() string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	out := r.response
 	for _, m := range r.followups {
 		out += messageText(m)
