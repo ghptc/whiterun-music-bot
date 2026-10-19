@@ -3,7 +3,6 @@ package discord
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -86,30 +85,6 @@ func TestQueueAcknowledgementHTTPBudget(t *testing.T) {
 	}
 }
 
-func TestQueueBlockedRendererReleasesResources(t *testing.T) {
-	r := newQueueImageRenderer()
-	// Occupy both rendering slots to reproduce CPU admission starvation.
-	r.slots <- struct{}{}
-	r.slots <- struct{}{}
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
-	defer cancel()
-	view, _ := buildQueueView(queueFixture(10), nil)
-	if err := r.render(ctx, &view.Blocks[0]); !errors.Is(err, context.DeadlineExceeded) {
-		t.Fatal(err)
-	}
-	if len(r.slots) != 2 || len(view.Blocks[0].PNG) != 0 {
-		t.Fatal("slot leak or partial PNG published")
-	}
-	<-r.slots
-	<-r.slots
-	if err := r.render(context.Background(), &view.Blocks[0]); err != nil {
-		t.Fatal(err)
-	}
-	if len(r.slots) != 0 {
-		t.Fatal("render slot leaked")
-	}
-}
-
 // Three blocked Spotify workers and a running voice callback must not delay
 // acknowledgements, detached snapshots, skip or another guild's queue.
 func TestQueueDuringSpotifyImportAndSkip(t *testing.T) {
@@ -165,16 +140,6 @@ func TestQueueDuringSpotifyImportAndSkip(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("audio did not start")
 	}
-	// Hold image admission after ack, then exercise player and the other guild.
-	queueImages.slots <- struct{}{}
-	queueImages.slots <- struct{}{}
-	released := false
-	defer func() {
-		if !released {
-			<-queueImages.slots
-			<-queueImages.slots
-		}
-	}()
 	acked := make(chan struct{})
 	e := interaction(t, "queue", true)
 	e.Respond = func(d.InteractionResponseType, d.InteractionResponseData, ...rest.RequestOpt) error {
@@ -203,13 +168,10 @@ func TestQueueDuringSpotifyImportAndSkip(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("other guild starved")
 	}
-	<-queueImages.slots
-	<-queueImages.slots
-	released = true
 	select {
 	case <-done:
 	case <-time.After(3 * time.Second):
-		t.Fatal("render did not resume")
+		t.Fatal("queue delivery did not finish")
 	}
 	if recorder.response == "" {
 		t.Fatal("queue response missing")
@@ -224,33 +186,5 @@ func TestQueueDuringSpotifyImportAndSkip(t *testing.T) {
 	defer g.queueMu.Unlock()
 	if len(g.queueDeliveries) != 0 {
 		t.Fatal("delivery resources leaked")
-	}
-}
-
-func TestQueueArtworkWarmCancellationReleasesSlot(t *testing.T) {
-	r := newQueueImageRenderer()
-	entered := make(chan struct{}, 2)
-	r.client = &http.Client{Transport: queueTransport(func(req *http.Request) (*http.Response, error) {
-		entered <- struct{}{}
-		<-req.Context().Done()
-		return nil, req.Context().Err()
-	})}
-	ctx, cancel := context.WithCancel(context.Background())
-	rows := []queueRow{{Track: media.Track{SpotifyArtworkURL: "https://i.scdn.co/slow"}}}
-	r.warm(ctx, rows)
-	select {
-	case <-entered:
-	case <-time.After(time.Second):
-		cancel()
-		t.Fatal("warm did not start")
-	}
-	cancel()
-	deadline := time.After(time.Second)
-	for len(r.warmSlots) != 0 {
-		select {
-		case <-deadline:
-			t.Fatal("artwork resource leaked")
-		case <-time.After(time.Millisecond):
-		}
 	}
 }

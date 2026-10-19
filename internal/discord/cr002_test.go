@@ -91,8 +91,8 @@ func TestNowPlayingComponentsArtworkAndNativeLimits(t *testing.T) {
 	}{
 		{"spotify", media.Track{SpotifyArtworkURL: "https://i.scdn.co/image/a", YouTubeThumbnailURL: "https://i.ytimg.com/a"}, "https://i.scdn.co/image/a"},
 		{"youtube", media.Track{VideoID: "abcdefghijk"}, "https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg"},
-		{"invalid", media.Track{SpotifyArtworkURL: "javascript:bad"}, fallbackArtwork},
-		{"missing", media.Track{}, fallbackArtwork},
+		{"invalid", media.Track{SpotifyArtworkURL: "javascript:bad"}, ""},
+		{"missing", media.Track{}, ""},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.track.Title = strings.Repeat("🎵", 400)
@@ -104,9 +104,15 @@ func TestNowPlayingComponentsArtworkAndNativeLimits(t *testing.T) {
 			}
 			container := message.Components[0].(d.ContainerComponent)
 			assertV2Budget(t, container)
-			row := container.Components[2].(d.SectionComponent)
-			if row.Accessory.(d.ThumbnailComponent).Media.URL != tc.art {
-				t.Fatal("wrong artwork")
+			if tc.art == "" {
+				if _, ok := container.Components[2].(d.TextDisplayComponent); !ok {
+					t.Fatal("missing art must use text")
+				}
+			} else {
+				row := container.Components[2].(d.SectionComponent)
+				if row.Accessory.(d.ThumbnailComponent).Media.URL != tc.art {
+					t.Fatal("wrong artwork")
+				}
 			}
 			text := messageText(message)
 			for _, part := range []string{"Artist", "07:55", "Up next: Next track"} {

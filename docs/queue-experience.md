@@ -1,85 +1,70 @@
-# Queue experience — CR-006.1
+# Native queue experience — CR-006.3
 
-`/queue` shows current and all upcoming logical positions from one detached
-`player.State()` snapshot. `/queue limit:N` limits upcoming songs only; current
-appears once before position 1. Pending entries retain their position and stored
-metadata. No music search, resolver or catalog read runs during rendering.
-Spotify Fidelity and Force Play behavior are unchanged.
+`/queue` displays current and all upcoming logical positions from one detached
+player snapshot. `/queue limit:N` limits upcoming positions only. Current appears
+once before position 1; pending entries keep their order and stored metadata.
+Spotify Fidelity, Force Play and SQLite persistence are unchanged.
 
-## Discord investigation
+## Native layout and artwork
+
+Each message contains one Container with a heading, subtle separator, song rows
+and a range/count footer. A row uses Section + Text Display + Thumbnail when
+artwork is available; otherwise it uses Text Display alone. Position, title and
+artist are text, with channel as artist fallback. Now Playing and announcements
+use the same minimal native song presentation.
+
+Artwork selection uses the persisted Spotify URL first, then the persisted
+YouTube thumbnail, then a thumbnail derived from a valid YouTube video ID.
+Invalid URLs fall through to the next source. No placeholder, image download,
+image cache, compositing, PNG encoding, HTML or TXT export runs during rendering.
+SQLite catalog and queue artwork recovery across restart remain covered by the
+storage tests. Discord loads artwork directly from its URL.
+
+## Discord limits
 
 The [official component reference](https://docs.discord.com/developers/components/reference)
-was checked before implementation. Section exposes text plus an accessory, with
-no accessory-side field. Thumbnail is only a Section accessory. Container exposes
-components, accent color and spoiler options, with no width field. Action Row
-holds interactive components, not arbitrary image/text columns. Separators can
-adjust their own spacing but do not set song-row height or alignment. Consequently,
-native Components V2 cannot guarantee left artwork, controlled width, compact
-fixed-height horizontal rows or Spotify-like column alignment.
+limits messages to 40 total components. A full block uses exactly 40: Container,
+heading, separator, footer and twelve rows of three components each. Text labels
+are escaped, mentions disabled, and titles/artists clipped to 100/80 UTF-16 units;
+including footer delivery notices, each message stays below 4000 text units.
+The same twelve-row bound also applies to rows without artwork. Tests validate
+actual serialized component trees, including nested accessories.
 
-The implementation draws PNG directly in Go using `image`, `image/png` and
-`golang.org/x/image`. Each block is a single dark music list, with position,
-48-pixel cover, title and artist at fixed coordinates. There are no individual
-song cards or borders. Each PNG is exposed through a Components V2 Media Gallery
-using `attachment://queue.png`; no HTML, TXT, CSS or headless browser is involved.
-Image alternative text includes clipped song titles and artists.
+Thumbnail is a Section accessory. There is no field selecting its side; Discord
+places it on the right. The API provides no fixed container width, row height,
+CSS, or precise music-column alignment. Discord controls fonts and layout across
+clients. A valid URL does not guarantee a reachable CDN image: the bot cannot
+observe client loading failure or automatically swap a broken Spotify image for
+YouTube after delivery. Fallback applies to absent/invalid metadata. Snapshots
+remain static as playback advances.
 
-## Bounds and performance
+## Delivery and responsiveness
 
-- 12 rows per PNG, 960 pixels wide, at most 856 pixels high (64 pixels per row).
-- One PNG attachment per message, capped at 4 MiB; no 500-song bitmap.
-- At most two image renders run concurrently across the process. Each render
-  handles a block at a time; delivery retains the first PNG for status edits and
-  releases subsequent PNG buffers after sending. Waiting renders honor cancellation.
-- Artwork fetches use stored Spotify artwork first, then stored YouTube thumbnail
-  or the existing video ID thumbnail, then a local placeholder. No track lookup.
-- Only HTTPS provider hosts `i.scdn.co`, `i.ytimg.com`, `img.youtube.com` are fetched;
-  redirects are refused. Custom artwork hosts get the local placeholder.
-- HTTP timeout: 800 ms per request; total artwork budget: 2 seconds per block.
-  Once exhausted, cached artwork still works and misses use the placeholder.
-- Artwork bodies are capped at 2 MiB and decoded images at 4 million pixels,
-  checked before full decode. Cropped covers are cached at 48×48 only.
-- Shared mutex-protected cache holds at most 256 entries (about 2.25 MiB of cover
-  pixels), with one-hour positive and five-minute negative TTLs. Eviction is
-  bounded, not LRU; simultaneous misses may fetch twice. There is no disk cache.
-- Pixel working sets are bounded by two concurrent blocks and two source images,
-  independent of queue length. HTTP buffers and PNG output also have explicit
-  caps. Snapshot and lightweight block-plan memory scale with queue length.
+The interaction is publicly deferred before the detached snapshot is taken.
+Component construction performs no provider/network I/O. Sequential REST sends
+hold no player lock, respect disgo rate limiting, use twenty-second request
+budgets and a twelve-minute delivery deadline. Replacement requests cancel old
+deliveries in the same guild/channel; other guilds/channels remain independent.
+Only confirmed positions count as delivered. A failed send stops further blocks
+and attempts a notice on the first block; failed notices are logged.
 
-The interaction is publicly deferred before taking the snapshot. Rendering and
-REST waits hold no player lock. Messages are sent sequentially through DisGo's
-REST limiter, with 20-second request budgets and a 12-minute delivery deadline.
-A newer request cancels an older delivery in the same guild/channel. Different
-channels/guilds remain independent. Rendering or sending failures stop further
-blocks; a best-effort edit reports confirmed positions without discarding the
-first image. Failure to send that edit is logged.
-
-An empty queue uses a short native text component without an attachment. A render
-failure before the first send produces a short retry message. No export fallback
-or silent song truncation is used. Server installation is required for more than
-five followups; a personal-only installation receives an explanation instead.
-123 songs need 11 messages; 500 need 42. The current song shares the first block.
-
-## Visual limitations
-
-Discord controls display width and scales images on smaller clients; the API
-cannot force a wide desktop container. Open the image to inspect full resolution.
-Text is not selectable or individually linked. Titles/artists use single-line
-pixel clipping with an ellipsis; full metadata remains in the queue. The embedded
-Go font supports Latin, Greek and Cyrillic but lacks many CJK and emoji glyphs;
-unsupported characters render the font's missing-glyph symbol. There is no system
-font or network font dependency. A placeholder may persist for five minutes after
-an artwork error. Snapshots do not update as playback advances.
+There is no implicit queue limit: 10 upcoming songs use one message, 123 use 11,
+and 500 use 42. Current shares the first block and can require another block at
+an exact multiple of twelve. The [interaction API](https://docs.discord.com/developers/interactions/receiving-and-responding)
+limits personal-only installations to five followups; oversized requests receive
+an explicit explanation, not a truncated list. Server installations can deliver
+larger queues, subject to API deadlines and rate limits.
 
 ## Verification
 
-Tests cover empty/1/10/123/500-song queues, limits/current/pending positions,
-Unicode and long text, decoded PNG dimensions, cover placement/order, positive
-and negative cache behavior, expiration/eviction, invalid and oversized images,
-provider fallback, canceled/invalid renders, output-byte cap, concurrent rendering,
-playback responsiveness, partial Discord delivery, personal-install limits and
-multipart retries after rate limits. Run `go test ./...`, `go test -race ./...`,
-`go vet ./...` and `docker build -t whiterun-music-bot:cr-006.1 .`.
+Tests cover 10/123/500 positions, limit/current/pending behavior, actual native
+artwork URLs and YouTube fallback, missing artwork without placeholders, component
+and text budgets, order without duplicates, detached snapshots, guild isolation,
+SQLite restart recovery, playback responsiveness, send failures and HTTP 429
+retries using JSON payloads. Raster-only tests were removed with the renderer.
+Run `go test ./...`, `go test -race ./...`, `go vet ./...` and
+`docker build -t whiterun-music-bot:cr-006.3 .`.
 
-Older layout investigations in `bard-ui-v2.md` and `queue-artwork-hotfix.md` describe
-the preceding native-thumbnail layout; this document supersedes that presentation.
+Live Discord client appearance and CDN availability require manual verification;
+o live Discord/voice session is claimed by the automated tests. This document
+supersedes the presentation in CR-006.1 and older queue layout investigations.

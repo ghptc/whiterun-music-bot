@@ -1,3 +1,6 @@
+> Historical investigation. CR-006.3 supersedes its presentation and export
+> behavior: see [native queue](queue-experience.md). No HTML/TXT exports remain.
+
 # CR-002: audit before corrections
 
 > Historical CR-002 audit. Its inline embeds, HTML/TXT exports and presentation measurements were superseded by [CR-006 UI V2](bard-ui-v2.md). Cache/fidelity investigation results remain relevant.

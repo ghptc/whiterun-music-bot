@@ -1,7 +1,6 @@
 package discord
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"strings"
@@ -16,14 +15,17 @@ import (
 	"whiterun/internal/player"
 )
 
-// Twelve fixed-height rows keep each PNG small and readable.
+// Container + heading + separator + footer + 12 × (section, text, thumbnail) = 40.
 const queueBlockSize = 12
-const fallbackArtwork = "https://cdn.discordapp.com/embed/avatars/1.png"
+
+type queueRow struct {
+	Track    media.Track
+	Position int
+}
 
 type queueBlock struct {
 	Container   d.ContainerComponent
 	Rows        []queueRow
-	PNG         []byte
 	First, Last int // upcoming positions; current never consumes a position
 }
 type queueView struct {
@@ -76,7 +78,7 @@ func musicLabel(s string, budget int) string {
 	s = musicEscaper.Replace(s)
 	return queueClip(s, budget)
 }
-func songSection(t media.Track, prefix, detail string) d.SectionComponent {
+func songSection(t media.Track, prefix, detail string) d.ContainerSubComponent {
 	name := musicLabel(t.Title, 100)
 	if name == "" {
 		name = "Untitled"
@@ -96,14 +98,12 @@ func songSection(t media.Track, prefix, detail string) d.SectionComponent {
 	art := media.ArtworkURL(t)
 	description := "Artwork · " + name
 	if art == "" {
-		art = fallbackArtwork
-		description = "No artwork available"
+		return d.TextDisplayComponent{Content: text}
 	}
 	return d.SectionComponent{Components: []d.SectionSubComponent{d.TextDisplayComponent{Content: text}}, Accessory: d.ThumbnailComponent{Media: d.UnfurledMediaItem{URL: art}, Description: description}}
 }
 
-// Build a lightweight plan from one detached player snapshot. Rendering and
-// artwork I/O happen later, one block at a time, without player locks.
+// Build native components from one detached snapshot, without artwork I/O.
 func buildQueueView(state player.State, limit *int) (queueView, error) {
 	if limit != nil && *limit < 1 {
 		return queueView{}, fmt.Errorf("Queue limit must be at least 1.")
@@ -137,9 +137,23 @@ func buildQueueView(state player.State, limit *int) (queueView, error) {
 		if block.First == 0 && end-offset > 1 {
 			block.First = 1
 		}
-		block.Container = musicContainer("THE BARD · QUEUE", d.TextDisplayComponent{Content: fmt.Sprintf("%s · %d of %d songs up next", block.rangeLabel(), shown, len(entries))})
+		body := make([]d.ContainerSubComponent, 0, len(block.Rows)+1)
+		count := 4 // container, heading, separator, footer
+		for _, row := range block.Rows {
+			prefix := fmt.Sprintf("%d. ", row.Position)
+			if row.Position == 0 {
+				prefix = "Now playing · "
+			}
+			body = append(body, songSection(row.Track, prefix, ""))
+			count++
+			if media.ArtworkURL(row.Track) != "" {
+				count += 2
+			}
+		}
+		body = append(body, d.TextDisplayComponent{Content: fmt.Sprintf("-# %s · %d of %d songs up next", block.rangeLabel(), shown, len(entries))})
+		block.Container = musicContainer("THE BARD · QUEUE", body...)
 		view.Blocks = append(view.Blocks, block)
-		view.Components += 3
+		view.Components += count
 	}
 	return view, nil
 }
@@ -163,12 +177,7 @@ func (block queueBlock) update(note string) d.MessageUpdate {
 			container.Components[i] = footer
 		}
 	}
-	update := componentUpdate(container)
-	if len(block.PNG) > 0 {
-		update.Files = []*d.File{d.NewFile("queue.png", "Music queue", bytes.NewReader(block.PNG))}
-		update.Attachments = &[]d.AttachmentUpdate{}
-	}
-	return update
+	return componentUpdate(container)
 }
 
 type queueDelivery struct {
@@ -223,23 +232,6 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 		}
 	}
 	defer finish()
-	render := func(block *queueBlock) error {
-		queueImages.warm(ctx, block.Rows)
-		renderStarted := time.Now()
-		bounded, cancel := context.WithTimeout(ctx, 5*time.Second)
-		defer cancel()
-		err := queueImages.render(bounded, block)
-		b.log.Info("queue_png", "interaction_id", e.ID(), "elapsed_us", time.Since(renderStarted).Microseconds(), "error", err)
-		return err
-	}
-	var renderErr error
-	if len(view.Blocks[0].Rows) > 0 {
-		if err := render(&view.Blocks[0]); err != nil {
-			renderErr = err
-			b.log.Warn("queue_render_failed", "error", err)
-			view.Blocks = []queueBlock{{Container: musicContainer("THE BARD · QUEUE", d.TextDisplayComponent{Content: "Could not draw the queue. Try /queue again."})}}
-		}
-	}
 	sendUpdate := func(update d.MessageUpdate, parent context.Context) error {
 		bounded, cancel := context.WithTimeout(parent, 20*time.Second)
 		defer cancel()
@@ -264,13 +256,9 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 			err = ctx.Err()
 			break
 		}
-		if err = render(&view.Blocks[i]); err != nil {
-			break
-		}
 		bounded, cancel := context.WithTimeout(ctx, 20*time.Second)
 		message := d.NewMessageCreateV2(view.Blocks[i].Container)
 		message.AllowedMentions = &d.AllowedMentions{}
-		message.Files = []*d.File{d.NewFile("queue.png", "Music queue", bytes.NewReader(view.Blocks[i].PNG))}
 		sendStarted := time.Now()
 		_, err = b.client.Rest.CreateFollowupMessage(b.client.ApplicationID, e.Token(), message, rest.WithCtx(bounded))
 		cancel()
@@ -278,7 +266,6 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 		if err == nil {
 			sent++
 			delivered = view.Blocks[i].Last
-			view.Blocks[i].PNG = nil
 		}
 	}
 	if err != nil {
@@ -300,7 +287,7 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 			b.log.Warn("queue_completion_notice_failed", "error", failure)
 		}
 	}
-	b.log.Info("queue_delivery_complete", "interaction_id", e.ID(), "elapsed_ms", time.Since(started).Milliseconds(), "messages_sent", sent, "positions_sent", delivered, "success", err == nil && renderErr == nil, "error", err, "render_error", renderErr)
+	b.log.Info("queue_delivery_complete", "interaction_id", e.ID(), "elapsed_ms", time.Since(started).Milliseconds(), "messages_sent", sent, "positions_sent", delivered, "success", err == nil, "error", err)
 }
 
 func (block queueBlock) rangeLabel() string {

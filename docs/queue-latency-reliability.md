@@ -1,3 +1,8 @@
+> CR-006.3 update: PNG rendering, render slots, image downloads/warming and the
+> `queue_png` metric described below were removed. Queue delivery now builds native
+> components without artwork I/O. See [current behavior](queue-experience.md).
+> The acknowledgement budgets, delivery deadlines and isolation remain in effect.
+
 # Queue latency and interaction reliability
 
 CR-006.2 separates the Discord acknowledgement deadline from queue delivery. The reported production interval, 22:11:20.338 to 22:11:22.339, matches the former two-second local acknowledgement timeout. Snapshot, PNG rendering and artwork downloads occurred after acknowledgement in the original code; they cannot directly explain that failed acknowledgement. Shared CPU/network pressure remains possible and requires production measurements.

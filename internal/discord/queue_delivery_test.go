@@ -8,7 +8,6 @@ import (
 	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/snowflake/v2"
 	"io"
-	"mime/multipart"
 	"net/http"
 	"strings"
 	"testing"
@@ -49,7 +48,7 @@ func TestQueuePartialDeliveryPreservesFirstCardAndReportsProgress(t *testing.T) 
 			}
 			failure := sender.updates[1]
 			text := updateText(failure)
-			if !strings.Contains(text, fmt.Sprintf("Delivery incomplete · %d/500", failAt*12)) || !strings.Contains(text, "Song 0001") || len(failure.Files) != 1 || failure.Embeds != nil {
+			if !strings.Contains(text, fmt.Sprintf("Delivery incomplete · %d/500", failAt*12)) || !strings.Contains(text, "Song 0001") || len(failure.Files) != 0 || failure.Embeds != nil {
 				t.Fatal(text)
 			}
 		})
@@ -64,19 +63,19 @@ func TestQueueCompleteDeliveryUsesOneContainerPerBlock(t *testing.T) {
 			if len(r.followups) != want-1 {
 				t.Fatal(len(r.followups), want)
 			}
-			if len(r.update.Files) != 1 {
-				t.Fatal("missing first PNG")
+			if len(r.update.Files) != 0 {
+				t.Fatal("unexpected attachment")
 			}
 
 			text := r.queueText()
 			for i := 1; i <= n; i++ {
-				if strings.Count(text, fmt.Sprintf("%d. Song %04d ·", i, i)) != 1 {
+				if strings.Count(text, fmt.Sprintf("**%d. Song %04d**", i, i)) != 1 {
 					t.Fatal("omitted/duplicated position", i)
 				}
 			}
 
 			for _, message := range r.followups {
-				if len(message.Components) != 1 || len(message.Embeds) > 0 || len(message.Files) != 1 || message.Content != "" || message.Flags&d.MessageFlagIsComponentsV2 == 0 || message.Flags&d.MessageFlagEphemeral != 0 || message.AllowedMentions == nil {
+				if len(message.Components) != 1 || len(message.Embeds) > 0 || len(message.Files) != 0 || message.Content != "" || message.Flags&d.MessageFlagIsComponentsV2 == 0 || message.Flags&d.MessageFlagEphemeral != 0 || message.AllowedMentions == nil {
 					t.Fatal(message)
 				}
 				assertV2Budget(t, message.Components[0].(d.ContainerComponent))
@@ -94,11 +93,7 @@ func TestQueueRateLimitRetriesSameJSONBlock(t *testing.T) {
 		if _, ok := req.Context().Deadline(); !ok {
 			t.Fatal("unbounded REST call")
 		}
-		var raw []byte
-		reader, err := multipart.NewReader(req.Body, strings.TrimPrefix(req.Header.Get("Content-Type"), "multipart/form-data; boundary=")).NextPart()
-		if err == nil {
-			raw, err = io.ReadAll(reader)
-		}
+		raw, err := io.ReadAll(req.Body)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -237,5 +232,34 @@ func BenchmarkQueueV2(b *testing.B) {
 				b.ReportMetric(float64(view.Missing), "missing-artworks")
 			}
 		})
+	}
+}
+
+type queueUpdateFailureRest struct {
+	rest.Rest
+	updates, followups int
+}
+
+func (r *queueUpdateFailureRest) UpdateInteractionResponse(_ snowflake.ID, _ string, _ d.MessageUpdate, _ ...rest.RequestOpt) (*d.Message, error) {
+	r.updates++
+	return nil, fmt.Errorf("controlled update failure")
+}
+func (r *queueUpdateFailureRest) CreateFollowupMessage(_ snowflake.ID, _ string, _ d.MessageCreate, _ ...rest.RequestOpt) (*d.Message, error) {
+	r.followups++
+	return &d.Message{}, nil
+}
+func TestQueueInitialSendAndNoticeFailureStopDelivery(t *testing.T) {
+	b, recorder := testBot(t)
+	sender := &queueUpdateFailureRest{Rest: recorder}
+	b.client.Rest = sender
+	b.replyQueue(interaction(t, "queue", true), queueFixture(500), nil)
+	if sender.updates != 2 || sender.followups != 0 {
+		t.Fatal("continued after failed initial send", sender.updates, sender.followups)
+	}
+	g := b.getGuild(1)
+	g.queueMu.Lock()
+	defer g.queueMu.Unlock()
+	if len(g.queueDeliveries) != 0 {
+		t.Fatal("failed delivery leaked")
 	}
 }

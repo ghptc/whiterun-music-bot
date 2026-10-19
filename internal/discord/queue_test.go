@@ -219,7 +219,7 @@ func TestQueueLimitValidationAndGuildIsolation(t *testing.T) {
 		}
 	}
 	b.command(interaction(t, "queue", true))
-	if len(r.update.Files) != 1 {
+	if len(r.update.Files) != 0 || !strings.Contains(r.response, "Guild 1") || strings.Contains(r.response, "Guild 2") {
 		t.Fatal(r.response)
 	}
 }
