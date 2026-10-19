@@ -27,13 +27,13 @@ Prerequisites: Docker Engine running with Docker Compose, a Discord server where
 | `DISCORD_GUILD_ID` | Optional server ID for fast, server-scoped command registration |
 | `YTDLP_VERSION` | Optional Docker build override; defaults to `2026.08.19` |
 
-Enable Discord Developer Mode to copy a server ID. With no guild ID, commands register globally and may take time to appear. Startup replaces the application's commands in the selected scope with the ten commands. Use a dedicated application; changing scope does not remove commands previously registered in another scope.
+Enable Discord Developer Mode to copy a server ID. With no guild ID, commands register globally and may take time to appear. Startup synchronizes the Bard's 22 commands in the selected scope. Use a dedicated application; changing scope does not remove commands previously registered in another scope.
 
 Logs: `docker compose logs -f bard`. Shut down: `docker compose down`. To update yt-dlp, change its version in `.env` and rebuild. Rebuild the image rather than updating a running container.
 
 ## Commands
 
-Join a regular voice channel first. Commands that change playback require you to be in the Bard's channel; `/queue` and `/now` can be used by anyone in the server. Playback control responses are visible only to the invoker; `/play` and `/queue` responses are public.
+Join a regular voice channel first. Commands that change playback require you to be in the Bard's channel; `/queue`, `/now`, `/history`, `/lyrics`, and `/help` can be used by anyone in the server. Playback control responses are visible only to the invoker; `/play` and `/queue` responses are public.
 
 | Command | Behavior |
 | --- | --- |
@@ -47,9 +47,23 @@ Join a regular voice channel first. Commands that change playback require you to
 | `/now` | Show only the current track, pause state, duration, album when available, and source/channel |
 | `/pause` | Hold the current track and keep the queue intact |
 | `/resume` | Continue paused audio, or release a consecutive-failure halt |
-| `/clear` | Clear upcoming tracks without interrupting playback or cancelling pending searches |
+| `/clear` | Clear upcoming tracks and cancel their searches without interrupting the current song; disable loop |
+| `/previous` | Replay the previous song; return the interrupted song to the queue |
+| `/remove position:N` | Remove a future position, including unresolved collection entries |
+| `/move from:N to:N` | Move a future position with its metadata intact |
+| `/shuffle` | Shuffle future positions only |
+| `/jump position:N` | Skip directly to a future position |
+| `/replay` | Restart the current song after stream teardown |
+| `/loop mode:off/track/queue` | Repeat successful tracks; skip bypasses repeat |
+| `/seek position:MM:SS` | Validate a timestamp and explicitly report unavailable seeking; playback stays unchanged |
+| `/autoplay enabled:true/false` | Persist guild preference; recommendations unavailable without a supported provider |
+| `/lyrics` | Report unavailable lyrics until a licensed provider is integrated |
+| `/history [limit]` | Read guild playback events from SQLite; default 10, maximum 20 |
+| `/help` | Show one static, ephemeral repertoire embed |
 | `/stop` | Stop playback, cancel searches, clear the queue, remain in voice |
 | `/leave` | Stop, cancel searches, clear the queue, and disconnect |
+
+See [CR-005 behavior, limitations, and verification](docs/bard-command-expansion.md) for position and loop semantics. Autoplay and lyrics are **not operational providers** in this release; seek is explicitly unavailable.
 
 `/queue` selects the full queue. `/queue limit:10` and `/queue limit:50` select only the next 10 or 50 future tracks; the current track is always separate. Zero and negative limits are rejected. One consistent snapshot produces up to ten artwork cards in Discord plus complete `queue.txt` and `queue.html` attachments. Download and open the HTML file for the full artwork gallery; the text file keeps every selected position accessible. Spotify album covers take priority over YouTube thumbnails, including pending tracks. There is no manual pagination. Rendering does not fetch images or resolve music. Attachment budgets and send failures are reported explicitly; see [queue experience and limits](docs/queue-experience.md).
 
