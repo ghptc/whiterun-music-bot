@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestArtworkPriorityAndInvalidURLs(t *testing.T) {
@@ -121,5 +123,72 @@ func TestSpotifyPlaylistEmbedIndividualArtwork(t *testing.T) {
 		if tr.SpotifyArtworkURL != fmt.Sprintf("https://i.scdn.co/image/cover-%d", i) {
 			t.Fatal("lost individual cover", i, tr)
 		}
+	}
+}
+
+type artworkCacheFixture struct {
+	brokenMappings
+	cached   Track
+	hit      bool
+	err      error
+	loads    int
+	deadline time.Time
+}
+
+func (s *artworkCacheFixture) LoadCatalog(ctx context.Context, _ string) (Track, bool, error) {
+	deadline, ok := ctx.Deadline()
+	if !ok {
+		return Track{}, false, fmt.Errorf("missing deadline")
+	}
+	if !s.deadline.IsZero() && !s.deadline.Equal(deadline) {
+		return Track{}, false, fmt.Errorf("lookup budget reset per track")
+	}
+	s.deadline = deadline
+	s.loads++
+	return s.cached, s.hit, s.err
+}
+func (*artworkCacheFixture) SaveCatalog(context.Context, Track) error { return nil }
+func TestCatalogArtworkRecoveryValidatesIdentityAndPreservesMetadata(t *testing.T) {
+	for _, mode := range []string{"hit", "miss", "error", "wrong ID", "wrong source", "invalid URL", "existing cover", "direct youtube"} {
+		t.Run(mode, func(t *testing.T) {
+			source := Track{SpotifyID: "same-id", RequestedSource: "spotify", Title: "Song", Artist: "Artist", VideoID: "abcdefghijk", YouTubeThumbnailURL: "https://i.ytimg.com/selected", RequestedBy: "traveler"}
+			store := &artworkCacheFixture{cached: Track{SpotifyID: source.SpotifyID, RequestedSource: "spotify", SpotifyArtworkURL: "https://i.scdn.co/image/cached"}, hit: true}
+			expected := source
+			switch mode {
+			case "hit":
+				expected.SpotifyArtworkURL = store.cached.SpotifyArtworkURL
+			case "miss":
+				store.hit = false
+			case "error":
+				store.err = fmt.Errorf("SQLite unavailable")
+			case "wrong ID":
+				store.cached.SpotifyID = "other-id"
+			case "wrong source":
+				store.cached.RequestedSource = "youtube"
+			case "invalid URL":
+				store.cached.SpotifyArtworkURL = "file:///bad"
+			case "existing cover":
+				source.SpotifyArtworkURL = "https://i.scdn.co/image/original"
+				expected = source
+			case "direct youtube":
+				source.RequestedSource = "youtube"
+				source.SpotifyID = ""
+				expected = source
+			}
+			tracks := []Track{source, source}
+			resolver := CollectionResolver{YouTube: Resolver{Mappings: store}}
+			resolver.restoreCatalogArtwork(context.Background(), tracks)
+			for _, got := range tracks {
+				if !reflect.DeepEqual(got, expected) {
+					t.Fatal(mode, got, expected)
+				}
+			}
+			if (mode == "existing cover" || mode == "direct youtube") && store.loads != 0 {
+				t.Fatal("unnecessary catalog read")
+			}
+			if !store.deadline.IsZero() && time.Until(store.deadline) > 200*time.Millisecond {
+				t.Fatal("unbounded artwork lookup")
+			}
+		})
 	}
 }

@@ -19,7 +19,10 @@ func (s *DB) SaveCatalog(ctx context.Context, t media.Track) error {
 	if err != nil {
 		return err
 	}
-	_, err = s.db.ExecContext(ctx, `INSERT INTO music_catalog(spotify_id,metadata,updated_at) VALUES(?,?,?) ON CONFLICT(spotify_id) DO UPDATE SET metadata=excluded.metadata,updated_at=excluded.updated_at`, t.SpotifyID, string(raw), time.Now().Unix())
+	_, err = s.db.ExecContext(ctx, `INSERT INTO music_catalog(spotify_id,metadata,updated_at) VALUES(?,?,?) ON CONFLICT(spotify_id) DO UPDATE SET metadata=CASE
+ WHEN coalesce(json_extract(excluded.metadata,'$.SpotifyArtworkURL'),'')='' THEN
+ json_set(excluded.metadata,'$.SpotifyArtworkURL',coalesce(json_extract(music_catalog.metadata,'$.SpotifyArtworkURL'),''))
+ ELSE excluded.metadata END,updated_at=excluded.updated_at`, t.SpotifyID, string(raw), time.Now().Unix())
 	return err
 }
 func (s *DB) LoadCatalog(ctx context.Context, id string) (media.Track, bool, error) {

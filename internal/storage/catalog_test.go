@@ -178,3 +178,47 @@ func TestOldStreamFailureCannotDeleteReplacementMapping(t *testing.T) {
 		t.Fatal(ok, err)
 	}
 }
+
+func TestMissingProviderCoverReusesExactSpotifyCatalogIdentity(t *testing.T) {
+	db := openTest(t)
+	ctx := context.Background()
+	original := catalogTrack()
+	if err := db.SaveCatalog(ctx, original); err != nil {
+		t.Fatal(err)
+	}
+	provider := &artworkCollectionProvider{tracks: []media.Track{
+		{SpotifyID: original.SpotifyID, RequestedSource: "spotify", Title: "Different display title", YouTubeThumbnailURL: "https://i.ytimg.com/new-video"},
+		{SpotifyID: "unrelated", RequestedSource: "spotify", Title: original.Title},
+		{VideoID: "abcdefghijk", RequestedSource: "youtube", Title: original.Title},
+	}}
+	resolver := media.CollectionResolver{Spotify: provider, YouTube: media.Resolver{Mappings: db}}
+	collection, progressive, err := resolver.Prepare(ctx, "https://open.spotify.com/playlist/1234567890123456789012")
+	if err != nil || !progressive || len(collection.Tracks) != 3 {
+		t.Fatal(collection, err)
+	}
+	if collection.Tracks[0].SpotifyArtworkURL != original.SpotifyArtworkURL || collection.Tracks[0].YouTubeThumbnailURL != provider.tracks[0].YouTubeThumbnailURL {
+		t.Fatal(collection.Tracks[0])
+	}
+	for _, track := range collection.Tracks[1:] {
+		if track.SpotifyArtworkURL != "" {
+			t.Fatal("title similarity assigned wrong cover", track)
+		}
+	}
+	// A refresh without cover data must not erase valid persisted album art.
+	stripped := original
+	stripped.SpotifyArtworkURL = ""
+	stripped.YouTubeThumbnailURL = "https://i.ytimg.com/selected"
+	if err := db.SaveCatalog(ctx, stripped); err != nil {
+		t.Fatal(err)
+	}
+	got, hit, err := db.LoadCatalog(ctx, original.SpotifyID)
+	if err != nil || !hit || got.SpotifyArtworkURL != original.SpotifyArtworkURL || got.YouTubeThumbnailURL != stripped.YouTubeThumbnailURL {
+		t.Fatal(got, hit, err)
+	}
+}
+
+type artworkCollectionProvider struct{ tracks []media.Track }
+
+func (p *artworkCollectionProvider) Collection(context.Context, string, string) (media.Collection, error) {
+	return media.Collection{Tracks: append([]media.Track(nil), p.tracks...)}, nil
+}

@@ -97,6 +97,7 @@ func (r CollectionResolver) spotifyMetadata(ctx context.Context, kind, id string
 	if len(c.Tracks) > MaxCollectionTracks {
 		return Collection{}, ErrCollectionTooLarge
 	}
+	r.restoreCatalogArtwork(ctx, c.Tracks)
 	for i := range c.Tracks {
 		r.saveCatalog(ctx, c.Tracks[i])
 		if c.Tracks[i].Position == 0 {
