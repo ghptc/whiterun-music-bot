@@ -27,7 +27,7 @@ func TestQueueNativeIndividualArtwork(t *testing.T) {
 	}
 	container := view.Blocks[0].Container
 	for i, track := range tracks {
-		row := container.Components[i+2]
+		row := container.Components[i+1]
 		if media.ArtworkURL(track) == "" {
 			if _, ok := row.(d.TextDisplayComponent); !ok {
 				t.Fatal("placeholder for absent art")

@@ -83,7 +83,7 @@ func TestQueueAndBulkSkipCommands(t *testing.T) {
 				t.Fatal("not playing")
 			}
 			b.command(interaction(t, "queue", true))
-			if !strings.Contains(r.queueText(), "121. Song 122") || !strings.Contains(r.queueText(), "122. Song 123") || !strings.Contains(r.response, "122 of 122 songs up next") {
+			if !strings.Contains(r.queueText(), "121 · **Song 122**") || !strings.Contains(r.queueText(), "122 · **Song 123**") || !strings.Contains(r.response, "122 of 122 songs up next") {
 				t.Fatal(r.response)
 			}
 			if count == 0 {
@@ -179,7 +179,7 @@ func TestPublicQueueDuringProgressiveLoading(t *testing.T) {
 			end = min(end, limit)
 		}
 		for i := 1; i <= 122; i++ {
-			if strings.Contains(text, fmt.Sprintf("%d. Song %03d", i, i+1)) != (i <= end) {
+			if strings.Contains(text, fmt.Sprintf("%d · **Song %03d**", i, i+1)) != (i <= end) {
 				t.Fatalf("incorrect pending position %d", i)
 			}
 		}

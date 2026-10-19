@@ -179,7 +179,7 @@ func TestForcePublishedJSONContract(t *testing.T) {
 func TestForcedNowPlayingKeepsThumbnail(t *testing.T) {
 	tr := media.Track{ForcedYouTube: true, RequestedSource: "youtube", Title: "Manual video", YouTubeThumbnailURL: "https://i.ytimg.com/vi/abcdefghijk/default.jpg"}
 	m := playbackMessage(player.PlaybackEvent{Track: tr})
-	if len(m.Components) != 1 || m.Components[0].(d.ContainerComponent).Components[2].(d.SectionComponent).Accessory.(d.ThumbnailComponent).Media.URL != tr.YouTubeThumbnailURL {
+	if len(m.Components) != 1 || m.Components[0].(d.ContainerComponent).Components[1].(d.SectionComponent).Accessory.(d.ThumbnailComponent).Media.URL != tr.YouTubeThumbnailURL {
 		t.Fatal(m)
 	}
 }

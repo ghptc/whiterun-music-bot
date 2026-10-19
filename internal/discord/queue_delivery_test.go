@@ -69,7 +69,7 @@ func TestQueueCompleteDeliveryUsesOneContainerPerBlock(t *testing.T) {
 
 			text := r.queueText()
 			for i := 1; i <= n; i++ {
-				if strings.Count(text, fmt.Sprintf("**%d. Song %04d**", i, i)) != 1 {
+				if strings.Count(text, fmt.Sprintf("%d · **Song %04d**", i, i)) != 1 {
 					t.Fatal("omitted/duplicated position", i)
 				}
 			}

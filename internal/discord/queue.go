@@ -15,8 +15,12 @@ import (
 	"whiterun/internal/player"
 )
 
-// Container + heading + separator + footer + 12 × (section, text, thumbnail) = 40.
+// Container + heading + footer + 12 × (section, text, thumbnail) = 39.
 const queueBlockSize = 12
+
+// A restrained aged-gold accent evokes Whiterun; Discord supplies the surface
+// and text colors for the reader's theme. Use one accent per block, not per row.
+const whiterunAccent = 0xA68B5B
 
 type queueRow struct {
 	Track    media.Track
@@ -88,9 +92,9 @@ func songSection(t media.Track, prefix, detail string) d.ContainerSubComponent {
 		artist = t.Channel
 	}
 	artist = musicLabel(artist, 80)
-	text := "**" + prefix + name + "**"
+	text := prefix + "**" + name + "**"
 	if artist != "" {
-		text += "\n" + artist
+		text += "\n-# " + artist
 	}
 	if detail != "" {
 		text += "\n-# " + detail
@@ -127,8 +131,8 @@ func buildQueueView(state player.State, limit *int) (queueView, error) {
 		}
 	}
 	if len(rows) == 0 {
-		view.Blocks = []queueBlock{{Container: musicContainer("THE BARD · QUEUE", d.TextDisplayComponent{Content: "Nothing playing. The queue is empty."})}}
-		view.Components = 4
+		view.Blocks = []queueBlock{{Container: musicContainer("Bardão · Queue", d.TextDisplayComponent{Content: "Nothing playing. The queue is empty."})}}
+		view.Components = 3
 		return view, nil
 	}
 	for offset := 0; offset < len(rows); offset += queueBlockSize {
@@ -138,9 +142,9 @@ func buildQueueView(state player.State, limit *int) (queueView, error) {
 			block.First = 1
 		}
 		body := make([]d.ContainerSubComponent, 0, len(block.Rows)+1)
-		count := 4 // container, heading, separator, footer
+		count := 3 // container, heading, footer
 		for _, row := range block.Rows {
-			prefix := fmt.Sprintf("%d. ", row.Position)
+			prefix := fmt.Sprintf("%d · ", row.Position)
 			if row.Position == 0 {
 				prefix = "Now playing · "
 			}
@@ -151,15 +155,15 @@ func buildQueueView(state player.State, limit *int) (queueView, error) {
 			}
 		}
 		body = append(body, d.TextDisplayComponent{Content: fmt.Sprintf("-# %s · %d of %d songs up next", block.rangeLabel(), shown, len(entries))})
-		block.Container = musicContainer("THE BARD · QUEUE", body...)
+		block.Container = musicContainer("Bardão · Queue", body...)
 		view.Blocks = append(view.Blocks, block)
 		view.Components += count
 	}
 	return view, nil
 }
 func musicContainer(heading string, body ...d.ContainerSubComponent) d.ContainerComponent {
-	components := []d.ContainerSubComponent{d.TextDisplayComponent{Content: "### " + heading}, d.SeparatorComponent{Divider: new(false), Spacing: d.SeparatorSpacingSizeSmall}}
-	return d.ContainerComponent{Components: append(components, body...)}
+	components := []d.ContainerSubComponent{d.TextDisplayComponent{Content: "### " + heading}}
+	return d.ContainerComponent{AccentColor: whiterunAccent, Components: append(components, body...)}
 }
 func componentUpdate(container d.ContainerComponent) d.MessageUpdate {
 	update := d.NewMessageUpdateV2(container)
@@ -212,13 +216,13 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 	view, err := buildQueueView(state, limit)
 	b.log.Info("queue_plan", "interaction_id", e.ID(), "elapsed_us", time.Since(started).Microseconds(), "components", view.Components, "messages", len(view.Blocks), "shown", view.Shown, "total", view.Total, "artwork_missing", view.Missing)
 	if err != nil {
-		view.Blocks = []queueBlock{{Container: musicContainer("THE BARD · QUEUE", d.TextDisplayComponent{Content: err.Error()})}}
+		view.Blocks = []queueBlock{{Container: musicContainer("Bardão · Queue", d.TextDisplayComponent{Content: err.Error()})}}
 	}
 	// A user-only installation has a five-followup ceiling. Do not silently cut
 	// a full queue down to that ceiling or switch to channel posts/exports.
 	owners := e.AuthorizingIntegrationOwners()
 	if _, userOnly := owners[d.ApplicationIntegrationTypeUserInstall]; userOnly && len(owners) == 1 && len(view.Blocks) > 6 {
-		view.Blocks = []queueBlock{{Container: musicContainer("THE BARD · QUEUE", d.TextDisplayComponent{Content: "This queue needs more messages than a personal installation permits. Install the Bard in this server to view the full queue, or request /queue limit:50. No songs were omitted from a delivered list."})}}
+		view.Blocks = []queueBlock{{Container: musicContainer("Bardão · Queue", d.TextDisplayComponent{Content: "This queue needs more messages than a personal installation permits. Install the Bard in this server to view the full queue, or request /queue limit:50. No songs were omitted from a delivered list."})}}
 	}
 	ctx := b.ctx
 	finish := func() {}

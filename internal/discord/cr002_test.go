@@ -105,11 +105,11 @@ func TestNowPlayingComponentsArtworkAndNativeLimits(t *testing.T) {
 			container := message.Components[0].(d.ContainerComponent)
 			assertV2Budget(t, container)
 			if tc.art == "" {
-				if _, ok := container.Components[2].(d.TextDisplayComponent); !ok {
+				if _, ok := container.Components[1].(d.TextDisplayComponent); !ok {
 					t.Fatal("missing art must use text")
 				}
 			} else {
-				row := container.Components[2].(d.SectionComponent)
+				row := container.Components[1].(d.SectionComponent)
 				if row.Accessory.(d.ThumbnailComponent).Media.URL != tc.art {
 					t.Fatal("wrong artwork")
 				}
