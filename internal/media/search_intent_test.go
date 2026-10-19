@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -72,6 +73,10 @@ func TestBardSpotifyResourceIntent(t *testing.T) {
 			c, pending, err := r.Prepare(context.Background(), "https://open.spotify.com/"+tc.kind+"/1234567890123456789012")
 			if err != nil || pending != (tc.kind != "track") || c.IsCollection != (tc.kind != "track") || len(c.Tracks) != len(tc.tracks) || c.Skipped != tc.skipped {
 				t.Fatalf("%+v %v %v", c, pending, err)
+			}
+			ordinary, ordinaryPending, ordinaryErr := r.PreparePlay(context.Background(), "https://open.spotify.com/"+tc.kind+"/1234567890123456789012", false)
+			if ordinaryErr != nil || ordinaryPending != pending || !reflect.DeepEqual(ordinary, c) {
+				t.Fatalf("force:false changed standard Spotify preparation: %+v %v %v", ordinary, ordinaryPending, ordinaryErr)
 			}
 			for i, tr := range c.Tracks {
 				if tr.Title != tc.tracks[i].Title || tr.SpotifyID != tc.tracks[i].SpotifyID || tr.Position != tc.tracks[i].Position || tr.Total != 8 {

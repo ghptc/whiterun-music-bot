@@ -54,3 +54,15 @@ The real disgo HTTP client and rate limiter are exercised with immediate acknowl
 The concurrent import regression uses 123 Spotify metadata entries with three blocked matching workers, a simulated active voice callback, skip, occupied render slots and a second guild requesting its queue. It verifies immediate acknowledgement, independent guild progress, resumed rendering and cleanup of collection/delivery resources. This is integration with the real player and queue renderer using simulated providers and voice transport; it does not validate real Spotify throughput, Discord voice packets or production CPU saturation.
 
 Validation passed: `go test ./... -count=1`, `go test -race ./... -count=1`, `go vet ./...`, `docker compose build`. The final artwork-cancellation regression also passed separately with and without race detection. Discord E2E remains unvalidated until exercised against the real API with a live bot and users.
+
+## Force Play verification before feature freeze
+
+The CR-006.2 hotfix includes verification that `/play force` remains optional. No production code change was necessary: `ApplicationCommandOptionBool.Required` already has its Go zero value `false`, the interaction decoder returns `false` for an omitted boolean, and `PreparePlay(..., false)` directly delegates to the existing `Prepare` path. Only `true` selects Force Play, which validates a direct YouTube video URL before extraction and rejects Spotify, text searches and playlist-only URLs.
+
+On 2026-10-19, a read-only authenticated GET to the real Discord API for the configured application's global commands confirmed a registered `/play` with exactly one `force` option, type `5` (boolean), and `required` absent, meaning optional. No guild scope was configured locally. No command was republished and no playback interaction was sent for this verification.
+
+`TestForceCommandQueueAndControls` exercises absent, explicit `false` and `true` through the command handler and player. `TestForcePublishedJSONContract` verifies the serialized publication contract for both global and guild scopes; the existing native option contract also checks `Required == false`. `TestBardSpotifyResourceIntent` now compares `PreparePlay(..., false)` with standard preparation for Spotify tracks, albums, playlists with duplicates and partially available albums. `TestPlayCollectionAndClearCommands` imports Spotify playlists through `/play` with no `force` field. The media suite also retains the Spotify Fidelity and Force Play rejection/isolation regressions.
+
+The live API check confirms the published command contract. Spotify and playback behavior remain covered by local fixtures, not a new real Discord playback E2E run.
+
+Complement validation passed: `go test ./... -count=1`, targeted Force Play/Spotify Fidelity/playlist integration regressions with `-race`, `go vet ./...` and `git diff --check`. This complement changes tests and documentation only.

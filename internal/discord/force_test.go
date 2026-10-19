@@ -128,6 +128,54 @@ func TestForceSlashContract(t *testing.T) {
 	}
 }
 
+// Verify the actual JSON contract used by both publication scopes. Discord
+// treats an omitted `required` property as false (the SDK uses omitempty).
+func TestForcePublishedJSONContract(t *testing.T) {
+	for _, scope := range []snowflake.ID{0, 1} {
+		t.Run(scope.String(), func(t *testing.T) {
+			found := false
+			for _, command := range scopedCommands(scope) {
+				if command.CommandName() != "play" {
+					continue
+				}
+				found = true
+				payload, err := json.Marshal(command)
+				if err != nil {
+					t.Fatal(err)
+				}
+				var wire struct {
+					Options []struct {
+						Name     string `json:"name"`
+						Type     int    `json:"type"`
+						Required bool   `json:"required"`
+					} `json:"options"`
+				}
+				if err := json.Unmarshal(payload, &wire); err != nil {
+					t.Fatal(err)
+				}
+				forceCount := 0
+				for _, option := range wire.Options {
+					if option.Name == "query" && !option.Required {
+						t.Fatal("query must remain required")
+					}
+					if option.Name == "force" {
+						forceCount++
+						if option.Type != 5 || option.Required {
+							t.Fatalf("invalid force publication: %s", payload)
+						}
+					}
+				}
+				if forceCount != 1 {
+					t.Fatalf("missing or duplicate force: %s", payload)
+				}
+			}
+			if !found {
+				t.Fatal("play not published")
+			}
+		})
+	}
+}
+
 func TestForcedNowPlayingKeepsThumbnail(t *testing.T) {
 	tr := media.Track{ForcedYouTube: true, RequestedSource: "youtube", Title: "Manual video", YouTubeThumbnailURL: "https://i.ytimg.com/vi/abcdefghijk/default.jpg"}
 	m := playbackMessage(player.PlaybackEvent{Track: tr})
