@@ -1,5 +1,7 @@
 # CR-002: audit before corrections
 
+> Historical CR-002 audit. Its inline embeds, HTML/TXT exports and presentation measurements were superseded by [CR-006 UI V2](bard-ui-v2.md). Cache/fidelity investigation results remain relevant.
+
 Audit baseline: `762fbb5`, 2026-10-18. No running Compose service or local runtime logs were available.
 
 ## Confirmed findings
