@@ -19,6 +19,9 @@ import (
 
 func TestRootsHelpCompleteStaticAndWithinLimits(t *testing.T) {
 	embed := helpEmbed()
+	if embed.Title != "The Bard · Help" {
+		t.Fatalf("help title: %q", embed.Title)
+	}
 	text := ""
 	if len(embed.Fields) != 4 {
 		t.Fatal(embed)

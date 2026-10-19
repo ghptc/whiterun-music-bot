@@ -38,7 +38,7 @@ func nextAnnouncement(t *testing.T, r *recordingRest) sentMessage {
 	select {
 	case m := <-r.messages:
 		m.message.Content = messageText(m.message)
-		if m.message.Flags&d.MessageFlagEphemeral != 0 || m.message.AllowedMentions == nil || !strings.Contains(m.message.Content, "Bardão · Now playing") {
+		if m.message.Flags&d.MessageFlagEphemeral != 0 || m.message.AllowedMentions == nil || !strings.Contains(m.message.Content, "The Bard · Now Playing") {
 			t.Fatal(m)
 		}
 		return m

@@ -44,7 +44,7 @@ func expansionCommands() []d.ApplicationCommandCreate {
 
 // Static content: no player, database, network, or provider access.
 func helpEmbed() d.Embed {
-	return d.Embed{Title: "The Bard's Repertoire", Color: 0x80745B, Fields: []d.EmbedField{
+	return d.Embed{Title: "The Bard · Help", Color: 0x80745B, Fields: []d.EmbedField{
 		{Name: "PLAYBACK", Value: "/play — Request a song or collection.\n/now — Show the current song.\n/pause — Pause the music.\n/resume — Resume the music.\n/previous — Return to the previous song.\n/skip — Skip songs.\n/jump — Skip to a queue position.\n/replay — Restart the current song.\n/loop — Repeat a song or the queue.\n/seek — Check a timestamp; currently unavailable."},
 		{Name: "QUEUE", Value: "/queue — View upcoming songs.\n/remove — Remove an upcoming song.\n/move — Reorder an upcoming song.\n/shuffle — Shuffle upcoming songs.\n/clear — Clear upcoming songs."},
 		{Name: "EXTRAS", Value: "/autoplay — Save a preference; recommendations unavailable.\n/lyrics — Check lyrics; licensed provider unavailable.\n/history — View recently played songs."},

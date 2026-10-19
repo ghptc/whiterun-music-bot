@@ -59,7 +59,7 @@ func TestQueueCompactContinuations(t *testing.T) {
 			t.Fatal(err)
 		}
 		text := viewText(view)
-		if strings.Count(text, "Bardão · Queue") != 1 || strings.Count(text, "songs up next") != 1 || strings.Count(text, "Now playing · **Current**") != 1 {
+		if strings.Count(text, "The Bard · Queue") != 1 || strings.Count(text, "songs up next") != 1 || strings.Count(text, "Now playing · **Current**") != 1 {
 			t.Fatalf("repeated heading/count/current for %d: %s", n, text)
 		}
 		for i, block := range view.Blocks {

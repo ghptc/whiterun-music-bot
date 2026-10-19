@@ -17,3 +17,14 @@ Checklist de evidências:
 - plano de backup/restauração SQLite validado no volume de QA.
 
 Os relatórios atuais registram testes locais aprovados e metas ainda não atingidas. Não há declaração de ausência universal de races, vazamentos ou incidentes.
+
+## Congelamento de UI
+
+UI congelada para a v1.0 após o ajuste final de nomenclatura: The Bard · Queue,
+The Bard · Now Playing (anúncios e /now) e The Bard · Help (/help).
+Layout, artwork e funcionalidades permanecem como homologáveis nesta versão.
+A próxima etapa é a validação pelos testes; o congelamento não representa
+aprovação dos gates de qualidade ou do E2E pendente.
+
+Validação após a nomenclatura: go test ./... -count=1,
+go test -race ./... -count=1 e go vet ./... aprovados.
