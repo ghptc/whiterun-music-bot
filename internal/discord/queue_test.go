@@ -108,7 +108,7 @@ func assertV2Budget(t *testing.T, container d.ContainerComponent) {
 	}
 }
 func TestQueueCompleteAndLimitedSnapshots(t *testing.T) {
-	for _, size := range []int{0, 1, 10, 20, 123, 500, 1000} {
+	for _, size := range []int{0, 1, 8, 9, 10, 18, 20, 123, 500, 1000} {
 		for _, limit := range []*int{nil, new(1), new(10), new(50), new(2000)} {
 			t.Run(fmt.Sprintf("%d/%v", size, limit), func(t *testing.T) {
 				state := queueFixture(size)
@@ -129,7 +129,7 @@ func TestQueueCompleteAndLimitedSnapshots(t *testing.T) {
 						t.Fatal("order/metadata", row)
 					}
 				}
-				expectedBlocks := max(1, (want+11)/12)
+				expectedBlocks := max(1, (want+queueBlockSize-1)/queueBlockSize)
 				if len(view.Blocks) != expectedBlocks {
 					t.Fatal("message count", len(view.Blocks), expectedBlocks)
 				}

@@ -48,7 +48,7 @@ func TestQueuePartialDeliveryPreservesFirstCardAndReportsProgress(t *testing.T) 
 			}
 			failure := sender.updates[1]
 			text := updateText(failure)
-			if !strings.Contains(text, fmt.Sprintf("Delivery incomplete · %d/500", failAt*12)) || !strings.Contains(text, "Song 0001") || len(failure.Files) != 0 || failure.Embeds != nil {
+			if !strings.Contains(text, fmt.Sprintf("Delivery incomplete · %d/500", failAt*queueBlockSize)) || !strings.Contains(text, "Song 0001") || len(failure.Files) != 0 || failure.Embeds != nil {
 				t.Fatal(text)
 			}
 		})
@@ -59,7 +59,7 @@ func TestQueueCompleteDeliveryUsesOneContainerPerBlock(t *testing.T) {
 		t.Run(fmt.Sprint(n), func(t *testing.T) {
 			b, r := testBot(t)
 			b.replyQueue(interaction(t, "queue", true), queueFixture(n), nil)
-			want := (n + 11) / 12
+			want := (n + queueBlockSize - 1) / queueBlockSize
 			if len(r.followups) != want-1 {
 				t.Fatal(len(r.followups), want)
 			}

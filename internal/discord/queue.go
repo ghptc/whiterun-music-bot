@@ -15,8 +15,8 @@ import (
 	"whiterun/internal/player"
 )
 
-// Container + heading + footer + 12 × (section, text, thumbnail) = 39.
-const queueBlockSize = 12
+// Container + heading + footer + 9 × (section, text, thumbnail) + 8 separators = 38.
+const queueBlockSize = 9
 
 // A restrained aged-gold accent evokes Whiterun; Discord supplies the surface
 // and text colors for the reader's theme. Use one accent per block, not per row.
@@ -83,6 +83,11 @@ func musicLabel(s string, budget int) string {
 	return queueClip(s, budget)
 }
 func songSection(t media.Track, prefix, detail string) d.ContainerSubComponent {
+	return styledSongSection(t, prefix, detail, true)
+}
+
+// Queue typography is independent of Now Playing and playback announcements.
+func styledSongSection(t media.Track, prefix, detail string, subtextArtist bool) d.ContainerSubComponent {
 	name := musicLabel(t.Title, 100)
 	if name == "" {
 		name = "Untitled"
@@ -94,7 +99,11 @@ func songSection(t media.Track, prefix, detail string) d.ContainerSubComponent {
 	artist = musicLabel(artist, 80)
 	text := prefix + "**" + name + "**"
 	if artist != "" {
-		text += "\n-# " + artist
+		text += "\n"
+		if subtextArtist {
+			text += "-# "
+		}
+		text += artist
 	}
 	if detail != "" {
 		text += "\n-# " + detail
@@ -141,14 +150,18 @@ func buildQueueView(state player.State, limit *int) (queueView, error) {
 		if block.First == 0 && end-offset > 1 {
 			block.First = 1
 		}
-		body := make([]d.ContainerSubComponent, 0, len(block.Rows)+1)
+		body := make([]d.ContainerSubComponent, 0, 2*len(block.Rows))
 		count := 2 // container and footer; only the first block has a heading
-		for _, row := range block.Rows {
+		for i, row := range block.Rows {
+			if i > 0 {
+				body = append(body, d.NewSmallSeparator())
+				count++
+			}
 			prefix := fmt.Sprintf("%d · ", row.Position)
 			if row.Position == 0 {
 				prefix = "Now playing · "
 			}
-			body = append(body, songSection(row.Track, prefix, ""))
+			body = append(body, styledSongSection(row.Track, "### "+prefix, "", false))
 			count++
 			if media.ArtworkURL(row.Track) != "" {
 				count += 2

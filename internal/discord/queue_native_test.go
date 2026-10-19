@@ -27,7 +27,7 @@ func TestQueueNativeIndividualArtwork(t *testing.T) {
 	}
 	container := view.Blocks[0].Container
 	for i, track := range tracks {
-		row := container.Components[i+1]
+		row := container.Components[2*i+1]
 		if media.ArtworkURL(track) == "" {
 			if _, ok := row.(d.TextDisplayComponent); !ok {
 				t.Fatal("placeholder for absent art")
@@ -51,7 +51,7 @@ func TestQueueNativeIndividualArtwork(t *testing.T) {
 }
 
 func TestQueueCompactContinuations(t *testing.T) {
-	for _, n := range []int{1, 10, 20, 123, 500} {
+	for _, n := range []int{1, 8, 9, 10, 18, 20, 123, 500} {
 		state := queueFixture(n)
 		state.Current = &media.Track{Title: "Current", Artist: "Artist", SpotifyArtworkURL: "https://art.example/current?size=48"}
 		view, err := buildQueueView(state, nil)
@@ -68,12 +68,21 @@ func TestQueueCompactContinuations(t *testing.T) {
 			if i == 0 {
 				start = 1
 			}
-			if len(block.Container.Components) != start+len(block.Rows)+1 || block.Container.AccentColor != whiterunAccent {
-				t.Fatal("extra spacing, decoration or inconsistent accent")
+			if len(block.Container.Components) != start+2*len(block.Rows) || block.Container.AccentColor != whiterunAccent {
+				t.Fatal("incorrect separators or inconsistent accent")
 			}
 			for j, row := range block.Rows {
-				section := block.Container.Components[start+j].(d.SectionComponent)
+				section := block.Container.Components[start+2*j].(d.SectionComponent)
+				if j > 0 {
+					separator, ok := block.Container.Components[start+2*j-1].(d.SeparatorComponent)
+					if !ok || separator.Spacing != d.SeparatorSpacingSizeSmall || (separator.Divider != nil && !*separator.Divider) {
+						t.Fatal("expected a small divider only between songs")
+					}
+				}
 				label := section.Components[0].(d.TextDisplayComponent).Content
+				if !strings.HasPrefix(label, "### ") || strings.Contains(label, "\n-# ") {
+					t.Fatal("queue needs a small heading and normal-size artist", label)
+				}
 				if len(section.Components) != 1 || strings.Count(label, "\n") != 1 || strings.Contains(label, "\n\n") {
 					t.Fatal("row must contain only title and artist", label)
 				}
