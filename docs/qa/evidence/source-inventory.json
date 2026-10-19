@@ -1,0 +1,686 @@
+[
+  {
+    "file": "cmd/bot/main.go",
+    "lines": 103,
+    "sha256": "9ffe48cb5e78caf1b8f977d8da4d7ad22f03f21668c3b73c8e887708e9e1d91f",
+    "kind": "production"
+  },
+  {
+    "file": "cmd/bot/spotify_diagnose.go",
+    "lines": 50,
+    "sha256": "7168565b86163353382781705b8290ad2592ba9d3837af44c20e05ebfbc8935d",
+    "kind": "production"
+  },
+  {
+    "file": "cmd/bot/spotify_diagnose_test.go",
+    "lines": 19,
+    "sha256": "7efe44a488c22ea17c1d46b724a61144b05d4cd0ff0fb4a542d800a5f71f5cf6",
+    "kind": "test"
+  },
+  {
+    "file": "cmd/profile/main.go",
+    "lines": 92,
+    "sha256": "5e1875c826b4eaa7420a4bec28b59faf4a2f11c607144d814e85dafd01dce46a",
+    "kind": "production"
+  },
+  {
+    "file": "internal/discord/announcements.go",
+    "lines": 84,
+    "sha256": "eb95f66af6ddb35b776566aa3bb88d293a43a326d15d7f2102ae792951254ad1",
+    "kind": "production"
+  },
+  {
+    "file": "internal/discord/announcements_test.go",
+    "lines": 228,
+    "sha256": "1be1b9dedcab43b83fe0c13b600fa2a2d80f47bb485ebd1749b581a656fb08e0",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/bot.go",
+    "lines": 342,
+    "sha256": "45cedb58118677280e10c33a4b805209ff6044563e9cb253fea4a88379656d12",
+    "kind": "production"
+  },
+  {
+    "file": "internal/discord/command_sync.go",
+    "lines": 109,
+    "sha256": "7b679c5b5d0b712c7378f0a4034c44777e91394790c77fe1653a00de2564bab7",
+    "kind": "production"
+  },
+  {
+    "file": "internal/discord/commands.go",
+    "lines": 451,
+    "sha256": "5dca9a081fdd689a834daaa95b164330e62dabe41d9b2d09a42bc00985e6d866",
+    "kind": "production"
+  },
+  {
+    "file": "internal/discord/commands_test.go",
+    "lines": 389,
+    "sha256": "cff47fb02620af22224dc5bf05562f3e52e0e04feb47c068e31f8d2058a06498",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/cr002_test.go",
+    "lines": 228,
+    "sha256": "049ac9b0ece1fc80fb9c050db72f2ccd25fcf49f9eab47f563e1b42dd9c9dd54",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/expansion.go",
+    "lines": 90,
+    "sha256": "01ee3da270f7ca4a224a360016556a46aed7c078f898040a715e54e4b9242a5d",
+    "kind": "production"
+  },
+  {
+    "file": "internal/discord/expansion_test.go",
+    "lines": 195,
+    "sha256": "1f5628cd8b6144fdc87986cc9f4ef1e4582f8d8db9fa543022abf371fa45c7a9",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/failure_notice_regression_test.go",
+    "lines": 15,
+    "sha256": "daa8350d4f79009120d436cad7fadcf253e81e1756fed689dfeeb3b04641f778",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/force_test.go",
+    "lines": 206,
+    "sha256": "dd51bef6045cd98f1adc3459beb804a1aa9d00d4481a686ff65e65292e0b19a7",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/idle.go",
+    "lines": 129,
+    "sha256": "c1de691d4821b154496c8f16189f0c6abf2cf09cc61034d36c97548bf08cdf12",
+    "kind": "production"
+  },
+  {
+    "file": "internal/discord/idle_test.go",
+    "lines": 244,
+    "sha256": "8c5847f508bb069113307bd12b9d81f5259cb21386407aaeaed94d78cac93e99",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/playback_embed.go",
+    "lines": 67,
+    "sha256": "39d39512ed5466794e9ecaf31cfcdc9ec129ad5e977b095b5647c63b4c7dccc9",
+    "kind": "production"
+  },
+  {
+    "file": "internal/discord/playback_integrity_test.go",
+    "lines": 107,
+    "sha256": "4cb93c24fb23054786f0bf6bb9a52f7a6e5dd26dd0f3a545512cc86ebf754141",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/quality_contract_test.go",
+    "lines": 118,
+    "sha256": "91497651198ec8225bfd0f15002306a20acafb42f6b7c0bf9fad5ee99a58738a",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/quality_test.go",
+    "lines": 246,
+    "sha256": "ae8f6c73c89b313e498b47269d170e37ff114d18de9052cac089559ca7014bcc",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/queue.go",
+    "lines": 325,
+    "sha256": "534c5d3317659dca05212d75f7b98ec48286ded0a154df355b2cb027f1273055",
+    "kind": "production"
+  },
+  {
+    "file": "internal/discord/queue_delivery_test.go",
+    "lines": 265,
+    "sha256": "ef1f04bc7014c2293a6a58692438c9fbd21d7d0e7487b6cba15f2c4ccda80133",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/queue_native_test.go",
+    "lines": 99,
+    "sha256": "57dff205da51ce640e88ceeedaf8d848936a76ae20fad370aa922b89cf8e2374",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/queue_reliability_test.go",
+    "lines": 190,
+    "sha256": "a06e6bbe2ee7ee8ba0de58fc367063d78cdab36f9a68217c6a4cafda43ee042a",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/queue_skip_test.go",
+    "lines": 209,
+    "sha256": "a0db39e9815b438227f132db0b7d2e3f6775e993de204e5dd62e1ff1a7f98c6a",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/queue_test.go",
+    "lines": 322,
+    "sha256": "9164679b017346ef8a44a52dbfdc17e1365fca39cd75714516af042d64895907",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/readiness_test.go",
+    "lines": 54,
+    "sha256": "9282af60c579b4e389890a9791d389a9be138d7f5df4b2d99ff0a76fe018150d",
+    "kind": "test"
+  },
+  {
+    "file": "internal/discord/settings.go",
+    "lines": 42,
+    "sha256": "6a309113656289634dd610d2bc6bcb895ae690aa8d7ff1676aa3f38bf0561288",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/artwork.go",
+    "lines": 78,
+    "sha256": "d6f2bebc0054e1b020859867af90dda4709e40d1966762afbaf8eefd0b9f974d",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/artwork_test.go",
+    "lines": 194,
+    "sha256": "d1f7b0e647443370e5252d043b53b54fec747a029a58249d7d6bbaf52794f20b",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/cache.go",
+    "lines": 161,
+    "sha256": "bfb40ca49792ea8be7bd848f3805fa759ea49217d6dae3486b88602626b405dc",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/cache_failure_regression_test.go",
+    "lines": 62,
+    "sha256": "68f1c1de5c9a30654db74a90dc79d46a39e1e22eaf5956fdae9963e21a301320",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/cache_test.go",
+    "lines": 210,
+    "sha256": "9e09cddefa62507047edde649a57f7a812fe86b3472dfeeb2518d03e7113970d",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/canonical_test.go",
+    "lines": 117,
+    "sha256": "0e35c9c10c03f3fc46bb12276be6b81e0923ea9636c9e8d353fd207fdcbc1b3c",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/catalog.go",
+    "lines": 31,
+    "sha256": "443c147c94e211d78744a464f52acba9a9e75b970bf96a6be6df6776a90741ba",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/collection.go",
+    "lines": 269,
+    "sha256": "9ec7312d2e04ad51ade33df1e2d1dcd1670c84ad1526151fc103b56429bcb33b",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/collection_test.go",
+    "lines": 160,
+    "sha256": "4f19e00d999d9a4cda96cc6398076f25f7e91392fa298c8abb3dfe2ecee9e11c",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/discovery.go",
+    "lines": 164,
+    "sha256": "76e7ec64692051435a130cac46e5c80a6ae14928a62b17bc73b9d6ca0a8b1794",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/discovery_test.go",
+    "lines": 308,
+    "sha256": "25492548669e61f56c8567559bee713325f177b4cd82b6de3100976ff755b5cd",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/fast_match_test.go",
+    "lines": 169,
+    "sha256": "a78ce6da571575032ffe751e428e502ab96ee081922b6e5e6687ae0365be6e57",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/fidelity.go",
+    "lines": 84,
+    "sha256": "9d73440dd79e7683a68fa761f73356975f9962fbda5f20fd258532d7ef75f730",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/fidelity_real_test.go",
+    "lines": 84,
+    "sha256": "70971aa59e30f2d503b1fc72ebcd69a5fcb0b12d5cbf9d849e564f4045586ba4",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/fidelity_test.go",
+    "lines": 166,
+    "sha256": "a0622b9e4b21c2ba1fcf332d2a51bd59983e529702b57ed2a25f80703cf2642f",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/first_confirmed_process_test.go",
+    "lines": 56,
+    "sha256": "496eab09a431daef30fda062100b8ff648450109767c3bf6c3fb2ab822680bad",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/first_confirmed_test.go",
+    "lines": 142,
+    "sha256": "4feefb5de5d2b62fd2deec51a53e648455b11104c83e4a038cc678f68187588a",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/force_test.go",
+    "lines": 110,
+    "sha256": "ab6306e71885ce0c341e4ec8fd7a02f47f5749a9c7feaacbc9868bd1aaebe10c",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/mapping.go",
+    "lines": 104,
+    "sha256": "114637e10095da7f55c9a9c8706cc19f52df6277c7e6497457f1f99765159243",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/process.go",
+    "lines": 61,
+    "sha256": "e392f1f69155eefbd676deb41078e1a731f68b33e68d7701f3dea8f66880435d",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/production_regressions_test.go",
+    "lines": 68,
+    "sha256": "c4f9c3a322a5177e982699a069bd27ce5d23ce4c9f6736462e8f9a42f781e38c",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/progressive.go",
+    "lines": 174,
+    "sha256": "67630e52ef4f536421118efe119d131d67a448215d4f38b4e4fd6473628d04be",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/progressive_test.go",
+    "lines": 57,
+    "sha256": "149ab3c690deb1fa43f6e928c39a1ac99cdbf9dab0d3980cbbc3f4b125ce1ab4",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/quality_identity_test.go",
+    "lines": 206,
+    "sha256": "67063edc1725d0ffff29c226f0b725abbeb2ae88e7f34465d86c5f95d5b72fe1",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/ranking.go",
+    "lines": 331,
+    "sha256": "ac79ca7db3ffda6b0dac948d66f34689c22b2eef5dd911029ed5208aa2428940",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/ranking_test.go",
+    "lines": 175,
+    "sha256": "bff8fca22289e0de8cce6ee9ea1cc841dca5d361cbf7281f1aba77b174c25529",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/recording_identity.go",
+    "lines": 58,
+    "sha256": "870b406edeeecc850dcb4186035661e62e1d2ac7f41e008116250951ae6059ef",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/recording_identity_test.go",
+    "lines": 161,
+    "sha256": "f64068034aca092228ab2b73570238d925fe8b404bf280c22ca97a885d7ee0fa",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/release_identity.go",
+    "lines": 50,
+    "sha256": "9c3eb078d7da25ca234f810fa3733acbd36b857b47e27708118c20b9b95150ed",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/release_identity_test.go",
+    "lines": 66,
+    "sha256": "85d23a379c5242d27bd1b3a2b159d7e8f50972d6b518610e662455eaf91d980a",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/resolver.go",
+    "lines": 316,
+    "sha256": "b9a7631d34035f4007fa43f0398767475343b09b06c65d7305e4ca27aa296f87",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/resolver_test.go",
+    "lines": 127,
+    "sha256": "6b9efdcd8b004305567b129b2cfc49c21f5328887138eca8719ac378346484be",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/search_intent_test.go",
+    "lines": 161,
+    "sha256": "2e21db85f3098f61e5b536b58d7b043c98a8ac786523fdc81c3e79551c7441b6",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/source_intent_test.go",
+    "lines": 198,
+    "sha256": "d25a8c188e2bb30979cb5d5fe57b480bdb92ef3a99fee732a0f249a90835d75d",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/spotify.go",
+    "lines": 275,
+    "sha256": "d1f29ebc722958c71dc1e68d6087773dea40cd837e27295580d9c0095fbc416b",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/spotify_anonymous.go",
+    "lines": 338,
+    "sha256": "d90bba6715261959eb8403504ede495e0e3e3c941debc67f5674bcd0a6b7b3e3",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/spotify_anonymous_test.go",
+    "lines": 385,
+    "sha256": "c66d5548005824c5667641a0d6abc65e8c67fd5ae5eaee4863095a7777aebed3",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/spotify_diagnostics.go",
+    "lines": 73,
+    "sha256": "76f49cab9d08d1f369deda4ebe54bee9e306762615dfed4e152f216ca7d87d41",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/spotify_diagnostics_test.go",
+    "lines": 99,
+    "sha256": "fe66973cef0502012ac33ef655eeb82b522e54c0de0470ea93416247593d82c9",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/spotify_discovery.go",
+    "lines": 107,
+    "sha256": "cd3077af27679df23aeeecf13c2203d4f8fda5d9698b472dac049daa6e8340c6",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/spotify_embed.go",
+    "lines": 190,
+    "sha256": "66389d0d3eb234890b8a056bc443af7bbc449bd6b3b39bcacc98ce709778ee05",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/spotify_embed_test.go",
+    "lines": 227,
+    "sha256": "78f642b00ceb81047bdc5d4d8abd6d0bb91566b23e93b283af227618fc5f85d6",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/spotify_public.go",
+    "lines": 296,
+    "sha256": "74df9f7502f299ba4ee909f0a8be1ec440ee9d3a4d9b9174adfb18e248a253bf",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/spotify_public_test.go",
+    "lines": 225,
+    "sha256": "1780635a2ba35cb95ae76422c64dd9e27c658b5d4f6475f26d9e72e9f130e907",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/spotify_rank.go",
+    "lines": 419,
+    "sha256": "ee7d5688eb595cfb381c17f6b87c1c45cd965e68c8fbc40b0c9cc9bb5db1dee6",
+    "kind": "production"
+  },
+  {
+    "file": "internal/media/spotify_test.go",
+    "lines": 219,
+    "sha256": "6d6f2c31d0aa7a527ebc176f3ca4b0a0989b5e78b0d1676c64634b00b8ae268e",
+    "kind": "test"
+  },
+  {
+    "file": "internal/media/timing.go",
+    "lines": 48,
+    "sha256": "d2ab1e8e95d7ef178ea31565d5d67f0beeedcc2e0836589bea8f06fdf3e6ffb7",
+    "kind": "production"
+  },
+  {
+    "file": "internal/player/attempt_regression_test.go",
+    "lines": 75,
+    "sha256": "6139816aa8686e67d2e76cc8acb01e1da65b19ed29ea3e2856dc2541a2dc944b",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/collection.go",
+    "lines": 484,
+    "sha256": "2af3a26a5c8ee0f30ad96d7a2739150c9ecba4b81c0cce3cddf1e63adc7fc05d",
+    "kind": "production"
+  },
+  {
+    "file": "internal/player/collection_test.go",
+    "lines": 626,
+    "sha256": "2c384950ef0b224d615e4d3b2d0661af0f5e51f68c9fde5035ffeae9561587a9",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/controls.go",
+    "lines": 145,
+    "sha256": "5b39ca400e087ff615e0d99798012e8f38506fba5d89d2bcf5c120e68cb5b493",
+    "kind": "production"
+  },
+  {
+    "file": "internal/player/controls_test.go",
+    "lines": 290,
+    "sha256": "e65880d551d07cb37198c8a85fff11d6a8bffddda37bf514535a5a0336b78082",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/durable.go",
+    "lines": 91,
+    "sha256": "b5fee437faf285e201e729598005a3523460a826f493eb4e25976e22c7626289",
+    "kind": "production"
+  },
+  {
+    "file": "internal/player/force_test.go",
+    "lines": 42,
+    "sha256": "6634fe0597c5c7685a305eb6ce351503e2ae14c1d053b93bfe29028ac42d68f0",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/lifecycle.go",
+    "lines": 243,
+    "sha256": "04719056a25536f2f62ce76bad730ee33d67298e479dc1eff5e306b518a44de8",
+    "kind": "production"
+  },
+  {
+    "file": "internal/player/lifecycle_test.go",
+    "lines": 351,
+    "sha256": "9e4d73a902985240aa5f5e4f60b46c8bda0b4b4a32ec6c3ceb450abb4f3c93cf",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/ogg.go",
+    "lines": 71,
+    "sha256": "827e897985cfc5604579fe7b9f36c38f7b26b0d6118d608323d6562c5ccb7336",
+    "kind": "production"
+  },
+  {
+    "file": "internal/player/ogg_test.go",
+    "lines": 34,
+    "sha256": "b07a5a963b42ff07eb88de41b7c972de2ec37fc16e9c7921b48148d94e30b977",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/pause.go",
+    "lines": 100,
+    "sha256": "1dcc351b8af99ce4bd83f26b92447ba848881d687237e69368187388b2308087",
+    "kind": "production"
+  },
+  {
+    "file": "internal/player/pause_test.go",
+    "lines": 167,
+    "sha256": "d5dc260bb84e0465073ccaf2da3f8daff92c927287486dcf953d30a4f7de7f9f",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/player.go",
+    "lines": 326,
+    "sha256": "727f45c0ce5cec4e5d8dd712f1d8df3fdc3e397f4eb814fe109387052fe2ccf4",
+    "kind": "production"
+  },
+  {
+    "file": "internal/player/player_test.go",
+    "lines": 212,
+    "sha256": "a443339291de6c101d1b8db474f25d7466f36e1353e96b275a274a42921ebe30",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/previous.go",
+    "lines": 51,
+    "sha256": "ee4a22f3edac2e0f2ce37028f149694362c1f84b416006a111a3a32a15565f04",
+    "kind": "production"
+  },
+  {
+    "file": "internal/player/previous_test.go",
+    "lines": 79,
+    "sha256": "f42a277ae612932126ea6ee2902d407261ebf9127a4761486de2c0a808efecf4",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/quality_benchmark_test.go",
+    "lines": 27,
+    "sha256": "60865e0cc3f116a5ed44b54fc8fd195ac79fd1d06d5be09f6e8dbdaaa9fd709c",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/quality_durable_test.go",
+    "lines": 87,
+    "sha256": "ee40d250912996bfe38e479892bc691dd5252b1d7ad0cbc23ef27dccea0e026b",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/quality_model_test.go",
+    "lines": 163,
+    "sha256": "f23ccbf0dddd97fd0a599b56dad2004b5951f4ab0fc5cd0d16b6e939cd8989db",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/quality_ogg_test.go",
+    "lines": 79,
+    "sha256": "cdb1c7e7f430da5ae48d9f417440601e229fcc2d4b7dec47ce7cefeb8c3ee26e",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/quality_soak_test.go",
+    "lines": 91,
+    "sha256": "0384aee0afc35789cd93796e44abf034532533e378e0ef49977ee7e5760beb3d",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/quality_teardown_test.go",
+    "lines": 96,
+    "sha256": "c0c7fee57185c8848e5dd608702c209041b8225cd50f4bf03310ac1082aad225",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/queue.go",
+    "lines": 151,
+    "sha256": "15c2e1c907e32b9876d47f410aa3237d0c285299152cde31f1cc1c334a8b01e0",
+    "kind": "production"
+  },
+  {
+    "file": "internal/player/reliability_test.go",
+    "lines": 300,
+    "sha256": "2c4f0f4af75d8aa1ac4059defa5aa3758bb6d67b19b892492015cee9814024f0",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/skip_test.go",
+    "lines": 296,
+    "sha256": "67e26e2fa6d15dfc6388d434e6f3cd9a7fc6105fa25764c6466bbec462aa2c38",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/spotify_public_test.go",
+    "lines": 83,
+    "sha256": "800b3ed6cf03c2e286488157ac075d0bc20a6737138435333d10bccae98f6150",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/stall_regression_test.go",
+    "lines": 86,
+    "sha256": "2f4bfd2cf31a928e4520b0e0c854a3b64cb02439e15bd62d534acde83db2aa6b",
+    "kind": "test"
+  },
+  {
+    "file": "internal/player/stream.go",
+    "lines": 462,
+    "sha256": "ee1b2dfcba11c5a5aec60ec70f518915a23b3b418f8e04d2115d99cce39989d7",
+    "kind": "production"
+  },
+  {
+    "file": "internal/player/stream_test.go",
+    "lines": 314,
+    "sha256": "3769462767add9e3f53f7ce3f164c5aed082cdb76161cf3e29424f4de780aae7",
+    "kind": "test"
+  },
+  {
+    "file": "internal/storage/catalog.go",
+    "lines": 46,
+    "sha256": "8e216fb3fa760eb510e862341e802e241d4b304eb83ae586d600cef323179e43",
+    "kind": "production"
+  },
+  {
+    "file": "internal/storage/catalog_test.go",
+    "lines": 224,
+    "sha256": "5c17a767faf6bc6c96e258551c4ba7cc0c93c11481870cb6ebdfc500d99a63e1",
+    "kind": "test"
+  },
+  {
+    "file": "internal/storage/controls_test.go",
+    "lines": 104,
+    "sha256": "78f0c7dc0ba394f931f3ecac0db286246c14b5a5b373dc7e0f92ae81d93f0514",
+    "kind": "test"
+  },
+  {
+    "file": "internal/storage/existing_database_test.go",
+    "lines": 59,
+    "sha256": "47b2350040e9b5b73443e7cf09b3d8b009099a1cc1c431c7ebb52547b2f83db4",
+    "kind": "test"
+  },
+  {
+    "file": "internal/storage/mapping_test.go",
+    "lines": 143,
+    "sha256": "cc1f1894af0639efe6d65c39d08fc67165cece2565e19259b1ab380ff9014ec5",
+    "kind": "test"
+  },
+  {
+    "file": "internal/storage/quality_failure_test.go",
+    "lines": 190,
+    "sha256": "6cf382714513adb2bc9d1ddc0bd1b608dcc18ae2bf3b6c8394127b1eed598002",
+    "kind": "test"
+  },
+  {
+    "file": "internal/storage/sqlite.go",
+    "lines": 218,
+    "sha256": "1dc9304e35b77f695cc54a6eb84c0290239e2d22f63896a33857fd6154da1e94",
+    "kind": "production"
+  },
+  {
+    "file": "internal/storage/sqlite_test.go",
+    "lines": 448,
+    "sha256": "c178df7b803b87cd03e0f14485c4a9bd8f9cd5a59a9c5df5653e5306a5ef2f4e",
+    "kind": "test"
+  }
+]

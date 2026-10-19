@@ -1,0 +1,4 @@
+ok  	whiterun/internal/player	2.672s
+ok  	whiterun/internal/media	1.801s
+ok  	whiterun/internal/storage	22.661s
+ok  	whiterun/internal/discord	1.259s

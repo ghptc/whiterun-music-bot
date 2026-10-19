@@ -1,0 +1,128 @@
+[
+  {
+    "name": "voice-validation",
+    "status": "DETECTED",
+    "command": [
+      "go",
+      "test",
+      "./internal/discord",
+      "-run",
+      "TestQualityVoiceBoundary",
+      "-count=1",
+      "-timeout=30s"
+    ],
+    "output": "--- FAIL: TestQualityVoiceBoundary (0.00s)\n    --- FAIL: TestQualityVoiceBoundary/summon/absent (0.00s)\npanic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]\n[signal SIGSEGV: segmentation violation code=0x1 addr=0x0 pc=0x9dbb2a]\n\ngoroutine 9 [running]:\ntesting.tRunner.func1.2({0x107e3a8, 0x11b1470})\n\t/usr/lib/go/src/testing/testing.go:2123 +0x232\ntesting.tRunner.func1()\n\t/usr/lib/go/src/testing/testing.go:2126 +0x329\npanic({0x107e3a8?, 0x11b1470?})\n\t/usr/lib/go/src/runtime/panic.go:859 +0x125\nwhiterun/internal/discord.(*Bot).commandAt(0x21990cb565a0, 0x21990cb2f930, {0x1132ad8?, 0x11bd2c0?, 0x11c6e00?})\n\t/tmp/bard-quality-mutation-cvxj10e7/internal/discord/commands.go:152 +0x188a\nwhiterun/internal/discord.(*Bot).command(0x21990cb565a0, 0x21990cb2f930)\n\t/tmp/bard-quality-mutation-cvxj10e7/internal/discord/commands.go:42 +0x35\nwhiterun/internal/discord.TestQualityVoiceBoundary.func1(0x21990cb646c8)\n\t/tmp/bard-quality-mutation-cvxj10e7/internal/discord/quality_contract_test.go:91 +0x265\ntesting.tRunner(0x21990cb646c8, 0x21990cb00f00)\n\t/usr/lib/go/src/testing/testing.go:2193 +0xea\ncreated by testing.(*T).Run in goroutine 8\n\t/usr/lib/go/src/testing/testing.go:2258 +0x4d4\nFAIL\twhiterun/internal/discord\t0.004s\nFAIL\n"
+  },
+  {
+    "name": "queue-order",
+    "status": "DETECTED",
+    "command": [
+      "go",
+      "test",
+      "./internal/player",
+      "-run",
+      "TestQualityQueueModel",
+      "-count=1",
+      "-timeout=30s"
+    ],
+    "output": "--- FAIL: TestQualityQueueModel (0.01s)\n    --- FAIL: TestQualityQueueModel/size=17/seed=41 (0.00s)\n        quality_model_test.go:85: step 1 position 0 metadata/order changed\n    --- FAIL: TestQualityQueueModel/size=17/seed=20261019 (0.00s)\n        quality_model_test.go:85: step 1 position 0 metadata/order changed\n    --- FAIL: TestQualityQueueModel/size=500/seed=41 (0.00s)\n        quality_model_test.go:85: step 1 position 21 metadata/order changed\n    --- FAIL: TestQualityQueueModel/size=500/seed=20261019 (0.00s)\n        quality_model_test.go:85: step 1 position 25 metadata/order changed\n    --- FAIL: TestQualityQueueModel/size=1000/seed=41 (0.00s)\n        quality_model_test.go:85: step 1 position 42 metadata/order changed\n    --- FAIL: TestQualityQueueModel/size=1000/seed=20261019 (0.00s)\n        quality_model_test.go:85: step 1 position 60 metadata/order changed\nFAIL\nFAIL\twhiterun/internal/player\t0.007s\nFAIL\n"
+  },
+  {
+    "name": "capacity",
+    "status": "DETECTED",
+    "command": [
+      "go",
+      "test",
+      "./internal/player",
+      "-run",
+      "TestQualityTwentyProducers",
+      "-count=1",
+      "-timeout=30s"
+    ],
+    "output": "--- FAIL: TestQualityTwentyProducers (0.00s)\n    quality_model_test.go:154: capacity overflow accepted\nFAIL\nFAIL\twhiterun/internal/player\t0.003s\nFAIL\n"
+  },
+  {
+    "name": "cache-expiry",
+    "status": "DETECTED",
+    "command": [
+      "go",
+      "test",
+      "./internal/media",
+      "-run",
+      "TestQualityCacheBoundaries",
+      "-count=1",
+      "-timeout=30s"
+    ],
+    "output": "--- FAIL: TestQualityCacheBoundaries (0.00s)\n    --- FAIL: TestQualityCacheBoundaries/exact_expiry (0.00s)\n        quality_identity_test.go:112: hit=true want false\n    --- FAIL: TestQualityCacheBoundaries/after_expiry (0.00s)\n        quality_identity_test.go:112: hit=true want false\nFAIL\nFAIL\twhiterun/internal/media\t0.002s\nFAIL\n"
+  },
+  {
+    "name": "cache-alias",
+    "status": "DETECTED",
+    "command": [
+      "go",
+      "test",
+      "./internal/media",
+      "-run",
+      "TestQualityCacheBoundaries",
+      "-count=1",
+      "-timeout=30s"
+    ],
+    "output": "--- FAIL: TestQualityCacheBoundaries (0.00s)\n    --- FAIL: TestQualityCacheBoundaries/before_expiry (0.00s)\n        quality_identity_test.go:119: shared mutable metadata\nFAIL\nFAIL\twhiterun/internal/media\t0.002s\nFAIL\n"
+  },
+  {
+    "name": "isrc-contradiction",
+    "status": "DETECTED",
+    "command": [
+      "go",
+      "test",
+      "./internal/media",
+      "-run",
+      "TestQualityIdentityMatrix",
+      "-count=1",
+      "-timeout=30s"
+    ],
+    "output": "--- FAIL: TestQualityIdentityMatrix (0.00s)\n    --- FAIL: TestQualityIdentityMatrix/wrong_ISRC (0.00s)\n        quality_identity_test.go:60: got {Status:MATCH_CONFIRMED Reason:verified_artist_and_identity Score:840} want MATCH_REJECTED\nFAIL\nFAIL\twhiterun/internal/media\t0.005s\nFAIL\n"
+  },
+  {
+    "name": "version-contradiction",
+    "status": "DETECTED",
+    "command": [
+      "go",
+      "test",
+      "./internal/media",
+      "-run",
+      "TestQualityIdentityMatrix",
+      "-count=1",
+      "-timeout=30s"
+    ],
+    "output": "--- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision (0.00s)\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/title/Live (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:823}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/title/Remix (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:823}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/title/Acoustic (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:823}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/title/Instrumental (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:823}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/title/Karaoke (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:823}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/title/Cover (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:823}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/title/Remastered_2020 (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:811}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/title/Slowed (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:823}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/title/Sped_Up (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:811}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/album/Live (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:840}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/album/Remix (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:840}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/album/Acoustic (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:840}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/album/Instrumental (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:840}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/album/Karaoke (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:840}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/album/Cover (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:840}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/album/Remastered_2020 (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:840}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/album/Slowed (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:840}\n    --- FAIL: TestQualityIdentityMatrixVersionIndependentOfTitlePrecision/album/Sped_Up (0.00s)\n        quality_identity_test.go:177: version guard bypassed: {Status:MATCH_CONFIRMED Reason:matching_isrc_and_identity Score:840}\nFAIL\nFAIL\twhiterun/internal/media\t0.003s\nFAIL\n"
+  },
+  {
+    "name": "history-restart",
+    "status": "DETECTED",
+    "command": [
+      "go",
+      "test",
+      "./internal/storage",
+      "-run",
+      "TestQualitySQLiteRestart",
+      "-count=1",
+      "-timeout=30s"
+    ],
+    "output": "--- FAIL: TestQualitySQLiteRestart (0.02s)\n    --- FAIL: TestQualitySQLiteRestart/0 (0.00s)\n        quality_failure_test.go:90: restart lost state: <nil>\n    --- FAIL: TestQualitySQLiteRestart/1 (0.00s)\n        quality_failure_test.go:90: restart lost state: <nil>\n    --- FAIL: TestQualitySQLiteRestart/500 (0.01s)\n        quality_failure_test.go:90: restart lost state: <nil>\n    --- FAIL: TestQualitySQLiteRestart/1000 (0.01s)\n        quality_failure_test.go:90: restart lost state: <nil>\nFAIL\nFAIL\twhiterun/internal/storage\t0.024s\nFAIL\n"
+  },
+  {
+    "name": "mapping-invalidation",
+    "status": "DETECTED",
+    "command": [
+      "go",
+      "test",
+      "./internal/storage",
+      "-run",
+      "TestSQLiteReopenAndMappingInvalidation",
+      "-count=1",
+      "-timeout=30s"
+    ],
+    "output": "--- FAIL: TestSQLiteReopenAndMappingInvalidation (0.00s)\n    sqlite_test.go:118: deleted mapping reused\nFAIL\nFAIL\twhiterun/internal/storage\t0.003s\nFAIL\n"
+  }
+]

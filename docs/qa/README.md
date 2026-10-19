@@ -33,10 +33,19 @@ Orçamento de cenários significativos (planejamento, não resultado): player/fi
 - Completo local: go test ./... -count=1
 - Race: go test -race ./... -count=1
 - Estática: go vet ./...
-- Cobertura: go test ./... -count=1 -covermode=atomic -coverprofile=/tmp/bard.cover
+- Cobertura: go test ./... -count=1 -coverpkg=./... -covermode=atomic -coverprofile=/tmp/bard.cover
 - Detalhe: go tool cover -func=/tmp/bard.cover
 - Stress P0: go test -race ./internal/player ./internal/media ./internal/storage ./internal/discord -run Quality -count=20 -timeout=5m
 - Mutação: python3 scripts/qa_mutations.py
 - Performance: go test ./internal/player -run '^$' -bench Quality -benchmem -count=5
 
 A suíte atual mistura testes rápidos e integração local; -short ainda não separa todos os testes FFmpeg existentes. Não alegar separação completa por tags. Testes novos com Quality no nome permitem seleção incremental. Workflows existentes executam teste, race, vet, cobertura e SQLite; metadata externo é manual e não equivale a E2E Discord.
+
+
+## Resultado desta etapa
+
+916 casos finais aprovados (289 Quality novos); 9/9 mutantes detectados após fechar uma lacuna; race do helper REST encontrada, documentada e corrigida. Suíte completa, race, vet e stress passaram. Cobertura agregada com chamadas entre pacotes: 85,9%; metas 90%/95% ainda pendentes. Sem alteração de produção.
+
+Leitura: inventory.md, risk-traceability.md, coverage-report.md, mutation-report.md, concurrency-report.md, findings.md, integration-plan.md, e2e-plan.md, performance-plan.md e release-criteria.md. Evidências brutas em evidence/.
+
+O CI ganhou job separado de stress e mutação. Soak local é opt-in com -tags soak e BARD_QA_SOAK_DURATION; a suíte padrão não executa sessões prolongadas. E2E essencial e soak operacional impedem homologação de release neste momento.

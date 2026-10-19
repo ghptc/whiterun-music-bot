@@ -1,0 +1,5 @@
+=== RUN   TestQualitySoak
+    quality_soak_test.go:83: cycles=1091 elapsed=2.000639923s heap_before=414528 heap_after=474344 total_alloc_delta=1764064368 goroutines_before=3 goroutines_after=2 fd_before=7 fd_after=7
+--- PASS: TestQualitySoak (2.00s)
+PASS
+ok  	whiterun/internal/player	3.007s

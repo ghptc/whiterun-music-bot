@@ -1,0 +1,21 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/player
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor           
+BenchmarkQualitySnapshot/1-8 	 7431616	       189.7 ns/op	     770 B/op	       6 allocs/op
+BenchmarkQualitySnapshot/1-8 	 5572338	       209.7 ns/op	     770 B/op	       6 allocs/op
+BenchmarkQualitySnapshot/1-8 	 5328854	       217.2 ns/op	     770 B/op	       6 allocs/op
+BenchmarkQualitySnapshot/1-8 	 4733380	       215.0 ns/op	     770 B/op	       6 allocs/op
+BenchmarkQualitySnapshot/1-8 	 5081262	       203.5 ns/op	     770 B/op	       6 allocs/op
+BenchmarkQualitySnapshot/500-8         	   14521	     80594 ns/op	  794259 B/op	    2020 allocs/op
+BenchmarkQualitySnapshot/500-8         	   15022	     80404 ns/op	  794258 B/op	    2020 allocs/op
+BenchmarkQualitySnapshot/500-8         	   15206	     78388 ns/op	  794259 B/op	    2020 allocs/op
+BenchmarkQualitySnapshot/500-8         	   14310	     82753 ns/op	  794259 B/op	    2020 allocs/op
+BenchmarkQualitySnapshot/500-8         	   14797	     81317 ns/op	  794259 B/op	    2020 allocs/op
+BenchmarkQualitySnapshot/1000-8        	    3663	    306223 ns/op	 2359568 B/op	    4024 allocs/op
+BenchmarkQualitySnapshot/1000-8        	    4014	    303169 ns/op	 2359567 B/op	    4024 allocs/op
+BenchmarkQualitySnapshot/1000-8        	    4036	    307053 ns/op	 2359566 B/op	    4024 allocs/op
+BenchmarkQualitySnapshot/1000-8        	    3662	    308967 ns/op	 2359567 B/op	    4024 allocs/op
+BenchmarkQualitySnapshot/1000-8        	    3559	    313337 ns/op	 2359566 B/op	    4024 allocs/op
+PASS
+ok  	whiterun/internal/player	17.576s

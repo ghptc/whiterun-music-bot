@@ -1,0 +1,11 @@
+{
+  "passed_leaf_cases": 916,
+  "new_quality_leaf_cases": 289,
+  "per_package": {
+    "whiterun/internal/media": 421,
+    "whiterun/internal/player": 198,
+    "whiterun/internal/discord": 248,
+    "whiterun/internal/storage": 48,
+    "whiterun/cmd/bot": 1
+  }
+}

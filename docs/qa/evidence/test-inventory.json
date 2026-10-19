@@ -32,47 +32,47 @@
   {
     "file": "internal/discord/commands_test.go",
     "test": "TestCommandsRequireGuildAndVoice",
-    "line": 89
+    "line": 97
   },
   {
     "file": "internal/discord/commands_test.go",
     "test": "TestControlsAndSearchCancellation",
-    "line": 104
+    "line": 112
   },
   {
     "file": "internal/discord/commands_test.go",
     "test": "TestQueueResponseStaysWithinDiscordLimit",
-    "line": 138
+    "line": 146
   },
   {
     "file": "internal/discord/commands_test.go",
     "test": "TestPlayAcknowledgesWithContentBeforeGuildWork",
-    "line": 170
+    "line": 178
   },
   {
     "file": "internal/discord/commands_test.go",
     "test": "TestPlayCollectionAndClearCommands",
-    "line": 202
+    "line": 210
   },
   {
     "file": "internal/discord/commands_test.go",
     "test": "TestClearRegistered",
-    "line": 283
+    "line": 291
   },
   {
     "file": "internal/discord/commands_test.go",
     "test": "TestPauseResumeNowAndLeaveCommands",
-    "line": 292
+    "line": 300
   },
   {
     "file": "internal/discord/commands_test.go",
     "test": "TestNewCommandsRegisteredAndNowNeedsNoVoice",
-    "line": 336
+    "line": 344
   },
   {
     "file": "internal/discord/commands_test.go",
     "test": "TestSpotifyErrorsHideDiagnosticDetails",
-    "line": 352
+    "line": 360
   },
   {
     "file": "internal/discord/cr002_test.go",
@@ -203,6 +203,21 @@
     "file": "internal/discord/playback_integrity_test.go",
     "test": "TestBotRestoresGuildSettingsAndMetadataWithoutVoice",
     "line": 73
+  },
+  {
+    "file": "internal/discord/quality_contract_test.go",
+    "test": "TestQualityCommandRegistry",
+    "line": 15
+  },
+  {
+    "file": "internal/discord/quality_contract_test.go",
+    "test": "TestQualityVoiceBoundary",
+    "line": 75
+  },
+  {
+    "file": "internal/discord/quality_contract_test.go",
+    "test": "TestQualityAckFailure",
+    "line": 102
   },
   {
     "file": "internal/discord/quality_test.go",
@@ -708,6 +723,36 @@
     "file": "internal/media/progressive_test.go",
     "test": "TestMatchLimiterReservesFirstCapacityAndReleasesCanceledWaiters",
     "line": 9
+  },
+  {
+    "file": "internal/media/quality_identity_test.go",
+    "test": "TestQualityIdentityMatrix",
+    "line": 14
+  },
+  {
+    "file": "internal/media/quality_identity_test.go",
+    "test": "TestQualityFirstConfirmed",
+    "line": 65
+  },
+  {
+    "file": "internal/media/quality_identity_test.go",
+    "test": "TestQualityCacheBoundaries",
+    "line": 95
+  },
+  {
+    "file": "internal/media/quality_identity_test.go",
+    "test": "TestQualityRequestedVersions",
+    "line": 148
+  },
+  {
+    "file": "internal/media/quality_identity_test.go",
+    "test": "TestQualityIdentityMatrixVersionIndependentOfTitlePrecision",
+    "line": 162
+  },
+  {
+    "file": "internal/media/quality_identity_test.go",
+    "test": "TestQualityCacheInvalidation",
+    "line": 184
   },
   {
     "file": "internal/media/ranking_test.go",
@@ -1255,6 +1300,51 @@
     "line": 58
   },
   {
+    "file": "internal/player/quality_durable_test.go",
+    "test": "TestQualityDurableRecovery",
+    "line": 29
+  },
+  {
+    "file": "internal/player/quality_durable_test.go",
+    "test": "TestQualityDurableReadFailure",
+    "line": 78
+  },
+  {
+    "file": "internal/player/quality_model_test.go",
+    "test": "TestQualityQueueModel",
+    "line": 25
+  },
+  {
+    "file": "internal/player/quality_model_test.go",
+    "test": "TestQualityTwentyProducers",
+    "line": 101
+  },
+  {
+    "file": "internal/player/quality_ogg_test.go",
+    "test": "TestQualityOggTruncation",
+    "line": 10
+  },
+  {
+    "file": "internal/player/quality_ogg_test.go",
+    "test": "TestQualityOggPacketBoundaries",
+    "line": 30
+  },
+  {
+    "file": "internal/player/quality_ogg_test.go",
+    "test": "TestQualityOggConsumerFailure",
+    "line": 58
+  },
+  {
+    "file": "internal/player/quality_soak_test.go",
+    "test": "TestQualitySoak",
+    "line": 18
+  },
+  {
+    "file": "internal/player/quality_teardown_test.go",
+    "test": "TestQualityTeardownSerializesSuccessor",
+    "line": 13
+  },
+  {
     "file": "internal/player/reliability_test.go",
     "test": "TestTwoTracksNaturalEOFDeliverIndependentAudio",
     "line": 190
@@ -1423,6 +1513,31 @@
     "file": "internal/storage/mapping_test.go",
     "test": "TestFirstConfirmedMappingIsPersistedAndReused",
     "line": 107
+  },
+  {
+    "file": "internal/storage/quality_failure_test.go",
+    "test": "TestQualitySQLiteRollback",
+    "line": 15
+  },
+  {
+    "file": "internal/storage/quality_failure_test.go",
+    "test": "TestQualitySQLiteRestart",
+    "line": 59
+  },
+  {
+    "file": "internal/storage/quality_failure_test.go",
+    "test": "TestQualitySQLiteUnavailable",
+    "line": 102
+  },
+  {
+    "file": "internal/storage/quality_failure_test.go",
+    "test": "TestQualitySQLiteCorruption",
+    "line": 149
+  },
+  {
+    "file": "internal/storage/quality_failure_test.go",
+    "test": "TestQualitySQLiteConcurrentGuilds",
+    "line": 160
   },
   {
     "file": "internal/storage/sqlite_test.go",
