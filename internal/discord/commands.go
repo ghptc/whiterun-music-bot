@@ -35,7 +35,7 @@ func commands() []d.ApplicationCommandCreate {
 		}
 		result = append(result, command)
 	}
-	return result
+	return append(result, expansionCommands()...)
 }
 func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 	started := time.Now()
@@ -81,10 +81,30 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 		reply("Use one of the Bard's slash commands.")
 		return
 	}
+	if data.CommandName() == "help" {
+		b.replyHelp(e)
+		return
+	}
 	id := *e.GuildID()
+	if data.CommandName() == "history" {
+		limit := 10
+		if value, present := data.OptInt("limit"); present {
+			limit = value
+		}
+		reply(b.historyText(id.String(), limit))
+		return
+	}
 	g := b.getGuild(id)
 	if g == nil {
 		reply("The Bard is shutting down.")
+		return
+	}
+	if data.CommandName() == "lyrics" {
+		if g.player.State().Current == nil {
+			reply("The Bard is not playing.")
+		} else {
+			reply("Lyrics are unavailable: no licensed lyrics provider is configured.")
+		}
 		return
 	}
 	if data.CommandName() == "now" {
@@ -144,6 +164,41 @@ func (b *Bot) command(e *events.ApplicationCommandInteractionCreate) {
 		}
 	}
 	switch name {
+	case "remove", "move", "shuffle", "jump", "replay", "loop", "seek", "autoplay":
+		var err error
+		message := "Queue updated."
+		switch name {
+		case "remove":
+			err = g.player.Remove(data.Int("position"))
+		case "move":
+			err = g.player.Move(data.Int("from"), data.Int("to"))
+		case "shuffle":
+			err = g.player.Shuffle()
+		case "jump":
+			err = g.player.Jump(data.Int("position"))
+			message = "Jump requested."
+		case "replay":
+			err = g.player.Replay()
+			message = "Restart requested."
+		case "loop":
+			err = g.player.SetLoop(data.String("mode"))
+			message = "Loop mode: " + data.String("mode") + "."
+		case "seek":
+			err = g.player.Seek(data.String("position"))
+		case "autoplay":
+			enabled := data.Bool("enabled")
+			g.player.SetAutoplay(enabled)
+			message = "Autoplay disabled."
+			if enabled {
+				message = "Autoplay preference saved. Recommendations are unavailable: no supported recommendation provider is configured."
+			}
+		}
+		g.mu.Unlock()
+		if err != nil {
+			reply(err.Error())
+		} else {
+			reply(message)
+		}
 	case "summon":
 		g.mu.Unlock()
 		reply("The Bard answers your summons.")
