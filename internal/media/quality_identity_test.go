@@ -158,3 +158,49 @@ func TestQualityRequestedVersions(t *testing.T) {
 		})
 	}
 }
+
+func TestQualityIdentityMatrixVersionIndependentOfTitlePrecision(t *testing.T) {
+	for _, location := range []string{"title", "album"} {
+		for _, version := range []string{"Live", "Remix", "Acoustic", "Instrumental", "Karaoke", "Cover", "Remastered 2020", "Slowed", "Sped Up"} {
+			t.Run(location+"/"+version, func(t *testing.T) {
+				tr, c := qualityIdentity()
+				tr.Title = "The Long Road Through Winter Mountains"
+				c.Title = tr.Title
+				c.Track = tr.Title
+				if location == "title" {
+					c.Title += " (" + version + ")"
+					c.Track = c.Title
+				} else {
+					c.Album += " (" + version + ")"
+				}
+				if got := CompareSpotify(tr, c, DefaultMatchPolicy()); got.Status != MatchRejected || got.Reason != "version_or_semantic_mismatch" {
+					t.Fatalf("version guard bypassed: %+v", got)
+				}
+			})
+		}
+	}
+}
+
+func TestQualityCacheInvalidation(t *testing.T) {
+	for _, source := range []string{"spotify", "youtube"} {
+		t.Run(source, func(t *testing.T) {
+			tr, _ := qualityIdentity()
+			tr.RequestedSource = source
+			cache := &SearchCache{}
+			key := "spotify:" + MappingKey(tr, nil)
+			now := time.Now()
+			cache.put(key, tr, now)
+			cache.put("unrelated", Track{Title: "retained"}, now)
+			ctx, cancel := context.WithCancel(context.Background())
+			cancel()
+			(Resolver{Cache: cache}).InvalidateSpotify(ctx, tr)
+			_, hit := cache.get(key, now)
+			if hit != (source != "spotify") {
+				t.Fatal("wrong invalidation scope", hit)
+			}
+			if got, hit := cache.get("unrelated", now); !hit || got.Title != "retained" {
+				t.Fatal("unrelated entry invalidated")
+			}
+		})
+	}
+}
