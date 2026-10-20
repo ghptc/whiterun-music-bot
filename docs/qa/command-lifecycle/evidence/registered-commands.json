@@ -1,0 +1,307 @@
+[
+  {
+    "type": 1,
+    "name": "summon",
+    "description": "Summon the Bard to your voice channel.",
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "play",
+    "description": "Find a song and add it to the queue.",
+    "options": [
+      {
+        "type": 3,
+        "name": "query",
+        "description": "Song and artist, YouTube video/playlist, or Spotify track/playlist/album URL",
+        "required": true,
+        "max_length": 500
+      },
+      {
+        "type": 5,
+        "name": "force",
+        "description": "Play exactly this YouTube video; requires a video URL"
+      }
+    ],
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "now",
+    "description": "Show the current song.",
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "pause",
+    "description": "Pause the current song.",
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "resume",
+    "description": "Resume the current song.",
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "previous",
+    "description": "Play the previous song from the beginning.",
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "skip",
+    "description": "Skip the current song.",
+    "options": [
+      {
+        "type": 4,
+        "name": "count",
+        "description": "Tracks to skip, including the current track (default 1)",
+        "min_value": 1,
+        "max_value": 1001
+      }
+    ],
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "queue",
+    "description": "Show the current song and queue.",
+    "options": [
+      {
+        "type": 4,
+        "name": "limit",
+        "description": "Maximum upcoming tracks to show in one message",
+        "min_value": 1
+      },
+      {
+        "type": 4,
+        "name": "from",
+        "description": "First upcoming position (inclusive)",
+        "min_value": 1
+      },
+      {
+        "type": 4,
+        "name": "to",
+        "description": "Last upcoming position (inclusive)",
+        "min_value": 1
+      }
+    ],
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "clear",
+    "description": "Clear upcoming tracks without stopping playback.",
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "stop",
+    "description": "Stop playback and clear the queue.",
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "leave",
+    "description": "Dismiss the Bard and clear the queue.",
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "remove",
+    "description": "Remove an upcoming song.",
+    "options": [
+      {
+        "type": 4,
+        "name": "position",
+        "description": "Upcoming queue position",
+        "required": true,
+        "min_value": 1,
+        "max_value": 1000
+      }
+    ],
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "move",
+    "description": "Move an upcoming song.",
+    "options": [
+      {
+        "type": 4,
+        "name": "from",
+        "description": "Upcoming queue position",
+        "required": true,
+        "min_value": 1,
+        "max_value": 1000
+      },
+      {
+        "type": 4,
+        "name": "to",
+        "description": "Upcoming queue position",
+        "required": true,
+        "min_value": 1,
+        "max_value": 1000
+      }
+    ],
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "shuffle",
+    "description": "Shuffle upcoming songs.",
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "jump",
+    "description": "Skip directly to an upcoming song.",
+    "options": [
+      {
+        "type": 4,
+        "name": "position",
+        "description": "Upcoming queue position",
+        "required": true,
+        "min_value": 1,
+        "max_value": 1000
+      }
+    ],
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "replay",
+    "description": "Restart the current song.",
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "loop",
+    "description": "Choose song or queue repeat.",
+    "options": [
+      {
+        "type": 3,
+        "name": "mode",
+        "description": "Repeat mode",
+        "required": true,
+        "choices": [
+          {
+            "name": "off",
+            "value": "off"
+          },
+          {
+            "name": "track",
+            "value": "track"
+          },
+          {
+            "name": "queue",
+            "value": "queue"
+          }
+        ]
+      }
+    ],
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "seek",
+    "description": "Request a timestamp in the current song.",
+    "options": [
+      {
+        "type": 3,
+        "name": "position",
+        "description": "MM:SS or HH:MM:SS",
+        "required": true,
+        "max_length": 16
+      }
+    ],
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "autoplay",
+    "description": "Set automatic recommendation preference.",
+    "options": [
+      {
+        "type": 5,
+        "name": "enabled",
+        "description": "Enable automatic recommendations when available",
+        "required": true
+      }
+    ],
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "lyrics",
+    "description": "Check lyrics availability for the current song.",
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "history",
+    "description": "Show recently played songs.",
+    "options": [
+      {
+        "type": 4,
+        "name": "limit",
+        "description": "Recent songs (default 10)",
+        "min_value": 1,
+        "max_value": 20
+      }
+    ],
+    "contexts": [
+      0
+    ]
+  },
+  {
+    "type": 1,
+    "name": "help",
+    "description": "Read the Bard's repertoire.",
+    "contexts": [
+      0
+    ]
+  }
+]
