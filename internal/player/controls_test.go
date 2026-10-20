@@ -20,10 +20,12 @@ func TestQueueEditsModelAndMutation(t *testing.T) {
 	p := New(context.Background(), slog.New(slog.NewTextHandler(io.Discard, nil)), nil)
 	defer p.Close(context.Background())
 	model := []int{}
+	p.mu.Lock()
 	for i := 0; i < 100; i++ {
 		model = append(model, i)
 		p.queue = append(p.queue, queueEntry{Track: media.Track{Title: fmt.Sprint(i), RequestedBy: "traveler", Artists: []string{"artist"}}, Pending: i%2 == 0, position: i, jobID: 7})
 	}
+	p.mu.Unlock()
 	rng := rand.New(rand.NewPCG(55, 91))
 	for len(model) > 0 {
 		from, to := rng.IntN(len(model)), rng.IntN(len(model))
@@ -88,9 +90,11 @@ func TestQueueEditsModelAndMutation(t *testing.T) {
 func TestConcurrentQueueControls(t *testing.T) {
 	p := New(context.Background(), slog.New(slog.NewTextHandler(io.Discard, nil)), nil)
 	defer p.Close(context.Background())
+	p.mu.Lock()
 	for i := 0; i < 200; i++ {
 		p.queue = append(p.queue, queueEntry{Track: media.Track{Title: fmt.Sprint(i)}})
 	}
+	p.mu.Unlock()
 	var wg sync.WaitGroup
 	for i := 0; i < 12; i++ {
 		wg.Go(func() {

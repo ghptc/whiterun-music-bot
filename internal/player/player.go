@@ -3,6 +3,7 @@ package player
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"sync"
 	"time"
@@ -21,6 +22,10 @@ type PlayFunc func(context.Context, media.Track, Voice) error
 const MaxQueueTracks = 1000
 
 type GuildPlayer struct {
+	diagnostics      *diagnostics
+	queueVersion     uint64
+	lastSignal       string
+	sessionID        string
 	loop             string
 	autoplay         bool
 	store            Store
@@ -61,10 +66,20 @@ type GuildPlayer struct {
 func New(ctx context.Context, log *slog.Logger, play PlayFunc) *GuildPlayer {
 	ctx, cancel := context.WithCancel(ctx)
 	p := &GuildPlayer{ctx: ctx, cancel: cancel, done: make(chan struct{}), wake: make(chan struct{}, 1), log: log, play: play, providerChanged: make(chan struct{})}
+	p.sessionID = fmt.Sprintf("%d", time.Now().UnixNano())
+	p.diagnostics = newDiagnostics(log)
 	go p.run()
 	return p
 }
-func (p *GuildPlayer) signal() {
+
+// signal callers hold mu (including notification provenance).
+func (p *GuildPlayer) signal(reasons ...string) {
+	p.lastSignal = "queue_changed"
+	if len(reasons) > 0 {
+		p.lastSignal = reasons[0]
+	}
+	p.diagnosticLocked(slog.LevelDebug, "scheduler_notification", "wakeup_reason", p.lastSignal)
+
 	select {
 	case p.wake <- struct{}{}:
 	default:
@@ -81,6 +96,7 @@ func (p *GuildPlayer) Attach(v Voice) error {
 	}
 	p.voice = v
 	p.generation++
+	p.mutationLocked("generation_changed")
 	p.signal()
 	return nil
 }
@@ -95,6 +111,7 @@ func (p *GuildPlayer) EnqueueMany(tracks []media.Track, ticket uint64) error {
 	defer p.mu.Unlock()
 	defer p.persistLocked()
 	if p.ctx.Err() != nil || p.voice == nil || ticket != p.generation {
+		p.diagnosticLocked(slog.LevelInfo, "queue_generation_rejected", "requested_generation", ticket, "reason", "stale_or_canceled")
 		return errors.New("Playback changed while searching. Ask the Bard again.")
 	}
 	if len(tracks) > MaxQueueTracks-len(p.queue) {
@@ -108,7 +125,8 @@ func (p *GuildPlayer) EnqueueMany(tracks []media.Track, ticket uint64) error {
 		}
 		p.queue = append(p.queue, queueEntry{Track: copyTrack(track), position: track.Position - 1})
 	}
-	p.signal()
+	p.mutationLocked("enqueue", "added_count", len(tracks))
+	p.signal("queue_insert")
 	return nil
 }
 func (p *GuildPlayer) Skip() bool {
@@ -124,7 +142,10 @@ func (p *GuildPlayer) Stop() {
 	p.loop = "off"
 	p.halted, p.failures = false, 0
 	p.generation++
+	p.mutationLocked("generation_changed")
 	p.cancelTrackLocked("stop")
+	p.mutationLocked("stop")
+	p.signal("stop")
 	p.persistLocked()
 }
 
@@ -140,7 +161,10 @@ func (p *GuildPlayer) Leave(ctx context.Context) {
 	p.loop = "off"
 	p.halted, p.failures = false, 0
 	p.generation++
+	p.mutationLocked("generation_changed")
 	p.cancelTrackLocked("leave")
+	p.mutationLocked("leave")
+	p.signal("leave")
 	p.persistLocked()
 	done := p.trackDone
 	p.mu.Unlock()
@@ -162,6 +186,11 @@ func (p *GuildPlayer) Close(ctx context.Context) {
 	p.Leave(ctx)
 	<-p.done
 	p.jobWorkers.Wait()
+	p.diagnostics.stopOnce.Do(func() { close(p.diagnostics.stop) })
+	select {
+	case <-p.diagnostics.done:
+	case <-time.After(time.Second):
+	}
 }
 func (p *GuildPlayer) run() {
 	defer close(p.done)
@@ -172,14 +201,12 @@ func (p *GuildPlayer) run() {
 			p.mu.Unlock()
 			return
 		}
-		if p.voice == nil || p.halted || p.providerBlocked || len(p.queue) == 0 || p.queue[0].Pending {
+		if reason, _ := p.schedulerReasonLocked(); reason != "ready" {
 			p.mu.Unlock()
-			select {
-			case <-p.ctx.Done():
+			if !p.schedulerWait() {
 				return
-			case <-p.wake:
-				continue
 			}
+			continue
 		}
 		entry := p.queue[0]
 		t := entry.Track
@@ -190,11 +217,17 @@ func (p *GuildPlayer) run() {
 		cancel := sync.OnceFunc(func() { cause(context.Canceled) })
 		p.trackCause = cause
 		p.sequence++
+		p.diagnosticLocked(slog.LevelInfo, "scheduler_advance", "collection_id", entry.jobID, "position", t.Position, "queue_position", 1, "spotify_id", t.SpotifyID, "video_id", t.VideoID)
 		sequence := p.sequence
+		attemptFields := []any{"playback_attempt_id", fmt.Sprintf("%s/%d", p.sessionID, sequence), "collection_id", entry.jobID, "queue_generation", p.generation, "queue_version", p.queueVersion}
+		if p.guildID != "" {
+			attemptFields = append(attemptFields, "guild_id", p.guildID)
+		}
 		if t.Timing != nil {
+			t.Timing = t.Timing.Child(attemptFields...)
 			t.Timing = t.Timing.Child("sequence", sequence, "spotify_id", t.SpotifyID, "position", t.Position, "video_id", t.VideoID)
 		} else {
-			t.Timing = media.NewTiming(p.log.With("sequence", sequence, "spotify_id", t.SpotifyID, "position", t.Position, "video_id", t.VideoID))
+			t.Timing = media.NewTiming(p.log.With(attemptFields...).With("sequence", sequence, "spotify_id", t.SpotifyID, "position", t.Position, "video_id", t.VideoID))
 		}
 		done := make(chan struct{})
 		p.trackDone = done
@@ -206,8 +239,9 @@ func (p *GuildPlayer) run() {
 		p.persistLocked()
 		p.mu.Unlock()
 		started := time.Now()
-		p.log.Info("next_track_selected", "sequence", sequence, "collection_id", entry.jobID, "position", t.Position, "spotify_id", t.SpotifyID, "title", t.Title, "video_id", t.VideoID)
-		p.log.Info("track_playback_start", "sequence", sequence, "position", t.Position, "video_id", t.VideoID)
+		attemptLog := p.log.With(attemptFields...)
+		attemptLog.Info("next_track_selected", "sequence", sequence, "collection_id", entry.jobID, "position", t.Position, "spotify_id", t.SpotifyID, "title", t.Title, "video_id", t.VideoID)
+		attemptLog.Info("track_playback_start", "sequence", sequence, "position", t.Position, "video_id", t.VideoID)
 		err := callPlay(p.play, ctx, t, &startVoice{Voice: v, start: func() { p.announceStart(ctx, t, sequence) }, metadata: func(resolved media.Track) {
 			p.mu.Lock()
 			defer p.mu.Unlock()
@@ -220,7 +254,7 @@ func (p *GuildPlayer) run() {
 		if ctx.Err() != nil {
 			category = "canceled"
 		}
-		p.log.Info("track_playback_end", "sequence", sequence, "position", t.Position, "title", t.Title, "video_id", t.VideoID, "elapsed_ms", time.Since(started).Milliseconds(), "category", category, "cancel_reason", context.Cause(ctx), "error", err)
+		attemptLog.Info("track_playback_end", "sequence", sequence, "position", t.Position, "title", t.Title, "video_id", t.VideoID, "elapsed_ms", time.Since(started).Milliseconds(), "category", category, "cancel_reason", context.Cause(ctx), "error", err)
 		expectedCancel := ctx.Err() != nil
 		cancel()
 		p.mu.Lock()
@@ -232,7 +266,7 @@ func (p *GuildPlayer) run() {
 		} else if err != nil {
 			terminal = Failed
 		}
-		p.log.Info("playback_attempt_terminal", "sequence", sequence, "spotify_id", t.SpotifyID, "position", t.Position, "state", terminal, "started", played)
+		attemptLog.Info("playback_attempt_terminal", "sequence", sequence, "spotify_id", t.SpotifyID, "position", t.Position, "state", string(terminal), "started", played)
 		if !expectedCancel && err == nil && played && len(p.queue) < MaxQueueTracks {
 			repeatedTrack := t
 			if p.current != nil {
@@ -254,12 +288,12 @@ func (p *GuildPlayer) run() {
 		p.trackCause = nil
 		if err != nil && !expectedCancel {
 			p.failures++
-			p.log.Warn("track_unavailable", "sequence", sequence, "spotify_id", t.SpotifyID, "video_id", t.VideoID, "position", t.Position, "state", "unavailable", "reason", category, "consecutive_failures", p.failures, "action", "advance_in_original_order")
+			attemptLog.Warn("track_unavailable", "sequence", sequence, "spotify_id", t.SpotifyID, "video_id", t.VideoID, "position", t.Position, "state", "unavailable", "reason", category, "consecutive_failures", p.failures, "action", "advance_in_original_order")
 		} else {
 			p.failures = 0
 		}
 		ready, pending := p.queueCountsLocked()
-		p.log.Info("player_transition", "sequence", sequence, "ready", ready, "pending", pending, "halted", p.halted, "provider_blocked", p.providerBlocked, "state", "transitioning", "next_pending", len(p.queue) > 0 && p.queue[0].Pending)
+		attemptLog.Info("player_transition", "sequence", sequence, "ready", ready, "pending", pending, "halted", p.halted, "provider_blocked", p.providerBlocked, "state", "transitioning", "next_pending", len(p.queue) > 0 && p.queue[0].Pending)
 		if p.ctx.Err() == nil {
 			p.persistLocked()
 		}
@@ -321,6 +355,6 @@ func (p *GuildPlayer) blockProviderAt(job *CollectionJob, position int, category
 		job.blockedPosition = position
 	}
 	p.blockProviderLocked(category)
+	p.signal("provider_blocked")
 	p.mu.Unlock()
-	p.signal()
 }

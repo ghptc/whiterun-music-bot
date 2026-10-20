@@ -3,6 +3,7 @@ package player
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"sort"
 
 	"whiterun/internal/media"
@@ -77,6 +78,8 @@ func (p *GuildPlayer) Clear() int {
 	n := len(p.queue)
 	p.cancelJobsLocked()
 	p.generation++
+	p.mutationLocked("clear", "invalidated_count", n)
+	p.signal("clear")
 	p.queue = nil
 	p.loop = "off"
 	p.halted, p.failures = false, 0
@@ -128,7 +131,8 @@ func (p *GuildPlayer) SkipN(count int) (SkipResult, error) {
 		result.NextPending = p.queue[0].Pending
 		result.Next = &next
 	}
-	p.signal()
+	p.mutationLocked("skip", "skipped_count", result.Skipped)
+	p.signal("skip")
 	return result, nil
 }
 
@@ -138,6 +142,7 @@ func (p *GuildPlayer) cancelTrackLocked(reason ...string) {
 	if len(reason) > 0 {
 		why = reason[0]
 	}
+	p.diagnosticLocked(slog.LevelInfo, "playback_cancel_requested", "cancel_reason", why)
 	if p.trackCause != nil {
 		p.trackCause(errors.New(why))
 	}

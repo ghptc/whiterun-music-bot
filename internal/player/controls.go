@@ -2,6 +2,7 @@ package player
 
 import (
 	"errors"
+	"log/slog"
 	"math/rand/v2"
 	"strconv"
 	"strings"
@@ -17,10 +18,12 @@ func (p *GuildPlayer) Remove(position int) error {
 		return errors.New("Choose an upcoming queue position.")
 	}
 	i := position - 1
-	p.discardEntryLocked(p.queue[i])
+	entry := p.queue[i]
+	p.discardEntryLocked(entry)
+	p.mutationLocked("remove", "collection_id", entry.jobID, "position", entry.Track.Position, "queue_position", position)
 	p.queue = append(p.queue[:i], p.queue[i+1:]...)
 	p.persistLocked()
-	p.signal()
+	p.signal("remove")
 	return nil
 }
 func (p *GuildPlayer) Move(from, to int) error {
@@ -37,8 +40,9 @@ func (p *GuildPlayer) Move(from, to int) error {
 		copy(p.queue[j+1:i+1], p.queue[j:i])
 	}
 	p.queue[j] = entry
+	p.mutationLocked("move", "collection_id", entry.jobID, "position", entry.Track.Position, "from_queue_position", from, "to_queue_position", to)
 	p.persistLocked()
-	p.signal()
+	p.signal("move")
 	return nil
 }
 func (p *GuildPlayer) Shuffle() error {
@@ -47,9 +51,12 @@ func (p *GuildPlayer) Shuffle() error {
 	if len(p.queue) == 0 {
 		return errors.New("The queue is empty.")
 	}
+	p.diagnosticLocked(slog.LevelInfo, "shuffle_started", "queue_size", len(p.queue))
 	rand.Shuffle(len(p.queue), func(i, j int) { p.queue[i], p.queue[j] = p.queue[j], p.queue[i] })
+	p.mutationLocked("shuffle")
+	p.diagnosticLocked(slog.LevelInfo, "shuffle_completed", "queue_size", len(p.queue))
 	p.persistLocked()
-	p.signal()
+	p.signal("shuffle")
 	return nil
 }
 func (p *GuildPlayer) Jump(position int) error {
@@ -58,6 +65,7 @@ func (p *GuildPlayer) Jump(position int) error {
 	if position < 1 || position > len(p.queue) {
 		return errors.New("Choose an upcoming queue position.")
 	}
+	p.mutationLocked("jump", "queue_position", position)
 	p.cancelTrackLocked("jump")
 	for _, entry := range p.queue[:position-1] {
 		p.discardEntryLocked(entry)
@@ -65,7 +73,7 @@ func (p *GuildPlayer) Jump(position int) error {
 	clear(p.queue[:position-1])
 	p.queue = p.queue[position-1:]
 	p.persistLocked()
-	p.signal()
+	p.signal("jump")
 	return nil
 }
 func (p *GuildPlayer) Replay() error {

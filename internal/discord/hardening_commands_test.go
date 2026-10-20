@@ -190,6 +190,10 @@ func TestHardeningReplyFailureIsReported(t *testing.T) {
 				b.client.Rest = &queueUpdateFailureRest{Rest: r}
 			}
 			b.command(qualityInteraction(t, "lyrics", 3, ""))
+			// Finish asynchronous player diagnostics before reading the buffer.
+			for _, g := range b.guilds {
+				g.player.Close(context.Background())
+			}
 			if strings.Contains(logs.String(), "command response failed") != failure {
 				t.Fatalf("response delivery health misreported: %s", logs.String())
 			}

@@ -3,6 +3,7 @@ package player
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"sync"
 )
 
@@ -73,19 +74,23 @@ func (p *GuildPlayer) SetPaused(paused bool) (bool, error) {
 		p.providerChanged = make(chan struct{})
 		p.failures = 0
 		p.log.Info("provider_playback_recovery_requested", "provider", "youtube", "previous_category", reason, "action", "retry same logical position")
-		p.signal()
+		p.signal("resume")
 		return true, nil
 	}
 	if !paused && p.halted {
 		p.halted = false
 		p.failures = 0
-		p.signal()
+		p.signal("resume")
 		return true, nil
 	}
 	if p.current == nil || p.pause == nil || p.ctx.Err() != nil {
 		return false, errors.New("The Bard is not playing.")
 	}
-	return p.pause.set(paused), nil
+	changed := p.pause.set(paused)
+	if changed {
+		p.diagnosticLocked(slog.LevelInfo, "playback_pause_changed", "paused", paused, "expected_event", "resume_or_cancel")
+	}
+	return changed, nil
 }
 
 // A stopped or detached session must not carry a provider latch into a fresh one.

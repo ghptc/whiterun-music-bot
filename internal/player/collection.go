@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -69,6 +70,7 @@ func (p *GuildPlayer) BeginCollection(parent context.Context, c media.Collection
 	defer p.mu.Unlock()
 	defer p.persistLocked()
 	if p.ctx.Err() != nil || parent.Err() != nil || p.voice == nil || ticket != p.generation {
+		p.diagnosticLocked(slog.LevelInfo, "queue_generation_rejected", "requested_generation", ticket, "reason", "stale_or_canceled")
 		return nil, errors.New("Playback changed while searching. Ask the Bard again.")
 	}
 	if len(c.Tracks) == 0 || len(c.Tracks) > media.MaxCollectionTracks || match == nil {
@@ -96,10 +98,11 @@ func (p *GuildPlayer) BeginCollection(parent context.Context, c media.Collection
 		p.jobs = make(map[uint64]*CollectionJob)
 	}
 	p.jobs[j.progress.ID] = j
+	p.mutationLocked("reserve", "collection_id", j.progress.ID, "reserved_count", len(c.Tracks))
 	stop := context.AfterFunc(p.ctx, cancel)
 	p.jobWorkers.Add(1)
 	go func() { defer p.jobWorkers.Done(); defer stop(); j.run() }()
-	p.signal()
+	p.signal("positions_reserved")
 	return j, nil
 }
 func (p *GuildPlayer) cancelJobsLocked() {
@@ -173,7 +176,6 @@ func (j *CollectionJob) resolve(index int, first bool) collectionResolution {
 	if ctx.Err() != nil {
 		err = ctx.Err()
 	}
-	j.event("track_resolution_complete", started, "spotify_id", j.metadata[index].SpotifyID, "video_id", track.VideoID, "position", index+1, "error", err, "cancel_reason", context.Cause(ctx))
 
 	p.mu.Lock()
 	skipped := !j.wanted[index]
@@ -182,6 +184,7 @@ func (j *CollectionJob) resolve(index int, first bool) collectionResolution {
 	p.mu.Unlock()
 	cancel()
 	if blocked {
+		j.event("track_resolution_discarded", started, "position", index+1, "reason", "provider_blocked")
 		return collectionResolution{index: index, blocked: true}
 	}
 	if err == nil && j.metadata[index].SpotifyID != "" && track.SpotifyID != j.metadata[index].SpotifyID {
@@ -190,6 +193,14 @@ func (j *CollectionJob) resolve(index int, first bool) collectionResolution {
 	if err == nil && track.URL == "" {
 		err = media.ErrSpotifyMatch
 	}
+	outcome := "ready"
+	if err != nil {
+		outcome = resolutionFailure(err)
+	}
+	if skipped {
+		outcome = "discarded"
+	}
+	j.event("track_resolution_complete", started, "position", j.metadata[index].Position, "spotify_id", j.metadata[index].SpotifyID, "video_id", track.VideoID, "outcome", outcome, "cancel_reason", context.Cause(ctx))
 	track.Timing = media.TimingFrom(j.ctx)
 	track.Position, track.Total = j.metadata[index].Position, j.metadata[index].Total
 	return collectionResolution{index: index, track: track, err: err, skipped: skipped}
@@ -214,12 +225,10 @@ func (j *CollectionJob) waitForProvider() error {
 	return err
 }
 func (j *CollectionJob) event(name string, start time.Time, fields ...any) {
-	fields = append([]any{"stage", name, "collection_id", j.progress.ID}, fields...)
-	if timing := media.TimingFrom(j.ctx); timing != nil {
-		timing.Event(name, start, fields...)
-	} else if j.player.log != nil {
-		j.player.log.Info(name, append(fields, "elapsed_ms", time.Since(start).Milliseconds())...)
-	}
+	p := j.player
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.diagnosticLocked(slog.LevelInfo, name, append([]any{"collection_id", j.progress.ID, "elapsed_ms", time.Since(start).Milliseconds()}, fields...)...)
 }
 
 // commit updates/removes existing slots; it never appends. A skip/clear/stop can
@@ -230,13 +239,16 @@ func (j *CollectionJob) commit(results []collectionResolution) bool {
 	defer p.mu.Unlock()
 	defer p.persistLocked()
 	if j.ctx.Err() != nil {
+		p.diagnosticLocked(slog.LevelInfo, "resolution_commit_discarded", "collection_id", j.progress.ID, "reason", "canceled", "cancel_reason", context.Cause(j.ctx))
 		return false
 	}
 	for _, r := range results {
+		found := false
 		for i, entry := range p.queue {
 			if entry.jobID != j.progress.ID || entry.position != r.index {
 				continue
 			}
+			found = true
 			if r.err != nil || r.skipped {
 				p.queue = append(p.queue[:i], p.queue[i+1:]...)
 				j.wanted[r.index] = false
@@ -244,10 +256,15 @@ func (j *CollectionJob) commit(results []collectionResolution) bool {
 				p.queue[i].Track = copyTrack(r.track)
 				p.queue[i].Pending = false
 			}
+			p.queueVersion++
+			p.diagnosticLocked(slog.LevelInfo, "resolution_position_commit", "collection_id", j.progress.ID, "position", entry.Track.Position, "queue_position", i+1, "spotify_id", entry.SpotifyID, "video_id", r.track.VideoID, "playback_eligible", r.err == nil && !r.skipped, "scheduler_notified", true)
 			break
 		}
+		if !found {
+			p.diagnosticLocked(slog.LevelInfo, "resolution_commit_discarded", "collection_id", j.progress.ID, "position", r.index+1, "reason", "position_invalidated")
+		}
 	}
-	p.signal()
+	p.signal("resolution_commit")
 	return true
 }
 func (j *CollectionJob) record(r collectionResolution) {
@@ -371,10 +388,12 @@ func (j *CollectionJob) run() {
 			return
 		}
 		if len(indexes) == 0 {
+			j.event("resolver_window_wait", time.Now(), "reason", "prefetch_window_ready", "expected_event", "queue_window_changed", "pending_count", remaining)
 			select {
 			case <-j.ctx.Done():
 				return
 			case <-j.wake:
+				j.event("resolver_window_wakeup", time.Now(), "wakeup_reason", "queue_window_changed")
 			}
 			continue
 		}

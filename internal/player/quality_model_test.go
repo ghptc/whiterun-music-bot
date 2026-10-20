@@ -28,10 +28,12 @@ func TestQualityQueueModel(t *testing.T) {
 			t.Run(fmt.Sprintf("size=%d/seed=%d", size, seed), func(t *testing.T) {
 				p := qualityDetached(t)
 				model := make([]media.Track, size)
+				p.mu.Lock()
 				for i := range model {
 					model[i] = media.Track{Title: fmt.Sprint(i), Artists: []string{"artist", fmt.Sprint(i)}, RequestedBy: "listener", SpotifyID: fmt.Sprint(i), Position: i + 1, Total: size, Explicit: new(i%2 == 0)}
 					p.queue = append(p.queue, queueEntry{Track: media.CloneTrack(model[i])})
 				}
+				p.mu.Unlock()
 				rng := rand.New(rand.NewPCG(seed, seed+1))
 				for step := 0; step < 200 && len(model) > 0; step++ {
 					n := len(model)

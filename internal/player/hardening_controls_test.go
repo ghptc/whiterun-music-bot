@@ -153,8 +153,10 @@ func TestHardeningPreviousFillsQueueCapacity(t *testing.T) {
 
 func TestHardeningReplayRejectsFullQueue(t *testing.T) {
 	p := qualityDetached(t)
+	p.mu.Lock()
 	p.current = &media.Track{Title: "current"}
 	p.queue = make([]queueEntry, MaxQueueTracks)
+	p.mu.Unlock()
 	before := p.State()
 	if err := p.Replay(); err == nil {
 		t.Fatal("replay exceeded queue capacity")
