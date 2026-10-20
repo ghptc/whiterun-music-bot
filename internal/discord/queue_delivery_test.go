@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"whiterun/internal/media"
 )
 
 type queueTransport func(*http.Request) (*http.Response, error)
@@ -23,8 +24,13 @@ type queueFailRest struct {
 	updates   []d.MessageUpdate
 	followups []d.MessageCreate
 	failAt    int
+	creations int
 }
 
+func (r *queueFailRest) CreateMessage(_ snowflake.ID, _ d.MessageCreate, _ ...rest.RequestOpt) (*d.Message, error) {
+	r.creations++
+	return &d.Message{}, nil
+}
 func (r *queueFailRest) UpdateInteractionResponse(_ snowflake.ID, _ string, m d.MessageUpdate, _ ...rest.RequestOpt) (*d.Message, error) {
 	r.updates = append(r.updates, m)
 	return &d.Message{}, nil
@@ -36,50 +42,49 @@ func (r *queueFailRest) CreateFollowupMessage(_ snowflake.ID, _ string, m d.Mess
 	}
 	return &d.Message{}, nil
 }
-func TestQueuePartialDeliveryPreservesFirstCardAndReportsProgress(t *testing.T) {
-	for _, failAt := range []int{1, 2, 10} {
-		t.Run(fmt.Sprint(failAt), func(t *testing.T) {
-			b, r := testBot(t)
-			sender := &queueFailRest{Rest: r, failAt: failAt}
-			b.client.Rest = sender
-			b.replyQueue(interaction(t, "queue", true), queueFixture(500), nil)
-			if len(sender.followups) != failAt || len(sender.updates) != 2 {
-				t.Fatal("unexpected retry or continuation", len(sender.followups), len(sender.updates))
-			}
-			failure := sender.updates[1]
-			text := updateText(failure)
-			if !strings.Contains(text, fmt.Sprintf("Delivery incomplete · %d/500", failAt*queueBlockSize)) || !strings.Contains(text, "Song 0001") || len(failure.Files) != 0 || failure.Embeds != nil {
-				t.Fatal(text)
-			}
-		})
-	}
-}
-func TestQueueCompleteDeliveryUsesOneContainerPerBlock(t *testing.T) {
-	for _, n := range []int{1, 10, 20, 123, 500, 1000} {
+func TestQueueSingleMessageDelivery(t *testing.T) {
+	for _, n := range []int{1, 10, 11, 100, 300, 500, 1000} {
 		t.Run(fmt.Sprint(n), func(t *testing.T) {
 			b, r := testBot(t)
-			b.replyQueue(interaction(t, "queue", true), queueFixture(n), nil)
-			want := (n + queueBlockSize - 1) / queueBlockSize
-			if len(r.followups) != want-1 {
-				t.Fatal(len(r.followups), want)
+			sender := &queueFailRest{Rest: r}
+			b.client.Rest = sender
+			e := interaction(t, "queue", true)
+			originals := 0
+			e.Respond = func(typ d.InteractionResponseType, _ d.InteractionResponseData, _ ...rest.RequestOpt) error {
+				if typ != d.InteractionResponseTypeDeferredCreateMessage {
+					originals++
+				}
+				return nil
 			}
-			if len(r.update.Files) != 0 {
-				t.Fatal("unexpected attachment")
+			p := b.getGuild(1).player
+			if err := p.Attach(announcementVoice{}); err != nil {
+				t.Fatal(err)
+			}
+			tracks := make([]media.Track, n)
+			for i, entry := range queueFixture(n).Entries {
+				tracks[i] = entry.Track
+			}
+			done := []<-chan struct{}{}
+			for offset := 0; offset < n; offset += 100 {
+				job, err := p.BeginCollection(b.ctx, media.Collection{Tracks: tracks[offset:min(offset+100, n)]}, func(ctx context.Context, _ media.Track, _ bool) (media.Track, error) {
+					<-ctx.Done()
+					return media.Track{}, ctx.Err()
+				}, p.Ticket())
+				if err != nil {
+					t.Fatal(err)
+				}
+				done = append(done, job.Done)
+			}
+			b.command(e)
+			p.Clear()
+			for _, ch := range done {
+				<-ch
 			}
 
-			text := r.queueText()
-			for i := 1; i <= n; i++ {
-				if strings.Count(text, fmt.Sprintf("%d · **Song %04d**", i, i)) != 1 {
-					t.Fatal("omitted/duplicated position", i)
-				}
+			if originals > 1 || len(sender.updates) != 1 || len(sender.followups) != 0 || sender.creations != 0 {
+				t.Fatal(originals, len(sender.updates), len(sender.followups))
 			}
-
-			for _, message := range r.followups {
-				if len(message.Components) != 1 || len(message.Embeds) > 0 || len(message.Files) != 0 || message.Content != "" || message.Flags&d.MessageFlagIsComponentsV2 == 0 || message.Flags&d.MessageFlagEphemeral != 0 || message.AllowedMentions == nil {
-					t.Fatal(message)
-				}
-				assertV2Budget(t, message.Components[0].(d.ContainerComponent))
-			}
+			assertV2Budget(t, (*sender.updates[0].Components)[0].(d.ContainerComponent))
 		})
 	}
 }
@@ -90,6 +95,9 @@ func TestQueueRateLimitRetriesSameJSONBlock(t *testing.T) {
 	firstPayload := ""
 	client := rest.NewClient("fixture", rest.WithLogger(b.log), rest.WithHTTPClient(&http.Client{Transport: queueTransport(func(req *http.Request) (*http.Response, error) {
 		calls++
+		if req.Method != "PATCH" || !strings.HasSuffix(req.URL.Path, "/messages/@original") {
+			t.Fatal("extra message route", req.Method, req.URL.Path)
+		}
 		if _, ok := req.Context().Deadline(); !ok {
 			t.Fatal("unbounded REST call")
 		}
@@ -128,7 +136,7 @@ func TestQueueRateLimitRetriesSameJSONBlock(t *testing.T) {
 	b.client.Rest = rest.New(client)
 	b.replyQueue(interaction(t, "queue", true), queueFixture(13), nil)
 	// Original edit twice (429), one followup, one completion edit.
-	if calls != 4 {
+	if calls != 2 {
 		t.Fatal("unexpected requests", calls)
 	}
 }
@@ -147,7 +155,7 @@ func TestQueueLongRateLimitStopsWithoutBurst(t *testing.T) {
 	b.client.Rest = rest.New(client)
 	started := time.Now()
 	b.replyQueue(interaction(t, "queue", true), queueFixture(123), nil)
-	if calls != 1 || time.Since(started) > time.Second {
+	if calls < 1 || calls > 2 || time.Since(started) > time.Second {
 		t.Fatal("burst or waited beyond request budget", calls, time.Since(started))
 	}
 }
@@ -213,7 +221,7 @@ func TestQueuePersonalInstallRefusesOversizedDeliveryExplicitly(t *testing.T) {
 		t.Fatal(err)
 	}
 	b.replyQueue(e, queueFixture(123), nil)
-	if len(r.followups) != 0 || !strings.Contains(r.response, "Install the Bard in this server") {
+	if len(r.followups) != 0 || !strings.Contains(r.response, "positions displayed") {
 		t.Fatal(r.response)
 	}
 }
@@ -238,10 +246,14 @@ func BenchmarkQueueV2(b *testing.B) {
 type queueUpdateFailureRest struct {
 	rest.Rest
 	updates, followups int
+	failure            error
 }
 
 func (r *queueUpdateFailureRest) UpdateInteractionResponse(_ snowflake.ID, _ string, _ d.MessageUpdate, _ ...rest.RequestOpt) (*d.Message, error) {
 	r.updates++
+	if r.failure != nil {
+		return nil, r.failure
+	}
 	return nil, fmt.Errorf("controlled update failure")
 }
 func (r *queueUpdateFailureRest) CreateFollowupMessage(_ snowflake.ID, _ string, _ d.MessageCreate, _ ...rest.RequestOpt) (*d.Message, error) {
@@ -261,5 +273,15 @@ func TestQueueInitialSendAndNoticeFailureStopDelivery(t *testing.T) {
 	defer g.queueMu.Unlock()
 	if len(g.queueDeliveries) != 0 {
 		t.Fatal("failed delivery leaked")
+	}
+}
+
+func TestQueueTimeoutOnlyEditsOriginal(t *testing.T) {
+	b, r := testBot(t)
+	sender := &queueUpdateFailureRest{Rest: r, failure: context.DeadlineExceeded}
+	b.client.Rest = sender
+	b.replyQueue(interaction(t, "queue", true), queueFixture(1000), nil)
+	if sender.updates != 2 || sender.followups != 0 {
+		t.Fatal(sender.updates, sender.followups)
 	}
 }

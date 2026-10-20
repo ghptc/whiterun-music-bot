@@ -109,3 +109,25 @@ buildx was unavailable. Image `e00b82610a15` was built without restarting the bo
 Tests include nine-row block boundaries, current-only/small/full queues, complete
 delivery, limit handling, artwork fallback, URL preservation, heading/artist
 formatting and small separators only between songs.
+
+## CR-007 — P0: Single Message Only
+
+Cada execução de `/queue` usa uma única resposta de interação. O defer e as
+edições de `@original` são permitidos; follow-ups e continuação automática são
+proibidos, inclusive em falhas, timeout e HTTP 429.
+
+A mensagem respeita 40 componentes e 4.000 unidades UTF-16, com até 10 artworks
+e as demais músicas em texto compacto. O rodapé entra no orçamento antes de
+cada música. Título e artista são incluídos inteiros: se uma música não couber,
+a lista termina antes dela, sem elipse silenciosa. O rodapé informa posições
+exibidas, posições restantes na fila e a próxima posição do intervalo omitido.
+
+`/queue from:N to:N` seleciona posições inclusivas da fila futura; `/queue
+limit:N` limita a quantidade a partir de `from` (padrão 1). Combinar as opções
+aplica ambos os limites. A música atual não consome posição futura. Intervalos
+fora da fila exibem zero posições. Erros de entrega tentam somente editar a
+resposta original com um aviso conciso.
+
+Invariantes por interação: `original_response_count <= 1`,
+`followup_message_count == 0`, `automatic_continuation_count == 0`.
+Esta regra substitui as orientações anteriores de entrega em blocos.

@@ -2,6 +2,7 @@ package discord
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -27,7 +28,7 @@ func TestQueueNativeIndividualArtwork(t *testing.T) {
 	}
 	container := view.Blocks[0].Container
 	for i, track := range tracks {
-		row := container.Components[2*i+1]
+		row := container.Components[i+1]
 		if media.ArtworkURL(track) == "" {
 			if _, ok := row.(d.TextDisplayComponent); !ok {
 				t.Fatal("placeholder for absent art")
@@ -50,50 +51,61 @@ func TestQueueNativeIndividualArtwork(t *testing.T) {
 	}
 }
 
-func TestQueueCompactContinuations(t *testing.T) {
-	for _, n := range []int{1, 8, 9, 10, 18, 20, 123, 500} {
-		state := queueFixture(n)
-		state.Current = &media.Track{Title: "Current", Artist: "Artist", SpotifyArtworkURL: "https://art.example/current?size=48"}
-		view, err := buildQueueView(state, nil)
+func TestQueueCompactSingleMessage(t *testing.T) {
+	view, err := buildQueueView(queueFixture(1000), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(view.Blocks) != 1 || view.Shown <= 10 || view.Shown >= 1000 {
+		t.Fatal(view)
+	}
+	assertV2Budget(t, view.Blocks[0].Container)
+	art := 0
+	for _, c := range view.Blocks[0].Container.Components {
+		if _, ok := c.(d.SectionComponent); ok {
+			art++
+		}
+	}
+	if art != 10 || !strings.Contains(viewText(view), "Next position:") {
+		t.Fatal(art, viewText(view))
+	}
+}
+
+func TestQueueRangesAndWholeSongs(t *testing.T) {
+	state := queueFixture(1000)
+	for _, tc := range []struct{ from, to, limit, want int }{{20, 30, 100, 11}, {990, 1000, 3, 3}, {1, 1000, 1000, 0}, {1001, 2000, 10, 0}} {
+		v, err := buildQueueRange(state, &tc.limit, &tc.from, &tc.to)
 		if err != nil {
 			t.Fatal(err)
 		}
-		text := viewText(view)
-		if strings.Count(text, "The Bard · Queue") != 1 || strings.Count(text, "songs up next") != 1 || strings.Count(text, "Now playing · **Current**") != 1 {
-			t.Fatalf("repeated heading/count/current for %d: %s", n, text)
+		if len(v.Blocks) != 1 || v.Shown > tc.to-tc.from+1 {
+			t.Fatal(v)
 		}
-		for i, block := range view.Blocks {
-			assertV2Budget(t, block.Container)
-			start := 0
-			if i == 0 {
-				start = 1
-			}
-			if len(block.Container.Components) != start+2*len(block.Rows) || block.Container.AccentColor != whiterunAccent {
-				t.Fatal("incorrect separators or inconsistent accent")
-			}
-			for j, row := range block.Rows {
-				section := block.Container.Components[start+2*j].(d.SectionComponent)
-				if j > 0 {
-					separator, ok := block.Container.Components[start+2*j-1].(d.SeparatorComponent)
-					if !ok || separator.Spacing != d.SeparatorSpacingSizeSmall || (separator.Divider != nil && !*separator.Divider) {
-						t.Fatal("expected a small divider only between songs")
-					}
-				}
-				label := section.Components[0].(d.TextDisplayComponent).Content
-				if !strings.HasPrefix(label, "### ") || strings.Contains(label, "\n-# ") {
-					t.Fatal("queue needs a small heading and normal-size artist", label)
-				}
-				if len(section.Components) != 1 || strings.Count(label, "\n") != 1 || strings.Contains(label, "\n\n") {
-					t.Fatal("row must contain only title and artist", label)
-				}
-				if section.Accessory.(d.ThumbnailComponent).Media.URL != media.ArtworkURL(row.Track) {
-					t.Fatal("artwork URL was rewritten")
-				}
-			}
-			footer := block.Container.Components[len(block.Container.Components)-1].(d.TextDisplayComponent).Content
-			if !strings.HasPrefix(footer, "-# "+block.rangeLabel()) {
-				t.Fatal("missing discreet position range", footer)
+		if tc.want > 0 && v.Shown != tc.want {
+			t.Fatal(v.Shown, tc.want)
+		}
+		for i, row := range v.Blocks[0].Rows {
+			if row.Position != tc.from+i {
+				t.Fatal(row)
 			}
 		}
+		text := viewText(v)
+		if !strings.Contains(text, fmt.Sprintf("%d positions displayed · %d remaining", v.Shown, 1000-v.Shown)) {
+			t.Fatal(text)
+		}
+		if tc.from+v.Shown <= min(tc.to, 1000) && v.Shown < tc.limit && !strings.Contains(text, fmt.Sprintf("Next position: %d", tc.from+v.Shown)) {
+			t.Fatal(text)
+		}
+		assertV2Budget(t, v.Blocks[0].Container)
+	}
+	for _, args := range [][3]int{{0, 3, 1}, {3, 2, 1}, {1, 3, 0}} {
+		if _, err := buildQueueRange(state, &args[2], &args[0], &args[1]); err == nil {
+			t.Fatal(args)
+		}
+	}
+	state.Entries[1].Track.Title = strings.Repeat("🎵", 2100)
+	v, err := buildQueueView(state, nil)
+	if err != nil || v.Shown != 1 || !strings.Contains(viewText(v), "Next position: 2") || strings.Contains(viewText(v), "…") {
+		t.Fatal(v.Shown, err, viewText(v))
 	}
 }

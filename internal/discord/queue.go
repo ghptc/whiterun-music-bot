@@ -15,8 +15,8 @@ import (
 	"whiterun/internal/player"
 )
 
-// Container + heading + footer + 9 × (section, text, thumbnail) + 8 separators = 38.
-const queueBlockSize = 9
+// P0: every queue view fits one Discord message (40 components, 4000 UTF-16 units).
+const queueBlockSize = 10
 
 // A restrained aged-gold accent evokes Whiterun; Discord supplies the surface
 // and text colors for the reader's theme. Use one accent per block, not per row.
@@ -118,70 +118,132 @@ func styledSongSection(t media.Track, prefix, detail string, subtextArtist bool)
 
 // Build native components from one detached snapshot, without artwork I/O.
 func buildQueueView(state player.State, limit *int) (queueView, error) {
-	if limit != nil && *limit < 1 {
-		return queueView{}, fmt.Errorf("Queue limit must be at least 1.")
+	return buildQueueRange(state, limit, nil, nil)
+}
+
+func buildQueueRange(state player.State, limit, from, to *int) (queueView, error) {
+	for _, value := range []*int{limit, from, to} {
+		if value != nil && *value < 1 {
+			return queueView{}, fmt.Errorf("Queue arguments must be at least 1.")
+		}
 	}
 	entries := queueEntries(state)
-	shown := len(entries)
-	if limit != nil {
-		shown = min(shown, *limit)
+	start, end := 1, len(entries)
+	if from != nil {
+		start = *from
 	}
-	view := queueView{Shown: shown, Total: len(entries)}
-	rows := make([]queueRow, 0, shown+1)
-	if state.Current != nil {
-		rows = append(rows, queueRow{Track: *state.Current})
+	if to != nil {
+		end = min(end, *to)
 	}
-	for i, e := range entries[:shown] {
-		rows = append(rows, queueRow{Track: e.Track, Position: i + 1})
+	if to != nil && *to < start {
+		return queueView{}, fmt.Errorf("Queue to must be at least from.")
 	}
-	for _, row := range rows {
-		if media.ArtworkURL(row.Track) == "" {
+	if limit != nil && start <= end && *limit < end-start+1 {
+		end = start + *limit - 1
+	}
+	view := queueView{Total: len(entries)}
+	block := queueBlock{}
+	body := []d.ContainerSubComponent{}
+	// Budget each candidate together with its complete footer before adding it.
+	units, components, artworks := 0, 3, 0 // container, heading, footer
+	units = len(utf16.Encode([]rune("### The Bard · Queue")))
+	currentOmitted := false
+	footerFor := func(shown, first, last int) string {
+		label := "Now playing"
+		if last > 0 {
+			label = fmt.Sprintf("%d–%d", first, last)
+		}
+		footer := fmt.Sprintf("-# %s · %d of %d songs up next · %d positions displayed · %d remaining", label, shown, view.Total, shown, view.Total-shown)
+		if start <= end && shown < end-start+1 {
+			footer += fmt.Sprintf(" · Next position: %d", start+shown)
+		}
+		if currentOmitted {
+			footer += " · Current song omitted: exceeds message budget."
+		}
+		return footer
+	}
+	compact := ""
+	add := func(row queueRow) bool {
+		title := musicEscaper.Replace(strings.Join(strings.Fields(row.Track.Title), " "))
+		if title == "" {
+			title = "Untitled"
+		}
+		artist := row.Track.Artist
+		if artist == "" {
+			artist = row.Track.Channel
+		}
+		artist = musicEscaper.Replace(strings.Join(strings.Fields(artist), " "))
+		prefix := fmt.Sprintf("%d · ", row.Position)
+		if row.Position == 0 {
+			prefix = "Now playing · "
+		}
+		text := prefix + "**" + title + "**"
+		if artist != "" {
+			text += " · " + artist
+		}
+		art := media.ArtworkURL(row.Track)
+		illustrated := art != "" && artworks < queueBlockSize && compact == ""
+		cost := 0
+		if illustrated {
+			cost = 3
+		} else if compact == "" {
+			cost = 1
+		}
+		size := len(utf16.Encode([]rune(text)))
+		if !illustrated && compact != "" {
+			size++
+		}
+		shown, first, last := view.Shown, block.First, block.Last
+		if row.Position > 0 {
+			if shown == 0 {
+				first = row.Position
+			}
+			shown++
+			last = row.Position
+		}
+		footerUnits := len(utf16.Encode([]rune(footerFor(shown, first, last))))
+		if units+size+footerUnits > 4000 || components+cost > 40 {
+			return false
+		}
+		units += size
+		components += cost
+		if illustrated {
+			body = append(body, d.SectionComponent{Components: []d.SectionSubComponent{d.TextDisplayComponent{Content: text}}, Accessory: d.ThumbnailComponent{Media: d.UnfurledMediaItem{URL: art}, Description: "Artwork"}})
+			artworks++
+		} else {
+			compact += text + "\n"
+		}
+		if art == "" {
 			view.Missing++
 		}
-	}
-	if len(rows) == 0 {
-		view.Blocks = []queueBlock{{Container: musicContainer("The Bard · Queue", d.TextDisplayComponent{Content: "Nothing playing. The queue is empty."})}}
-		view.Components = 3
-		return view, nil
-	}
-	for offset := 0; offset < len(rows); offset += queueBlockSize {
-		end := min(offset+queueBlockSize, len(rows))
-		block := queueBlock{Rows: rows[offset:end], First: rows[offset].Position, Last: rows[end-1].Position}
-		if block.First == 0 && end-offset > 1 {
-			block.First = 1
-		}
-		body := make([]d.ContainerSubComponent, 0, 2*len(block.Rows))
-		count := 2 // container and footer; only the first block has a heading
-		for i, row := range block.Rows {
-			if i > 0 {
-				body = append(body, d.NewSmallSeparator())
-				count++
+		block.Rows = append(block.Rows, row)
+		if row.Position > 0 {
+			if view.Shown == 0 {
+				block.First = row.Position
 			}
-			prefix := fmt.Sprintf("%d · ", row.Position)
-			if row.Position == 0 {
-				prefix = "Now playing · "
-			}
-			body = append(body, styledSongSection(row.Track, "### "+prefix, "", false))
-			count++
-			if media.ArtworkURL(row.Track) != "" {
-				count += 2
-			}
+			block.Last = row.Position
+			view.Shown++
 		}
-		footer := "-# " + block.rangeLabel()
-		if offset == 0 {
-			footer += fmt.Sprintf(" · %d of %d songs up next", shown, len(entries))
-		}
-		body = append(body, d.TextDisplayComponent{Content: footer})
-		if offset == 0 {
-			block.Container = musicContainer("The Bard · Queue", body...)
-			count++
-		} else {
-			// Continue directly with songs; the discreet footer identifies the range.
-			block.Container = d.ContainerComponent{AccentColor: whiterunAccent, Components: body}
-		}
-		view.Blocks = append(view.Blocks, block)
-		view.Components += count
+		return true
 	}
+	currentOmitted = state.Current != nil && !add(queueRow{Track: *state.Current})
+	for pos := start; pos <= end; pos++ {
+		if !add(queueRow{Track: entries[pos-1].Track, Position: pos}) {
+			break
+		}
+	}
+	if compact != "" {
+		body = append(body, d.TextDisplayComponent{Content: strings.TrimSuffix(compact, "\n")})
+	}
+	footer := footerFor(view.Shown, block.First, block.Last)
+	if len(entries) == 0 && state.Current == nil {
+		body = append(body, d.TextDisplayComponent{Content: "Nothing playing. The queue is empty."})
+		components++
+	}
+	body = append(body, d.TextDisplayComponent{Content: footer})
+	block.Container = musicContainer("The Bard · Queue", body...)
+	view.Blocks = []queueBlock{block}
+	view.Components = components
 	return view, nil
 }
 func musicContainer(heading string, body ...d.ContainerSubComponent) d.ContainerComponent {
@@ -236,16 +298,18 @@ func (g *guild) beginQueueDelivery(parent context.Context, channel snowflake.ID)
 }
 func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state player.State, limit *int) {
 	started := time.Now()
-	view, err := buildQueueView(state, limit)
+	data := e.SlashCommandInteractionData()
+	var from, to *int
+	if value, ok := data.OptInt("from"); ok {
+		from = &value
+	}
+	if value, ok := data.OptInt("to"); ok {
+		to = &value
+	}
+	view, err := buildQueueRange(state, limit, from, to)
 	b.log.Info("queue_plan", "interaction_id", e.ID(), "elapsed_us", time.Since(started).Microseconds(), "components", view.Components, "messages", len(view.Blocks), "shown", view.Shown, "total", view.Total, "artwork_missing", view.Missing)
 	if err != nil {
 		view.Blocks = []queueBlock{{Container: musicContainer("The Bard · Queue", d.TextDisplayComponent{Content: err.Error()})}}
-	}
-	// A user-only installation has a five-followup ceiling. Do not silently cut
-	// a full queue down to that ceiling or switch to channel posts/exports.
-	owners := e.AuthorizingIntegrationOwners()
-	if _, userOnly := owners[d.ApplicationIntegrationTypeUserInstall]; userOnly && len(owners) == 1 && len(view.Blocks) > 6 {
-		view.Blocks = []queueBlock{{Container: musicContainer("The Bard · Queue", d.TextDisplayComponent{Content: "This queue needs more messages than a personal installation permits. Install the Bard in this server to view the full queue, or request /queue limit:50. No songs were omitted from a delivered list."})}}
 	}
 	ctx := b.ctx
 	finish := func() {}
@@ -267,54 +331,18 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 		b.log.Info("queue_response", "interaction_id", e.ID(), "elapsed_us", time.Since(sendStarted).Microseconds(), "error", err)
 		return err
 	}
-	delivered := 0
-	sent := 0
-	initialNote := ""
-	if len(view.Blocks) > 1 {
-		initialNote = fmt.Sprintf("Sending %d blocks…", len(view.Blocks))
-	}
-	err = sendUpdate(view.Blocks[0].update(initialNote), ctx)
-	if err == nil {
-		sent++
-		delivered = view.Blocks[0].Last
-	}
-	for i := 1; err == nil && i < len(view.Blocks); i++ {
-		if ctx.Err() != nil {
-			err = ctx.Err()
-			break
-		}
-		bounded, cancel := context.WithTimeout(ctx, 20*time.Second)
-		message := d.NewMessageCreateV2(view.Blocks[i].Container)
-		message.AllowedMentions = &d.AllowedMentions{}
-		sendStarted := time.Now()
-		_, err = b.client.Rest.CreateFollowupMessage(b.client.ApplicationID, e.Token(), message, rest.WithCtx(bounded))
-		cancel()
-		b.log.Info("queue_response", "interaction_id", e.ID(), "elapsed_us", time.Since(sendStarted).Microseconds(), "error", err)
-		if err == nil {
-			sent++
-			delivered = view.Blocks[i].Last
-		}
-	}
+	// P0: only PATCH @original. Never create a follow-up or continuation.
+	err = sendUpdate(view.Blocks[0].update(""), ctx)
 	if err != nil {
-		b.log.Warn("queue_delivery_failed", "guild_id", e.GuildID(), "messages_sent", sent, "last_position", delivered, "error", err)
-		notice := fmt.Sprintf("Delivery incomplete · %d/%d upcoming songs confirmed. Try /queue again.", delivered, view.Shown)
-		if ctx.Err() == context.Canceled && b.ctx.Err() == nil {
-			notice = "Delivery stopped · a newer /queue request replaced this view."
-		}
+		b.log.Warn("queue_delivery_failed", "error", err)
 		fallback, cancel := context.WithTimeout(b.ctx, 3*time.Second)
 		defer cancel()
-		if ctx.Err() == nil {
-			if failure := sendUpdate(view.Blocks[0].update(notice), fallback); failure != nil {
-				b.log.Warn("queue_delivery_notice_failed", "error", failure)
-			}
-		}
-	} else if len(view.Blocks) > 1 {
-		if failure := sendUpdate(view.Blocks[0].update(""), ctx); failure != nil {
-			err = failure
-			b.log.Warn("queue_completion_notice_failed", "error", failure)
+		notice := musicContainer("The Bard · Queue", d.TextDisplayComponent{Content: "Unable to display the queue. Try /queue again."})
+		if failure := sendUpdate(componentUpdate(notice), fallback); failure != nil {
+			b.log.Warn("queue_delivery_notice_failed", "error", failure)
 		}
 	}
-	b.log.Info("queue_delivery_complete", "interaction_id", e.ID(), "elapsed_ms", time.Since(started).Milliseconds(), "messages_sent", sent, "positions_sent", delivered, "success", err == nil, "error", err)
+
 }
 
 func (block queueBlock) rangeLabel() string {

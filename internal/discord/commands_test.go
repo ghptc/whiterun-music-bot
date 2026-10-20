@@ -169,7 +169,7 @@ func TestQueueResponseStaysWithinDiscordLimit(t *testing.T) {
 	if snapshot.Current != nil {
 		want++
 	}
-	if len(queueSections(v)) != want {
+	if len(queueSections(v)) > want || !strings.Contains(viewText(v), "Next position:") {
 		t.Fatal("missing songs")
 	}
 

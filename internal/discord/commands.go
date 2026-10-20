@@ -29,7 +29,7 @@ func commands() []d.ApplicationCommandCreate {
 			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionString{Name: "query", Description: "Song and artist, YouTube video/playlist, or Spotify track/playlist/album URL", Required: true, MaxLength: new(500)}, d.ApplicationCommandOptionBool{Name: "force", Description: "Play exactly this YouTube video; requires a video URL"}}
 		}
 		if c.name == "queue" {
-			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionInt{Name: "limit", Description: "Maximum upcoming tracks to show (omit for the complete queue)", MinValue: new(1)}}
+			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionInt{Name: "limit", Description: "Maximum upcoming tracks to show in one message", MinValue: new(1)}, d.ApplicationCommandOptionInt{Name: "from", Description: "First upcoming position (inclusive)", MinValue: new(1)}, d.ApplicationCommandOptionInt{Name: "to", Description: "Last upcoming position (inclusive)", MinValue: new(1)}}
 		}
 		if c.name == "skip" {
 			command.Options = []d.ApplicationCommandOption{d.ApplicationCommandOptionInt{Name: "count", Description: "Tracks to skip, including the current track (default 1)", MinValue: new(1), MaxValue: new(player.MaxSkipTracks)}}

@@ -33,7 +33,7 @@ func TestQueueAndSkipOptionRegistration(t *testing.T) {
 			continue
 		}
 		found++
-		if len(c.Options) != 1 {
+		if (c.Name == "queue" && len(c.Options) != 3) || (c.Name == "skip" && len(c.Options) != 1) {
 			t.Fatal(c)
 		}
 		opt, ok := c.Options[0].(d.ApplicationCommandOptionInt)

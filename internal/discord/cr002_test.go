@@ -35,7 +35,7 @@ func TestCommandSyncUpsertsAndReadsBackWithoutDeleting(t *testing.T) {
 						}
 						if payload["name"] == "queue" {
 							options := payload["options"].([]any)
-							if len(options) != 1 || options[0].(map[string]any)["name"] != "limit" || options[0].(map[string]any)["type"] != float64(4) {
+							if len(options) != 3 || options[0].(map[string]any)["name"] != "limit" || options[0].(map[string]any)["type"] != float64(4) {
 								t.Fatal(payload)
 							}
 						}
