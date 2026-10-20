@@ -15,7 +15,8 @@ coleção, geração e slot original. Um EOF normal não indica erro de decoder.
 | Geração antiga | queue_generation_rejected ou resolution_commit_discarded; não esperar commit ressuscitar posição removida |
 | Stop/cancelamento | playback_cancel_requested, wakeup, término de workers; sem skip automático |
 
-Um timer por espera registra WARN após 30 segundos em cabeça pendente/resolvendo.
+Um timer por espera registra WARN após 30 segundos em cabeça pendente/resolvendo. Uma cabeça que ficou pronta sem notificação
+é registrada como notification_missing; o timer continua sem avançá-la.
 É limiar diagnóstico, não SLA: uma resolução saudável de até 90 segundos também
 pode emitir aviso. O aviso informa condição, tempo, active_resolutions, cabeça,
 contagens, último motivo notificado, próximo evento esperado e goroutines.
@@ -70,3 +71,35 @@ diagnósticos verifica admissão sem espera pelo writer. Suites existentes de
 collection/stream/lifecycle cobrem timeout, cancelamento, teardown e concorrência;
 logstore cobre redaction, DB indisponível, falhas de escrita, concorrência e
 admissão não bloqueante. Isso não constitui E2E de playback Discord em produção.
+
+
+## Matriz de cobertura solicitada
+
+| Requisito | Evidência automatizada |
+|---|---|
+| 1–4 espera, motivo, wakeup, causa | TestSchedulerDiagnosticDecisions, TestSchedulerBlockingConditions |
+| 5 resolução concluída | TestResolutionCommitAndStaleGenerationDiagnostics e testes progressivos de collection |
+| 6 geração obsoleta | TestResolutionCommitAndStaleGenerationDiagnostics |
+| 7 shuffle durante resolução | TestShuffleWhileResolutionActiveKeepsSlotIdentity; TestReorderedPendingHeadWakesSleepingResolver/shuffle |
+| 8–9 EOF pendente/pronto | TestEOFReadyAndPendingDiagnostics; TestReorderedPendingHeadWakesSleepingResolver/move |
+| 10–11 provider, pause | TestPauseAndProviderDoNotReportStall |
+| 12–13 stop/cancelamento | TestSchedulerDiagnosticDecisions, TestProgressiveCancellation, TestCollectionPerPositionTimeoutAndCancellation |
+| 14 stall prolongado | TestSchedulerDiagnosticDecisions, TestStallObserverDoesNotAdvanceWithoutNotification |
+| 15 volume | TestSchedulerDiagnosticDecisions (cinco minutos virtuais sem novos eventos idle) |
+| 16 correlação | TestPlaybackAttemptCorrelation (mesmo attempt no stream, início, fim, terminal, transição) |
+| 17 redaction | TestRedactionCredentialsPrivateMessagesAndProviderBuffers (logstore) |
+| 18 falha DB | TestUnavailableAndFullDiskRecoverWithoutConsoleLoss, TestWALReaderStallsPersistenceNotProducer |
+| 19 concorrência | TestConcurrentDiagnosticPressure, TestConcurrentWritesBatchAndFinalFlush e race detector |
+| 20 não bloqueio | TestDiagnosticAdmissionDoesNotWaitForHandler, TestBlockedDiagnosticSinkDoesNotBlockPlayback |
+
+O teste de não bloqueio cobre o novo caminho assíncrono; o destino console dos
+emissores legados continua síncrono, conforme a auditoria. As suites de logstore
+são as existentes, executadas novamente; não são 20 testes novos de integração.
+
+Validação local em 2026-10-20: `go test ./... -count=1`,
+`go test -race ./... -count=1` e `go vet ./...` passaram. As regressões de
+reordenação e shuffle com workers ativos também passaram com race detector.
+A regressão Move falhou antes da correção com `current=nil` após EOF e passou
+após acordar os coordenadores. Fixtures antigas foram ajustadas para proteger
+inicialização de fila com mutex e finalizar writers antes de ler bytes.Buffer.
+Não houve deploy, reinício da produção ou teste de audibilidade no Discord.

@@ -45,14 +45,16 @@ func (p *GuildPlayer) Move(from, to int) error {
 	p.signal("move")
 	return nil
 }
-func (p *GuildPlayer) Shuffle() error {
+func (p *GuildPlayer) Shuffle() error { return p.shuffle(rand.Shuffle) }
+
+func (p *GuildPlayer) shuffle(shuffle func(int, func(int, int))) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if len(p.queue) == 0 {
 		return errors.New("The queue is empty.")
 	}
 	p.diagnosticLocked(slog.LevelInfo, "shuffle_started", "queue_size", len(p.queue))
-	rand.Shuffle(len(p.queue), func(i, j int) { p.queue[i], p.queue[j] = p.queue[j], p.queue[i] })
+	shuffle(len(p.queue), func(i, j int) { p.queue[i], p.queue[j] = p.queue[j], p.queue[i] })
 	p.mutationLocked("shuffle")
 	p.diagnosticLocked(slog.LevelInfo, "shuffle_completed", "queue_size", len(p.queue))
 	p.persistLocked()

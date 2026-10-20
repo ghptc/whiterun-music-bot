@@ -27,9 +27,19 @@ Não há falha FFmpeg, Opus ou Voice nesse EOF. A evidência combina com o camin
 `CollectionJob.run` aguarda `j.wake` quando a janela contém somente prontas;
 `Shuffle` muda a janela e acorda apenas `p.wake`; scheduler encontra cabeça
 pendente e aguarda commit que não será iniciado. Skip descarta uma posição e
-`discardEntryLocked` acorda o coordenador. A regressão com Move reproduz a
-mesma perda de notificação sem depender da aleatoriedade do shuffle.
+`discardEntryLocked` acorda o coordenador. As regressões com Move e shuffle de permutação controlada reproduzem a
+mesma perda de notificação sem depender da aleatoriedade global.
 A ordem completa pós-shuffle não pode ser recuperada dos logs históricos.
+
+## Correção confirmada
+
+A notificação de fila agora acorda também `CollectionJob.wake` de todos os
+coordenadores ativos. Isso reavalia a janela depois de shuffle/move/jump/remove
+e demais alterações, preservando slots, ordem, cancelamentos e limite de
+workers. Canais de capacidade um coalescem notificações sem bloquear. Nenhum
+retry, skip automático ou expansão de prefetch foi adicionado. A operação
+shuffle aceita internamente uma função de permutação para que a regressão
+execute o mesmo caminho com ordem controlada; a API pública mantém rand.Shuffle.
 
 ## Correlação
 
@@ -90,12 +100,13 @@ Volume adicional é proporcional a slots/commits/controles/transições: poucos
 eventos por resolução, não por frame nem por segundo. Uma playlist de 302 slots
 adiciona da ordem de milhares de eventos pequenos, e não snapshots quadráticos.
 A taxa de catálogo existente foi dominante nesta amostra (302/687 registros).
-Não há heartbeat novo. Limites de volume reais dependem de atividade e drops;
+O timer apenas observa; mesmo uma cabeça pronta sem notificação não é
+avançada por ele (wait_reason=notification_missing). Não há heartbeat novo. Limites de volume reais dependem de atividade e drops;
 medir `log_persistence_metrics` antes de reduzir retenção.
 
 ## Inventário estático dos emissores
 
-Tabela gerada da AST dos arquivos Go de produção em `internal/`. Inclui chamadas
+Tabela gerada da AST dos arquivos Go de produção em `internal/` e `cmd/`. Inclui chamadas
 com nomes literais de slog, Timing e helpers de diagnóstico. `Campos literais`
 inclui valores literais além de chaves; atributos herdados por With/Timing e
 campos dinâmicos estão descritos acima ou no código. Mensagens de dependências
@@ -208,38 +219,39 @@ de error não implica sucesso de playback. Auditoria dos riscos em logging-gaps.
 | collection_prefix_committed | `internal/player/collection.go:476` | `through_position` |
 | remove | `internal/player/controls.go:23` | `collection_id`, `position`, `queue_position` |
 | move | `internal/player/controls.go:43` | `collection_id`, `position`, `from_queue_position`, `to_queue_position` |
-| shuffle_started | `internal/player/controls.go:54` | `queue_size` |
-| shuffle | `internal/player/controls.go:56` |  |
-| shuffle_completed | `internal/player/controls.go:57` | `queue_size` |
-| jump | `internal/player/controls.go:68` | `queue_position` |
+| shuffle_started | `internal/player/controls.go:56` | `queue_size` |
+| shuffle | `internal/player/controls.go:58` |  |
+| shuffle_completed | `internal/player/controls.go:59` | `queue_size` |
+| jump | `internal/player/controls.go:70` | `queue_position` |
 | durable_state_write_failed | `internal/player/durable.go:87` | `guild_id`, `error` |
 | playback_history_write_failed | `internal/player/lifecycle.go:163` | `guild_id`, `error` |
 | next_track_start | `internal/player/lifecycle.go:168` | `state`, `playing`, `next_track_delay_ms`, `spotify_id`, `sequence`, `video_id`, `position` |
-| queue_mutation | `internal/player/observability.go:68` |  |
-| scheduler_track_ready | `internal/player/observability.go:127` |  |
-| scheduler_wait | `internal/player/observability.go:134` |  |
-| scheduler_wakeup | `internal/player/observability.go:141` | `wakeup_reason`, `canceled`, `elapsed_wait_ms` |
-| scheduler_wakeup | `internal/player/observability.go:146` | `wakeup_reason`, `elapsed_wait_ms` |
-| scheduler_stall_detected | `internal/player/observability.go:152` |  |
+| queue_mutation | `internal/player/observability.go:74` |  |
+| scheduler_track_ready | `internal/player/observability.go:135` |  |
+| scheduler_wait | `internal/player/observability.go:142` |  |
+| scheduler_wakeup | `internal/player/observability.go:150` | `wakeup_reason`, `canceled`, `elapsed_wait_ms` |
+| scheduler_wakeup | `internal/player/observability.go:156` | `wakeup_reason`, `elapsed_wait_ms` |
+| scheduler_stall_detected | `internal/player/observability.go:162` |  |
+| scheduler_stall_detected | `internal/player/observability.go:165` | `notification_missing`, `scheduler_notification` |
 | provider_playback_recovery_requested | `internal/player/pause.go:76` | `provider`, `youtube`, `previous_category`, `action`, `retry same logical position` |
 | playback_pause_changed | `internal/player/pause.go:91` | `paused`, `expected_event`, `resume_or_cancel` |
 | scheduler_notification | `internal/player/player.go:81` | `wakeup_reason` |
-| generation_changed | `internal/player/player.go:98` |  |
-| queue_generation_rejected | `internal/player/player.go:113` | `requested_generation`, `reason`, `stale_or_canceled` |
-| enqueue | `internal/player/player.go:127` | `added_count` |
-| generation_changed | `internal/player/player.go:144` |  |
-| stop | `internal/player/player.go:146` |  |
-| generation_changed | `internal/player/player.go:163` |  |
-| leave | `internal/player/player.go:165` |  |
-| player_loop_exit | `internal/player/player.go:196` | `cause` |
-| scheduler_advance | `internal/player/player.go:219` | `collection_id`, `position`, `queue_position`, `spotify_id`, `video_id` |
-| next_track_selected | `internal/player/player.go:239` | `sequence`, `collection_id`, `position`, `spotify_id`, `title`, `video_id` |
-| track_playback_start | `internal/player/player.go:240` | `sequence`, `position`, `video_id` |
-| track_playback_end | `internal/player/player.go:253` | `sequence`, `position`, `title`, `video_id`, `elapsed_ms`, `category`, `cancel_reason`, `error` |
-| playback_attempt_terminal | `internal/player/player.go:265` | `sequence`, `spotify_id`, `position`, `state`, `started` |
-| track_unavailable | `internal/player/player.go:287` | `sequence`, `spotify_id`, `video_id`, `position`, `state`, `unavailable`, `reason`, `consecutive_failures`, `action`, `advance_in_original_order` |
-| player_transition | `internal/player/player.go:292` | `sequence`, `ready`, `pending`, `halted`, `provider_blocked`, `state`, `transitioning`, `next_pending` |
-| provider_playback_blocked | `internal/player/player.go:314` | `provider`, `youtube`, `category`, `action`, `queue retained; use resume to retry the same position` |
+| generation_changed | `internal/player/player.go:109` |  |
+| queue_generation_rejected | `internal/player/player.go:124` | `requested_generation`, `reason`, `stale_or_canceled` |
+| enqueue | `internal/player/player.go:138` | `added_count` |
+| generation_changed | `internal/player/player.go:155` |  |
+| stop | `internal/player/player.go:157` |  |
+| generation_changed | `internal/player/player.go:174` |  |
+| leave | `internal/player/player.go:176` |  |
+| player_loop_exit | `internal/player/player.go:207` | `cause` |
+| scheduler_advance | `internal/player/player.go:230` | `collection_id`, `position`, `queue_position`, `spotify_id`, `video_id` |
+| next_track_selected | `internal/player/player.go:253` | `sequence`, `collection_id`, `position`, `spotify_id`, `title`, `video_id` |
+| track_playback_start | `internal/player/player.go:254` | `sequence`, `position`, `video_id` |
+| track_playback_end | `internal/player/player.go:267` | `sequence`, `position`, `title`, `video_id`, `elapsed_ms`, `category`, `cancel_reason`, `error` |
+| playback_attempt_terminal | `internal/player/player.go:279` | `sequence`, `spotify_id`, `position`, `state`, `started` |
+| track_unavailable | `internal/player/player.go:301` | `sequence`, `spotify_id`, `video_id`, `position`, `state`, `unavailable`, `reason`, `consecutive_failures`, `action`, `advance_in_original_order` |
+| player_transition | `internal/player/player.go:306` | `sequence`, `ready`, `pending`, `halted`, `provider_blocked`, `state`, `transitioning`, `next_pending` |
+| provider_playback_blocked | `internal/player/player.go:328` | `provider`, `youtube`, `category`, `action`, `queue retained; use resume to retry the same position` |
 | clear | `internal/player/queue.go:81` | `invalidated_count` |
 | skip | `internal/player/queue.go:134` | `skipped_count` |
 | playback_cancel_requested | `internal/player/queue.go:145` | `cancel_reason` |
@@ -267,3 +279,17 @@ de error não implica sucesso de playback. Auditoria dos riscos em logging-gaps.
 | audio_source_exit | `internal/player/stream.go:329` | `video_id`, `yt_exit_code`, `ffmpeg_exit_code`, `category`, `yt_stderr_tail`, `ffmpeg_stderr_tail` |
 | stream_resolve_complete | `internal/player/stream.go:368` |  |
 | stream_url_resolved | `internal/player/stream.go:370` |  |
+| log_persistence_unavailable | `cmd/bot/logs.go:34` | `reason`, `invalid BARD_LOG_DB_MAX_BYTES` |
+| log_persistence_unavailable | `cmd/bot/logs.go:55` | `reason`, `SQLite initialization failed`, `error_category` |
+| log_persistence_started | `cmd/bot/logs.go:59` | `max_bytes` |
+| logs_query_failed | `cmd/bot/main.go:26` | `error` |
+| bot stopped | `cmd/bot/main.go:36` | `error` |
+| log_persistence_flush_timeout | `cmd/bot/main.go:43` |  |
+| shutting down | `cmd/bot/main.go:118` |  |
+| Spotify production diagnostic | `cmd/bot/spotify_diagnose.go:35` | `binary_sha256`, `dns_edns_disabled`, `market`, `credentials_configured`, `refresh_configured` |
+| Spotify production diagnostic complete | `cmd/bot/spotify_diagnose.go:47` | `resolved`, `elapsed_ms` |
+| provide one or more song queries or YouTube URLs | `cmd/profile/main.go:45` |  |
+| profile_resolution_total | `cmd/profile/main.go:55` | `error` |
+| queue_inserted | `cmd/profile/main.go:74` | `measurement`, `local_queue`, `error` |
+| profile_queue_ready | `cmd/profile/main.go:75` | `discord_queued_ms`, `error` |
+| profile_playback_complete | `cmd/profile/main.go:86` | `audio_sink`, `local_discard`, `frame_received`, `frames`, `requested_play_duration`, `error` |

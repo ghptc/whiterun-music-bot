@@ -79,6 +79,16 @@ func (p *GuildPlayer) signal(reasons ...string) {
 		p.lastSignal = reasons[0]
 	}
 	p.diagnosticLocked(slog.LevelDebug, "scheduler_notification", "wakeup_reason", p.lastSignal)
+	// A queue mutation can expose a pending head outside the old prefetch window.
+	// Wake the owners of that window as well as playback; neither consumer can
+	// substitute for the other. Notifications coalesce and never run resolver work
+	// under this lock.
+	for _, job := range p.jobs {
+		select {
+		case job.wake <- struct{}{}:
+		default:
+		}
+	}
 
 	select {
 	case p.wake <- struct{}{}:
