@@ -311,6 +311,7 @@ func Run(parent context.Context, c Config) (result error) {
 			g.done <- struct{}{}
 			return playErr
 		})
+		groups = append(groups, g) // own cleanup even if recovery setup fails
 		if err = g.p.ConfigureStore(db, id); err != nil {
 			return err
 		}
@@ -338,7 +339,6 @@ func Run(parent context.Context, c Config) (result error) {
 			g.observe("first_frame", time.Since(g.active.selected))
 			events.write(map[string]any{"event": "announced", "at": time.Now().UTC(), "guild": id, "identity": e.Track.SpotifyID, "sequence": e.Sequence})
 		})
-		groups = append(groups, g)
 		if err = g.p.Attach(&voice{g}); err != nil {
 			return err
 		}
