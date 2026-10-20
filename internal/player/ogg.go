@@ -61,6 +61,9 @@ func oggPackets(r io.Reader, send func([]byte) error, firstPacket ...func()) err
 				if !seenHead {
 					return errors.New("audio before Opus header")
 				}
+				if len(packet) == 0 {
+					return errors.New("empty Opus audio packet")
+				}
 				if err = send(packet); err != nil {
 					return err
 				}
