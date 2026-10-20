@@ -1,0 +1,35 @@
+{
+  "environment": "isolated Docker, real Spotify, same process; 1 eager then 1 deferred; no Voice",
+  "hardware": "AMD Ryzen 7 9800X3D, 8 CPUs available",
+  "go": "go version go1.27.1-X:nodwarf5 linux/amd64",
+  "source_commit": "af6c619",
+  "samples": [
+    {
+      "alloc_bytes": 66701832,
+      "cpu_self_ms": 248.463,
+      "deferred": false,
+      "elapsed_ms": 43428.814055,
+      "environment": "real-spotify-metadata-no-voice",
+      "heap_end_bytes": 2188856,
+      "pending": 0,
+      "success": true,
+      "tracks": 500
+    },
+    {
+      "alloc_bytes": 13586192,
+      "cpu_self_ms": 26.423,
+      "deferred": true,
+      "elapsed_ms": 4106.468789,
+      "environment": "real-spotify-metadata-no-voice",
+      "heap_end_bytes": 2161800,
+      "pending": 400,
+      "success": true,
+      "tracks": 500
+    }
+  ],
+  "notes": [
+    "No network quantiles inferred from one paired observation.",
+    "Provider probe overlapped connected Voice observations for playlist-123; this is a diagnostic pair, not a controlled release distribution.",
+    "Heap end is sampled live heap, not peak RSS."
+  ]
+}

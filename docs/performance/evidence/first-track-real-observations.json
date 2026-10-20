@@ -1,0 +1,1179 @@
+[
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 5000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 42572,
+        "extraction": 4739863790,
+        "ffmpeg_started": 5236022640,
+        "first_resolved": 2386342730,
+        "metadata": 2386323413,
+        "opus": 5289035081,
+        "preparation": 2386346608,
+        "received": 0,
+        "transport_sent": 5289125936,
+        "voice_connected": 881837613
+      },
+      {
+        "ack": 35919,
+        "extraction": 3194429150,
+        "ffmpeg_started": 3286179540,
+        "first_resolved": 1413641059,
+        "metadata": 1413616402,
+        "opus": 3320773009,
+        "preparation": 1413645288,
+        "received": 0,
+        "transport_sent": 3320910845
+      },
+      {
+        "ack": 33775,
+        "extraction": 2883436146,
+        "ffmpeg_started": 2929985275,
+        "first_resolved": 1183523483,
+        "metadata": 1183493856,
+        "opus": 2965578738,
+        "preparation": 1183529495,
+        "received": 0,
+        "transport_sent": 2965658081
+      }
+    ],
+    "scenario": {
+      "Name": "youtube-single",
+      "Kind": "youtube",
+      "Mode": "cold",
+      "Count": 1,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 3320.910845,
+      "p95_ms": 5289.125936,
+      "p99_ms": 5289.125936,
+      "max_ms": 5289.125936
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 2000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 38545,
+        "extraction": 1676252886,
+        "ffmpeg_started": 1701709928,
+        "first_resolved": 56620,
+        "metadata": 55507,
+        "opus": 1735918880,
+        "preparation": 71869,
+        "received": 0,
+        "transport_sent": 1735998543
+      },
+      {
+        "ack": 37272,
+        "extraction": 2015978047,
+        "ffmpeg_started": 2037552637,
+        "first_resolved": 54726,
+        "metadata": 53604,
+        "opus": 2074616244,
+        "preparation": 57090,
+        "received": 0,
+        "transport_sent": 2074705135
+      },
+      {
+        "ack": 38865,
+        "extraction": 1858650736,
+        "ffmpeg_started": 1884264805,
+        "first_resolved": 56439,
+        "metadata": 55347,
+        "opus": 1919075408,
+        "preparation": 58313,
+        "received": 0,
+        "transport_sent": 1919155903
+      }
+    ],
+    "scenario": {
+      "Name": "youtube-single",
+      "Kind": "youtube",
+      "Mode": "warm",
+      "Count": 1,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 1919.155903,
+      "p95_ms": 2074.705135,
+      "p99_ms": 2074.705135,
+      "max_ms": 2074.705135
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 5000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 32983,
+        "extraction": 3207005232,
+        "ffmpeg_started": 3311713674,
+        "first_resolved": 1481068752,
+        "metadata": 1481047511,
+        "opus": 3346771821,
+        "preparation": 1481073631,
+        "received": 0,
+        "transport_sent": 3346865381
+      },
+      {
+        "ack": 32793,
+        "extraction": 3649348309,
+        "ffmpeg_started": 3768450361,
+        "first_resolved": 1325451998,
+        "metadata": 1325430657,
+        "opus": 3803956817,
+        "preparation": 1325455996,
+        "received": 0,
+        "transport_sent": 3804039897
+      },
+      {
+        "ack": 33385,
+        "extraction": 3333139612,
+        "ffmpeg_started": 3361590065,
+        "first_resolved": 1278342988,
+        "metadata": 1278322068,
+        "opus": 3397779323,
+        "preparation": 1278346515,
+        "received": 0,
+        "transport_sent": 3397863986
+      }
+    ],
+    "scenario": {
+      "Name": "youtube-force",
+      "Kind": "youtube",
+      "Mode": "cold",
+      "Count": 1,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 3397.863986,
+      "p95_ms": 3804.039897,
+      "p99_ms": 3804.039897,
+      "max_ms": 3804.039897
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 2000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 286521,
+        "extraction": 1857474497,
+        "ffmpeg_started": 1879972143,
+        "first_resolved": 306901,
+        "metadata": 305859,
+        "opus": 1907964731,
+        "preparation": 309786,
+        "received": 0,
+        "transport_sent": 1908049685
+      },
+      {
+        "ack": 58463,
+        "extraction": 1783392743,
+        "ffmpeg_started": 1822701350,
+        "first_resolved": 84362,
+        "metadata": 82278,
+        "opus": 1858094296,
+        "preparation": 88601,
+        "received": 0,
+        "transport_sent": 1858181795
+      },
+      {
+        "ack": 37793,
+        "extraction": 1587557270,
+        "ffmpeg_started": 1616462120,
+        "first_resolved": 54104,
+        "metadata": 52922,
+        "opus": 1645728926,
+        "preparation": 55998,
+        "received": 0,
+        "transport_sent": 1645801957
+      }
+    ],
+    "scenario": {
+      "Name": "youtube-force",
+      "Kind": "youtube",
+      "Mode": "warm",
+      "Count": 1,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 1858.181795,
+      "p95_ms": 1908.049685,
+      "p99_ms": 1908.049685,
+      "max_ms": 1908.049685
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 5000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 26301,
+        "extraction": 5630568708,
+        "ffmpeg_started": 5671831767,
+        "first_resolved": 3672099088,
+        "metadata": 493406409,
+        "metadata_tracks": 1,
+        "opus": 5707587182,
+        "preparation": 3672106102,
+        "received": 0,
+        "transport_sent": 5707681633
+      },
+      {
+        "ack": 35969,
+        "extraction": 4476724325,
+        "ffmpeg_started": 4601976414,
+        "first_resolved": 2727942270,
+        "metadata": 167400688,
+        "metadata_tracks": 1,
+        "opus": 4637405767,
+        "preparation": 2727949594,
+        "received": 0,
+        "transport_sent": 4637492163
+      },
+      {
+        "ack": 36780,
+        "extraction": 3956410923,
+        "ffmpeg_started": 3978752144,
+        "first_resolved": 2483274361,
+        "metadata": 187255745,
+        "metadata_tracks": 1,
+        "opus": 4014351801,
+        "preparation": 2483281204,
+        "received": 0,
+        "transport_sent": 4014437255
+      }
+    ],
+    "scenario": {
+      "Name": "spotify-single",
+      "Kind": "track",
+      "Mode": "cold",
+      "Count": 1,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 4637.492163,
+      "p95_ms": 5707.681633,
+      "p99_ms": 5707.681633,
+      "max_ms": 5707.681633
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 2000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 35338,
+        "extraction": 1420690671,
+        "ffmpeg_started": 1447908568,
+        "first_resolved": 132916,
+        "metadata": 103359,
+        "metadata_tracks": 1,
+        "opus": 1482211934,
+        "preparation": 137605,
+        "received": 0,
+        "transport_sent": 1482300565
+      },
+      {
+        "ack": 34296,
+        "extraction": 1556848216,
+        "ffmpeg_started": 1580047773,
+        "first_resolved": 185828,
+        "metadata": 101054,
+        "metadata_tracks": 1,
+        "opus": 1616680188,
+        "preparation": 189905,
+        "received": 0,
+        "transport_sent": 1616769991
+      },
+      {
+        "ack": 35539,
+        "extraction": 1994824281,
+        "ffmpeg_started": 2018448303,
+        "first_resolved": 136172,
+        "metadata": 105493,
+        "metadata_tracks": 1,
+        "opus": 2046813350,
+        "preparation": 140972,
+        "received": 0,
+        "transport_sent": 2046910337
+      }
+    ],
+    "scenario": {
+      "Name": "spotify-single",
+      "Kind": "track",
+      "Mode": "warm",
+      "Count": 1,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 1616.769991,
+      "p95_ms": 2046.910337,
+      "p99_ms": 2046.910337,
+      "max_ms": 2046.910337
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 5000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 125101,
+        "extraction": 5253076462,
+        "ffmpeg_started": 5277121420,
+        "first_resolved": 3251639707,
+        "metadata": 505251503,
+        "metadata_tracks": 10,
+        "opus": 5306084814,
+        "preparation": 505255721,
+        "received": 0,
+        "transport_sent": 5306169246
+      },
+      {
+        "ack": 25379,
+        "extraction": 4612167437,
+        "ffmpeg_started": 4637633767,
+        "first_resolved": 3257546004,
+        "metadata": 517577593,
+        "metadata_tracks": 10,
+        "opus": 4666058001,
+        "preparation": 517586179,
+        "received": 0,
+        "transport_sent": 4666131943
+      },
+      {
+        "ack": 27523,
+        "extraction": 4545779179,
+        "ffmpeg_started": 4569372912,
+        "first_resolved": 3095426869,
+        "metadata": 458193415,
+        "metadata_tracks": 10,
+        "opus": 4598740246,
+        "preparation": 458198194,
+        "received": 0,
+        "transport_sent": 4598814399
+      }
+    ],
+    "scenario": {
+      "Name": "spotify-album",
+      "Kind": "album",
+      "Mode": "cold",
+      "Count": 10,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 4666.131943,
+      "p95_ms": 5306.169246,
+      "p99_ms": 5306.169246,
+      "max_ms": 5306.169246
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 2000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 33404,
+        "extraction": 2211554379,
+        "ffmpeg_started": 2237831062,
+        "first_resolved": 389166673,
+        "metadata": 388014957,
+        "metadata_tracks": 10,
+        "opus": 2267189615,
+        "preparation": 388018945,
+        "received": 0,
+        "transport_sent": 2267270862
+      },
+      {
+        "ack": 56730,
+        "extraction": 2298036070,
+        "ffmpeg_started": 2323024059,
+        "first_resolved": 629506048,
+        "metadata": 628406162,
+        "metadata_tracks": 10,
+        "opus": 2351252913,
+        "preparation": 628411502,
+        "received": 0,
+        "transport_sent": 2351330312
+      },
+      {
+        "ack": 37462,
+        "extraction": 1881383348,
+        "ffmpeg_started": 1906130961,
+        "first_resolved": 518470918,
+        "metadata": 517572209,
+        "metadata_tracks": 10,
+        "opus": 1974468559,
+        "preparation": 517578581,
+        "received": 0,
+        "transport_sent": 1974574914
+      }
+    ],
+    "scenario": {
+      "Name": "spotify-album",
+      "Kind": "album",
+      "Mode": "warm",
+      "Count": 10,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 2267.270862,
+      "p95_ms": 2351.330312,
+      "p99_ms": 2351.330312,
+      "max_ms": 2351.330312
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 5000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 312512,
+        "extraction": 5792544237,
+        "ffmpeg_started": 5986152709,
+        "first_resolved": 4231296588,
+        "metadata": 943849467,
+        "metadata_tracks": 10,
+        "opus": 6014279229,
+        "preparation": 943853665,
+        "received": 0,
+        "transport_sent": 6014362910
+      },
+      {
+        "ack": 29387,
+        "extraction": 5846552447,
+        "ffmpeg_started": 5871639846,
+        "first_resolved": 4115327879,
+        "metadata": 1201834455,
+        "metadata_tracks": 10,
+        "opus": 5899663172,
+        "preparation": 1201838403,
+        "received": 0,
+        "transport_sent": 5899742545
+      },
+      {
+        "ack": 28164,
+        "extraction": 4765063271,
+        "ffmpeg_started": 7886741245,
+        "first_resolved": 3169493891,
+        "metadata": 986823250,
+        "metadata_tracks": 10,
+        "opus": 7920173910,
+        "preparation": 986827328,
+        "received": 0,
+        "transport_sent": 7920249676
+      }
+    ],
+    "scenario": {
+      "Name": "playlist-10",
+      "Kind": "playlist",
+      "Mode": "cold",
+      "Count": 10,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 6014.36291,
+      "p95_ms": 7920.249676,
+      "p99_ms": 7920.249676,
+      "max_ms": 7920.249676
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 2000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 32602,
+        "extraction": 2501979174,
+        "ffmpeg_started": 2533896489,
+        "first_resolved": 992258142,
+        "metadata": 991426352,
+        "metadata_tracks": 10,
+        "opus": 2562687051,
+        "preparation": 991431322,
+        "received": 0,
+        "transport_sent": 2562766925
+      },
+      {
+        "ack": 36070,
+        "extraction": 2608357020,
+        "ffmpeg_started": 2650489636,
+        "first_resolved": 984006602,
+        "metadata": 983111160,
+        "metadata_tracks": 10,
+        "opus": 2678797455,
+        "preparation": 983116831,
+        "received": 0,
+        "transport_sent": 2678870525
+      },
+      {
+        "ack": 34877,
+        "extraction": 3997584631,
+        "ffmpeg_started": 4022694505,
+        "first_resolved": 1135173393,
+        "metadata": 1134454971,
+        "metadata_tracks": 10,
+        "opus": 4051967735,
+        "preparation": 1134458799,
+        "received": 0,
+        "transport_sent": 4052050734
+      }
+    ],
+    "scenario": {
+      "Name": "playlist-10",
+      "Kind": "playlist",
+      "Mode": "warm",
+      "Count": 10,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 2678.870525,
+      "p95_ms": 4052.050734,
+      "p99_ms": 4052.050734,
+      "max_ms": 4052.050734
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 5000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 33725,
+        "extraction": 6824910349,
+        "ffmpeg_started": 6895111638,
+        "first_resolved": 5072762471,
+        "metadata": 1990728366,
+        "metadata_tracks": 50,
+        "opus": 6923097096,
+        "preparation": 1990732404,
+        "received": 0,
+        "transport_sent": 6923180937
+      },
+      {
+        "ack": 25969,
+        "extraction": 5506891122,
+        "ffmpeg_started": 5538039328,
+        "first_resolved": 4009441635,
+        "metadata": 1537030386,
+        "metadata_tracks": 50,
+        "opus": 5567815816,
+        "preparation": 1537034394,
+        "received": 0,
+        "transport_sent": 5567892955
+      },
+      {
+        "ack": 26271,
+        "extraction": 6513710999,
+        "ffmpeg_started": 6714143429,
+        "first_resolved": 4623115560,
+        "metadata": 1679255096,
+        "metadata_tracks": 50,
+        "opus": 6743300853,
+        "preparation": 1679259935,
+        "received": 0,
+        "transport_sent": 6743376618
+      }
+    ],
+    "scenario": {
+      "Name": "playlist-50",
+      "Kind": "playlist",
+      "Mode": "cold",
+      "Count": 50,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 6743.376618,
+      "p95_ms": 6923.180937,
+      "p99_ms": 6923.180937,
+      "max_ms": 6923.180937
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 2000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 36470,
+        "extraction": 3550872925,
+        "ffmpeg_started": 3580373232,
+        "first_resolved": 1789738169,
+        "metadata": 1788282391,
+        "metadata_tracks": 50,
+        "opus": 3609512155,
+        "preparation": 1788287120,
+        "received": 0,
+        "transport_sent": 3609588261
+      },
+      {
+        "ack": 33835,
+        "extraction": 3327245025,
+        "ffmpeg_started": 3433135320,
+        "first_resolved": 1615015797,
+        "metadata": 1613547264,
+        "metadata_tracks": 50,
+        "opus": 3465255656,
+        "preparation": 1613552374,
+        "received": 0,
+        "transport_sent": 3465331222
+      },
+      {
+        "ack": 91426,
+        "extraction": 3740220161,
+        "ffmpeg_started": 3777422489,
+        "first_resolved": 1653944037,
+        "metadata": 1652465165,
+        "metadata_tracks": 50,
+        "opus": 3813687495,
+        "preparation": 1652470134,
+        "received": 0,
+        "transport_sent": 3813784431
+      }
+    ],
+    "scenario": {
+      "Name": "playlist-50",
+      "Kind": "playlist",
+      "Mode": "warm",
+      "Count": 50,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 3609.588261,
+      "p95_ms": 3813.784431,
+      "p99_ms": 3813.784431,
+      "max_ms": 3813.784431
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 5000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 30889,
+        "extraction": 6983617227,
+        "ffmpeg_started": 7011769998,
+        "first_resolved": 5413793629,
+        "metadata": 2613452212,
+        "metadata_tracks": 123,
+        "opus": 7040237514,
+        "preparation": 2613456620,
+        "received": 0,
+        "transport_sent": 7040330583
+      },
+      {
+        "ack": 24978,
+        "extraction": 8344325972,
+        "ffmpeg_started": 8379327507,
+        "first_resolved": 6308321297,
+        "metadata": 3487868706,
+        "metadata_tracks": 123,
+        "opus": 8407517273,
+        "preparation": 3487873586,
+        "received": 0,
+        "transport_sent": 8407593610
+      },
+      {
+        "ack": 27482,
+        "extraction": 7385849839,
+        "ffmpeg_started": 7414717704,
+        "first_resolved": 5474176949,
+        "metadata": 2652806702,
+        "metadata_tracks": 123,
+        "opus": 7443334606,
+        "preparation": 2652811561,
+        "received": 0,
+        "transport_sent": 7443416924
+      }
+    ],
+    "scenario": {
+      "Name": "playlist-123",
+      "Kind": "playlist",
+      "Mode": "cold",
+      "Count": 123,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 7443.416924,
+      "p95_ms": 8407.59361,
+      "p99_ms": 8407.59361,
+      "max_ms": 8407.59361
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 2000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 34105,
+        "extraction": 4227230949,
+        "ffmpeg_started": 4280189579,
+        "first_resolved": 2747409952,
+        "metadata": 2745007727,
+        "metadata_tracks": 123,
+        "opus": 4309134977,
+        "preparation": 2745012386,
+        "received": 0,
+        "transport_sent": 4309257913
+      },
+      {
+        "ack": 35478,
+        "extraction": 4466277580,
+        "ffmpeg_started": 4488141719,
+        "first_resolved": 2840311225,
+        "metadata": 2837180902,
+        "metadata_tracks": 123,
+        "opus": 4516696370,
+        "preparation": 2837185601,
+        "received": 0,
+        "transport_sent": 4516767557
+      },
+      {
+        "ack": 34686,
+        "extraction": 4442823181,
+        "ffmpeg_started": 4470765539,
+        "first_resolved": 2651155749,
+        "metadata": 2648239788,
+        "metadata_tracks": 123,
+        "opus": 4498875440,
+        "preparation": 2648244767,
+        "received": 0,
+        "transport_sent": 4498958079
+      }
+    ],
+    "scenario": {
+      "Name": "playlist-123",
+      "Kind": "playlist",
+      "Mode": "warm",
+      "Count": 123,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 4498.958079,
+      "p95_ms": 4516.767557,
+      "p99_ms": 4516.767557,
+      "max_ms": 4516.767557
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 5000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 26681,
+        "extraction": 7205409047,
+        "ffmpeg_started": 7358630137,
+        "first_resolved": 5328741854,
+        "metadata": 2775532538,
+        "metadata_tracks": 302,
+        "opus": 7386842450,
+        "preparation": 2775537517,
+        "received": 0,
+        "transport_sent": 7386915069
+      },
+      {
+        "ack": 25880,
+        "extraction": 7891480187,
+        "ffmpeg_started": 7920040304,
+        "first_resolved": 6128974531,
+        "metadata": 3245553276,
+        "metadata_tracks": 302,
+        "opus": 7948769194,
+        "preparation": 3245557885,
+        "received": 0,
+        "transport_sent": 7948847254
+      },
+      {
+        "ack": 26321,
+        "extraction": 8213003145,
+        "ffmpeg_started": 8232867359,
+        "first_resolved": 6263023671,
+        "metadata": 3277813536,
+        "metadata_tracks": 302,
+        "opus": 8261766272,
+        "preparation": 3277818255,
+        "received": 0,
+        "transport_sent": 8261840484
+      }
+    ],
+    "scenario": {
+      "Name": "playlist-302",
+      "Kind": "playlist",
+      "Mode": "cold",
+      "Count": 302,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 7948.847254,
+      "p95_ms": 8261.840484,
+      "p99_ms": 8261.840484,
+      "max_ms": 8261.840484
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 2000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 42502,
+        "extraction": 4552654431,
+        "ffmpeg_started": 4577830439,
+        "first_resolved": 2960114862,
+        "metadata": 2954496424,
+        "metadata_tracks": 302,
+        "opus": 4606527899,
+        "preparation": 2954501294,
+        "received": 0,
+        "transport_sent": 4606610578
+      },
+      {
+        "ack": 35378,
+        "extraction": 5092554092,
+        "ffmpeg_started": 5123532044,
+        "first_resolved": 3263898772,
+        "metadata": 3257353957,
+        "metadata_tracks": 302,
+        "opus": 5152653762,
+        "preparation": 3257358796,
+        "received": 0,
+        "transport_sent": 5152733465
+      },
+      {
+        "ack": 34556,
+        "extraction": 5072465265,
+        "ffmpeg_started": 5163423978,
+        "first_resolved": 3023889845,
+        "metadata": 3018273513,
+        "metadata_tracks": 302,
+        "opus": 5193193132,
+        "preparation": 3018279986,
+        "received": 0,
+        "transport_sent": 5193266834
+      }
+    ],
+    "scenario": {
+      "Name": "playlist-302",
+      "Kind": "playlist",
+      "Mode": "warm",
+      "Count": 302,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 5152.733465,
+      "p95_ms": 5193.266834,
+      "p99_ms": 5193.266834,
+      "max_ms": 5193.266834
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 5000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 25368,
+        "extraction": 8684875004,
+        "ffmpeg_started": 8749910876,
+        "first_resolved": 7049282558,
+        "metadata": 4253290881,
+        "metadata_tracks": 500,
+        "opus": 8778616534,
+        "preparation": 4253296031,
+        "received": 0,
+        "transport_sent": 8778693421
+      },
+      {
+        "ack": 28494,
+        "extraction": 8901429258,
+        "ffmpeg_started": 8922714179,
+        "first_resolved": 6844750750,
+        "metadata": 4104467934,
+        "metadata_tracks": 500,
+        "opus": 8951483585,
+        "preparation": 4104471971,
+        "received": 0,
+        "transport_sent": 8951572857
+      },
+      {
+        "ack": 26671,
+        "extraction": 8951032915,
+        "ffmpeg_started": 8972856437,
+        "first_resolved": 7112664113,
+        "metadata": 4323535434,
+        "metadata_tracks": 500,
+        "opus": 9001759305,
+        "preparation": 4323539391,
+        "received": 0,
+        "transport_sent": 9001838567
+      }
+    ],
+    "scenario": {
+      "Name": "playlist-500",
+      "Kind": "playlist",
+      "Mode": "cold",
+      "Count": 500,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 8951.572857,
+      "p95_ms": 9001.838567,
+      "p99_ms": 9001.838567,
+      "max_ms": 9001.838567
+    }
+  },
+  {
+    "ack_transport": "simulated",
+    "budget_ms": 2000,
+    "dave_verified": true,
+    "environment": "real-providers-discord-dave",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 36400,
+        "extraction": 6177405466,
+        "ffmpeg_started": 6341526873,
+        "first_resolved": 4289261109,
+        "metadata": 4282360617,
+        "metadata_tracks": 500,
+        "opus": 6369764428,
+        "preparation": 4282365236,
+        "received": 0,
+        "transport_sent": 6369846836
+      },
+      {
+        "ack": 36109,
+        "extraction": 7174127887,
+        "ffmpeg_started": 7197642944,
+        "first_resolved": 5114397549,
+        "metadata": 5106585269,
+        "metadata_tracks": 500,
+        "opus": 7226504148,
+        "preparation": 5106590289,
+        "received": 0,
+        "transport_sent": 7226588700
+      },
+      {
+        "ack": 37121,
+        "extraction": 6172323151,
+        "ffmpeg_started": 6215550840,
+        "first_resolved": 4312328505,
+        "metadata": 4304303740,
+        "metadata_tracks": 500,
+        "opus": 6244515386,
+        "preparation": 4304308459,
+        "received": 0,
+        "transport_sent": 6244596833
+      }
+    ],
+    "scenario": {
+      "Name": "playlist-500",
+      "Kind": "playlist",
+      "Mode": "warm",
+      "Count": 500,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "FAIL",
+    "stimulus": "synthetic interaction at commandAt; real Discord UDP",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 6369.846836,
+      "p95_ms": 7226.5887,
+      "p99_ms": 7226.5887,
+      "max_ms": 7226.5887
+    }
+  }
+]

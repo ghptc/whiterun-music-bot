@@ -112,6 +112,7 @@ func TestInstantPlaybackDiscordLive(t *testing.T) {
 			t.Fatal("live samples must be 1..100")
 		}
 	}
+	disconnect := os.Getenv("BARD_LIVE_DISCONNECT") == "1"
 	var serial snowflake.ID = 1000
 	for _, c := range cases {
 		for _, mode := range []string{"cold", "warm"} {
@@ -121,6 +122,14 @@ func TestInstantPlaybackDiscordLive(t *testing.T) {
 				var failures []string
 				for repeat := 0; repeat < samples; repeat++ {
 					g := b.getGuild(guildID)
+					if disconnect {
+						cleanup, closeCancel := context.WithTimeout(context.Background(), 10*time.Second)
+						g.mu.Lock()
+						g.player.Leave(cleanup)
+						g.conn = nil
+						g.mu.Unlock()
+						closeCancel()
+					}
 					g.mu.Lock()
 					g.searchCancel()
 					g.searchCtx, g.searchCancel = context.WithTimeout(b.ctx, 75*time.Second)
@@ -217,7 +226,7 @@ func TestInstantPlaybackDiscordLive(t *testing.T) {
 				if len(failures) > 0 || perfgate.Check(values, budget) != nil {
 					status = "FAIL"
 				}
-				raw, _ := json.Marshal(map[string]any{"scenario": instantScenario{Name: c.Name, Kind: c.Kind, Count: c.Count, Guilds: 1, Mode: mode}, "ttfa": perfgate.Summarize(values), "budget_ms": budget.Milliseconds(), "environment": "real-providers-discord-dave", "dave_verified": len(values) > 0, "status": status, "monotonic_ns": traces, "errors": failures, "ack_transport": "simulated", "stimulus": "synthetic interaction at commandAt; real Discord UDP"})
+				raw, _ := json.Marshal(map[string]any{"scenario": instantScenario{Name: c.Name, Kind: c.Kind, Count: c.Count, Guilds: 1, Mode: mode, Disconnected: disconnect}, "ttfa": perfgate.Summarize(values), "budget_ms": budget.Milliseconds(), "environment": "real-providers-discord-dave", "dave_verified": len(values) > 0, "status": status, "monotonic_ns": traces, "errors": failures, "ack_transport": "simulated", "stimulus": "synthetic interaction at commandAt; real Discord UDP"})
 				t.Log("PERF_GATE_JSON " + string(raw))
 			})
 		}

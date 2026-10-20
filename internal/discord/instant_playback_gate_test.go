@@ -118,6 +118,10 @@ func (h instantHandler) Handle(_ context.Context, r slog.Record) error {
 		if _, ok := tr.snapshot()["metadata"]; !ok {
 			tr.mark("metadata")
 		}
+	case "spotify_first_track_metadata_available":
+		stage = "first_metadata"
+	case "collection_positions_validated":
+		stage = "manifest"
 	case "spotify_metadata_available":
 		if count, err := strconv.ParseInt(fmt.Sprint(attrs["tracks"]), 10, 64); err == nil {
 			tr.mu.Lock()

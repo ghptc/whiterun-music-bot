@@ -1,0 +1,12 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/media
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkPlaybackMetadata500/deferred=false-8         	      30	   4277288 ns/op	 8138978 B/op	   47331 allocs/op
+BenchmarkPlaybackMetadata500/deferred=false-8         	      30	   4300664 ns/op	 8152439 B/op	   47351 allocs/op
+BenchmarkPlaybackMetadata500/deferred=false-8         	      30	   4286840 ns/op	 8151592 B/op	   47341 allocs/op
+BenchmarkPlaybackMetadata500/deferred=true-8          	      30	   1268071 ns/op	 2663782 B/op	   10624 allocs/op
+BenchmarkPlaybackMetadata500/deferred=true-8          	      30	   1260128 ns/op	 2655268 B/op	   10618 allocs/op
+BenchmarkPlaybackMetadata500/deferred=true-8          	      30	   1264285 ns/op	 2650980 B/op	   10608 allocs/op
+PASS
+ok  	whiterun/internal/media	0.504s
