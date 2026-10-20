@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"log/slog"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -90,5 +91,29 @@ func TestOwnedDirectoryCannotBeReusedImplicitly(t *testing.T) {
 	err := Run(context.Background(), Config{Out: t.TempDir(), Duration: time.Second, Sample: time.Second, Audio: 20 * time.Millisecond, Playlist: 123, Guilds: 1})
 	if err == nil {
 		t.Fatal("arbitrary existing directory accepted")
+	}
+}
+
+func TestDiagnosticCachePolicyCannotChangeOnResume(t *testing.T) {
+	out := t.TempDir()
+	c := Config{Out: out, Duration: time.Second, Sample: time.Second, Audio: time.Second, Playlist: 500, Guilds: 2}
+	if err := atomicJSON(filepath.Join(out, "qa010-owned.json"), c); err != nil {
+		t.Fatal(err)
+	}
+	c.Resume = true
+	c.DisableCache = true
+	if err := Run(context.Background(), c); err == nil || err.Error() != "resume configuration mismatch" {
+		t.Fatalf("cache policy changed for checkpoint: %v", err)
+	}
+}
+
+func TestDisabledCacheCannotProduceWarmHitMetrics(t *testing.T) {
+	out := filepath.Join(t.TempDir(), "not-created")
+	err := Run(context.Background(), Config{Out: out, Duration: time.Second, Sample: time.Second, Audio: time.Second, Playlist: 500, Guilds: 2, Warm: true, DisableCache: true})
+	if err == nil || err.Error() != "disabled QA cache cannot report warm cache hits" {
+		t.Fatalf("misleading cache hit metrics accepted: %v", err)
+	}
+	if _, err := os.Stat(out); !os.IsNotExist(err) {
+		t.Fatalf("invalid diagnostic created output: %v", err)
 	}
 }

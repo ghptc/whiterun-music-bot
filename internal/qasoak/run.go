@@ -29,6 +29,7 @@ type Config struct {
 	Playlist, Guilds        int
 	Seed                    uint64
 	Warm, Resume, Faults    bool
+	DisableCache            bool // QA-only diagnostic; nil resolver cache, never production configuration.
 }
 type histogram struct {
 	Count    uint64
@@ -168,6 +169,9 @@ func atomicJSON(path string, v any) error {
 
 // Run uses only an owned SQLite file and controlled subprocess/transport boundaries.
 func Run(parent context.Context, c Config) (result error) {
+	if c.DisableCache && c.Warm {
+		return errors.New("disabled QA cache cannot report warm cache hits")
+	}
 	if c.Out == "" || c.Duration <= 0 || c.Sample <= 0 || c.Audio < 20*time.Millisecond || c.Audio > time.Minute || (c.Playlist != 123 && c.Playlist != 500) || c.Guilds < 1 || c.Guilds > 8 {
 		return errors.New("invalid QA config: out, positive durations, audio 20ms..1m, playlist 123|500, guilds 1..8 required")
 	}
@@ -187,7 +191,7 @@ func Run(parent context.Context, c Config) (result error) {
 		if err = json.Unmarshal(b, &old); err != nil {
 			return err
 		}
-		if old.Playlist != c.Playlist || old.Guilds != c.Guilds || old.Seed != c.Seed || old.Warm != c.Warm || old.Faults != c.Faults || old.Audio != c.Audio {
+		if old.Playlist != c.Playlist || old.Guilds != c.Guilds || old.Seed != c.Seed || old.Warm != c.Warm || old.Faults != c.Faults || old.Audio != c.Audio || old.DisableCache != c.DisableCache {
 			return errors.New("resume configuration mismatch")
 		}
 	} else {
@@ -248,6 +252,9 @@ func Run(parent context.Context, c Config) (result error) {
 	defer cancel()
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	resolver := media.Resolver{Binary: producer, Cache: &media.SearchCache{}}
+	if c.DisableCache {
+		resolver.Cache = nil
+	}
 	streamer := player.Streamer{YTDLP: producer, FFmpeg: ff, FirstAudioTimeout: 5 * time.Second, ResolveTimeout: 5 * time.Second, DrainTimeout: time.Second}
 	var groups []*guildRun
 	defer func() {
