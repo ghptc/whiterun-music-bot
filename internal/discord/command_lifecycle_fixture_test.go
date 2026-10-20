@@ -135,10 +135,11 @@ func newLifecycleFixtureLog(t *testing.T, phase string, store player.Store, log 
 	if err := g.player.ConfigureStore(store, "1"); err != nil {
 		t.Fatal(err)
 	}
-	if err := g.player.Attach(transport{conn: &lifecycleConn{}}); err != nil {
+	conn := &lifecycleConn{}
+	if err := g.player.Attach(transport{conn: conn}); err != nil {
 		t.Fatal(err)
 	}
-	g.conn = &lifecycleConn{}
+	g.conn = conn
 	g.channel = 5
 	b.bindAnnouncements(g)
 	listener(b, 1, 3, false)
@@ -184,9 +185,12 @@ func lifecycleOptions(name string) []map[string]any {
 	}
 }
 func (f *lifecycleFixture) interaction(name string) *events.ApplicationCommandInteractionCreate {
+	return f.interactionFor(name, 1, 3)
+}
+func (f *lifecycleFixture) interactionFor(name string, guild, user snowflake.ID) *events.ApplicationCommandInteractionCreate {
 	f.serial++
 	e := interaction(f.t, name, true)
-	body := map[string]any{"id": fmt.Sprint(100 + f.serial), "application_id": "2", "type": 2, "token": "test", "guild_id": "1", "user": map[string]any{"id": "3", "username": "tester"}, "data": map[string]any{"id": "4", "name": name, "type": 1, "options": lifecycleOptions(name)}}
+	body := map[string]any{"id": fmt.Sprint(100 + f.serial), "application_id": "2", "type": 2, "token": "test", "guild_id": guild.String(), "user": map[string]any{"id": user.String(), "username": "tester"}, "data": map[string]any{"id": "4", "name": name, "type": 1, "options": lifecycleOptions(name)}}
 	raw, _ := json.Marshal(body)
 	if err := json.Unmarshal(raw, &e.ApplicationCommandInteraction); err != nil {
 		f.t.Fatal(err)
