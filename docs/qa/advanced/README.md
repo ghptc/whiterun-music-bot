@@ -1,5 +1,12 @@
 # QA-008 — Advanced Reliability Testing
 
+> Atualização QA-009: este documento registra o estado histórico da QA-008.
+> O score sistemático anterior foi invalidado: Gremlins 0.6.0 gerava `-cpu 2`
+> como um único argumento e falhas de execução eram contadas como KILLED.
+> As reproduções D01/D02 foram promovidas a regressões padrão; D03 foi
+> investigado além do prazo de Close e mitigado por limiter com ciclo de vida próprio.
+> Evidências corrigidas, classificação e limitações: [QA-009](../defect-elimination/README.md).
+
 Extensão dos relatórios existentes de QA. Não houve nova auditoria geral nem
 alteração de produção, dependências, layout ou identidade visual congelada.
 

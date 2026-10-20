@@ -1,0 +1,1 @@
+{"campaign": "player", "package": "player", "files": ["controls.go", "queue.go", "previous.go", "durable.go"], "operator": "boundary", "exit_code": 0, "elapsed_seconds": 21.84546128399961, "model_seed": 41, "source_isolation": "temporary copy", "statuses": {"KILLED": 27, "LIVED": 2}, "infrastructure_failures": []}

@@ -1,0 +1,4 @@
+isolated comparator < -> <=
+['go', 'test', './internal/player', '-run=^(TestAdvanced|TestQuality|TestHardening|TestDefect)', '-count=1', '-timeout=40s']
+exit_code=0
+ok  	whiterun/internal/player	1.056s

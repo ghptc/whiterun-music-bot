@@ -1,0 +1,46 @@
+=== RUN   TestUpstreamLimiterPersistsAcrossCleanupPeriods
+    upstream_probe_test.go:73: worker persists after Close deadline, cycle=1; blocked in doCleanup=true
+    upstream_probe_test.go:73: worker persists after Close deadline, cycle=2; blocked in doCleanup=true
+    upstream_probe_test.go:73: worker persists after Close deadline, cycle=3; blocked in doCleanup=true
+    upstream_probe_test.go:75: goroutine 8 [running]:
+        whiterun/internal/discord.TestUpstreamLimiterPersistsAcrossCleanupPeriods(0xc00018c488)
+                /home/gabriel/Projects/whiterun-music-bot/internal/discord/upstream_probe_test.go:69 +0x6e5
+        testing.tRunner(0xc00018c488, 0x1b69478)
+                /usr/lib/go/src/testing/testing.go:2193 +0x21d
+        created by testing.(*T).Run in goroutine 1
+                /usr/lib/go/src/testing/testing.go:2258 +0xb13
+
+        goroutine 1 [chan receive]:
+        testing.(*T).Run(0xc00018c248, {0x134714c, 0x2f}, 0x1b69478)
+                /usr/lib/go/src/testing/testing.go:2266 +0xb3e
+        testing.runTests.func1(0xc00018c248)
+                /usr/lib/go/src/testing/testing.go:2742 +0x85
+        testing.tRunner(0xc00018c248, 0xc000195a40)
+                /usr/lib/go/src/testing/testing.go:2193 +0x21d
+        testing.runTests({0x1329a1d, 0x8}, {0x1335a96, 0x19}, 0xc0000168a0, {0x1bf0c78, 0x51, 0x51}, {0xc2adcf7a876ac2c0, 0x25420a4c0, ...})
+                /usr/lib/go/src/testing/testing.go:2740 +0x9ea
+        testing.(*M).Run(0xc0000c5b80)
+                /usr/lib/go/src/testing/testing.go:2600 +0xf45
+        main.main()
+                _testmain.go:212 +0x165
+
+        goroutine 9 [sync.Mutex.Lock]:
+        internal/sync.runtime_SemacquireMutex(0xc000092c20?, 0x0?, 0x0?)
+                /usr/lib/go/src/runtime/sema.go:95 +0x25
+        internal/sync.(*Mutex).lockSlow(0xc00005d6f8)
+                /usr/lib/go/src/internal/sync/mutex.go:149 +0x1eb
+        internal/sync.(*Mutex).Lock(0xc00005d6f8)
+                /usr/lib/go/src/internal/sync/mutex.go:70 +0x45
+        sync.(*Mutex).Lock(0xc000052fc0?)
+                /usr/lib/go/src/sync/mutex.go:46 +0x15
+        github.com/disgoorg/disgo/rest.(*rateLimiterImpl).doCleanup(0xc00005d6c0)
+                /home/gabriel/go/pkg/mod/github.com/disgoorg/disgo@v0.19.6/rest/rest_rate_limiter.go:79 +0x4d
+        github.com/disgoorg/disgo/rest.(*rateLimiterImpl).cleanup(0xc00005d6c0)
+                /home/gabriel/go/pkg/mod/github.com/disgoorg/disgo@v0.19.6/rest/rest_rate_limiter.go:74 +0x88
+        created by github.com/disgoorg/disgo/rest.NewRateLimiter in goroutine 8
+                /home/gabriel/go/pkg/mod/github.com/disgoorg/disgo@v0.19.6/rest/rest_rate_limiter.go:51 +0x246
+    upstream_probe_test.go:78: QA008-D03: limiter worker persists after Close deadline and three cleanup periods
+--- FAIL: TestUpstreamLimiterPersistsAcrossCleanupPeriods (1.04s)
+FAIL
+FAIL    whiterun/internal/discord       1.047s
+FAIL

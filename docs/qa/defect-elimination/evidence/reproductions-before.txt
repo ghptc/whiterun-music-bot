@@ -1,0 +1,36 @@
+--- FAIL: TestKnownIssuesNegativeExtractorDuration (0.00s)
+    advanced_knownissues_test.go:16: QA008-D01: malformed provider duration escaped: -1s
+FAIL
+FAIL	whiterun/internal/media	0.003s
+--- FAIL: TestKnownIssuesEmptyOpusPacket (0.00s)
+    advanced_knownissues_test.go:16: QA008-D02: empty audio packet delivered as Opus: delivered=1 err=<nil>
+FAIL
+FAIL	whiterun/internal/player	0.001s
+--- FAIL: TestKnownIssuesDisgoLimiterClose (0.00s)
+panic: deadlock: main bubble goroutine has exited but blocked goroutines remain [recovered, repanicked]
+
+goroutine 8 [running]:
+testing.tRunner.func1.2({0x112da90, 0x1fd922a1c978})
+	/usr/lib/go/src/testing/testing.go:2123 +0x232
+testing.tRunner.func1()
+	/usr/lib/go/src/testing/testing.go:2126 +0x329
+panic({0x112da90?, 0x1fd922a1c978?})
+	/usr/lib/go/src/runtime/panic.go:859 +0x125
+internal/synctest.Run(0x1fd922aa8f40)
+	/usr/lib/go/src/runtime/synctest.go:247 +0x2dd
+testing/synctest.Test(0x1fd922b8c488, 0x11b6598)
+	/usr/lib/go/src/testing/synctest/synctest.go:291 +0x99
+whiterun/internal/discord.TestKnownIssuesDisgoLimiterClose(0x1fd922b8c488?)
+	/home/gabriel/Projects/whiterun-music-bot/internal/discord/advanced_knownissues_test.go:15 +0x1a
+testing.tRunner(0x1fd922b8c488, 0x11b6328)
+	/usr/lib/go/src/testing/testing.go:2193 +0xea
+created by testing.(*T).Run in goroutine 1
+	/usr/lib/go/src/testing/testing.go:2258 +0x4d4
+
+goroutine 11 [chan receive (durable), synctest bubble 1]:
+github.com/disgoorg/disgo/rest.(*rateLimiterImpl).cleanup(0x1fd922a636c0)
+	/home/gabriel/go/pkg/mod/github.com/disgoorg/disgo@v0.19.6/rest/rest_rate_limiter.go:73 +0x5d
+created by github.com/disgoorg/disgo/rest.NewRateLimiter in goroutine 10
+	/home/gabriel/go/pkg/mod/github.com/disgoorg/disgo@v0.19.6/rest/rest_rate_limiter.go:51 +0x14a
+FAIL	whiterun/internal/discord	0.004s
+FAIL

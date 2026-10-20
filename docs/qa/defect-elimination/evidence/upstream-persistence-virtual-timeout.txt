@@ -1,0 +1,74 @@
+=== RUN   TestUpstreamLimiterPersistsAcrossCleanupPeriods
+panic: test timed out after 10m0s
+	running tests:
+		TestUpstreamLimiterPersistsAcrossCleanupPeriods (10m0s)
+
+goroutine 18 [running]:
+testing.(*M).startAlarm.func1()
+	/usr/lib/go/src/testing/testing.go:2959 +0x605
+created by time.goFunc
+	/usr/lib/go/src/time/sleep.go:182 +0x45
+
+goroutine 1 [chan receive]:
+testing.(*T).Run(0xc00020c248, {0x13460f6, 0x2f}, 0x1b67c00)
+	/usr/lib/go/src/testing/testing.go:2266 +0xb3e
+testing.runTests.func1(0xc00020c248)
+	/usr/lib/go/src/testing/testing.go:2742 +0x85
+testing.tRunner(0xc00020c248, 0xc000215a40)
+	/usr/lib/go/src/testing/testing.go:2193 +0x21d
+testing.runTests({0x1328a1d, 0x8}, {0x1334a8b, 0x19}, 0xc0000168a0, {0x1beec78, 0x51, 0x51}, {0xc2adcf53a825cc41, 0x8bb2de0c0f, ...})
+	/usr/lib/go/src/testing/testing.go:2740 +0x9ea
+testing.(*M).Run(0xc0000c5c20)
+	/usr/lib/go/src/testing/testing.go:2600 +0xf45
+main.main()
+	_testmain.go:212 +0x165
+
+goroutine 8 [synctest.Run (durable), synctest bubble 1]:
+internal/synctest.Run(0xc0000a2f60)
+	/usr/lib/go/src/runtime/synctest.go:214 +0x1da
+testing/synctest.Test(0xc00020c488, 0x1b67d70)
+	/usr/lib/go/src/testing/synctest/synctest.go:291 +0x125
+whiterun/internal/discord.TestUpstreamLimiterPersistsAcrossCleanupPeriods(0xc00020c488)
+	/home/gabriel/Projects/whiterun-music-bot/internal/discord/upstream_probe_test.go:42 +0x2e
+testing.tRunner(0xc00020c488, 0x1b67c00)
+	/usr/lib/go/src/testing/testing.go:2193 +0x21d
+created by testing.(*T).Run in goroutine 1
+	/usr/lib/go/src/testing/testing.go:2258 +0xb13
+
+goroutine 9 [chan receive (durable), synctest bubble 1]:
+testing/synctest.testingSynctestTest(0xc00020c488, 0x1b67d70)
+	/usr/lib/go/src/testing/testing.go:2308 +0x625
+testing/synctest.Test.func1()
+	/usr/lib/go/src/testing/synctest/synctest.go:292 +0x45
+created by testing/synctest.Test in goroutine 8
+	/usr/lib/go/src/testing/synctest/synctest.go:291 +0x125
+
+goroutine 10 [synctest.Wait (durable), synctest bubble 1]:
+internal/synctest.Wait()
+	/usr/lib/go/src/runtime/synctest.go:296 +0x70
+testing/synctest.Wait(...)
+	/usr/lib/go/src/testing/synctest/synctest.go:311
+whiterun/internal/discord.TestUpstreamLimiterPersistsAcrossCleanupPeriods.func1(0xc00020c6c8)
+	/home/gabriel/Projects/whiterun-music-bot/internal/discord/upstream_probe_test.go:50 +0x20b
+testing.tRunner(0xc00020c6c8, 0x1b67d70)
+	/usr/lib/go/src/testing/testing.go:2193 +0x21d
+created by testing/synctest.testingSynctestTest in goroutine 9
+	/usr/lib/go/src/testing/testing.go:2307 +0x5fd
+
+goroutine 11 [sync.Mutex.Lock, synctest bubble 1]:
+internal/sync.runtime_SemacquireMutex(0x1a7bda0?, 0x5e?, 0xc000016948?)
+	/usr/lib/go/src/runtime/sema.go:95 +0x25
+internal/sync.(*Mutex).lockSlow(0xc00005d6f8)
+	/usr/lib/go/src/internal/sync/mutex.go:149 +0x1eb
+internal/sync.(*Mutex).Lock(0xc00005d6f8)
+	/usr/lib/go/src/internal/sync/mutex.go:70 +0x45
+sync.(*Mutex).Lock(0x1?)
+	/usr/lib/go/src/sync/mutex.go:46 +0x15
+github.com/disgoorg/disgo/rest.(*rateLimiterImpl).doCleanup(0xc00005d6c0)
+	/home/gabriel/go/pkg/mod/github.com/disgoorg/disgo@v0.19.6/rest/rest_rate_limiter.go:79 +0x4d
+github.com/disgoorg/disgo/rest.(*rateLimiterImpl).cleanup(0xc00005d6c0)
+	/home/gabriel/go/pkg/mod/github.com/disgoorg/disgo@v0.19.6/rest/rest_rate_limiter.go:74 +0x88
+created by github.com/disgoorg/disgo/rest.NewRateLimiter in goroutine 10
+	/home/gabriel/go/pkg/mod/github.com/disgoorg/disgo@v0.19.6/rest/rest_rate_limiter.go:51 +0x246
+FAIL	whiterun/internal/discord	600.107s
+FAIL

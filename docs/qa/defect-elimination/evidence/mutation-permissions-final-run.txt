@@ -1,0 +1,20 @@
+{"campaign": "permissions", "package": "discord", "files": ["commands.go"], "operator": "negation", "exit_code": 1, "elapsed_seconds": 7.459681413005455, "model_seed": 41, "source_isolation": "temporary copy"}
+Starting...
+Gathering coverage...
+/tmp/bard-qa008-mutation-ddou1f1g
+test
+-cover
+-coverprofile
+/tmp/gremlins-1829085017/coverage
+./internal/discord/...
+--- FAIL: TestHardeningSuccessfulPlayPersistsAnnouncementDestination (0.00s)
+    hardening_commands_test.go:218: play failed Could not resolve this song or collection. Check the link and try again.
+2026/10/19 22:53:55 WARN rate limit exceeded name=rest_rate_limiter endpoint=/webhooks/2/test/messages/@original retry_after=1
+2026/10/19 22:53:56 WARN rate limit exceeded name=rest_rate_limiter endpoint=/webhooks/2/test/messages/@original retry_after=60
+2026/10/19 22:53:58 WARN rate limit exceeded name=rest_rate_limiter endpoint=/interactions/10/test/callback retry_after=60
+FAIL
+coverage: 86.8% of statements
+FAIL    whiterun/internal/discord       6.259s
+FAIL
+
+ERROR: failed to gather coverage: impossible to executeCoverage coverage: exit status 1

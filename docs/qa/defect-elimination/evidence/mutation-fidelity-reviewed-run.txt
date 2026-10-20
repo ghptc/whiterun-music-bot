@@ -1,0 +1,1 @@
+{"campaign": "fidelity", "package": "media", "files": ["spotify_rank.go", "fidelity.go"], "operator": "negation", "exit_code": 0, "elapsed_seconds": 38.484054219996324, "model_seed": 41, "source_isolation": "temporary copy", "statuses": {"KILLED": 106, "LIVED": 1}, "infrastructure_failures": []}

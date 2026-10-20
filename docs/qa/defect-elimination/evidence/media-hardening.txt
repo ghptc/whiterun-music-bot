@@ -1,0 +1,5 @@
+# whiterun/internal/media [whiterun/internal/media.test]
+internal/media/hardening_mapping_test.go:211:24: invalid operation: got[0] != want (struct containing []string cannot be compared)
+internal/media/hardening_mapping_test.go:211:42: invalid operation: got[1] != second (struct containing []string cannot be compared)
+FAIL	whiterun/internal/media [build failed]
+FAIL

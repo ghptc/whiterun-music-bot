@@ -1,0 +1,50 @@
+[
+  {
+    "name": "full",
+    "command": [
+      "go",
+      "test",
+      "./...",
+      "-count=1"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 28.53
+  },
+  {
+    "name": "race",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./...",
+      "-count=1"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 39.141
+  },
+  {
+    "name": "vet",
+    "command": [
+      "go",
+      "vet",
+      "./..."
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.577
+  },
+  {
+    "name": "coverage",
+    "command": [
+      "go",
+      "test",
+      "./...",
+      "-count=1",
+      "-coverpkg=./...",
+      "-covermode=atomic",
+      "-coverprofile=docs/qa/defect-elimination/evidence/coverage.out",
+      "-json"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 28.628
+  }
+]

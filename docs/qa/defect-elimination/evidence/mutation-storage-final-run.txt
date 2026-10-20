@@ -1,0 +1,1 @@
+{"campaign": "storage", "package": "storage", "files": ["sqlite.go"], "operator": "negation", "exit_code": 0, "elapsed_seconds": 30.15695845898881, "model_seed": 41, "source_isolation": "temporary copy", "statuses": {"KILLED": 37}, "infrastructure_failures": []}

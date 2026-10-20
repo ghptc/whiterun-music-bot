@@ -1,0 +1,10 @@
+fuzz: elapsed: 0s, gathering baseline coverage: 0/120 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 120/120 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 5297 (1765/sec), new interesting: 10 (total: 130)
+fuzz: elapsed: 6s, execs: 6139 (281/sec), new interesting: 11 (total: 131)
+fuzz: elapsed: 9s, execs: 13152 (2338/sec), new interesting: 16 (total: 136)
+fuzz: elapsed: 12s, execs: 13152 (0/sec), new interesting: 16 (total: 136)
+fuzz: elapsed: 15s, execs: 26102 (4319/sec), new interesting: 26 (total: 146)
+fuzz: elapsed: 16s, execs: 26102 (0/sec), new interesting: 26 (total: 146)
+PASS
+ok  	whiterun/internal/discord	16.025s

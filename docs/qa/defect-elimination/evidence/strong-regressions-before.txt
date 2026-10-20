@@ -1,0 +1,31 @@
+--- FAIL: TestDefectNegativeExtractorDuration (0.00s)
+    defect_regression_test.go:13: QA008-D01: malformed provider duration escaped: -1s
+--- FAIL: TestDefectExtractorDurationBoundaries (0.01s)
+    --- FAIL: TestDefectExtractorDurationBoundaries/negative (0.00s)
+        duration_regression_test.go:30: invalid duration published: {ForcedYouTube:false identityProof:0x31011ed54f20 SpotifyArtworkURL: YouTubeThumbnailURL: SpotifyID: ISRC: Explicit:<nil> RequestedBy: MatchStatus: MatchReason: Live:false Position:0 Total:0 RequestedSource:youtube SourceURL: Artist: Artists:[] Album: VerifyBeforePlay:false VideoID:abcdefghijk Channel: Title:Song URL:https://www.youtube.com/watch?v=abcdefghijk Duration:-1ms Timing:<nil>} <nil>
+    --- FAIL: TestDefectExtractorDurationBoundaries/overflow (0.00s)
+        duration_regression_test.go:30: invalid duration published: {ForcedYouTube:false identityProof:0x31011ed55340 SpotifyArtworkURL: YouTubeThumbnailURL: SpotifyID: ISRC: Explicit:<nil> RequestedBy: MatchStatus: MatchReason: Live:false Position:0 Total:0 RequestedSource:youtube SourceURL: Artist: Artists:[] Album: VerifyBeforePlay:false VideoID:abcdefghijk Channel: Title:Song URL:https://www.youtube.com/watch?v=abcdefghijk Duration:-2562047h47m16.854775808s Timing:<nil>} <nil>
+    --- FAIL: TestDefectExtractorDurationBoundaries/rounded_overflow (0.00s)
+        duration_regression_test.go:30: invalid duration published: {ForcedYouTube:false identityProof:0x31011ed55760 SpotifyArtworkURL: YouTubeThumbnailURL: SpotifyID: ISRC: Explicit:<nil> RequestedBy: MatchStatus: MatchReason: Live:false Position:0 Total:0 RequestedSource:youtube SourceURL: Artist: Artists:[] Album: VerifyBeforePlay:false VideoID:abcdefghijk Channel: Title:Song URL:https://www.youtube.com/watch?v=abcdefghijk Duration:-2562047h47m16.854775808s Timing:<nil>} <nil>
+--- FAIL: TestDefectPlaylistDoesNotPublishMalformedDuration (0.00s)
+    --- FAIL: TestDefectPlaylistDoesNotPublishMalformedDuration/-1 (0.00s)
+        duration_regression_test.go:46: invalid playlist entry escaped: {Title: SourceURL:https://www.youtube.com/playlist?list=PLfixture Tracks:[{ForcedYouTube:false identityProof:<nil> SpotifyArtworkURL: YouTubeThumbnailURL: SpotifyID: ISRC: Explicit:<nil> RequestedBy: MatchStatus: MatchReason: Live:false Position:0 Total:0 RequestedSource:youtube SourceURL: Artist: Artists:[] Album: VerifyBeforePlay:true VideoID:abcdefghijk Channel: Title:bad URL:https://www.youtube.com/watch?v=abcdefghijk Duration:-1s Timing:<nil>} {ForcedYouTube:false identityProof:<nil> SpotifyArtworkURL: YouTubeThumbnailURL: SpotifyID: ISRC: Explicit:<nil> RequestedBy: MatchStatus: MatchReason: Live:false Position:0 Total:0 RequestedSource:youtube SourceURL: Artist: Artists:[] Album: VerifyBeforePlay:true VideoID:lmnopqrstuv Channel: Title:good URL:https://www.youtube.com/watch?v=lmnopqrstuv Duration:2s Timing:<nil>}] Skipped:0 IsCollection:true} <nil>
+    --- FAIL: TestDefectPlaylistDoesNotPublishMalformedDuration/1e20 (0.00s)
+        duration_regression_test.go:46: invalid playlist entry escaped: {Title: SourceURL:https://www.youtube.com/playlist?list=PLfixture Tracks:[{ForcedYouTube:false identityProof:<nil> SpotifyArtworkURL: YouTubeThumbnailURL: SpotifyID: ISRC: Explicit:<nil> RequestedBy: MatchStatus: MatchReason: Live:false Position:0 Total:0 RequestedSource:youtube SourceURL: Artist: Artists:[] Album: VerifyBeforePlay:true VideoID:abcdefghijk Channel: Title:bad URL:https://www.youtube.com/watch?v=abcdefghijk Duration:-2562047h47m16.854775808s Timing:<nil>} {ForcedYouTube:false identityProof:<nil> SpotifyArtworkURL: YouTubeThumbnailURL: SpotifyID: ISRC: Explicit:<nil> RequestedBy: MatchStatus: MatchReason: Live:false Position:0 Total:0 RequestedSource:youtube SourceURL: Artist: Artists:[] Album: VerifyBeforePlay:true VideoID:lmnopqrstuv Channel: Title:good URL:https://www.youtube.com/watch?v=lmnopqrstuv Duration:2s Timing:<nil>}] Skipped:0 IsCollection:true} <nil>
+--- FAIL: TestDefectFidelityRejectsInvalidDuration (0.00s)
+    --- FAIL: TestDefectFidelityRejectsInvalidDuration/-1 (0.00s)
+        duration_regression_test.go:60: {MATCH_UNCERTAIN duration_unknown 0}
+    --- FAIL: TestDefectFidelityRejectsInvalidDuration/NaN (0.00s)
+        duration_regression_test.go:60: {MATCH_CONFIRMED matching_isrc_and_identity 760}
+FAIL
+FAIL	whiterun/internal/media	0.011s
+--- FAIL: TestDefectEmptyOpusPacket (0.00s)
+    defect_regression_test.go:20: QA008-D02: empty audio packet delivered as Opus: delivered=1 err=<nil>
+--- FAIL: TestDefectEmptyOpusNeverStartsStream (0.22s)
+    --- FAIL: TestDefectEmptyOpusNeverStartsStream/false (0.10s)
+        defect_regression_test.go:47: empty audio delivered or retained speaking: frames=6 err=<nil>
+    --- FAIL: TestDefectEmptyOpusNeverStartsStream/true (0.12s)
+        defect_regression_test.go:47: empty audio delivered or retained speaking: frames=7 err=<nil>
+FAIL
+FAIL	whiterun/internal/player	0.226s
+FAIL

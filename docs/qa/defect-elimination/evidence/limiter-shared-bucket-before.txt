@@ -1,0 +1,125 @@
+==================
+WARNING: DATA RACE
+Read at 0x00c000136888 by goroutine 13:
+  whiterun/internal/discord.(*managedRESTLimiter).Wait()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter.go:169 +0x236
+  whiterun/internal/discord.TestDefectLimiterConcurrentSameBucket.func1()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter_test.go:138 +0x7c
+
+Previous write at 0x00c000136888 by goroutine 30:
+  whiterun/internal/discord.(*managedRESTLimiter).Unlock()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter.go:223 +0x1ce
+  whiterun/internal/discord.TestDefectLimiterConcurrentSameBucket.func1()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter_test.go:148 +0x49e
+
+Goroutine 13 (running) created at:
+  sync.(*WaitGroup).Go()
+      /usr/lib/go/src/sync/waitgroup.go:238 +0x72
+  testing.tRunner()
+      /usr/lib/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/go/src/testing/testing.go:2258 +0x38
+
+Goroutine 30 (running) created at:
+  sync.(*WaitGroup).Go()
+      /usr/lib/go/src/sync/waitgroup.go:238 +0x72
+  testing.tRunner()
+      /usr/lib/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/go/src/testing/testing.go:2258 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c0001368b8 by goroutine 13:
+  whiterun/internal/discord.(*managedRESTLimiter).Wait()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter.go:169 +0x2a4
+  whiterun/internal/discord.TestDefectLimiterConcurrentSameBucket.func1()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter_test.go:138 +0x7c
+
+Previous write at 0x00c0001368b8 by goroutine 30:
+  whiterun/internal/discord.(*managedRESTLimiter).Unlock()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter.go:265 +0xa9b
+  whiterun/internal/discord.TestDefectLimiterConcurrentSameBucket.func1()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter_test.go:148 +0x49e
+
+Goroutine 13 (running) created at:
+  sync.(*WaitGroup).Go()
+      /usr/lib/go/src/sync/waitgroup.go:238 +0x72
+  testing.tRunner()
+      /usr/lib/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/go/src/testing/testing.go:2258 +0x38
+
+Goroutine 30 (running) created at:
+  sync.(*WaitGroup).Go()
+      /usr/lib/go/src/sync/waitgroup.go:238 +0x72
+  testing.tRunner()
+      /usr/lib/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/go/src/testing/testing.go:2258 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c0001368b0 by goroutine 13:
+  whiterun/internal/discord.(*managedRESTLimiter).Wait()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter.go:169 +0x32b
+  whiterun/internal/discord.TestDefectLimiterConcurrentSameBucket.func1()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter_test.go:138 +0x7c
+
+Previous write at 0x00c0001368b0 by goroutine 30:
+  whiterun/internal/discord.(*managedRESTLimiter).Unlock()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter.go:273 +0xc7b
+  whiterun/internal/discord.TestDefectLimiterConcurrentSameBucket.func1()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter_test.go:148 +0x49e
+
+Goroutine 13 (running) created at:
+  sync.(*WaitGroup).Go()
+      /usr/lib/go/src/sync/waitgroup.go:238 +0x72
+  testing.tRunner()
+      /usr/lib/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/go/src/testing/testing.go:2258 +0x38
+
+Goroutine 30 (running) created at:
+  sync.(*WaitGroup).Go()
+      /usr/lib/go/src/sync/waitgroup.go:238 +0x72
+  testing.tRunner()
+      /usr/lib/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/go/src/testing/testing.go:2258 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c000136898 by goroutine 13:
+  whiterun/internal/discord.(*managedRESTLimiter).Wait()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter.go:169 +0x3b7
+  whiterun/internal/discord.TestDefectLimiterConcurrentSameBucket.func1()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter_test.go:138 +0x7c
+
+Previous write at 0x00c000136898 by goroutine 30:
+  whiterun/internal/discord.(*managedRESTLimiter).Unlock()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter.go:283 +0x1244
+  whiterun/internal/discord.TestDefectLimiterConcurrentSameBucket.func1()
+      /home/gabriel/Projects/whiterun-music-bot/internal/discord/rest_limiter_test.go:148 +0x49e
+
+Goroutine 13 (running) created at:
+  sync.(*WaitGroup).Go()
+      /usr/lib/go/src/sync/waitgroup.go:238 +0x72
+  testing.tRunner()
+      /usr/lib/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/go/src/testing/testing.go:2258 +0x38
+
+Goroutine 30 (running) created at:
+  sync.(*WaitGroup).Go()
+      /usr/lib/go/src/sync/waitgroup.go:238 +0x72
+  testing.tRunner()
+      /usr/lib/go/src/testing/testing.go:2193 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/go/src/testing/testing.go:2258 +0x38
+==================
+--- FAIL: TestDefectLimiterConcurrentSameBucket (0.22s)
+    testing.go:1865: race detected during execution of test
+FAIL
+FAIL	whiterun/internal/discord	0.236s
+FAIL

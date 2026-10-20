@@ -1,0 +1,85 @@
+{
+  "leaf_passes": 3267,
+  "baseline_leaf_passes": 3165,
+  "net_new_leaf_passes": 102,
+  "skipped": [
+    [
+      "whiterun/internal/storage",
+      "TestExistingDatabaseUpgrade"
+    ],
+    [
+      "whiterun/internal/media",
+      "TestLiveResolverTiming"
+    ],
+    [
+      "whiterun/internal/media",
+      "TestSpotifyPublicLargeLiveRegression"
+    ],
+    [
+      "whiterun/internal/media",
+      "TestSpotifyEmbedLiveRegression"
+    ]
+  ],
+  "coverage_packages": {
+    "whiterun/cmd/bot": [
+      1,
+      83
+    ],
+    "whiterun/cmd/profile": [
+      0,
+      51
+    ],
+    "whiterun/internal/discord": [
+      1000,
+      1155
+    ],
+    "whiterun/internal/media": [
+      1828,
+      1967
+    ],
+    "whiterun/internal/player": [
+      1108,
+      1240
+    ],
+    "whiterun/internal/storage": [
+      130,
+      151
+    ]
+  },
+  "fuzz": [
+    {
+      "target": "FuzzAdvancedDiagnosticBudget",
+      "executions": 584849
+    },
+    {
+      "target": "FuzzAdvancedDurationValidity",
+      "executions": 336179
+    },
+    {
+      "target": "FuzzAdvancedMediaURLs",
+      "executions": 383200
+    },
+    {
+      "target": "FuzzAdvancedOgg",
+      "executions": 657978
+    },
+    {
+      "target": "FuzzAdvancedQueue",
+      "executions": 9257
+    },
+    {
+      "target": "FuzzAdvancedQueueArguments",
+      "executions": 26102
+    },
+    {
+      "target": "FuzzAdvancedRecordingMetadata",
+      "executions": 15904
+    },
+    {
+      "target": "FuzzAdvancedTimestamp",
+      "executions": 536109
+    }
+  ],
+  "fuzz_executions": 2549578,
+  "coverage_percent": 87.52
+}
