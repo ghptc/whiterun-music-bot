@@ -43,7 +43,7 @@ Join a regular voice channel first. Commands that change playback require you to
 | `/play query:Nutshell Alice in Chains unplugged` | Prefer the unplugged version |
 | `/play query:https://www.youtube.com/watch?v=VIDEO_ID` | Play that exact video, including unofficial uploads and live streams |
 | `/skip [count]` | Skip 1–1001 tracks atomically, including the current track; default 1 |
-| `/queue [limit]` | Show current plus the complete upcoming queue; optional positive integer limits future tracks |
+| `/queue [limit] [from] [to]` | Show current and future positions within one message; all options are optional positive integers |
 | `/now` | Show current artwork, title, artist, duration and next song in one compact card |
 | `/pause` | Hold the current track and keep the queue intact |
 | `/resume` | Continue paused audio, or release a consecutive-failure halt |
@@ -65,7 +65,7 @@ Join a regular voice channel first. Commands that change playback require you to
 
 See [CR-005 behavior, limitations, and verification](docs/bard-command-expansion.md) for position and loop semantics. Autoplay and lyrics are **not operational providers** in this release; seek is explicitly unavailable.
 
-`/queue` displays a native Discord Components V2 music list: one container per block, with position, title, artist and an individual right-side thumbnail when artwork exists. Stored Spotify covers take priority over YouTube thumbnails/video-ID fallback. No PNG, composite image, HTML or TXT is generated. `/queue limit:N` limits upcoming positions; current appears once. Blocks hold up to 12 rows; 123 upcoming songs use 11 messages and 500 use 42 (also with one current song). Rendering reads a detached snapshot without fetching artwork or holding player locks. Partial delivery is reported explicitly. See [queue layout, bounds and limitations](docs/queue-experience.md).
+`/queue` needs no flags and fills one Discord Components V2 message from a consistent snapshot. Current appears once as text; the first ten displayed future tracks have individual artwork when available, followed by compact text until the safe character budget is full. Whole titles and Unicode are preserved. The footer reports displayed and remaining counts and the next position. `/queue from:60 to:70` uses inclusive future positions; `from` alone fills the budget and `limit:25` caps the count. No follow-ups or automatic continuation messages are sent. See [queue layout, budgets and contract investigation](docs/queue-experience.md).
 
 Command registration inventories the selected scope, upserts changed Bard commands and verifies the published contracts without deleting unrelated commands. Run `bard commands-sync` with the usual Discord environment variables to publish/read back without opening gateway or voice. Failures are logged and return a nonzero exit status. The real REST audit found the correct `/queue limit` schema already published; the original “outdated” client error was not reproduced. See [CR-002 audit and acceptance](docs/queue-artwork-hotfix.md).
 
@@ -81,7 +81,7 @@ A finished or failed track advances automatically. Playback failures are logged.
 
 ## Collections and Spotify setup
 
-`/play` accepts YouTube playlists (including album playlists), Spotify tracks, Spotify playlists, and Spotify albums. Normal `https://open.spotify.com/track/...`, `/album/...`, and `/playlist/...` links accept share parameters such as `?si=...` and localized `intl-...` paths. Malformed or unsupported Spotify links are rejected, never searched as song text. Spotify short/redirect links and URIs are not supported. Collections append atomically in source order and start automatically when idle. `/queue` displays the current track and provides the complete upcoming queue through native previews and attached exports. `/clear` removes only upcoming tracks; `/stop` also cancels playback and pending searches.
+`/play` accepts YouTube playlists (including album playlists), Spotify tracks, Spotify playlists, and Spotify albums. Normal `https://open.spotify.com/track/...`, `/album/...`, and `/playlist/...` links accept share parameters such as `?si=...` and localized `intl-...` paths. Malformed or unsupported Spotify links are rejected, never searched as song text. Spotify short/redirect links and URIs are not supported. Collections append atomically in source order and start automatically when idle. `/queue` displays the current track and as many future positions as fit in one message. `/clear` removes only upcoming tracks; `/stop` also cancels playback and pending searches.
 
 YouTube playlist URLs use flat metadata, preserve video IDs/order/duplicates, and skip known unavailable entries. Each exact video is verified when its turn arrives; no alternate recording is searched. Explicit video URLs (even with a playlist share parameter) play that video without a music/category/duration filter. Direct live URLs are supported with no fixed playback-duration deadline. Audio streams are extracted fresh only at playback. Individual failures advance; five consecutive failures halt with the remaining queue retained for `/resume` or an accepted `/play`.
 

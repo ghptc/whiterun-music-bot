@@ -1,133 +1,83 @@
-# Native queue experience — CR-006.4
+# Queue — CR-007.1
 
-`/queue` displays current and all upcoming logical positions from one detached
-player snapshot. `/queue limit:N` limits upcoming positions only. Current appears
-once before position 1; pending entries keep their order and stored metadata.
-Spotify Fidelity, Force Play and SQLite persistence are unchanged.
+`/queue` works with no options. `limit`, `from`, and `to` are independent,
+optional positive integers, in that order in the Discord contract. One detached
+player snapshot supplies current and future tracks. Rendering performs no media
+or artwork requests and does not hold player locks.
 
-## Native layout and artwork
+- `/queue`: current song, then future positions until the message budget is full.
+- `/queue from:60 to:70`: future positions 60 through 70 inclusive.
+- `/queue from:60`: start at 60 and fill the budget.
+- `/queue limit:25`: at most 25 future positions.
+- Combined options intersect the inclusive range with the maximum count.
 
-Each message contains one Container with song rows and a discreet range footer.
-Only the first block includes the heading and upcoming count. A row uses Section + Text Display + Thumbnail when
-artwork is available; otherwise it uses Text Display alone. Position, title and
-artist are text, with channel as artist fallback. Now Playing and announcements
-use the same minimal native song presentation.
+Explicit positions outside the snapshot or a reversed range return an error in
+the original response. Empty queues without explicit positions remain valid.
+Current does not consume a future position or the upcoming artwork allowance.
+The first ten displayed future positions use individual artwork when available;
+a missing image does not suppress images on subsequent preview positions.
+Later positions share a compact Text Display. Titles are escaped, never clipped;
+Unicode is retained. A complete row that cannot fit stops the listing.
 
-Artwork selection uses the persisted Spotify URL first, then the persisted
-YouTube thumbnail, then a thumbnail derived from a valid YouTube video ID.
-Invalid URLs fall through to the next source. No placeholder, image download,
-image cache, compositing, PNG encoding, HTML or TXT export runs during rendering.
-SQLite catalog and queue artwork recovery across restart remain covered by the
-storage tests. Discord loads artwork directly from its URL.
+## Discord budgets and delivery
 
-## Discord limits
+The [Discord component reference](https://docs.discord.com/developers/components/reference)
+defines 40 components per message, including nested components. A Section holds
+one to three text children plus its accessory; ours has one Text Display and one
+Thumbnail, so costs three components. Container is a grouping component, not an
+additional text allowance. The [discord.js component guide](https://discordjs.guide/legacy/popular-topics/display-components)
+specifies an aggregate 4,000-character Text Display budget; the current Discord
+reference does not explicitly specify a separate numeric Text Display cap. We
+use that compatibility budget and conservatively measure UTF-16 units. The heading, all
+rows, inter-row newlines and complete candidate footer share this budget. A
+footer is a Text Display, not an embed footer with a separate allowance. V2 uses
+neither ordinary message content nor embeds. No independent larger Text Display,
+Section or Container allowance is assumed.
 
-The [official component reference](https://docs.discord.com/developers/components/reference)
-limits messages to 40 total components. The first full block uses 38: Container,
-heading, footer, nine rows of three components each and eight small Separators.
-Continuations use 37 components because the heading is omitted. Text labels
-are escaped, mentions disabled, and titles/artists clipped to 100/80 UTF-16 units;
-including footer delivery notices, each message stays below 4000 text units.
-The same nine-row bound also applies to rows without artwork. Tests validate
-actual serialized component trees, including nested accessories.
+The footer reserves its space before each row: exact displayed future count,
+total future count, count not displayed (including positions before `from`),
+and next position after the displayed range when one exists. An oversized current
+song is explicitly reported as omitted. The listing does not skip oversized
+future songs to fit smaller ones later.
 
-Thumbnail is a Section accessory. There is no field selecting its side; Discord
-places it on the right. The API provides no fixed container width, row height,
-CSS, or precise music-column alignment. Discord controls fonts and layout across
-clients. A valid URL does not guarantee a reachable CDN image: the bot cannot
-observe client loading failure or automatically swap a broken Spotify image for
-YouTube after delivery. Fallback applies to absent/invalid metadata. Snapshots
-remain static as playback advances.
+An interaction defers once and PATCHes `@original`. No follow-ups, channel
+messages, continuation messages or exports are created. On edit failure it
+attempts a bounded error edit to the same original. A failed acknowledgement
+stops before snapshot/rendering. REST 429 retries target the same message.
 
-## Delivery and responsiveness
+## Outdated investigation — 2026-10-20
 
-The interaction is publicly deferred before the detached snapshot is taken.
-Component construction performs no provider/network I/O. Sequential REST sends
-hold no player lock, respect disgo rate limiting, use twenty-second request
-budgets and a twelve-minute delivery deadline. Replacement requests cancel old
-deliveries in the same guild/channel; other guilds/channels remain independent.
-Only confirmed positions count as delivered. A failed send stops further blocks
-and attempts a notice on the first block; failed notices are logged.
+Read-only authenticated API requests using this project's configured application
+returned global `/queue` ID `1548720833114153074`, version
+`1562070939611439114`. All three options are type 4 (integer), minimum 1,
+with `required` absent (false), ordered `limit`, `from`, `to`, matching local
+code. The bot belongs to two guilds: neither has a guild-scoped `/queue` override.
+No commands were published or deleted during this inspection.
 
-There is no implicit queue limit: 10 upcoming songs use two messages, 123 use 14,
-and 500 use 56. Current shares the first block and can require another block at
-an exact multiple of nine. The [interaction API](https://docs.discord.com/developers/interactions/receiving-and-responding)
-limits personal-only installations to five followups; oversized requests receive
-an explicit explanation, not a truncated list. Server installations can deliver
-larger queues, subject to API deadlines and rate limits.
+Startup calls `SyncCommands` before opening normal operation. Sync inventories,
+upserts changed definitions by name/type, then reads back and compares the
+published contract. Tests cover both global and guild scopes, stale options,
+readback failures and preservation of unrelated commands. `TestCR007PublishedQueueContract`
+adds the observed global queue contract as an offline regression input.
 
-## Verification
+`docker compose ps` returned no Bard containers; the full container inventory
+contained no Bard runtime. Therefore the binary, startup sync logs, command ID
+and version at the reported failure cannot be correlated here. The current
+published contract rules out missing flags as an explanation for today's
+contract. Earlier propagation/client cache or an older deployment remain
+unverified hypotheses. Capture the affected interaction's command ID, time,
+startup sync logs and runtime image before assigning a root cause.
 
-Tests cover 1/10/20/123/500 positions, limit/current/pending behavior, actual native
-artwork URLs and YouTube fallback, missing artwork without placeholders, component
-and text budgets, order without duplicates, detached snapshots, guild isolation,
-SQLite restart recovery, playback responsiveness, send failures and HTTP 429
-retries using JSON payloads. Raster-only tests were removed with the renderer.
-Run `go test ./...`, `go test -race ./...`, `go vet ./...` and
-`docker compose build`.
+## Validation
 
-Live Discord client appearance and CDN availability require manual verification;
-no live Discord/voice session is claimed by the automated tests. This document
-supersedes the presentation in CR-006.1 and older queue layout investigations.
+Coverage includes 300 future tracks, default/independent/combined options,
+inclusive ranges, invalid positions, current, missing artwork, long Unicode,
+whole-row budget exhaustion, exact footer counts, no extra message, failed
+acknowledgements, update failures and HTTP 429. `scripts/check_ui_mutations.py`
+runs targeted mutants in disposable copies and rejects compile failures as
+mutation evidence. Force Play, Spotify Fidelity and mapping-cache regressions
+remain in the full Go suite.
 
-## CR-006.5 — native visual refinement
-
-Queue titles now use the smallest native heading (H3) with bold title text;
-artists use normal text rather than subtext. Each song has two text lines without
-blank lines. The current song keeps its discreet “Now playing” prefix. Small
-Separators appear only between songs, with no leading/trailing separator. Each
-block remains a single Container using the same native horizontal layout and gold
-accent; continuation blocks retain only their range footer. Now Playing and
-playback announcements retain their previous typography.
-
-Adding Separators requires nine songs per block to stay below Discord's
-40-component limit. All songs, current position, ordering, artwork fallback and
-`/queue limit:N` semantics remain intact. More blocks are sent for large queues;
-the existing personal-installation followup restriction still applies.
-
-The [official component reference](https://docs.discord.com/developers/components/reference)
-provides no configurable Thumbnail size, Section height, Container width or font
-size. **Thumbnails retain their actual native size; no reduction is claimed.**
-H3 improves title hierarchy and normal text improves artist legibility, while
-small Separators provide the minimum supported separator padding. Exact spacing,
-wrapping and dimensions remain client-controlled; this does not guarantee a
-smaller total row height or exact pixel targets. The Container is not narrowed
-or split into per-song cards. Original artwork URLs and their query parameters
-remain unchanged, with Spotify → YouTube → valid-video-ID fallback, and text-only
-rows when no artwork exists.
-
-The unused A/B/C script and investigation document were removed at the user's
-request. No prototypes were published, and no real-client visual homologation is
-claimed. This implementation supersedes the previous investigation gate following
-explicit authorization to refine production directly. Player behavior, Spotify
-Fidelity, Force Play and persistence were not changed.
-
-Validation on 2026-10-19: `go test ./...`, `go test -race ./...`,
-`go vet ./...` and `docker compose build` passed. Race/vet required access to the
-host Go cache; Docker required daemon access and used the classic builder because
-buildx was unavailable. Image `e00b82610a15` was built without restarting the bot.
-Tests include nine-row block boundaries, current-only/small/full queues, complete
-delivery, limit handling, artwork fallback, URL preservation, heading/artist
-formatting and small separators only between songs.
-
-## CR-007 — P0: Single Message Only
-
-Cada execução de `/queue` usa uma única resposta de interação. O defer e as
-edições de `@original` são permitidos; follow-ups e continuação automática são
-proibidos, inclusive em falhas, timeout e HTTP 429.
-
-A mensagem respeita 40 componentes e 4.000 unidades UTF-16, com até 10 artworks
-e as demais músicas em texto compacto. O rodapé entra no orçamento antes de
-cada música. Título e artista são incluídos inteiros: se uma música não couber,
-a lista termina antes dela, sem elipse silenciosa. O rodapé informa posições
-exibidas, posições restantes na fila e a próxima posição do intervalo omitido.
-
-`/queue from:N to:N` seleciona posições inclusivas da fila futura; `/queue
-limit:N` limita a quantidade a partir de `from` (padrão 1). Combinar as opções
-aplica ambos os limites. A música atual não consome posição futura. Intervalos
-fora da fila exibem zero posições. Erros de entrega tentam somente editar a
-resposta original com um aviso conciso.
-
-Invariantes por interação: `original_response_count <= 1`,
-`followup_message_count == 0`, `automatic_continuation_count == 0`.
-Esta regra substitui as orientações anteriores de entrega em blocos.
+Local unit/race/vet and Docker build results are recorded in
+[CR-007.1 validation](cr007-validation.md). Real Discord interaction/rendering
+and audio playback have not been homologated by this change.

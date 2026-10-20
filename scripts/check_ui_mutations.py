@@ -7,20 +7,17 @@ import tempfile
 
 root = pathlib.Path(__file__).resolve().parents[1]
 mutants = {
-    "artwork-always-fallback": ('URL: art', 'URL: fallbackArtwork'),
-    "truncate-after-first-block": (
-        'offset < len(rows); offset += queueBlockSize',
-        'offset < min(len(rows), queueBlockSize); offset += queueBlockSize',
+    "stop-at-ten": ("pos <= end; pos++", "pos <= min(end, start+9); pos++"),
+    "eleven-artworks": ("view.Shown < queueBlockSize", "view.Shown <= queueBlockSize"),
+    "ignore-footer-budget": ("units+size+footerUnits > queueTextBudget", "units+size+footerUnits*0 > queueTextBudget"),
+    "reduced-text-budget": ("queueTextBudget      = 4000", "queueTextBudget      = 2000"),
+    "extra-followup": (
+        'err = sendUpdate(view.Blocks[0].update(""), ctx)',
+        '_, _ = b.client.Rest.CreateFollowupMessage(b.client.ApplicationID, e.Token(), d.MessageCreate{Content: "extra"}); err = sendUpdate(view.Blocks[0].update(""), ctx)',
     ),
-    "wrong-queue-number": ('fmt.Sprintf("%d. ", i+1)', 'fmt.Sprintf("%d. ", i+2)'),
-    "leak-ready-state": (
-        'text := "**" + prefix + name + "**"',
-        'text := "**" + prefix + name + "**\\nready"',
-    ),
-    "youtube-overwrites-spotify-cover": (
-        'art := media.ArtworkURL(t)',
-        'art := media.SafeArtworkURL(t.YouTubeThumbnailURL)',
-    ),
+    "exclusive-to": ("end = *to", "end = *to - 1"),
+    "wrong-next-position": ("start+shown)", "start+shown+1)"),
+    "current-consumes-preview": ("art != \"\" && row.Position > 0 && preview", "art != \"\" && preview"),
 }
 with tempfile.TemporaryDirectory(prefix="bard-ui-mutations-") as temporary:
     work = pathlib.Path(temporary)
@@ -30,7 +27,7 @@ with tempfile.TemporaryDirectory(prefix="bard-ui-mutations-") as temporary:
     target = work / "internal/discord/queue.go"
     original = target.read_text()
     command = ["go", "test", "./internal/discord", "-run",
-               "TestQueueCompleteAndLimitedSnapshots|TestQueueCurrentPendingAndArtwork|TestNowPlayingComponentsArtworkAndNativeLimits",
+               "TestCR007|TestQueueCompactSingleMessage|TestQueueRangesAndWholeSongs|TestQueueSingleMessageDelivery",
                "-count=1", "-timeout=15s"]
     baseline = subprocess.run(command, cwd=work, capture_output=True, text=True)
     if baseline.returncode:
@@ -43,3 +40,15 @@ with tempfile.TemporaryDirectory(prefix="bard-ui-mutations-") as temporary:
         if result.returncode == 0 or "[build failed]" in result.stdout + result.stderr:
             raise SystemExit(f"Mutant not killed by assertions: {name}\n{result.stdout}{result.stderr}")
         print(f"KILLED {name}")
+    target.write_text(original)
+    target = work / "internal/discord/commands.go"
+    original = target.read_text()
+    before = 'Name: "limit", Description: "Maximum upcoming tracks to show in one message",'
+    after = before + ' Required: true,'
+    if original.count(before) != 1:
+        raise SystemExit("Mutation site changed: required-limit")
+    target.write_text(original.replace(before, after, 1))
+    result = subprocess.run(command, cwd=work, capture_output=True, text=True)
+    if result.returncode == 0 or "[build failed]" in result.stdout + result.stderr:
+        raise SystemExit("Mutant not killed by assertions: required-limit\n" + result.stdout + result.stderr)
+    print("KILLED required-limit")

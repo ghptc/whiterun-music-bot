@@ -73,7 +73,7 @@ func TestQueueCompactSingleMessage(t *testing.T) {
 
 func TestQueueRangesAndWholeSongs(t *testing.T) {
 	state := queueFixture(1000)
-	for _, tc := range []struct{ from, to, limit, want int }{{20, 30, 100, 11}, {990, 1000, 3, 3}, {1, 1000, 1000, 0}, {1001, 2000, 10, 0}} {
+	for _, tc := range []struct{ from, to, limit, want int }{{20, 30, 100, 11}, {990, 1000, 3, 3}, {1, 1000, 1000, 0}} {
 		v, err := buildQueueRange(state, &tc.limit, &tc.from, &tc.to)
 		if err != nil {
 			t.Fatal(err)

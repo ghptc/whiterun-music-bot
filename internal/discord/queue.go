@@ -16,7 +16,11 @@ import (
 )
 
 // P0: every queue view fits one Discord message (40 components, 4000 UTF-16 units).
-const queueBlockSize = 10
+const (
+	queueBlockSize       = 10
+	queueTextBudget      = 4000 // aggregate TextDisplay content, measured conservatively in UTF-16
+	queueComponentBudget = 40   // includes container, sections, text and accessories
+)
 
 // A restrained aged-gold accent evokes Whiterun; Discord supplies the surface
 // and text colors for the reader's theme. Use one accent per block, not per row.
@@ -133,7 +137,10 @@ func buildQueueRange(state player.State, limit, from, to *int) (queueView, error
 		start = *from
 	}
 	if to != nil {
-		end = min(end, *to)
+		end = *to
+	}
+	if (from != nil && start > len(entries)) || (to != nil && end > len(entries)) {
+		return queueView{}, fmt.Errorf("Queue positions must be within 1–%d.", len(entries))
 	}
 	if to != nil && *to < start {
 		return queueView{}, fmt.Errorf("Queue to must be at least from.")
@@ -145,7 +152,7 @@ func buildQueueRange(state player.State, limit, from, to *int) (queueView, error
 	block := queueBlock{}
 	body := []d.ContainerSubComponent{}
 	// Budget each candidate together with its complete footer before adding it.
-	units, components, artworks := 0, 3, 0 // container, heading, footer
+	units, components := 0, 3 // container, heading, footer
 	units = len(utf16.Encode([]rune("### The Bard · Queue")))
 	currentOmitted := false
 	footerFor := func(shown, first, last int) string {
@@ -154,7 +161,7 @@ func buildQueueRange(state player.State, limit, from, to *int) (queueView, error
 			label = fmt.Sprintf("%d–%d", first, last)
 		}
 		footer := fmt.Sprintf("-# %s · %d of %d songs up next · %d positions displayed · %d remaining", label, shown, view.Total, shown, view.Total-shown)
-		if start <= end && shown < end-start+1 {
+		if start+shown <= view.Total {
 			footer += fmt.Sprintf(" · Next position: %d", start+shown)
 		}
 		if currentOmitted {
@@ -182,15 +189,16 @@ func buildQueueRange(state player.State, limit, from, to *int) (queueView, error
 			text += " · " + artist
 		}
 		art := media.ArtworkURL(row.Track)
-		illustrated := art != "" && artworks < queueBlockSize && compact == ""
+		preview := row.Position == 0 || view.Shown < queueBlockSize
+		illustrated := art != "" && row.Position > 0 && preview
 		cost := 0
 		if illustrated {
 			cost = 3
-		} else if compact == "" {
+		} else if preview || compact == "" {
 			cost = 1
 		}
 		size := len(utf16.Encode([]rune(text)))
-		if !illustrated && compact != "" {
+		if !preview && compact != "" {
 			size++
 		}
 		shown, first, last := view.Shown, block.First, block.Last
@@ -202,14 +210,15 @@ func buildQueueRange(state player.State, limit, from, to *int) (queueView, error
 			last = row.Position
 		}
 		footerUnits := len(utf16.Encode([]rune(footerFor(shown, first, last))))
-		if units+size+footerUnits > 4000 || components+cost > 40 {
+		if units+size+footerUnits > queueTextBudget || components+cost > queueComponentBudget {
 			return false
 		}
 		units += size
 		components += cost
 		if illustrated {
 			body = append(body, d.SectionComponent{Components: []d.SectionSubComponent{d.TextDisplayComponent{Content: text}}, Accessory: d.ThumbnailComponent{Media: d.UnfurledMediaItem{URL: art}, Description: "Artwork"}})
-			artworks++
+		} else if preview {
+			body = append(body, d.TextDisplayComponent{Content: text})
 		} else {
 			compact += text + "\n"
 		}
