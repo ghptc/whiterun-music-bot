@@ -21,8 +21,17 @@ jobs:
           sudo apt-get install -y --no-install-recommends ffmpeg
           ffmpeg -hide_banner -loglevel error -f lavfi -i anullsrc=r=48000:cl=stereo -t 0.1 -c:a libopus -f opus -y /dev/null
       - run: go vet ./...
+      - run: go test -short ./... -count=1 -timeout=5m
+  integration-and-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
       - run: go test ./... -count=1 -timeout=5m
-      - run: go test -race ./... -count=1 -timeout=5m
       - name: Coverage
         run: |
           go test ./... -covermode=atomic -coverprofile=coverage.out -timeout=5m
@@ -35,6 +44,16 @@ jobs:
             coverage.out
             coverage-summary.txt
             coverage.html
+  race:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - run: go test -race ./... -count=1 -timeout=5m
   sqlite-integration:
     runs-on: ubuntu-latest
     timeout-minutes: 10

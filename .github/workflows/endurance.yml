@@ -1,0 +1,57 @@
+name: Operational endurance QA-010
+on:
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: Real continuous duration (6h/12h use the dedicated CLI runner)
+        type: choice
+        options: ['60s', '1h']
+        default: '60s'
+      playlist:
+        type: choice
+        options: ['123', '500']
+        default: '500'
+permissions:
+  contents: read
+jobs:
+  stress-and-crash:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Twenty users and owned SQLite crash injection
+        env:
+          BARD_QA_TRACE_DIR: ${{ runner.temp }}/qa010-traces
+        run: go test -race -tags stress ./internal/player ./internal/storage -run '^TestEnduranceTwentyUsers$|^TestEnduranceKill' -count=3 -timeout=5m -v
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa010-command-traces
+          path: ${{ runner.temp }}/qa010-traces/
+  local-audio-soak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - run: go build -race -o "$RUNNER_TEMP/qa-soak" ./cmd/qa-soak
+      - name: Real-time local FFmpeg and SQLite session
+        env:
+          QA_DURATION: ${{ inputs.duration }}
+          QA_PLAYLIST: ${{ inputs.playlist }}
+        run: |
+          "$RUNNER_TEMP/qa-soak" -out "$RUNNER_TEMP/qa010-session" -duration "$QA_DURATION" -playlist "$QA_PLAYLIST" -guilds 2 -faults -warm
+      - name: Reconcile and export evidence only
+        if: always()
+        run: python3 -B scripts/qa010_report.py --run "$RUNNER_TEMP/qa010-session" --out "$RUNNER_TEMP/qa010-evidence"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa010-local-soak
+          path: ${{ runner.temp }}/qa010-evidence/
