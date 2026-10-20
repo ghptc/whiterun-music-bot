@@ -99,14 +99,14 @@ func TestCR007QueueDefaultsRangesAndBudget(t *testing.T) {
 					art++
 				}
 			}
-			if art != min(10, view.Shown) {
+			if art != min(12, view.Shown+1) {
 				t.Fatal("upcoming artwork", art)
 			}
 			assertV2Budget(t, view.Blocks[0].Container)
 			// Default/from must stop only when the next full row plus footer cannot fit.
 			if tc.shown == 0 {
 				next := state.Entries[tc.first+view.Shown-1].Track
-				nextText := fmt.Sprintf("%d · **%s** · %s\n", tc.first+view.Shown, next.Title, next.Artist)
+				nextText := fmt.Sprintf("\n\n%d · **%s**\n-# %s\n-# %s", tc.first+view.Shown, next.Title, next.Artist, queueDuration(next.Duration))
 				actual := 0
 				for _, c := range view.Blocks[0].Container.Components {
 					switch v := c.(type) {
@@ -145,7 +145,7 @@ func TestCR007ArtworkAfterMissingAndWholeUnicode(t *testing.T) {
 			art++
 		}
 	}
-	if art != 9 || !strings.Contains(viewText(view), state.Entries[1].Track.Title) {
+	if art != 11 || !strings.Contains(viewText(view), state.Entries[1].Track.Title) {
 		t.Fatal(art, viewText(view))
 	}
 	state.Current = &media.Track{Title: strings.Repeat("🎵", 2200)}

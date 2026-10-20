@@ -66,7 +66,7 @@ func TestQueueCompactSingleMessage(t *testing.T) {
 			art++
 		}
 	}
-	if art != 10 || !strings.Contains(viewText(view), "Next position:") {
+	if art != 12 || !strings.Contains(viewText(view), "Next position:") {
 		t.Fatal(art, viewText(view))
 	}
 }

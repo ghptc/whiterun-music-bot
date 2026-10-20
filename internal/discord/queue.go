@@ -17,7 +17,6 @@ import (
 
 // P0: every queue view fits one Discord message (40 components, 4000 UTF-16 units).
 const (
-	queueBlockSize       = 10
 	queueTextBudget      = 4000 // aggregate TextDisplay content, measured conservatively in UTF-16
 	queueComponentBudget = 40   // includes container, sections, text and accessories
 )
@@ -126,6 +125,11 @@ func buildQueueView(state player.State, limit *int) (queueView, error) {
 }
 
 func buildQueueRange(state player.State, limit, from, to *int) (queueView, error) {
+	return buildQueueLayout(state, limit, from, to, true)
+}
+
+// compactTail reserves one Text Display before spending the image budget.
+func buildQueueLayout(state player.State, limit, from, to *int, compactTail bool) (queueView, error) {
 	for _, value := range []*int{limit, from, to} {
 		if value != nil && *value < 1 {
 			return queueView{}, fmt.Errorf("Queue arguments must be at least 1.")
@@ -149,8 +153,8 @@ func buildQueueRange(state player.State, limit, from, to *int) (queueView, error
 		end = start + *limit - 1
 	}
 	view := queueView{Total: len(entries)}
-	block := queueBlock{}
-	body := []d.ContainerSubComponent{}
+	block := queueBlock{Rows: make([]queueRow, 0, min(len(entries)+1, 100))}
+	body := make([]d.ContainerSubComponent, 0, 16)
 	// Budget each candidate together with its complete footer before adding it.
 	units, components := 0, 3 // container, heading, footer
 	units = len(utf16.Encode([]rune("### The Bard · Queue")))
@@ -169,7 +173,7 @@ func buildQueueRange(state player.State, limit, from, to *int) (queueView, error
 		}
 		return footer
 	}
-	compact := ""
+	var compact strings.Builder
 	add := func(row queueRow) bool {
 		title := musicEscaper.Replace(strings.Join(strings.Fields(row.Track.Title), " "))
 		if title == "" {
@@ -186,20 +190,28 @@ func buildQueueRange(state player.State, limit, from, to *int) (queueView, error
 		}
 		text := prefix + "**" + title + "**"
 		if artist != "" {
-			text += " · " + artist
+			text += "\n-# " + artist
 		}
+		text += "\n-# " + queueDuration(row.Track.Duration)
 		art := media.ArtworkURL(row.Track)
-		preview := row.Position == 0 || view.Shown < queueBlockSize
-		illustrated := art != "" && row.Position > 0 && preview
+		reserve := 0
+		if compactTail {
+			reserve = 1
+		}
+		illustrated := art != "" && components+3+reserve <= queueComponentBudget
+		preview := illustrated || (art == "" && compact.Len() == 0 && components+3+reserve <= queueComponentBudget)
 		cost := 0
 		if illustrated {
 			cost = 3
-		} else if preview || compact == "" {
+		} else if preview || compact.Len() == 0 {
 			cost = 1
 		}
-		size := len(utf16.Encode([]rune(text)))
-		if !preview && compact != "" {
-			size++
+		if !compactTail && art != "" && !illustrated {
+			return false
+		}
+		size := queueUnits(text)
+		if !preview && compact.Len() != 0 {
+			size += 2
 		}
 		shown, first, last := view.Shown, block.First, block.Last
 		if row.Position > 0 {
@@ -209,7 +221,7 @@ func buildQueueRange(state player.State, limit, from, to *int) (queueView, error
 			shown++
 			last = row.Position
 		}
-		footerUnits := len(utf16.Encode([]rune(footerFor(shown, first, last))))
+		footerUnits := queueUnits(footerFor(shown, first, last))
 		if units+size+footerUnits > queueTextBudget || components+cost > queueComponentBudget {
 			return false
 		}
@@ -220,7 +232,10 @@ func buildQueueRange(state player.State, limit, from, to *int) (queueView, error
 		} else if preview {
 			body = append(body, d.TextDisplayComponent{Content: text})
 		} else {
-			compact += text + "\n"
+			if compact.Len() > 0 {
+				compact.WriteString("\n\n")
+			}
+			compact.WriteString(text)
 		}
 		if art == "" {
 			view.Missing++
@@ -241,8 +256,8 @@ func buildQueueRange(state player.State, limit, from, to *int) (queueView, error
 			break
 		}
 	}
-	if compact != "" {
-		body = append(body, d.TextDisplayComponent{Content: strings.TrimSuffix(compact, "\n")})
+	if compact.Len() != 0 {
+		body = append(body, d.TextDisplayComponent{Content: compact.String()})
 	}
 	footer := footerFor(view.Shown, block.First, block.Last)
 	if len(entries) == 0 && state.Current == nil {
@@ -255,6 +270,28 @@ func buildQueueRange(state player.State, limit, from, to *int) (queueView, error
 	view.Components = components
 	return view, nil
 }
+func queueUnits(s string) int {
+	n := 0
+	for _, r := range s {
+		n++
+		if r > 0xffff {
+			n++
+		}
+	}
+	return n
+}
+
+func queueDuration(duration time.Duration) string {
+	if duration <= 0 {
+		return "Duration unavailable"
+	}
+	seconds := int64(duration / time.Second)
+	if seconds >= 3600 {
+		return fmt.Sprintf("%02d:%02d:%02d", seconds/3600, seconds/60%60, seconds%60)
+	}
+	return fmt.Sprintf("%02d:%02d", seconds/60, seconds%60)
+}
+
 func musicContainer(heading string, body ...d.ContainerSubComponent) d.ContainerComponent {
 	components := []d.ContainerSubComponent{d.TextDisplayComponent{Content: "### " + heading}}
 	return d.ContainerComponent{AccentColor: whiterunAccent, Components: append(components, body...)}

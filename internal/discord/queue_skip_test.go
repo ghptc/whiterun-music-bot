@@ -83,7 +83,12 @@ func TestQueueAndBulkSkipCommands(t *testing.T) {
 				t.Fatal("not playing")
 			}
 			b.command(interaction(t, "queue", true))
-			if !strings.Contains(r.queueText(), "121 · **Song 122**") || !strings.Contains(r.queueText(), "122 · **Song 123**") || !strings.Contains(r.response, "122 of 122 songs up next") {
+			view, err := buildQueueView(g.player.State(), nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			last := view.Shown
+			if last < 1 || !strings.Contains(r.queueText(), fmt.Sprintf("%d · **Song %03d**", last, last+1)) || !strings.Contains(r.response, fmt.Sprintf("%d of 122 songs up next", last)) {
 				t.Fatal(r.response)
 			}
 			if count == 0 {
@@ -174,7 +179,11 @@ func TestPublicQueueDuringProgressiveLoading(t *testing.T) {
 			t.Fatal(r.response)
 		}
 		text := r.queueText()
-		end := 122
+		view, err := buildQueueView(g.player.State(), nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		end := view.Shown
 		if limit > 0 {
 			end = min(end, limit)
 		}
