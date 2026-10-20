@@ -72,6 +72,11 @@ func (r CollectionResolver) restoreCatalogArtwork(ctx context.Context, tracks []
 			return
 		}
 		if hit && cached.SpotifyID == t.SpotifyID && cached.RequestedSource == "spotify" {
+			if t.MetadataPending && completeSpotifyMetadata(cached, t.SpotifyID) {
+				position, total, requester := t.Position, t.Total, t.RequestedBy
+				*t = cached
+				t.Position, t.Total, t.RequestedBy = position, total, requester
+			}
 			t.SpotifyArtworkURL = SafeArtworkURL(cached.SpotifyArtworkURL)
 		}
 	}

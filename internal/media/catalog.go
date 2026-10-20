@@ -17,7 +17,7 @@ func catalogContext(ctx context.Context) (context.Context, context.CancelFunc) {
 }
 func (r CollectionResolver) saveCatalog(ctx context.Context, t Track) {
 	store, ok := r.YouTube.Mappings.(CatalogStore)
-	if !ok || t.SpotifyID == "" {
+	if !ok || t.SpotifyID == "" || t.MetadataPending {
 		return
 	}
 	bounded, cancel := catalogContext(ctx)
@@ -33,6 +33,16 @@ func (r CollectionResolver) saveCatalog(ctx context.Context, t Track) {
 // One transaction avoids a durable commit per playlist occurrence. The whole
 // optional cache write has one deadline; queue preparation never waits N times.
 func (r CollectionResolver) saveCatalogTracks(ctx context.Context, tracks []Track) {
+	complete := make([]Track, 0, len(tracks))
+	for _, t := range tracks {
+		if !t.MetadataPending {
+			complete = append(complete, t)
+		}
+	}
+	tracks = complete
+	if len(tracks) == 0 {
+		return
+	}
 	if store, ok := r.YouTube.Mappings.(interface {
 		SaveCatalogBatch(context.Context, []Track) error
 	}); ok && len(tracks) > 1 {

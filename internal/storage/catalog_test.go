@@ -222,3 +222,26 @@ type artworkCollectionProvider struct{ tracks []media.Track }
 func (p *artworkCollectionProvider) Collection(context.Context, string, string) (media.Collection, error) {
 	return media.Collection{Tracks: append([]media.Track(nil), p.tracks...)}, nil
 }
+
+func TestPERF018PendingMetadataCannotOverwriteCatalog(t *testing.T) {
+	ctx := context.Background()
+	db, err := Open(filepath.Join(t.TempDir(), "catalog.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	original := catalogTrack()
+	if err = db.SaveCatalog(ctx, original); err != nil {
+		t.Fatal(err)
+	}
+	pending := original
+	pending.MetadataPending = true
+	pending.Title = "Loading Spotify metadata…"
+	if err = db.SaveCatalog(ctx, pending); err == nil {
+		t.Fatal("pending placeholder stored as source metadata")
+	}
+	got, hit, err := db.LoadCatalog(ctx, original.SpotifyID)
+	if err != nil || !hit || got.Title != original.Title || got.MetadataPending {
+		t.Fatal("catalog poisoned", got, err)
+	}
+}

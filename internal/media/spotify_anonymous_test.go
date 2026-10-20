@@ -47,7 +47,7 @@ func newAnonymousFixture(total, embedded int) *anonymousFixture {
 func (f *anonymousFixture) session() map[string]any {
 	return f.envelope["props"].(map[string]any)["pageProps"].(map[string]any)["state"].(map[string]any)["settings"].(map[string]any)["session"].(map[string]any)
 }
-func (f *anonymousFixture) client(t *testing.T) *Spotify {
+func (f *anonymousFixture) client(t testing.TB) *Spotify {
 	t.Helper()
 	return &Spotify{ClientID: "id", ClientSecret: "operator-secret", Client: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
 		f.mu.Lock()

@@ -41,7 +41,8 @@ func (l *MatchLimiter) acquire(ctx context.Context, first bool) (func(), error) 
 	}
 }
 
-// Prepare returns complete Spotify playlist/album metadata, without YouTube work.
+// Prepare returns validated Spotify occurrences, without YouTube work.
+// Public playlist tail metadata is hydrated within the existing playback window.
 // All other inputs retain the existing fully-resolved single/YouTube path.
 func (r CollectionResolver) Prepare(ctx context.Context, query string) (Collection, bool, error) {
 	if len(query) > 500 {
@@ -58,11 +59,17 @@ func (r CollectionResolver) Prepare(ctx context.Context, query string) (Collecti
 	started := time.Now()
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
-	c, err := r.spotifyMetadata(ctx, kind, id)
+	c, err := r.spotifyMetadata(context.WithValue(ctx, playbackMetadataKey{}, true), kind, id)
 	if err != nil {
 		return Collection{}, false, err
 	}
-	TimingFrom(ctx).Event("collection_metadata_complete", started, "spotify_tracks", len(c.Tracks), "metadata_skipped", c.Skipped)
+	pending := 0
+	for _, t := range c.Tracks {
+		if t.MetadataPending {
+			pending++
+		}
+	}
+	TimingFrom(ctx).Event("collection_positions_validated", started, "spotify_tracks", len(c.Tracks), "metadata_pending", pending, "metadata_skipped", c.Skipped)
 	return c, true, nil
 }
 func (r CollectionResolver) spotifyMetadata(ctx context.Context, kind, id string) (result Collection, resultErr error) {
@@ -90,7 +97,15 @@ func (r CollectionResolver) spotifyMetadata(ctx context.Context, kind, id string
 	if r.Spotify == nil {
 		return Collection{}, ErrSpotifyConfig
 	}
-	c, err := r.Spotify.Collection(ctx, kind, id)
+	var c Collection
+	var err error
+	if provider, ok := r.Spotify.(interface {
+		CollectionForPlayback(context.Context, string, string) (Collection, error)
+	}); ok && kind != "track" && playbackMetadata(ctx) {
+		c, err = provider.CollectionForPlayback(ctx, kind, id)
+	} else {
+		c, err = r.Spotify.Collection(ctx, kind, id)
+	}
 	if err != nil {
 		return Collection{}, err
 	}
@@ -123,6 +138,12 @@ func (r CollectionResolver) MatchSpotify(ctx context.Context, original Track, fi
 	defer release()
 	if err = ctx.Err(); err != nil {
 		return Track{}, err
+	}
+	if original.MetadataPending {
+		original, err = r.enrichSpotify(ctx, original)
+		if err != nil {
+			return Track{}, err
+		}
 	}
 	search := r.Search
 	if search == nil {

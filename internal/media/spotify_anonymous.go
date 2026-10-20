@@ -167,7 +167,7 @@ func validateSpotifyPublicItems(p spotifyPublicItems, offset, total int, revisio
 }
 
 // anonymousPlaylist combines ordered occurrence pagination with public Embed
-// metadata. Only fully hydrated, revision-consistent collections escape.
+// metadata. Playback may defer tail hydration; occurrence revisions are always checked.
 func (s *Spotify) anonymousPlaylist(ctx context.Context, id string, embed []byte, evidence playlistEvidence) (result Collection, err error) {
 	stage := "spotify_anonymous_validation"
 	defer func() {
@@ -191,6 +191,7 @@ func (s *Spotify) anonymousPlaylist(ctx context.Context, id string, embed []byte
 	if err != nil {
 		return Collection{}, err
 	}
+	TimingFrom(ctx).Event("spotify_first_track_metadata_available", time.Now(), "metadata_tracks", len(cached.Tracks), "positions", evidence.Total)
 	stage = "spotify_anonymous_bootstrap"
 	s.stage(ctx, "spotify_anonymous_bootstrap_start")
 	session := spotifyAnonymousSession{spotify: s, id: id}
@@ -242,7 +243,16 @@ func (s *Spotify) anonymousPlaylist(ctx context.Context, id string, embed []byte
 	}
 	stage = "spotify_tail_enrichment"
 	s.stage(ctx, "spotify_tail_enrichment_start", "missing", len(missing))
-	hydrated, err := s.hydrateSpotifyTracks(ctx, missing)
+	var hydrated []Track
+	if playbackMetadata(ctx) {
+		// Keep every verified occurrence, without fetching the unneeded tail.
+		for _, uri := range missing {
+			id := strings.TrimPrefix(uri, "spotify:track:")
+			metadata[uri] = Track{SpotifyID: id, SourceURL: "https://open.spotify.com/track/" + id, RequestedSource: "spotify", MetadataPending: true, Title: "Loading Spotify metadata…"}
+		}
+	} else {
+		hydrated, err = s.hydrateSpotifyTracks(ctx, missing)
+	}
 	if err != nil {
 		return Collection{}, err
 	}
@@ -250,7 +260,7 @@ func (s *Spotify) anonymousPlaylist(ctx context.Context, id string, embed []byte
 	for i, track := range hydrated {
 		metadata[missing[i]] = track
 	}
-	// An edit during hydration invalidates the entire batch, even at equal length.
+	// Recheck the occurrence snapshot before admission, even when enrichment is deferred.
 	stage = "spotify_revision_validation"
 	last, err := session.page(ctx, 0)
 	if err != nil {

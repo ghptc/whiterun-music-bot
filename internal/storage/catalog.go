@@ -31,7 +31,7 @@ func (s *DB) SaveCatalogBatch(ctx context.Context, tracks []media.Track) error {
 }
 
 func saveCatalog(ctx context.Context, writer catalogWriter, t media.Track) error {
-	if t.SpotifyID == "" || t.RequestedSource != "spotify" {
+	if t.SpotifyID == "" || t.RequestedSource != "spotify" || t.MetadataPending {
 		return fmt.Errorf("catalog requires Spotify metadata")
 	}
 	// Whitelist source metadata; never persist requester/queue/session fields here.
