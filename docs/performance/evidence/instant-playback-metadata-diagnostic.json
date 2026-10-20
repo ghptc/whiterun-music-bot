@@ -1,0 +1,7 @@
+{
+  "elapsed_ms": 42529.54776,
+  "error": "Spotify API failed: Spotify could not access this track or collection. Check the authorized account, app access mode, and playlist permissions.: status=403 path=playlists/0OdkLDK5wUdzAd2OT03hQz/items?limit=50&offset=0; public webpage fallback failed: Spotify public page does not expose a verifiably complete playlist; nothing was queued.: rendered=30 total=500\nCould not fetch Spotify public playlist metadata.: status=504",
+  "scenario": "playlist-500-metadata-diagnostic",
+  "success": false,
+  "tracks": 0
+}

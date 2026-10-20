@@ -1,0 +1,87 @@
+name: Instant playback real homologation
+on:
+  workflow_dispatch:
+    inputs:
+      evidence_path:
+        description: Repository JSONL evidence from an authorized real Discord/DAVE session
+        required: false
+        type: string
+      guild:
+        description: Explicitly authorized test guild (optional live run)
+        type: string
+      channel:
+        description: Explicitly authorized Voice channel (optional live run)
+        type: string
+permissions:
+  contents: read
+jobs:
+  real-voice-ttfa:
+    if: inputs.evidence_path != ''
+    runs-on: ubuntu-latest
+    environment: external-tests
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Require actual provider and Discord/DAVE evidence for every scenario
+        env:
+          REAL_EVIDENCE: ${{ inputs.evidence_path }}
+        run: python3 scripts/instant_playback_gate.py --kind real --input "$REAL_EVIDENCE" --output gate-artifacts/real.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instant-playback-real-homologation
+          path: gate-artifacts/
+
+  authorized-live-observations:
+    if: inputs.guild != '' && inputs.channel != ''
+    runs-on: ubuntu-latest
+    environment: external-tests
+    timeout-minutes: 25
+    env:
+      DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+      DISCORD_APPLICATION_ID: ${{ secrets.DISCORD_APPLICATION_ID }}
+      SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+      SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+      SPOTIFY_REFRESH_TOKEN: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
+      BARD_LIVE_GUILD: ${{ inputs.guild }}
+      BARD_LIVE_CHANNEL: ${{ inputs.channel }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build isolated probe and runtime (does not deploy)
+        run: |
+          go test -c ./internal/discord -o "${RUNNER_TEMP}/instant-live.test"
+          docker build -t instant-live-runtime .
+          mkdir -p gate-artifacts
+      - name: Measure actual providers, Discord Voice and DAVE in authorized channel
+        run: |
+          docker run --rm --read-only --tmpfs /tmp:rw,size=512m,mode=1777 \
+            -e DISCORD_TOKEN -e DISCORD_APPLICATION_ID -e SPOTIFY_CLIENT_ID \
+            -e SPOTIFY_CLIENT_SECRET -e SPOTIFY_REFRESH_TOKEN \
+            -e BARD_LIVE_GUILD -e BARD_LIVE_CHANNEL -e BARD_DISCORD_LIVE=1 \
+            -v "${RUNNER_TEMP}/instant-live.test:/probe:ro" --entrypoint /probe \
+            instant-live-runtime -test.run '^TestInstantPlaybackDiscordLive$' \
+            -test.v -test.timeout 15m > gate-artifacts/discord.raw.log 2>&1
+      - name: Fail closed if real release evidence is incomplete or exceeds budget
+        if: always()
+        run: python3 scripts/instant_playback_gate.py --kind real --input gate-artifacts/discord.raw.log --output gate-artifacts/real.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instant-playback-authorized-live
+          path: gate-artifacts/
+
+  require-explicit-evidence-or-target:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require an evidence file or an authorized guild and Voice channel
+        env:
+          EVIDENCE: ${{ inputs.evidence_path }}
+          GUILD: ${{ inputs.guild }}
+          CHANNEL: ${{ inputs.channel }}
+        run: test -n "$EVIDENCE" || { test -n "$GUILD" && test -n "$CHANNEL"; }

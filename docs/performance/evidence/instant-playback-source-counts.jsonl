@@ -1,0 +1,6 @@
+{"name": "spotify-album", "id": "7eLwoxxWs6lfkVYJGkGNbk", "count": 10, "source": "api", "elapsed_ms": 306.285}
+{"name": "playlist-10", "id": "3tfeDqgxoMDd5sCmefEtx8", "count": 10, "source": "public-initialState", "elapsed_ms": 936.39}
+{"name": "playlist-50", "id": "6dADHYLaAAQ61tUZJyIljF", "count": 50, "source": "public-initialState", "elapsed_ms": 849.255}
+{"name": "playlist-123", "id": "35m4wmHSlcS2RNsafX4dEg", "count": 123, "source": "public-initialState", "elapsed_ms": 1422.072}
+{"name": "playlist-302", "id": "6BL3uZVI7Q41TtpsLbmmLt", "count": 302, "source": "public-initialState", "elapsed_ms": 1108.112}
+{"name": "playlist-500", "id": "0OdkLDK5wUdzAd2OT03hQz", "count": 500, "source": "public-initialState", "elapsed_ms": 1445.464}

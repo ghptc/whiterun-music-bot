@@ -1,0 +1,94 @@
+{
+  "revision_before_admission_fix": "5b378eb + timing/gate harness working tree",
+  "scenarios": [
+    {
+      "scenario": {
+        "Name": "spotify-single",
+        "Kind": "track",
+        "Mode": "cold",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 21.862817,
+        "p95_ms": 23.299013,
+        "p99_ms": 24.153074,
+        "max_ms": 24.588121
+      }
+    },
+    {
+      "scenario": {
+        "Name": "spotify-single",
+        "Kind": "track",
+        "Mode": "warm",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 19.558414,
+        "p95_ms": 20.049887,
+        "p99_ms": 20.165176,
+        "max_ms": 20.179233
+      }
+    },
+    {
+      "scenario": {
+        "Name": "playlist-500",
+        "Kind": "playlist",
+        "Mode": "cold",
+        "Count": 500,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 48.494667,
+        "p95_ms": 51.205072,
+        "p99_ms": 55.251213,
+        "max_ms": 61.881848
+      }
+    },
+    {
+      "scenario": {
+        "Name": "playlist-500",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 500,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 49.535535,
+        "p95_ms": 52.646731,
+        "p99_ms": 53.694159,
+        "max_ms": 54.624935
+      }
+    }
+  ],
+  "load_5_guilds": {
+    "status": "FAIL",
+    "reason": "No first frame for fifth simultaneous request; four-slot search admission rejected immediately",
+    "deadline_ms": 8000
+  }
+}

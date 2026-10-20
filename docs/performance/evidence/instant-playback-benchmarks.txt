@@ -1,0 +1,42 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/discord
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkInstantCachedResolution-8      	   57686	      2044 ns/op	    1762 B/op	      14 allocs/op
+BenchmarkInstantCachedResolution-8      	   56956	      2095 ns/op	    1762 B/op	      14 allocs/op
+BenchmarkInstantCachedResolution-8      	   57670	      2066 ns/op	    1762 B/op	      14 allocs/op
+BenchmarkInstantUncachedResolution-8    	      55	   1977013 ns/op	  490121 B/op	    4754 allocs/op
+BenchmarkInstantUncachedResolution-8    	      58	   1961397 ns/op	  492080 B/op	    4753 allocs/op
+BenchmarkInstantUncachedResolution-8    	      58	   1934006 ns/op	  489450 B/op	    4752 allocs/op
+BenchmarkInstantPlaylistPreparation/10-8         	     435	    256694 ns/op	   61674 B/op	     624 allocs/op
+BenchmarkInstantPlaylistPreparation/10-8         	     476	    250625 ns/op	   61447 B/op	     623 allocs/op
+BenchmarkInstantPlaylistPreparation/10-8         	     469	    252717 ns/op	   61456 B/op	     623 allocs/op
+BenchmarkInstantPlaylistPreparation/50-8         	     100	   1236344 ns/op	  301192 B/op	    2952 allocs/op
+BenchmarkInstantPlaylistPreparation/50-8         	     100	   1230926 ns/op	  301133 B/op	    2952 allocs/op
+BenchmarkInstantPlaylistPreparation/50-8         	     100	   1229531 ns/op	  300892 B/op	    2951 allocs/op
+BenchmarkInstantPlaylistPreparation/123-8        	      49	   2992647 ns/op	  739893 B/op	    7175 allocs/op
+BenchmarkInstantPlaylistPreparation/123-8        	      50	   2988213 ns/op	  739555 B/op	    7174 allocs/op
+BenchmarkInstantPlaylistPreparation/123-8        	      48	   3034895 ns/op	  739386 B/op	    7173 allocs/op
+BenchmarkInstantPlaylistPreparation/302-8        	      20	   7337862 ns/op	 1783123 B/op	   17540 allocs/op
+BenchmarkInstantPlaylistPreparation/302-8        	      20	   7430732 ns/op	 1781910 B/op	   17539 allocs/op
+BenchmarkInstantPlaylistPreparation/302-8        	      19	   7423274 ns/op	 1782522 B/op	   17533 allocs/op
+BenchmarkInstantPlaylistPreparation/500-8        	      12	  12195901 ns/op	 2918063 B/op	   29170 allocs/op
+BenchmarkInstantPlaylistPreparation/500-8        	      12	  12103567 ns/op	 2917472 B/op	   29170 allocs/op
+BenchmarkInstantPlaylistPreparation/500-8        	      12	  12054004 ns/op	 2916132 B/op	   29166 allocs/op
+BenchmarkInstantStreamingStartup-8               	       6	  19611820 ns/op	  146776 B/op	     483 allocs/op
+BenchmarkInstantStreamingStartup-8               	       6	  19422387 ns/op	  146744 B/op	     482 allocs/op
+BenchmarkInstantStreamingStartup-8               	       6	  19194805 ns/op	  146816 B/op	     483 allocs/op
+BenchmarkInstantTimeToFirstFrame-8               	       6	  19833648 ns/op	  341836 B/op	    2807 allocs/op
+BenchmarkInstantTimeToFirstFrame-8               	       6	  19770262 ns/op	  335120 B/op	    2792 allocs/op
+BenchmarkInstantTimeToFirstFrame-8               	       6	  19850760 ns/op	  345965 B/op	    2784 allocs/op
+PASS
+ok  	whiterun/internal/discord	3.794s
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/discord
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkInstantReadyTransition-8   	       5	  20927007 ns/op	  20972466 eof_to_frame_ns/op	  186444 B/op	     759 allocs/op
+BenchmarkInstantReadyTransition-8   	       4	  25948518 ns/op	  25900382 eof_to_frame_ns/op	  189220 B/op	     806 allocs/op
+BenchmarkInstantReadyTransition-8   	       5	  24923454 ns/op	  24919312 eof_to_frame_ns/op	  187812 B/op	     782 allocs/op
+PASS
+ok  	whiterun/internal/discord	3.572s

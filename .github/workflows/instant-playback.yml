@@ -1,0 +1,30 @@
+name: Instant playback performance gate
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deterministic-ttfa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Install real FFmpeg and libopus
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Validate evidence evaluator
+        run: python3 scripts/test_instant_playback_gate.py
+      - name: Enforce TTFA, transition, load and playlist scaling budgets
+        run: python3 scripts/instant_playback_gate.py --run --output gate-artifacts/deterministic.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instant-playback-deterministic
+          path: gate-artifacts/

@@ -1,0 +1,693 @@
+{
+  "kind": "real",
+  "status": "FAIL",
+  "release_approved": false,
+  "errors": [
+    "('youtube-single', 'cold'): interaction acknowledgement was not measured over Discord REST",
+    "('youtube-single', 'cold'): only 3 samples; require >=100",
+    "('youtube-single', 'cold'): producer status FAIL",
+    "('youtube-single', 'warm'): interaction acknowledgement was not measured over Discord REST",
+    "('youtube-single', 'warm'): only 3 samples; require >=100",
+    "('youtube-single', 'warm'): producer status FAIL",
+    "('youtube-force', 'cold'): interaction acknowledgement was not measured over Discord REST",
+    "('youtube-force', 'cold'): only 3 samples; require >=100",
+    "('youtube-force', 'cold'): producer status FAIL",
+    "('youtube-force', 'warm'): interaction acknowledgement was not measured over Discord REST",
+    "('youtube-force', 'warm'): only 3 samples; require >=100",
+    "('youtube-force', 'warm'): producer status FAIL",
+    "('spotify-single', 'cold'): interaction acknowledgement was not measured over Discord REST",
+    "('spotify-single', 'cold'): only 3 samples; require >=100",
+    "('spotify-single', 'cold'): producer status FAIL",
+    "('spotify-single', 'warm'): interaction acknowledgement was not measured over Discord REST",
+    "('spotify-single', 'warm'): only 3 samples; require >=100",
+    "('spotify-single', 'warm'): producer status FAIL",
+    "('spotify-album', 'cold'): interaction acknowledgement was not measured over Discord REST",
+    "('spotify-album', 'cold'): only 3 samples; require >=100",
+    "('spotify-album', 'cold'): producer status FAIL",
+    "('spotify-album', 'warm'): interaction acknowledgement was not measured over Discord REST",
+    "('spotify-album', 'warm'): only 3 samples; require >=100",
+    "('spotify-album', 'warm'): producer status FAIL",
+    "('playlist-10', 'cold'): interaction acknowledgement was not measured over Discord REST",
+    "('playlist-10', 'cold'): only 3 samples; require >=100",
+    "('playlist-10', 'cold'): producer status FAIL",
+    "('playlist-10', 'warm'): interaction acknowledgement was not measured over Discord REST",
+    "('playlist-10', 'warm'): only 3 samples; require >=100",
+    "('playlist-10', 'warm'): producer status FAIL",
+    "('playlist-50', 'cold'): interaction acknowledgement was not measured over Discord REST",
+    "('playlist-50', 'cold'): only 3 samples; require >=100",
+    "('playlist-50', 'cold'): producer status FAIL",
+    "('playlist-50', 'warm'): interaction acknowledgement was not measured over Discord REST",
+    "('playlist-50', 'warm'): only 3 samples; require >=100",
+    "('playlist-50', 'warm'): producer status FAIL",
+    "('playlist-123', 'cold'): interaction acknowledgement was not measured over Discord REST",
+    "('playlist-123', 'cold'): only 3 samples; require >=100",
+    "('playlist-123', 'cold'): producer status FAIL",
+    "('playlist-123', 'warm'): interaction acknowledgement was not measured over Discord REST",
+    "('playlist-123', 'warm'): only 3 samples; require >=100",
+    "('playlist-123', 'warm'): producer status FAIL",
+    "('playlist-302', 'cold'): interaction acknowledgement was not measured over Discord REST",
+    "('playlist-302', 'cold'): only 3 samples; require >=100",
+    "('playlist-302', 'cold'): producer status FAIL",
+    "('playlist-302', 'warm'): interaction acknowledgement was not measured over Discord REST",
+    "('playlist-302', 'warm'): only 3 samples; require >=100",
+    "('playlist-302', 'warm'): producer status FAIL",
+    "('playlist-500', 'cold'): interaction acknowledgement was not measured over Discord REST",
+    "('playlist-500', 'cold'): only 3 samples; require >=100",
+    "('playlist-500', 'cold'): producer status FAIL",
+    "('playlist-500', 'warm'): interaction acknowledgement was not measured over Discord REST",
+    "('playlist-500', 'warm'): missing verified DAVE transport attestation",
+    "('playlist-500', 'warm'): only 0 samples; require >=100",
+    "('playlist-500', 'warm'): producer status FAIL",
+    "('playlist-500', 'warm'): provider/transport failures occurred",
+    "missing scenario: ('after-restart', 'cold')",
+    "missing scenario: ('after-restart', 'warm')",
+    "missing scenario: ('after-shuffle', 'cold')",
+    "missing scenario: ('after-shuffle', 'warm')",
+    "missing scenario: ('load-10-guilds', 'warm')",
+    "missing scenario: ('load-2-guilds', 'warm')",
+    "missing scenario: ('load-5-guilds', 'warm')",
+    "missing scenario: ('progressive-active', 'cold')",
+    "missing scenario: ('progressive-active', 'warm')",
+    "missing scenario: ('ready-transition', 'ready')",
+    "missing scenario: ('voice-disconnected', 'cold')",
+    "missing scenario: ('voice-disconnected', 'warm')"
+  ],
+  "scenarios": [
+    {
+      "scenario": {
+        "Name": "youtube-single",
+        "Kind": "youtube",
+        "Mode": "cold",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 3582.216779,
+        "p95_ms": 15805.92561,
+        "p99_ms": 15805.92561,
+        "max_ms": 15805.92561
+      },
+      "budget_ms": 5000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "youtube-single",
+        "Kind": "youtube",
+        "Mode": "warm",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 2088.351543,
+        "p95_ms": 2307.732045,
+        "p99_ms": 2307.732045,
+        "max_ms": 2307.732045
+      },
+      "budget_ms": 2000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "youtube-force",
+        "Kind": "youtube",
+        "Mode": "cold",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 3238.4549,
+        "p95_ms": 3287.171449,
+        "p99_ms": 3287.171449,
+        "max_ms": 3287.171449
+      },
+      "budget_ms": 5000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "youtube-force",
+        "Kind": "youtube",
+        "Mode": "warm",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 2281.251373,
+        "p95_ms": 2543.135741,
+        "p99_ms": 2543.135741,
+        "max_ms": 2543.135741
+      },
+      "budget_ms": 2000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "spotify-single",
+        "Kind": "track",
+        "Mode": "cold",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 5315.944091,
+        "p95_ms": 6585.645009,
+        "p99_ms": 6585.645009,
+        "max_ms": 6585.645009
+      },
+      "budget_ms": 5000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "spotify-single",
+        "Kind": "track",
+        "Mode": "warm",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 1788.279,
+        "p95_ms": 1989.782967,
+        "p99_ms": 1989.782967,
+        "max_ms": 1989.782967
+      },
+      "budget_ms": 2000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "spotify-album",
+        "Kind": "album",
+        "Mode": "cold",
+        "Count": 0,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 5067.936603,
+        "p95_ms": 5338.031054,
+        "p99_ms": 5338.031054,
+        "max_ms": 5338.031054
+      },
+      "budget_ms": 5000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "spotify-album",
+        "Kind": "album",
+        "Mode": "warm",
+        "Count": 0,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 2746.569632,
+        "p95_ms": 2926.179384,
+        "p99_ms": 2926.179384,
+        "max_ms": 2926.179384
+      },
+      "budget_ms": 2000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "playlist-10",
+        "Kind": "playlist",
+        "Mode": "cold",
+        "Count": 10,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 5532.277131,
+        "p95_ms": 6158.053323,
+        "p99_ms": 6158.053323,
+        "max_ms": 6158.053323
+      },
+      "budget_ms": 5000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "playlist-10",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 10,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 2934.525829,
+        "p95_ms": 3133.397991,
+        "p99_ms": 3133.397991,
+        "max_ms": 3133.397991
+      },
+      "budget_ms": 2000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "playlist-50",
+        "Kind": "playlist",
+        "Mode": "cold",
+        "Count": 50,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 7029.844925,
+        "p95_ms": 7250.836704,
+        "p99_ms": 7250.836704,
+        "max_ms": 7250.836704
+      },
+      "budget_ms": 5000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "playlist-50",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 50,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 3532.653536,
+        "p95_ms": 3554.949533,
+        "p99_ms": 3554.949533,
+        "max_ms": 3554.949533
+      },
+      "budget_ms": 2000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "playlist-123",
+        "Kind": "playlist",
+        "Mode": "cold",
+        "Count": 123,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 9433.296197,
+        "p95_ms": 9912.656098,
+        "p99_ms": 9912.656098,
+        "max_ms": 9912.656098
+      },
+      "budget_ms": 5000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "playlist-123",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 123,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 6620.814672,
+        "p95_ms": 7315.230624,
+        "p99_ms": 7315.230624,
+        "max_ms": 7315.230624
+      },
+      "budget_ms": 2000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "playlist-302",
+        "Kind": "playlist",
+        "Mode": "cold",
+        "Count": 302,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 8187.595158,
+        "p95_ms": 8330.594126,
+        "p99_ms": 8330.594126,
+        "max_ms": 8330.594126
+      },
+      "budget_ms": 5000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "playlist-302",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 302,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 4999.282945,
+        "p95_ms": 5094.161949,
+        "p99_ms": 5094.161949,
+        "max_ms": 5094.161949
+      },
+      "budget_ms": 2000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "playlist-500",
+        "Kind": "playlist",
+        "Mode": "cold",
+        "Count": 500,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 3,
+        "p50_ms": 53831.696508,
+        "p95_ms": 56636.883276,
+        "p99_ms": 56636.883276,
+        "max_ms": 56636.883276
+      },
+      "budget_ms": 5000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "only 3 samples; require >=100",
+        "producer status FAIL"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    },
+    {
+      "scenario": {
+        "Name": "playlist-500",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 500,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 0
+      },
+      "budget_ms": 2000,
+      "environment": "real-providers-discord-dave",
+      "status": "FAIL",
+      "errors": [
+        "interaction acknowledgement was not measured over Discord REST",
+        "missing verified DAVE transport attestation",
+        "only 0 samples; require >=100",
+        "producer status FAIL",
+        "provider/transport failures occurred"
+      ],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    }
+  ],
+  "playlist_10_to_500_p95_growth_ms": null,
+  "scaling_budget_ms": 250,
+  "configuration": {
+    "samples_per_scenario": 100,
+    "match_slots": 4,
+    "background_slots": 3,
+    "collection_workers": 3,
+    "logical_prefetch": 6,
+    "search_admission_slots": 4,
+    "search_admission_deadline_ms": 5000,
+    "source_go_sha256": "ba9a733b16ecb65d59d228907dffd0c346112cc4ede8743109dcf9b7642d2dca",
+    "quantiles": "nearest-rank",
+    "external_network": true
+  },
+  "host": {
+    "platform": "Linux-7.2.7-arch1-1-x86_64-with-glibc2.44",
+    "cpu": "AMD Ryzen 7 9800X3D 8-Core Processor",
+    "logical_cpus": 8,
+    "go": "go version go1.27.1-X:nodwarf5 linux/amd64",
+    "ffmpeg": "ffmpeg version n9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+    "monotonic_resolution_seconds": 1e-09,
+    "gomaxprocs": "Go default",
+    "revision": "2920a2980441b74fca2559bcd58546ddae170ba2"
+  }
+}

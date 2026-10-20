@@ -1,0 +1,362 @@
+[
+  {
+    "environment": "real-providers-simulated-udp",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 42471,
+        "extraction": 2946324909,
+        "ffmpeg_started": 3020617402,
+        "first_resolved": 1246005904,
+        "metadata": 1245987649,
+        "opus": 3050707794,
+        "preparation": 1246009441,
+        "received": 0,
+        "transport_sent": 3050736779
+      },
+      {
+        "ack": 25328,
+        "extraction": 3585458775,
+        "ffmpeg_started": 3610188818,
+        "first_resolved": 1511950448,
+        "metadata": 1511930881,
+        "opus": 3639541239,
+        "preparation": 1511954125,
+        "received": 0,
+        "transport_sent": 3639570314
+      },
+      {
+        "ack": 27171,
+        "extraction": 2969797530,
+        "ffmpeg_started": 2998700167,
+        "first_resolved": 1339058808,
+        "metadata": 1339033139,
+        "opus": 3028088747,
+        "preparation": 1339063006,
+        "received": 0,
+        "transport_sent": 3028214245
+      }
+    ],
+    "release_approved": false,
+    "scenario": {
+      "Name": "youtube-normal",
+      "Kind": "youtube-normal",
+      "Mode": "cold",
+      "Count": 1,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "OBSERVATION",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 3050.736779,
+      "p95_ms": 3639.570314,
+      "p99_ms": 3639.570314,
+      "max_ms": 3639.570314
+    }
+  },
+  {
+    "environment": "real-providers-simulated-udp",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 43813,
+        "extraction": 2206697076,
+        "ffmpeg_started": 2378822079,
+        "first_resolved": 61677,
+        "metadata": 63521,
+        "opus": 2407317653,
+        "preparation": 63631,
+        "received": 0,
+        "transport_sent": 2407335878
+      },
+      {
+        "ack": 41389,
+        "extraction": 1583564017,
+        "ffmpeg_started": 1676909865,
+        "first_resolved": 59543,
+        "metadata": 61286,
+        "opus": 1705439815,
+        "preparation": 61407,
+        "received": 0,
+        "transport_sent": 1705457238
+      },
+      {
+        "ack": 40236,
+        "extraction": 1822632645,
+        "ffmpeg_started": 1847459262,
+        "first_resolved": 66176,
+        "metadata": 68009,
+        "opus": 1877298579,
+        "preparation": 68139,
+        "received": 0,
+        "transport_sent": 1877315761
+      }
+    ],
+    "release_approved": false,
+    "scenario": {
+      "Name": "youtube-normal",
+      "Kind": "youtube-normal",
+      "Mode": "warm",
+      "Count": 1,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "OBSERVATION",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 1877.315761,
+      "p95_ms": 2407.335878,
+      "p99_ms": 2407.335878,
+      "max_ms": 2407.335878
+    }
+  },
+  {
+    "environment": "real-providers-simulated-udp",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 24777,
+        "extraction": 3182244168,
+        "ffmpeg_started": 3207574602,
+        "first_resolved": 1479112056,
+        "metadata": 1479085977,
+        "opus": 3236304572,
+        "preparation": 1479116044,
+        "received": 0,
+        "transport_sent": 3236323117
+      },
+      {
+        "ack": 27402,
+        "extraction": 3153974169,
+        "ffmpeg_started": 3179899062,
+        "first_resolved": 1302827361,
+        "metadata": 1302805831,
+        "opus": 3208104787,
+        "preparation": 1302831319,
+        "received": 0,
+        "transport_sent": 3208122460
+      },
+      {
+        "ack": 24837,
+        "extraction": 3429163855,
+        "ffmpeg_started": 3456869230,
+        "first_resolved": 1459825845,
+        "metadata": 1459796099,
+        "opus": 3487600561,
+        "preparation": 1459830915,
+        "received": 0,
+        "transport_sent": 3487618806
+      }
+    ],
+    "release_approved": false,
+    "scenario": {
+      "Name": "youtube-force",
+      "Kind": "youtube-force",
+      "Mode": "cold",
+      "Count": 1,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "OBSERVATION",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 3236.323117,
+      "p95_ms": 3487.618806,
+      "p99_ms": 3487.618806,
+      "max_ms": 3487.618806
+    }
+  },
+  {
+    "environment": "real-providers-simulated-udp",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 42181,
+        "extraction": 1810166966,
+        "ffmpeg_started": 1846249370,
+        "first_resolved": 63511,
+        "metadata": 65675,
+        "opus": 1878079829,
+        "preparation": 65785,
+        "received": 0,
+        "transport_sent": 1878098274
+      },
+      {
+        "ack": 38513,
+        "extraction": 1992128923,
+        "ffmpeg_started": 2026920245,
+        "first_resolved": 53923,
+        "metadata": 56568,
+        "opus": 2058352128,
+        "preparation": 56698,
+        "received": 0,
+        "transport_sent": 2058386353
+      },
+      {
+        "ack": 38914,
+        "extraction": 2062945729,
+        "ffmpeg_started": 2091720536,
+        "first_resolved": 55455,
+        "metadata": 57339,
+        "opus": 2124298696,
+        "preparation": 57469,
+        "received": 0,
+        "transport_sent": 2124316219
+      }
+    ],
+    "release_approved": false,
+    "scenario": {
+      "Name": "youtube-force",
+      "Kind": "youtube-force",
+      "Mode": "warm",
+      "Count": 1,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "OBSERVATION",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 2058.386353,
+      "p95_ms": 2124.316219,
+      "p99_ms": 2124.316219,
+      "max_ms": 2124.316219
+    }
+  },
+  {
+    "environment": "real-providers-simulated-udp",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 26099,
+        "extraction": 5357953673,
+        "ffmpeg_started": 5381265776,
+        "first_resolved": 3809578346,
+        "metadata": 815161885,
+        "opus": 5409810065,
+        "preparation": 3809586963,
+        "received": 0,
+        "transport_sent": 5409827348
+      },
+      {
+        "ack": 23955,
+        "extraction": 5479257703,
+        "ffmpeg_started": 5512106016,
+        "first_resolved": 3517595054,
+        "metadata": 549543814,
+        "opus": 5544747527,
+        "preparation": 3517603120,
+        "received": 0,
+        "transport_sent": 5544766363
+      },
+      {
+        "ack": 31670,
+        "extraction": 5252781216,
+        "ffmpeg_started": 5315817793,
+        "first_resolved": 3624146361,
+        "metadata": 424233879,
+        "opus": 5345275968,
+        "preparation": 3624153344,
+        "received": 0,
+        "transport_sent": 5345294784
+      }
+    ],
+    "release_approved": false,
+    "scenario": {
+      "Name": "spotify-single",
+      "Kind": "spotify-single",
+      "Mode": "cold",
+      "Count": 1,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "OBSERVATION",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 5409.827348,
+      "p95_ms": 5544.766363,
+      "p99_ms": 5544.766363,
+      "max_ms": 5544.766363
+    }
+  },
+  {
+    "environment": "real-providers-simulated-udp",
+    "errors": null,
+    "monotonic_ns": [
+      {
+        "ack": 38693,
+        "extraction": 2159578159,
+        "ffmpeg_started": 2190882070,
+        "first_resolved": 167378,
+        "metadata": 134926,
+        "opus": 2225520424,
+        "preparation": 173810,
+        "received": 0,
+        "transport_sent": 2225539631
+      },
+      {
+        "ack": 67479,
+        "extraction": 1830960763,
+        "ffmpeg_started": 1859137977,
+        "first_resolved": 288228,
+        "metadata": 242401,
+        "opus": 1895727467,
+        "preparation": 296383,
+        "received": 0,
+        "transport_sent": 1895751112
+      },
+      {
+        "ack": 36098,
+        "extraction": 1994173497,
+        "ffmpeg_started": 2051666989,
+        "first_resolved": 136930,
+        "metadata": 105470,
+        "opus": 2086736012,
+        "preparation": 141539,
+        "received": 0,
+        "transport_sent": 2086768563
+      }
+    ],
+    "release_approved": false,
+    "scenario": {
+      "Name": "spotify-single",
+      "Kind": "spotify-single",
+      "Mode": "warm",
+      "Count": 1,
+      "Guilds": 1,
+      "Disconnected": false,
+      "Restart": false,
+      "Shuffle": false,
+      "Transition": false,
+      "Progressive": false
+    },
+    "status": "OBSERVATION",
+    "ttfa": {
+      "n": 3,
+      "p50_ms": 2086.768563,
+      "p95_ms": 2225.539631,
+      "p99_ms": 2225.539631,
+      "max_ms": 2225.539631
+    }
+  }
+]
