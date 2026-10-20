@@ -1,0 +1,24 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/discord
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor           
+BenchmarkQueueV2/1-8 	  179652	      1291 ns/op	         6.000 components	         1.000 messages	         0 missing-artworks	       513.0 payload-bytes	    1800 B/op	      27 allocs/op
+BenchmarkQueueV2/1-8 	  182976	      1294 ns/op	         6.000 components	         1.000 messages	         0 missing-artworks	       513.0 payload-bytes	    1800 B/op	      27 allocs/op
+BenchmarkQueueV2/1-8 	  186333	      1308 ns/op	         6.000 components	         1.000 messages	         0 missing-artworks	       513.0 payload-bytes	    1800 B/op	      27 allocs/op
+BenchmarkQueueV2/10-8         	   26176	      9189 ns/op	        33.00 components	         1.000 messages	         0 missing-artworks	      2390 payload-bytes	   12862 B/op	     189 allocs/op
+BenchmarkQueueV2/10-8         	   26178	      9197 ns/op	        33.00 components	         1.000 messages	         0 missing-artworks	      2390 payload-bytes	   12862 B/op	     189 allocs/op
+BenchmarkQueueV2/10-8         	   26187	      9201 ns/op	        33.00 components	         1.000 messages	         0 missing-artworks	      2390 payload-bytes	   12862 B/op	     189 allocs/op
+BenchmarkQueueV2/20-8         	   13428	     17898 ns/op	        40.00 components	         1.000 messages	         0 missing-artworks	      3303 payload-bytes	   24701 B/op	     342 allocs/op
+BenchmarkQueueV2/20-8         	   13545	     17712 ns/op	        40.00 components	         1.000 messages	         0 missing-artworks	      3303 payload-bytes	   24700 B/op	     342 allocs/op
+BenchmarkQueueV2/20-8         	   13471	     17833 ns/op	        40.00 components	         1.000 messages	         0 missing-artworks	      3303 payload-bytes	   24700 B/op	     342 allocs/op
+BenchmarkQueueV2/123-8        	    3957	     60766 ns/op	        40.00 components	         1.000 messages	         0 missing-artworks	      6394 payload-bytes	  102392 B/op	    1093 allocs/op
+BenchmarkQueueV2/123-8        	    3997	     60397 ns/op	        40.00 components	         1.000 messages	         0 missing-artworks	      6394 payload-bytes	  102391 B/op	    1093 allocs/op
+BenchmarkQueueV2/123-8        	    3919	     60421 ns/op	        40.00 components	         1.000 messages	         0 missing-artworks	      6394 payload-bytes	  102389 B/op	    1093 allocs/op
+BenchmarkQueueV2/500-8        	    3944	     61930 ns/op	        40.00 components	         1.000 messages	         0 missing-artworks	      6395 payload-bytes	  103627 B/op	    1241 allocs/op
+BenchmarkQueueV2/500-8        	    3825	     62147 ns/op	        40.00 components	         1.000 messages	         0 missing-artworks	      6395 payload-bytes	  103629 B/op	    1241 allocs/op
+BenchmarkQueueV2/500-8        	    3931	     62367 ns/op	        40.00 components	         1.000 messages	         0 missing-artworks	      6395 payload-bytes	  103629 B/op	    1241 allocs/op
+BenchmarkQueueV2/1000-8       	    3800	     62988 ns/op	        40.00 components	         1.000 messages	         0 missing-artworks	      6396 payload-bytes	  103761 B/op	    1241 allocs/op
+BenchmarkQueueV2/1000-8       	    3844	     63400 ns/op	        40.00 components	         1.000 messages	         0 missing-artworks	      6396 payload-bytes	  103764 B/op	    1241 allocs/op
+BenchmarkQueueV2/1000-8       	    3903	     62949 ns/op	        40.00 components	         1.000 messages	         0 missing-artworks	      6396 payload-bytes	  103762 B/op	    1241 allocs/op
+PASS
+ok  	whiterun/internal/discord	4.339s

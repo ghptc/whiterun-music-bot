@@ -10,8 +10,9 @@ import (
 )
 
 type playlistEvidence struct {
-	Total  int
-	Prefix []string
+	Total   int
+	Prefix  []string
+	Artwork map[string]string
 }
 
 // scriptData preserves JSON string whitespace (notably Embed's artist delimiter).
@@ -53,7 +54,12 @@ func spotifyPlaylistEvidence(body []byte, id string) (playlistEvidence, error) {
 					Items []struct {
 						Item struct {
 							Data struct {
-								URI string `json:"uri"`
+								URI   string `json:"uri"`
+								Album struct {
+									CoverArt struct {
+										Sources []spotifyImage `json:"sources"`
+									} `json:"coverArt"`
+								} `json:"albumOfTrack"`
 							} `json:"data"`
 						} `json:"itemV2"`
 					} `json:"items"`
@@ -83,13 +89,14 @@ func spotifyPlaylistEvidence(body []byte, id string) (playlistEvidence, error) {
 	} else if content.Paging.Next != nil {
 		return playlistEvidence{}, ErrSpotifyIncomplete
 	}
-	evidence := playlistEvidence{Total: *content.Total}
+	evidence := playlistEvidence{Total: *content.Total, Artwork: make(map[string]string)}
 	for _, item := range content.Items {
 		uri := item.Item.Data.URI
 		if !strings.HasPrefix(uri, "spotify:track:") || !spotifyID.MatchString(strings.TrimPrefix(uri, "spotify:track:")) {
 			return playlistEvidence{}, ErrSpotifyIncomplete
 		}
 		evidence.Prefix = append(evidence.Prefix, uri)
+		evidence.Artwork[strings.TrimPrefix(uri, "spotify:track:")] = spotifyArtwork(item.Item.Data.Album.CoverArt.Sources)
 	}
 	return evidence, nil
 }
@@ -114,6 +121,9 @@ type spotifyEmbedEnvelope struct {
 	} `json:"props"`
 }
 type spotifyEmbedEntity struct {
+	VisualIdentity struct {
+		Image []spotifyImage `json:"image"`
+	} `json:"visualIdentity"`
 	CoverArt struct {
 		Sources []spotifyImage `json:"sources"`
 	} `json:"coverArt"`

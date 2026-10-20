@@ -239,6 +239,12 @@ func BenchmarkQueueV2(b *testing.B) {
 				b.ReportMetric(float64(len(view.Blocks)), "messages")
 				b.ReportMetric(float64(view.Missing), "missing-artworks")
 			}
+			view, _ := buildQueueView(state, nil)
+			raw, err := json.Marshal(view.Blocks[0].update(""))
+			if err != nil {
+				b.Fatal(err)
+			}
+			b.ReportMetric(float64(len(raw)), "payload-bytes")
 		})
 	}
 }

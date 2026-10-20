@@ -60,6 +60,12 @@ func (s *Spotify) publicPlaylist(ctx context.Context, id string) (result Collect
 			if evidenceErr != nil {
 				return Collection{}, errors.Join(err, evidenceErr)
 			}
+			for i := range result.Tracks {
+				t := &result.Tracks[i]
+				if SafeArtworkURL(t.SpotifyArtworkURL) == "" {
+					t.SpotifyArtworkURL = evidence.Artwork[t.SpotifyID]
+				}
+			}
 			err = nil
 		}
 	}
