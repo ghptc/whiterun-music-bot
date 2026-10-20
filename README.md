@@ -110,7 +110,7 @@ Collections are limited to 500 entries and queues to 1,000 upcoming logical posi
 
 `/play` and `/queue` responses are public. Every actual first voice frame triggers one compact public Now Playing container with individual artwork, title, artist, known duration and the next song title. `/now` uses the same design and remains ephemeral. The latest accepted `/play` sets the text channel for future announcements. Provider details and recording identity remain in metadata and logs, outside the music cards.
 
-Lifecycle logs correlate queue selection, process exits, voice submission, cleanup, and advancement. A pause-aware 90-second inactivity deadline and two-second post-EOF cleanup deadline prevent indefinite fake Current states. Transient gateway reconnects receive 60 seconds of grace; confirmed moves/leaves still clear immediately. See [the investigation and tests](docs/source-selection-and-lifecycle.md).
+Lifecycle logs correlate queue selection, process exits, voice submission, cleanup, and advancement. A pause-aware 90-second inactivity deadline and two-second post-EOF cleanup deadline prevent indefinite fake Current states. Voice transport failures suspend playback and preserve the queue while a bounded per-guild circuit recreates the connection and DAVE session. See [FIX-020 and its validation evidence](docs/fixes/fix020-discord-voice-cascade.md). See [the investigation and tests](docs/source-selection-and-lifecycle.md).
 
 ## Architecture
 

@@ -1,0 +1,11 @@
+ok  	whiterun/cmd/bot	0.008s
+?   	whiterun/cmd/profile	[no test files]
+ok  	whiterun/cmd/qa-memory	0.031s
+?   	whiterun/cmd/qa-soak	[no test files]
+ok  	whiterun/internal/discord	9.485s
+ok  	whiterun/internal/logstore	0.577s
+ok  	whiterun/internal/media	0.437s
+ok  	whiterun/internal/perfgate	0.008s
+ok  	whiterun/internal/player	27.561s
+ok  	whiterun/internal/qasoak	0.007s
+ok  	whiterun/internal/storage	0.165s

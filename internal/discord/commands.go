@@ -173,7 +173,7 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 				reply("The Bard cannot join. Check View Channel, Connect, and Speak permissions.")
 				return
 			}
-			if err := g.player.Attach(transport{conn: conn}); err != nil {
+			if err := g.player.Attach(b.playbackTransport(id, g, conn)); err != nil {
 				cleanup, c := context.WithTimeout(context.Background(), 3*time.Second)
 				conn.Close(cleanup)
 				c()

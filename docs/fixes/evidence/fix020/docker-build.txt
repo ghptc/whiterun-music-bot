@@ -1,0 +1,99 @@
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon   27.4MB
+
+Step 1/21 : FROM golang:1.27-bookworm AS test-env
+ ---> 648f440f42a0
+Step 2/21 : RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg     && rm -rf /var/lib/apt/lists/*     && ffmpeg -version     && ffmpeg -hide_banner -loglevel error -f lavfi -i anullsrc=r=48000:cl=stereo        -t 0.1 -c:a libopus -f opus -y /dev/null
+ ---> Using cache
+ ---> fcb3ccc82117
+Step 3/21 : WORKDIR /src
+ ---> Using cache
+ ---> f9acd273ef9d
+Step 4/21 : COPY go.mod go.sum ./
+ ---> Using cache
+ ---> 5cd76b74461e
+Step 5/21 : RUN GODEBUG=netedns0=0 go mod download
+ ---> Using cache
+ ---> 866ed85c2844
+Step 6/21 : COPY cmd ./cmd
+ ---> Using cache
+ ---> 8026a4c2ee40
+Step 7/21 : COPY internal ./internal
+ ---> e46e9b99dc59
+Step 8/21 : FROM test-env AS build
+ ---> e46e9b99dc59
+Step 9/21 : RUN go vet ./... && go test ./... && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/bard ./cmd/bot && sha256sum /out/bard
+ ---> Running in 992ac16e14cf
+ok  	whiterun/cmd/bot	0.019s
+?   	whiterun/cmd/profile	[no test files]
+ok  	whiterun/cmd/qa-memory	0.035s
+?   	whiterun/cmd/qa-soak	[no test files]
+ok  	whiterun/internal/discord	10.087s
+ok  	whiterun/internal/logstore	4.979s
+ok  	whiterun/internal/media	0.283s
+ok  	whiterun/internal/perfgate	0.001s
+ok  	whiterun/internal/player	27.360s
+ok  	whiterun/internal/qasoak	0.022s
+ok  	whiterun/internal/storage	0.963s
+dd447fd2df5bcae79067fb97fac06a60fc5b807e024a3b951f2f53b091966959  /out/bard
+ ---> Removed intermediate container 992ac16e14cf
+ ---> cb00453f4082
+Step 10/21 : FROM denoland/deno:bin-2.5.6 AS deno
+ ---> 2f5f9d651af3
+Step 11/21 : FROM debian:bookworm-slim AS runtime
+ ---> 88200866dfff
+Step 12/21 : ARG YTDLP_VERSION=2026.08.19
+ ---> Using cache
+ ---> 40e6c0955b2e
+Step 13/21 : RUN apt-get update && apt-get install -y --no-install-recommends     ca-certificates ffmpeg python3 python3-venv     && python3 -m venv /opt/yt-dlp     && /opt/yt-dlp/bin/pip install --no-cache-dir "yt-dlp[default]==${YTDLP_VERSION}"     && rm -rf /var/lib/apt/lists/*     && useradd --create-home --uid 10001 bard
+ ---> Using cache
+ ---> 72b988e79c25
+Step 14/21 : COPY --from=deno /deno /usr/local/bin/deno
+ ---> Using cache
+ ---> 75cb8661075e
+Step 15/21 : COPY --from=build /out/bard /usr/local/bin/bard
+ ---> ac3c951b6a24
+Step 16/21 : ENV GODEBUG="netedns0=0"     PATH="/opt/yt-dlp/bin:${PATH}"     DENO_DIR=/tmp/deno     PYTHONDONTWRITEBYTECODE=1
+ ---> Running in 92ea81d8871a
+ ---> Removed intermediate container 92ea81d8871a
+ ---> 9a72d392309d
+Step 17/21 : RUN ffmpeg -version && yt-dlp --version && deno --version     && ffmpeg -hide_banner -loglevel error -f lavfi -i anullsrc=r=48000:cl=stereo        -t 0.1 -c:a libopus -f opus -y /dev/null
+ ---> Running in 21de65fbc1b7
+ffmpeg version 5.1.9-0+deb12u1 Copyright (c) 2000-2026 the FFmpeg developers
+built with gcc 12 (Debian 12.2.0-14+deb12u1)
+configuration: --prefix=/usr --extra-version=0+deb12u1 --toolchain=hardened --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --arch=amd64 --enable-gpl --disable-stripping --enable-gnutls --enable-ladspa --enable-libaom --enable-libass --enable-libbluray --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libcodec2 --enable-libdav1d --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libglslang --enable-libgme --enable-libgsm --enable-libjack --enable-libmp3lame --enable-libmysofa --enable-libopenjpeg --enable-libopenmpt --enable-libopus --enable-libpulse --enable-librabbitmq --enable-librist --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzimg --enable-libzmq --enable-libzvbi --enable-lv2 --enable-omx --enable-openal --enable-opencl --enable-opengl --enable-sdl2 --disable-sndio --enable-libjxl --enable-pocketsphinx --enable-librsvg --enable-libmfx --enable-libdc1394 --enable-libdrm --enable-libiec61883 --enable-chromaprint --enable-frei0r --enable-libx264 --enable-libplacebo --enable-librav1e --enable-shared
+libavutil      57. 28.100 / 57. 28.100
+libavcodec     59. 37.100 / 59. 37.100
+libavformat    59. 27.100 / 59. 27.100
+libavdevice    59.  7.100 / 59.  7.100
+libavfilter     8. 44.100 /  8. 44.100
+libswscale      6.  7.100 /  6.  7.100
+libswresample   4.  7.100 /  4.  7.100
+libpostproc    56.  6.100 / 56.  6.100
+2026.08.19
+deno 2.5.6 (stable, release, x86_64-unknown-linux-gnu)
+v8 14.0.365.5-rusty
+typescript 5.9.2
+ ---> Removed intermediate container 21de65fbc1b7
+ ---> e539f95f0387
+Step 18/21 : RUN mkdir -p /home/bard/data && chown bard:bard /home/bard/data
+ ---> Running in 32ad56e0117c
+ ---> Removed intermediate container 32ad56e0117c
+ ---> 1b96366759e2
+Step 19/21 : USER bard
+ ---> Running in 0dee83f3997a
+ ---> Removed intermediate container 0dee83f3997a
+ ---> 81428941ad63
+Step 20/21 : WORKDIR /home/bard
+ ---> Running in 28fd9b80c087
+ ---> Removed intermediate container 28fd9b80c087
+ ---> dabc0272489f
+Step 21/21 : ENTRYPOINT ["bard"]
+ ---> Running in 60775030a67c
+ ---> Removed intermediate container 60775030a67c
+ ---> 13c52ec8a5d8
+Successfully built 13c52ec8a5d8
+Successfully tagged whiterun-music-bot:fix020

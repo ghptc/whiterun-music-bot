@@ -53,6 +53,9 @@ func (b *Bot) setupAnnouncements(id snowflake.ID, g *guild) {
 	}()
 }
 func playbackText(event player.PlaybackEvent) string {
+	if event.FailureStage == "voice" {
+		return event.SkippedReason
+	}
 	label := "Now playing"
 	if event.SkippedReason != "" {
 		label = "Unavailable"

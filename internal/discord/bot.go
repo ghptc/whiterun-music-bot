@@ -64,7 +64,10 @@ func New(ctx context.Context, token string, appID snowflake.ID, log *slog.Logger
 		bot.WithRestClientConfigOpts(rest.WithRateLimiter(limiter)),
 		bot.WithGatewayConfigOpts(gateway.WithIntents(gateway.IntentGuilds, gateway.IntentGuildVoiceStates)),
 		bot.WithCacheConfigOpts(cache.WithCaches(cache.FlagGuilds, cache.FlagVoiceStates, cache.FlagMembers)),
-		bot.WithVoiceManagerConfigOpts(voice.WithConnCreateFunc(newVoiceConn)),
+		bot.WithVoiceManagerConfigOpts(voice.WithConnCreateFunc(func(guildID, userID snowflake.ID, update voice.StateUpdateFunc, remove func(), opts ...voice.ConnConfigOpt) voice.Conn {
+			opts = append(opts, voice.WithConnGatewayCreateFunc(incidentGatewayFactory(log)))
+			return newVoiceConn(guildID, userID, update, remove, opts...)
+		})),
 		bot.WithEventListenerFunc(b.handle),
 		bot.WithEventListenerFunc(b.voiceStateChanged),
 	)
@@ -137,7 +140,7 @@ func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) e
 		metadata.SetPlaybackTrack(track)
 	}
 	err := b.streamer.Play(ctx, track, voice)
-	if err != nil && ctx.Err() == nil {
+	if err != nil && ctx.Err() == nil && !player.IsVoiceFailure(err) {
 		b.resolver.YouTube.InvalidateSpotify(ctx, track)
 	}
 	return err
@@ -203,6 +206,9 @@ func (b *Bot) Close(ctx context.Context) {
 			defer g.mu.Unlock()
 			g.emptySince = time.Time{}
 			g.player.Close(ctx)
+			if g.conn != nil {
+				g.conn.Close(ctx)
+			}
 			g.conn = nil
 			g.channel = 0
 		}()
@@ -211,7 +217,7 @@ func (b *Bot) Close(ctx context.Context) {
 	b.client.Close(ctx)
 }
 
-// A voice kick, move, or failed voice gateway invalidates the old player session.
+// A voice kick, move, or failed gateway suspends audio while preserving the queue.
 // Polling also catches voice transport loss without a main-gateway leave event.
 func (b *Bot) watchVoice() {
 	defer b.workers.Done()
@@ -255,7 +261,8 @@ type transport struct{ conn voice.Conn }
 // Retain the DAVE session to hold audio during encryption handshakes.
 type voiceConn struct {
 	voice.Conn
-	dave *session.Session
+	dave      *session.Session
+	closeOnce sync.Once
 }
 
 func newVoiceConn(guildID, userID snowflake.ID, update voice.StateUpdateFunc, remove func(), opts ...voice.ConnConfigOpt) voice.Conn {
@@ -268,10 +275,17 @@ func newVoiceConn(guildID, userID snowflake.ID, update voice.StateUpdateFunc, re
 	return c
 }
 func (c *voiceConn) Close(ctx context.Context) {
-	c.Conn.Close(ctx)
-	_ = c.dave.Close()
+	c.closeOnce.Do(func() {
+		c.Conn.Close(ctx)
+		if c.dave != nil {
+			_ = c.dave.Close()
+		}
+	})
 }
 func (v transport) WriteFrame(ctx context.Context, frame []byte) error {
+	if c, ok := v.conn.(*voiceConn); ok && c.Gateway().Status() != voice.StatusReady {
+		return errors.New("voice gateway not ready")
+	}
 	if c, ok := v.conn.(*voiceConn); ok {
 		if err := waitVoiceReady(ctx, c.dave, 60*time.Second); err != nil {
 			return err

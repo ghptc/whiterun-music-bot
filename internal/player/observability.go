@@ -79,6 +79,8 @@ func (p *GuildPlayer) schedulerReasonLocked() (string, string) {
 		return "canceled", "none"
 	case p.voice == nil:
 		return "voice_detached", "voice_attach"
+	case p.voiceBlocked:
+		return "voice_suspended", "voice_recovery"
 	case p.providerBlocked:
 		return "provider_blocked", "provider_recovery"
 	case p.halted:

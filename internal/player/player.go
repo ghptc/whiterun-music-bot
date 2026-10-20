@@ -22,45 +22,51 @@ type PlayFunc func(context.Context, media.Track, Voice) error
 const MaxQueueTracks = 1000
 
 type GuildPlayer struct {
-	diagnostics      *diagnostics
-	queueVersion     uint64
-	lastSignal       string
-	sessionID        string
-	loop             string
-	autoplay         bool
-	store            Store
-	guildID          string
-	persistenceError string
-	mu               sync.Mutex
-	ctx              context.Context
-	cancel           context.CancelFunc
-	done             chan struct{}
-	wake             chan struct{}
-	log              *slog.Logger
-	play             PlayFunc
-	voice            Voice
-	current          *media.Track
-	history          []media.Track
-	completedImports []CollectionProgress
-	lastTransition   time.Time
-	startedSequence  uint64
-	queue            []queueEntry
-	jobs             map[uint64]*CollectionJob
-	nextJob          uint64
-	jobWorkers       sync.WaitGroup
-	trackCancel      context.CancelFunc
-	trackDone        chan struct{}
-	generation       uint64
-	pause            *pauseGate
-	trackCause       context.CancelCauseFunc
-	onStart          func(PlaybackEvent)
-	onSkip           func(PlaybackEvent)
-	sequence         uint64
-	halted           bool
-	failures         int
-	providerBlocked  bool
-	providerReason   string
-	providerChanged  chan struct{}
+	diagnostics         *diagnostics
+	queueVersion        uint64
+	lastSignal          string
+	sessionID           string
+	loop                string
+	autoplay            bool
+	store               Store
+	guildID             string
+	persistenceError    string
+	mu                  sync.Mutex
+	ctx                 context.Context
+	cancel              context.CancelFunc
+	done                chan struct{}
+	wake                chan struct{}
+	log                 *slog.Logger
+	play                PlayFunc
+	voice               Voice
+	current             *media.Track
+	history             []media.Track
+	completedImports    []CollectionProgress
+	lastTransition      time.Time
+	startedSequence     uint64
+	queue               []queueEntry
+	jobs                map[uint64]*CollectionJob
+	nextJob             uint64
+	jobWorkers          sync.WaitGroup
+	trackCancel         context.CancelFunc
+	trackDone           chan struct{}
+	generation          uint64
+	pause               *pauseGate
+	trackCause          context.CancelCauseFunc
+	onStart             func(PlaybackEvent)
+	onSkip              func(PlaybackEvent)
+	sequence            uint64
+	halted              bool
+	failures            int
+	voiceBlocked        bool
+	voiceIncident       bool
+	voiceAttempts       int
+	voiceNotice         bool
+	voiceEpoch          uint64
+	voiceRecoveryCancel context.CancelFunc
+	providerBlocked     bool
+	providerReason      string
+	providerChanged     chan struct{}
 }
 
 func New(ctx context.Context, log *slog.Logger, play PlayFunc) *GuildPlayer {
@@ -105,6 +111,10 @@ func (p *GuildPlayer) Attach(v Voice) error {
 		return errors.New("The Bard is already summoned.")
 	}
 	p.voice = v
+	p.voiceBlocked = false
+	p.voiceIncident = false
+	p.voiceNotice = false
+	p.voiceAttempts = 0
 	p.generation++
 	p.mutationLocked("generation_changed")
 	p.signal()
@@ -147,6 +157,7 @@ func (p *GuildPlayer) Stop() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.cancelJobsLocked()
+	p.cancelVoiceRecoveryLocked()
 	p.resetProviderLocked()
 	p.queue = nil
 	p.loop = "off"
@@ -166,6 +177,7 @@ func (p *GuildPlayer) Leave(ctx context.Context) {
 	v := p.voice
 	p.voice = nil
 	p.cancelJobsLocked()
+	p.cancelVoiceRecoveryLocked()
 	p.resetProviderLocked()
 	p.queue = nil
 	p.loop = "off"
@@ -210,6 +222,11 @@ func (p *GuildPlayer) run() {
 		if p.ctx.Err() != nil {
 			p.mu.Unlock()
 			return
+		}
+		if p.voiceBlocked && p.voiceAttempts < 5 && len(p.queue) > 0 && p.voice != nil {
+			p.mu.Unlock()
+			p.recoverVoice()
+			continue
 		}
 		if reason, _ := p.schedulerReasonLocked(); reason != "ready" {
 			p.mu.Unlock()
@@ -261,17 +278,31 @@ func (p *GuildPlayer) run() {
 			}
 		}})
 		category := failureCategory(err)
-		if ctx.Err() != nil {
+		if isVoiceFailure(context.Cause(ctx)) {
+			category = "voice_transport"
+		} else if ctx.Err() != nil {
 			category = "canceled"
 		}
 		attemptLog.Info("track_playback_end", "sequence", sequence, "position", t.Position, "title", t.Title, "video_id", t.VideoID, "elapsed_ms", time.Since(started).Milliseconds(), "category", category, "cancel_reason", context.Cause(ctx), "error", err)
 		expectedCancel := ctx.Err() != nil
 		cancel()
 		p.mu.Lock()
+		transportFailure := (isVoiceFailure(err) || isVoiceFailure(context.Cause(ctx))) && p.current != nil && p.ctx.Err() == nil
 		expectedCancel = expectedCancel || p.current == nil || p.ctx.Err() != nil
+		if transportFailure {
+			p.suspendVoiceLocked()
+			// The selected entry was released from resolver ownership. Preserve final
+			// metadata as a ready entry; no rematching or fidelity downgrade.
+			retained := copyTrack(*p.current)
+			p.queue = append([]queueEntry{{Track: retained}}, p.queue...)
+			p.mutationLocked("voice_track_retained")
+			expectedCancel = true
+		}
 		played := p.startedSequence == sequence
 		terminal := Finished
-		if expectedCancel {
+		if transportFailure {
+			terminal = Suspended
+		} else if expectedCancel {
 			terminal = Canceled
 		} else if err != nil {
 			terminal = Failed

@@ -25,6 +25,9 @@ func failureCategory(err error) string {
 	if err == nil {
 		return "eof"
 	}
+	if isVoiceFailure(err) {
+		return "voice_transport"
+	}
 	var stream *StreamError
 	if errors.As(err, &stream) {
 		return stream.Category
@@ -90,6 +93,7 @@ func watchActivity(ctx context.Context, cancel context.CancelCauseFunc, last *at
 type AttemptState string
 
 const (
+	Suspended AttemptState = "SUSPENDED"
 	Pending   AttemptState = "PENDING"
 	Resolving AttemptState = "RESOLVING"
 	Ready     AttemptState = "READY"
@@ -140,6 +144,12 @@ func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequ
 	}
 	track = copyTrack(*p.current)
 	p.startedSequence = sequence
+	if p.voiceIncident {
+		p.voiceIncident = false
+		p.voiceAttempts = 0
+		p.voiceNotice = false
+		p.log.Info("voice_audio_resumed", "guild_id", p.guildID, "sequence", sequence)
+	}
 	p.history = append(p.history, copyTrack(track))
 	if len(p.history) > 100 {
 		p.history = append([]media.Track(nil), p.history[len(p.history)-100:]...)

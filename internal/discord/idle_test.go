@@ -147,7 +147,7 @@ func (readyGateway) Status() gateway.Status    { return gateway.StatusReady }
 func (readyGateway) Close(context.Context)     {}
 func (r *recordingRest) Close(context.Context) {}
 
-func TestWatchVoiceDisconnectClearsPausedSession(t *testing.T) {
+func TestWatchVoiceDisconnectPreservesPausedSession(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		b, _ := testBot(t)
 		g, c := idleGuild(t, b, 1)
@@ -164,7 +164,7 @@ func TestWatchVoiceDisconnectClearsPausedSession(t *testing.T) {
 		b.voiceWake = make(chan struct{}, 1)
 		b.workers.Add(1)
 		go b.watchVoice()
-		// Missing cache state gets a recovery grace, then clears the session.
+		// Persistent transport loss must retain the logical track.
 		b.voiceWake <- struct{}{}
 		synctest.Wait()
 		g.mu.Lock()
@@ -172,10 +172,10 @@ func TestWatchVoiceDisconnectClearsPausedSession(t *testing.T) {
 			t.Error("transient cache loss disconnected voice")
 		}
 		g.mu.Unlock()
-		time.Sleep(voiceRecoveryGrace + time.Second)
+		time.Sleep(61 * time.Second)
 		synctest.Wait()
-		if !c.closed || g.conn != nil || !g.emptySince.IsZero() || old.Err() == nil || g.player.State().Current != nil {
-			t.Fatal("disconnect retained paused session")
+		if c.closed || g.conn == nil || old.Err() != nil || !g.player.State().VoiceSuspended || g.player.Length() != 1 {
+			t.Fatal("disconnect lost preserved track")
 		}
 		b.Close(context.Background())
 	})
@@ -236,9 +236,9 @@ func TestTransientGatewayStateRetainsPlayback(t *testing.T) {
 	if c.closed || old.Err() != nil || !g.unhealthySince.IsZero() {
 		t.Fatal("recovery cleared playback")
 	}
-	// A confirmed move on a ready gateway remains immediately terminal.
+	// A confirmed move is also transport loss; only explicit leave clears.
 	b.checkVoiceHealth(1, g, now.Add(11*time.Second), true, true, true, false)
-	if !c.closed || old.Err() == nil || g.player.Length() != 0 {
-		t.Fatal("confirmed move retained playback")
+	if c.closed || old.Err() != nil || !g.player.State().VoiceSuspended {
+		t.Fatal("confirmed move lost playback")
 	}
 }

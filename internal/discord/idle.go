@@ -20,6 +20,9 @@ func (g *guild) leave(ctx, parent context.Context) {
 	g.announcementMu.Unlock()
 	g.resetSearches(parent)
 	g.player.Leave(ctx)
+	if g.conn != nil {
+		g.conn.Close(ctx)
+	}
 	g.conn = nil
 	g.channel = 0
 }
@@ -95,11 +98,8 @@ func (b *Bot) voiceStateChanged(e *events.GuildVoiceStateUpdate) {
 	}()
 }
 
-const voiceRecoveryGrace = 60 * time.Second
-
-// A reconnecting gateway is not proof of a kick. Cache absence while the main
-// gateway reconnects is also not authoritative. Only a known move/leave with a
-// ready main gateway is immediately terminal; other unhealthy states get grace.
+// Voice infrastructure loss must preserve the queue, including known moves
+// and disconnects. Only explicit user actions may clear playback.
 // Caller holds g.mu. True means skip idle checks against stale caches.
 func (b *Bot) checkVoiceHealth(id snowflake.ID, g *guild, now time.Time, mainReady, voiceReady, known, sameChannel bool) bool {
 	if mainReady && voiceReady && known && sameChannel {
@@ -118,12 +118,6 @@ func (b *Bot) checkVoiceHealth(id snowflake.ID, g *guild, now time.Time, mainRea
 		g.unhealthySince = now
 		b.log.Warn("voice_unhealthy", "guild_id", id, "main_ready", mainReady, "voice_ready", voiceReady, "cache_known", known, "same_channel", sameChannel, "reason", reason)
 	}
-	if !terminal && now.Sub(g.unhealthySince) < voiceRecoveryGrace {
-		return true
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	g.leave(ctx, b.ctx)
-	b.log.Warn("voice_disconnected", "guild_id", id, "reason", reason, "main_ready", mainReady, "voice_ready", voiceReady, "cache_known", known, "action", "cleared playback")
+	g.player.SuspendVoice()
 	return true
 }

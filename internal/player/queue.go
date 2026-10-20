@@ -26,6 +26,7 @@ type State struct {
 	Queued           []media.Track
 	Paused           bool
 	Halted           bool
+	VoiceSuspended   bool
 	ProviderBlocked  bool
 	ProviderReason   string
 	Entries          []QueueEntry
@@ -41,12 +42,15 @@ func (p *GuildPlayer) State() State {
 		t := copyTrack(*p.current)
 		current = &t
 	}
-	state := State{Loop: p.loop, Autoplay: p.autoplay, CurrentStarted: p.current != nil && p.startedSequence == p.sequence, PersistenceError: p.persistenceError, Imports: append([]CollectionProgress(nil), p.completedImports...), Current: current, Paused: p.pause.paused(), Halted: p.halted, ProviderBlocked: p.providerBlocked, ProviderReason: p.providerReason}
+	state := State{VoiceSuspended: p.voiceBlocked, Loop: p.loop, Autoplay: p.autoplay, CurrentStarted: p.current != nil && p.startedSequence == p.sequence, PersistenceError: p.persistenceError, Imports: append([]CollectionProgress(nil), p.completedImports...), Current: current, Paused: p.pause.paused(), Halted: p.halted, ProviderBlocked: p.providerBlocked, ProviderReason: p.providerReason}
 	if current != nil {
 		state.PlaybackState = Starting
 		if state.CurrentStarted {
 			state.PlaybackState = Playing
 		}
+	}
+	if p.voiceBlocked {
+		state.PlaybackState = Suspended
 	}
 	for _, entry := range p.queue {
 		phase := Ready
