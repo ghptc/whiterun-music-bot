@@ -239,7 +239,7 @@ func (r CollectionResolver) youtube(ctx context.Context, id string) (Collection,
 	}
 	result := Collection{Title: data.Title, SourceURL: target, IsCollection: true}
 	for _, c := range data.Entries {
-		if c == nil || !videoID.MatchString(c.ID) || c.Title == "" || c.Title == "[Private video]" || c.Title == "[Deleted video]" || c.Availability == "private" || c.Availability == "premium_only" || c.Availability == "subscriber_only" || c.LiveStatus == "is_upcoming" {
+		if c == nil || !validDurationSeconds(c.Duration) || !videoID.MatchString(c.ID) || c.Title == "" || c.Title == "[Private video]" || c.Title == "[Deleted video]" || c.Availability == "private" || c.Availability == "premium_only" || c.Availability == "subscriber_only" || c.LiveStatus == "is_upcoming" {
 			result.Skipped++
 			continue
 		}

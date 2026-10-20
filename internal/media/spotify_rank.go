@@ -114,6 +114,10 @@ func rankSpotify(t Track, c Candidate, provisional bool) spotifyRank {
 }
 func rankSpotifyPolicy(t Track, c Candidate, provisional bool, policy MatchPolicy) spotifyRank {
 	b := spotifyRank{Reason: "accepted", VersionCompatible: true}
+	if !validDurationSeconds(c.Duration) {
+		b.Reason = "invalid_duration"
+		return b
+	}
 	reject := func(reason string) spotifyRank { b.Reason = reason; return b }
 	if !videoID.MatchString(c.ID) || c.Title == "" || c.Live || c.LiveStatus == "is_live" || c.LiveStatus == "is_upcoming" {
 		return reject("not_finite_recording")

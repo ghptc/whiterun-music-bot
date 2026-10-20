@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/url"
 	"regexp"
 	"strings"
@@ -145,6 +146,14 @@ func (r Resolver) extract(ctx context.Context, target, purpose string, flat bool
 	var result searchResult
 	if err := json.Unmarshal(out.Data, &result); err != nil {
 		return result, fmt.Errorf("invalid YouTube metadata: %w", err)
+	}
+	if !validDurationSeconds(result.Duration) {
+		return searchResult{}, errors.New("invalid YouTube duration")
+	}
+	for i, candidate := range result.Entries {
+		if candidate != nil && !validDurationSeconds(candidate.Duration) {
+			result.Entries[i] = nil
+		}
 	}
 	// Provider JSON cannot set the trusted validation timestamp.
 	result.CheckedAt = time.Time{}
@@ -313,4 +322,11 @@ func CloneTrack(t Track) Track {
 		t.Explicit = new(*t.Explicit)
 	}
 	return t
+}
+
+// Zero means unknown (including live streams); malformed or overflowing
+// provider values must never wrap into a negative time.Duration.
+func validDurationSeconds(seconds float64) bool {
+	return !math.IsNaN(seconds) && !math.IsInf(seconds, 0) &&
+		seconds >= 0 && seconds*float64(time.Second) < float64(math.MaxInt64)
 }
