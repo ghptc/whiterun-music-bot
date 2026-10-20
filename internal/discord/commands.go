@@ -49,7 +49,7 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 	}
 	var timing *media.Timing
 	if slash && data.CommandName() == "play" {
-		timing = media.NewTiming(b.log.With("interaction_id", e.ID(), "guild_id", e.GuildID()))
+		timing = media.NewTimingAt(b.log.With("interaction_id", e.ID(), "guild_id", e.GuildID()), started)
 		timing.Event("play_request_start", started, "query", data.String("query"))
 		defer func() { timing.Event("play_request_total", started) }()
 	}
@@ -229,16 +229,26 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 		ticket := g.player.Ticket()
 		searchCtx := g.searchCtx
 		g.mu.Unlock()
+		// Short bursts queue behind the same four searches instead of losing
+		// accepted /play requests. Leave/stop cancels admission immediately.
+		admission, stopAdmission := context.WithTimeout(searchCtx, 5*time.Second)
 		select {
 		case b.searches <- struct{}{}:
-		default:
-			reply("The Bard is searching for other songs. Try again shortly.")
+			stopAdmission()
+		case <-admission.Done():
+			stopAdmission()
+			if searchCtx.Err() != nil {
+				reply("Playback changed while searching. Ask the Bard again.")
+			} else {
+				reply("The Bard is searching for other songs. Try again shortly.")
+			}
 			return
 		}
 		releaseSearch := sync.OnceFunc(func() { <-b.searches })
 		defer releaseSearch()
 		resolveCtx := media.WithTiming(searchCtx, timing)
 		result, progressive, err := b.resolver.PreparePlay(resolveCtx, data.String("query"), data.Bool("force"))
+		timing.Event("play_preparation_complete", started, "success", err == nil, "progressive", progressive)
 		if err != nil {
 			b.log.Warn("media resolution failed", "guild_id", id, "stage", resolutionStage(err), "error", err)
 			if searchCtx.Err() != nil {
@@ -290,6 +300,9 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 		if err == nil && progressive {
 			first = <-job.First
 			err = first.Err
+		}
+		if err == nil {
+			timing.Event("play_first_track_resolved", started)
 		}
 		releaseSearch()
 		if err != nil {

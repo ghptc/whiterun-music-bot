@@ -65,7 +65,13 @@ func (r CollectionResolver) Prepare(ctx context.Context, query string) (Collecti
 	TimingFrom(ctx).Event("collection_metadata_complete", started, "spotify_tracks", len(c.Tracks), "metadata_skipped", c.Skipped)
 	return c, true, nil
 }
-func (r CollectionResolver) spotifyMetadata(ctx context.Context, kind, id string) (Collection, error) {
+func (r CollectionResolver) spotifyMetadata(ctx context.Context, kind, id string) (result Collection, resultErr error) {
+	startedMetadata := time.Now()
+	defer func() {
+		if resultErr == nil {
+			TimingFrom(ctx).Event("spotify_metadata_available", startedMetadata, "tracks", len(result.Tracks))
+		}
+	}()
 
 	if store, ok := r.YouTube.Mappings.(CatalogStore); ok && kind == "track" {
 		started := time.Now()

@@ -17,7 +17,12 @@ type Timing struct {
 
 type timingKey struct{}
 
-func NewTiming(log *slog.Logger) *Timing { return &Timing{log: log, start: time.Now()} }
+func NewTiming(log *slog.Logger) *Timing { return NewTimingAt(log, time.Now()) }
+
+// NewTimingAt retains the command-entry monotonic clock through queued work.
+func NewTimingAt(log *slog.Logger, started time.Time) *Timing {
+	return &Timing{log: log, start: started}
+}
 func WithTiming(ctx context.Context, t *Timing) context.Context {
 	return context.WithValue(ctx, timingKey{}, t)
 }
@@ -32,7 +37,7 @@ func (t *Timing) Event(name string, start time.Time, attrs ...any) {
 	if t == nil {
 		return
 	}
-	fields := []any{"elapsed_ms", float64(time.Since(start).Microseconds()) / 1000, "request_elapsed_ms", float64(time.Since(t.start).Microseconds()) / 1000}
+	fields := []any{"elapsed_ns", time.Since(start).Nanoseconds(), "request_elapsed_ns", time.Since(t.start).Nanoseconds(), "elapsed_ms", float64(time.Since(start).Microseconds()) / 1000, "request_elapsed_ms", float64(time.Since(t.start).Microseconds()) / 1000}
 	t.log.Info(name, append(fields, attrs...)...)
 }
 
