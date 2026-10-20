@@ -115,6 +115,15 @@ for name, (package, files, operator) in targets.items():
             (evidence / (name + "-run.json")).write_text(json.dumps(metadata, indent=2)+"\n")
         else:
             failed = True
+        # One reviewable JSONL artifact preserves all raw commands, source diffs
+        # and outputs without adding hundreds of individual files to git.
+        records = sorted(logs.glob("test-*"))
+        with (evidence / (name + "-executions.jsonl")).open("w") as archive:
+            for record in records:
+                archive.write(json.dumps({"record": record.name, "output": record.read_text(errors="replace")}) + "\n")
+        for record in records:
+            record.unlink()
+        logs.rmdir()
         failed = failed or bool(code)
         print(json.dumps({k:v for k,v in metadata.items() if k not in ("command", "module_replacements")}), flush=True)
         if code:
