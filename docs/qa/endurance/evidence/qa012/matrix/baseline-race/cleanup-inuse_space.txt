@@ -1,0 +1,19 @@
+File: memory-race
+Build ID: a6f1bc9e0c7fe1da4dca1060bfba53bfe2067472
+Type: inuse_space
+Time: 2026-10-20 05:47:54 -03
+Showing nodes accounting for 406.15kB, 100% of 406.15kB total
+Showing top 12 nodes out of 44
+      flat  flat%   sum%        cum   cum%
+  128.36kB 31.60% 31.60%   128.36kB 31.60%  runtime.mallocgc
+   78.23kB 19.26% 50.87%    78.23kB 19.26%  reflect.compiledTypelinks
+   70.19kB 17.28% 68.15%    70.19kB 17.28%  slices.Grow[go.shape.[]uint8,go.shape.uint8] (inline)
+   65.32kB 16.08% 84.23%   143.55kB 35.35%  encoding/json/v2.makeStructFields
+   64.05kB 15.77%   100%    64.05kB 15.77%  internal/bytealg.MakeNoZero
+         0     0%   100%   213.74kB 52.63%  encoding/json.(*Encoder).Encode
+         0     0%   100%    70.19kB 17.28%  encoding/json/internal/jsonwire.AppendQuote
+         0     0%   100%    70.19kB 17.28%  encoding/json/jsontext.(*Encoder).WriteToken (inline)
+         0     0%   100%    70.19kB 17.28%  encoding/json/jsontext.(*encoderState).WriteToken
+         0     0%   100%    70.19kB 17.28%  encoding/json/jsontext.Token.appendString
+         0     0%   100%   213.74kB 52.63%  encoding/json/v2.MarshalEncode
+         0     0%   100%   213.74kB 52.63%  encoding/json/v2.makeInterfaceArshaler.func1

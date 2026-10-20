@@ -1,0 +1,19 @@
+File: memory
+Build ID: 3b2b8123766db1cfd0ad97fff422985626250056
+Type: inuse_space
+Time: 2026-10-20 06:07:04 -03
+Showing nodes accounting for 258.73kB, 100% of 258.73kB total
+Showing top 12 nodes out of 33
+      flat  flat%   sum%        cum   cum%
+  128.28kB 49.58% 49.58%   128.28kB 49.58%  runtime.mallocgc
+   66.40kB 25.67% 75.25%    66.40kB 25.67%  encoding/json/v2.makeStructFields.func3
+   64.05kB 24.75%   100%    64.05kB 24.75%  internal/bytealg.MakeNoZero
+         0     0%   100%    66.40kB 25.67%  encoding/json.(*Encoder).Encode
+         0     0%   100%    66.40kB 25.67%  encoding/json/v2.MarshalEncode
+         0     0%   100%    66.40kB 25.67%  encoding/json/v2.makeInterfaceArshaler.func1
+         0     0%   100%    66.40kB 25.67%  encoding/json/v2.makeMapArshaler.func2
+         0     0%   100%    66.40kB 25.67%  encoding/json/v2.makeStructArshaler.func1
+         0     0%   100%    66.40kB 25.67%  encoding/json/v2.makeStructArshaler.func2
+         0     0%   100%    66.40kB 25.67%  encoding/json/v2.makeStructFields
+         0     0%   100%    66.40kB 25.67%  encoding/json/v2.marshalEncode
+         0     0%   100%    66.40kB 25.67%  encoding/json/v2.marshalValueAny

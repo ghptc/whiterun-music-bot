@@ -1,0 +1,20 @@
+File: memory-context-race
+Build ID: 0cc48aebaa27f7129342f54ac2ae3c821e231226
+Type: alloc_space
+Time: 2026-10-20 06:06:10 -03
+Showing nodes accounting for 20.17MB, 98.71% of 20.43MB total
+Dropped 38 nodes (cum <= 0.10MB)
+Showing top 12 nodes out of 33
+      flat  flat%   sum%        cum   cum%
+   17.01MB 83.27% 83.27%    20.24MB 99.08%  main.run
+    0.94MB  4.62% 87.89%     0.94MB  4.62%  compress/flate.(*fastGen).addBlock
+    0.79MB  3.85% 91.74%     1.44MB  7.03%  compress/flate.NewWriter (inline)
+    0.45MB  2.21% 93.95%     0.45MB  2.21%  compress/flate.newFastEnc (inline)
+    0.39MB  1.93% 95.88%     0.39MB  1.93%  slices.Grow[go.shape.[]uint8,go.shape.uint8] (inline)
+    0.20MB  0.97% 96.85%     0.65MB  3.18%  compress/flate.(*compressor).init
+    0.19MB  0.92% 97.77%     0.19MB  0.92%  runtime.mallocgc
+    0.13MB  0.63% 98.40%     3.17MB 15.50%  main.run.func1
+    0.06MB  0.31% 98.71%     0.13MB  0.61%  runtime/pprof.(*profileBuilder).emitLocation
+         0     0% 98.71%     0.94MB  4.62%  compress/flate.(*Writer).Close (inline)
+         0     0% 98.71%     0.94MB  4.62%  compress/flate.(*compressor).close
+         0     0% 98.71%     0.94MB  4.62%  compress/flate.(*compressor).deflateFast

@@ -1,0 +1,19 @@
+File: memory-isolate-race
+Build ID: c877d5794f3e4812d3e1537c80c6a10f64d60493
+Type: inuse_space
+Time: 2026-10-20 06:00:57 -03
+Showing nodes accounting for 270.57kB, 100% of 270.57kB total
+Showing top 12 nodes out of 34
+      flat  flat%   sum%        cum   cum%
+   78.23kB 28.91% 28.91%    78.23kB 28.91%  reflect.compiledTypelinks
+   64.23kB 23.74% 52.65%    64.23kB 23.74%  runtime.mallocgc
+   64.05kB 23.67% 76.33%    64.05kB 23.67%  context.(*cancelCtx).Done
+   64.05kB 23.67%   100%    64.05kB 23.67%  internal/bytealg.MakeNoZero
+         0     0%   100%    78.23kB 28.91%  encoding/json.(*Encoder).Encode
+         0     0%   100%    78.23kB 28.91%  encoding/json/v2.MarshalEncode
+         0     0%   100%    78.23kB 28.91%  encoding/json/v2.makeInterfaceArshaler.func1
+         0     0%   100%    78.23kB 28.91%  encoding/json/v2.makeMapArshaler.func2
+         0     0%   100%    78.23kB 28.91%  encoding/json/v2.makeStructArshaler.func1
+         0     0%   100%    78.23kB 28.91%  encoding/json/v2.makeStructArshaler.func2
+         0     0%   100%    78.23kB 28.91%  encoding/json/v2.makeStructFields
+         0     0%   100%    78.23kB 28.91%  encoding/json/v2.makeStructFields.func3

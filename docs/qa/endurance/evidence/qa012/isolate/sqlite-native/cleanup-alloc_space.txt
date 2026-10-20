@@ -1,0 +1,20 @@
+File: memory-isolate
+Build ID: 324fd9646f304eb4eebacb9bf46f84acbfe067f0
+Type: alloc_space
+Time: 2026-10-20 05:58:18 -03
+Showing nodes accounting for 591.07MB, 96.51% of 612.42MB total
+Dropped 94 nodes (cum <= 3.06MB)
+Showing top 12 nodes out of 39
+      flat  flat%   sum%        cum   cum%
+  197.06MB 32.18% 32.18%   608.24MB 99.32%  whiterun/internal/storage.(*DB).SaveGuild
+   91.54MB 14.95% 47.13%    91.54MB 14.95%  bytes.Clone (inline)
+   85.71MB 14.00% 61.12%   107.35MB 17.53%  encoding/json/jsontext.(*encoderState).WriteToken
+   54.15MB  8.84% 69.96%    54.15MB  8.84%  reflect.unsafe_New
+   48.79MB  7.97% 77.93%   198.46MB 32.41%  encoding/json/v2.makeStructArshaler.func2
+   34.43MB  5.62% 83.55%    34.43MB  5.62%  encoding/json/jsontext.stateMachine.MayAppendDelim (partial-inline)
+   26.52MB  4.33% 87.88%    26.52MB  4.33%  modernc.org/sqlite.interruptOnDone
+   19.41MB  3.17% 91.05%    19.41MB  3.17%  internal/strconv.AppendBool (inline)
+    9.94MB  1.62% 92.67%     9.94MB  1.62%  database/sql.driverArgsConnLocked
+    9.50MB  1.55% 94.23%    14.01MB  2.29%  fmt.Sprintf
+    9.39MB  1.53% 95.76%     9.39MB  1.53%  slices.Grow[go.shape.[]uint8,go.shape.uint8] (inline)
+    4.63MB  0.76% 96.51%    50.71MB  8.28%  database/sql.(*DB).execDC

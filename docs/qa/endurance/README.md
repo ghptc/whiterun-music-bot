@@ -1,6 +1,6 @@
 # QA-010 — Endurance e confiabilidade operacional
 
-**QA-011: uma hora real executada e integridade aprovada; gate operacional de memória ainda bloqueado.** Maior segmento contínuo: 3.600,141 segundos. Há crescimento sustentado de RSS no binário com race, ainda em triagem; não é diagnóstico confirmado de vazamento de produção. Campanhas 6h/12h não iniciadas nem aprovadas. Ver [resultados QA-011](soak-results.md#qa-011--campanha-real-de-uma-hora). Produção, Spotify Fidelity, Force Play, UI e o harness não foram alterados na QA-011.
+**QA-012: hora nativa concluída; crescimento isolado principalmente à instrumentação sob churn de goroutines.** A QA-011 registrou 1,18GiB após uma hora com race. A nova hora sem race executou 3.600,018s, 6.874 seleções, RSS periódico 22,40–29,08MiB e 17,05MiB após 120s ociosos. Liberada a execução local protegida de 6h/12h **sem race**; essas durações continuam não executadas/aprovadas. Sessões prolongadas com race no envelope atual permanecem bloqueadas. Ver [investigação e limites](rss-investigation.md). Nenhum código de produção alterado.
 
 ## Inventário reutilizado
 
@@ -20,19 +20,23 @@ O transporte real de Discord aguarda readiness DAVE antes de enviar UDP e impõe
 Linux, Go do go.mod e FFmpeg com libopus. O executável não pede token, não chama serviços externos e não lê .env. O comando `source` implementa somente a fixture local de yt-dlp. O yt-dlp de produção não foi usado nessas sessões.
 
 ```sh
-go build -race -o /tmp/qa-soak ./cmd/qa-soak
-/tmp/qa-soak -out /tmp/qa010-new -duration 1h -playlist 123 -guilds 2 -warm -faults
-# Novos diretórios para sessões independentes e ininterruptas:
-/tmp/qa-soak -out /tmp/qa010-6h -duration 6h -playlist 500 -guilds 2 -faults
-/tmp/qa-soak -out /tmp/qa010-12h -duration 12h -playlist 500 -guilds 2 -warm -faults
+# Race permanece na suíte e nos controles curtos:
+go build -race -o /tmp/qa-soak-race ./cmd/qa-soak
+/tmp/qa-soak-race -out /tmp/qa010-short-new -duration 60s -playlist 123 -guilds 2 -warm -faults
+# Campanhas de horas usam build sem race após a triagem QA-012:
+go build -o /tmp/qa-soak-native ./cmd/qa-soak
+/tmp/qa-soak-native -out /tmp/qa010-new -duration 1h -playlist 123 -guilds 2 -warm -faults
+# Planejamento opt-in: não são resultados aprovados:
+/tmp/qa-soak-native -out /tmp/qa010-6h -duration 6h -playlist 500 -guilds 2 -faults
+/tmp/qa-soak-native -out /tmp/qa010-12h -duration 12h -playlist 500 -guilds 2 -warm -faults
 ```
 
-Os exemplos 6h/12h são planejamento e estão bloqueados após a observação QA011-R01; não representam aprovação nem autorização para ignorar a triagem de memória. Esses comandos são instruções, não resultados executados. Duração usa relógio monotônico real; nenhum synctest ou avanço virtual no soak. Sources de 100ms tornam o workload intensivo em transições/processos e persistência; não representam músicas naturais de três minutos.
+Os exemplos 6h/12h são planejamento; a QA-012 liberou somente sua execução local sem race após a triagem de QA011-R01; não representam aprovação nem autorização para ignorar a triagem de memória. Esses comandos são instruções, não resultados executados. Duração usa relógio monotônico real; nenhum synctest ou avanço virtual no soak. Sources de 100ms tornam o workload intensivo em transições/processos e persistência; não representam músicas naturais de três minutos.
 
 `-out` precisa ser um diretório novo. Para recuperar um checkpoint do próprio harness:
 
 ```sh
-/tmp/qa-soak -out /tmp/qa010-new -resume -duration 1h -playlist 123 -guilds 2 -warm -faults
+/tmp/qa-soak-native -out /tmp/qa010-new -resume -duration 1h -playlist 123 -guilds 2 -warm -faults
 python3 -B scripts/qa010_report.py --run /tmp/qa010-new --out /tmp/qa010-evidence
 ```
 
@@ -88,6 +92,11 @@ Logs de Docker/benchmarks/build-info com whitespace de terminal têm apresentaç
 
 Foi reutilizado cmd/qa-soak e scripts/qa010_report.py. Builds com e sem race são do mesmo commit 27a49ba. O comando de uma hora usou `-duration 1h -sample 10s -playlist 500 -guilds 2 -audio 1s -warm -faults -seed 20261019`, com duração monotônica integral. Manifesto/hashes/limites/estatísticas systemd e ledger em evidence/qa011/. A campanha sem race de dez minutos é controle diagnóstico, nunca substituta da hora.
 
-Checkpoint: `.qa-runs/qa011-20261020T022653Z/1h`. O diretório é excluído do Git e do contexto de build Docker, contém somente SQLite/fixtures de QA e permanece no disco do workspace para retomada; o exportador copia apenas métricas/ledger, não o banco. Comando de retomada compatível: `.qa-runs/qa011-soak -out .qa-runs/qa011-20261020T022653Z/1h -resume -duration 1h -sample 10s -playlist 500 -guilds 2 -audio 1s -warm -faults -seed 20261019`. Uma retomada sempre gera outro segmento e não prolonga retroativamente o anterior.
+Checkpoint: `.qa-runs/qa011-20261020T022653Z/1h`. O diretório é excluído do Git e do contexto de build Docker, contém somente SQLite/fixtures de QA e permanece no disco do workspace para retomada; o exportador copia apenas métricas/ledger, não o banco. Comando de retomada compatível sem race, em **outro segmento**: `.qa-runs/qa011-soak-control -out .qa-runs/qa011-20261020T022653Z/1h -resume -duration 1h -sample 10s -playlist 500 -guilds 2 -audio 1s -warm -faults -seed 20261019`. Uma retomada sempre gera outro segmento e não prolonga retroativamente o anterior.
 
 A hora executada teve CPUQuota=100% (um núcleo), prioridade nice 10, MemoryMax=2GiB, TasksMax=128, NOFILE=256 e arquivo individual até 512MiB. Rede IP foi bloqueada no serviço. O ambiente foi filtrado para PATH/GOMAXPROCS/GOMEMLIMIT/GORACE; não houve leitura de .env, token, volume operacional ou acesso Discord. Nenhum serviço do bot foi reiniciado/parado. Limites de execução são proteção do host compartilhado, não critérios de performance fabricados.
+
+
+## QA-012 — perfis e liberação de execução nativa
+
+[Diagnóstico completo](rss-investigation.md), 21 controles curtos e hora nativa real, perfis heap/allocs, smaps, séries e hashes em evidence/qa012/. Para 6h/12h liberadas usar build **sem `-race`** e diretórios novos em escopo protegido. A suíte curta/race continua obrigatória; não suprimir reports. Os exemplos antigos com o binário race não estão liberados para horas. O novo cmd/qa-memory pode envolver o mesmo harness com perfis e repouso: `-duration 6h -idle 120s` ou `-duration 12h -idle 120s`, apenas em nova campanha isolada. Nenhuma das duas foi executada nesta etapa.

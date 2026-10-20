@@ -1,0 +1,20 @@
+File: memory
+Build ID: 3b2b8123766db1cfd0ad97fff422985626250056
+Type: alloc_space
+Time: 2026-10-20 06:07:04 -03
+Showing nodes accounting for 36671.74kB, 86.74% of 42278.56kB total
+Dropped 45 nodes (cum <= 211.39kB)
+Showing top 12 nodes out of 69
+      flat  flat%   sum%        cum   cum%
+ 8011.34kB 18.95% 18.95% 27233.14kB 64.41%  whiterun/internal/player.(*GuildPlayer).run
+ 7054.44kB 16.69% 35.63%  7886.86kB 18.65%  whiterun/internal/player.New
+ 3850.16kB  9.11% 44.74%  4298.32kB 10.17%  whiterun/internal/player.(*GuildPlayer).announceStart
+ 3401.95kB  8.05% 52.79%  3401.95kB  8.05%  whiterun/internal/player.(*GuildPlayer).EnqueueMany
+ 3074.56kB  7.27% 60.06%  3074.56kB  7.27%  log/slog.argsToAttrSlice
+ 2561.66kB  6.06% 66.12%  2561.66kB  6.06%  log/slog.(*Record).Add
+ 2113.80kB  5.00% 71.12%  2113.80kB  5.00%  context.(*cancelCtx).Done
+ 2050.86kB  4.85% 75.97%  3203.84kB  7.58%  context.(*cancelCtx).propagateCancel
+ 1729.05kB  4.09% 80.06%  4932.90kB 11.67%  context.withCancel (inline)
+ 1025.12kB  2.42% 82.48%  1025.12kB  2.42%  log/slog.(*commonHandler).clone (inline)
+  966.51kB  2.29% 84.77%   966.51kB  2.29%  compress/flate.(*fastGen).addBlock
+  832.28kB  1.97% 86.74%   832.28kB  1.97%  log/slog/internal/buffer.(*Buffer).WriteString (inline)

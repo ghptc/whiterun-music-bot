@@ -1,0 +1,19 @@
+File: memory-isolate
+Build ID: 324fd9646f304eb4eebacb9bf46f84acbfe067f0
+Type: inuse_space
+Time: 2026-10-20 06:00:26 -03
+Showing nodes accounting for 262.33kB, 100% of 262.33kB total
+Showing top 12 nodes out of 28
+      flat  flat%   sum%        cum   cum%
+  128.10kB 48.83% 48.83%   128.10kB 48.83%  runtime.mallocgc
+   70.19kB 26.75% 75.59%    70.19kB 26.75%  slices.Grow[go.shape.[]uint8,go.shape.uint8] (inline)
+   64.05kB 24.41%   100%    64.05kB 24.41%  internal/bytealg.MakeNoZero
+         0     0%   100%    70.19kB 26.75%  encoding/json.(*Encoder).Encode
+         0     0%   100%    70.19kB 26.75%  encoding/json/internal/jsonwire.AppendQuote
+         0     0%   100%    70.19kB 26.75%  encoding/json/jsontext.(*Encoder).WriteToken (inline)
+         0     0%   100%    70.19kB 26.75%  encoding/json/jsontext.(*encoderState).WriteToken
+         0     0%   100%    70.19kB 26.75%  encoding/json/jsontext.Token.appendString
+         0     0%   100%    70.19kB 26.75%  encoding/json/v2.MarshalEncode
+         0     0%   100%    70.19kB 26.75%  encoding/json/v2.makeInterfaceArshaler.func1
+         0     0%   100%    70.19kB 26.75%  encoding/json/v2.makeMapArshaler.func2
+         0     0%   100%    70.19kB 26.75%  encoding/json/v2.marshalEncode

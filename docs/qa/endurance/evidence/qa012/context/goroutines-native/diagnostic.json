@@ -1,0 +1,14 @@
+{
+  "count": 150000,
+  "error": "\u003cnil\u003e",
+  "go_version": "go1.27.1-X:nodwarf5",
+  "idle_seconds": 30,
+  "mem_profile_rate": 65536,
+  "mode": "goroutines",
+  "no_cache": false,
+  "real_elapsed_seconds": 30.052128501,
+  "requested_seconds": 60,
+  "selected": 150000,
+  "sqlite_background": false,
+  "warm": true
+}

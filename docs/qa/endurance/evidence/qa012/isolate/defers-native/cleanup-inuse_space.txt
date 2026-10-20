@@ -1,0 +1,19 @@
+File: memory-isolate
+Build ID: 324fd9646f304eb4eebacb9bf46f84acbfe067f0
+Type: inuse_space
+Time: 2026-10-20 06:01:27 -03
+Showing nodes accounting for 257.03kB, 100% of 257.03kB total
+Showing top 12 nodes out of 20
+      flat  flat%   sum%        cum   cum%
+  128.10kB 49.84% 49.84%   128.10kB 49.84%  runtime.mallocgc
+   64.88kB 25.24% 75.08%    64.88kB 25.24%  unicode.map.init.1
+   64.05kB 24.92%   100%    64.05kB 24.92%  internal/bytealg.MakeNoZero
+         0     0%   100%    64.05kB 24.92%  main.main
+         0     0%   100%    64.05kB 24.92%  main.run
+         0     0%   100%    64.05kB 24.92%  path/filepath.Join (inline)
+         0     0%   100%    64.05kB 24.92%  path/filepath.join
+         0     0%   100%    64.05kB 24.92%  runtime.(*scavengerState).init
+         0     0%   100%    64.05kB 24.92%  runtime.acquireSudog
+         0     0%   100%    64.05kB 24.92%  runtime.bgscavenge
+         0     0%   100%    64.88kB 25.24%  runtime.doInit
+         0     0%   100%    64.88kB 25.24%  runtime.doInit1

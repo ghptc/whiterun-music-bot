@@ -1,0 +1,20 @@
+File: memory-race
+Build ID: a6f1bc9e0c7fe1da4dca1060bfba53bfe2067472
+Type: alloc_space
+Time: 2026-10-20 06:05:25 -03
+Showing nodes accounting for 1616.27MB, 91.16% of 1773.05MB total
+Dropped 265 nodes (cum <= 8.87MB)
+Showing top 12 nodes out of 68
+      flat  flat%   sum%        cum   cum%
+  384.15MB 21.67% 21.67%  1433.49MB 80.85%  whiterun/internal/storage.(*DB).SaveGuild
+  307.42MB 17.34% 39.00%   594.31MB 33.52%  encoding/json/v2.makeStructArshaler.func2
+  214.91MB 12.12% 51.13%   214.91MB 12.12%  bytes.Clone (inline)
+  202.94MB 11.45% 62.57%   202.94MB 11.45%  whiterun/internal/player.(*GuildPlayer).durableLocked
+  159.28MB  8.98% 71.55%   159.28MB  8.98%  slices.Grow[go.shape.[]uint8,go.shape.uint8] (inline)
+   81.36MB  4.59% 76.14%    81.36MB  4.59%  reflect.unsafe_New
+   77.59MB  4.38% 80.52%    77.72MB  4.38%  io.copyBuffer
+   52.46MB  2.96% 83.48%    52.46MB  2.96%  internal/strconv.AppendUint
+   44.84MB  2.53% 86.01%    44.84MB  2.53%  modernc.org/sqlite.interruptOnDone
+   39.53MB  2.23% 88.24%    39.53MB  2.23%  encoding/json/jsontext.stateMachine.MayAppendDelim
+   26.10MB  1.47% 89.71%    26.10MB  1.47%  internal/strconv.AppendBool
+   25.69MB  1.45% 91.16%    25.69MB  1.45%  whiterun/internal/player.(*GuildPlayer).State

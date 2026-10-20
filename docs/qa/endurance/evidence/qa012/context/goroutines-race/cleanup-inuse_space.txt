@@ -1,0 +1,19 @@
+File: memory-context-race
+Build ID: 0cc48aebaa27f7129342f54ac2ae3c821e231226
+Type: inuse_space
+Time: 2026-10-20 06:06:10 -03
+Showing nodes accounting for 334.69kB, 100% of 334.69kB total
+Showing top 12 nodes out of 40
+      flat  flat%   sum%        cum   cum%
+  192.41kB 57.49% 57.49%   192.41kB 57.49%  runtime.mallocgc
+   78.23kB 23.37% 80.86%    78.23kB 23.37%  reflect.compiledTypelinks
+   64.05kB 19.14%   100%    64.05kB 19.14%  internal/bytealg.MakeNoZero
+         0     0%   100%    78.23kB 23.37%  encoding/json.(*Encoder).Encode
+         0     0%   100%    78.23kB 23.37%  encoding/json/v2.MarshalEncode
+         0     0%   100%    78.23kB 23.37%  encoding/json/v2.makeInterfaceArshaler.func1
+         0     0%   100%    78.23kB 23.37%  encoding/json/v2.makeMapArshaler.func2
+         0     0%   100%    78.23kB 23.37%  encoding/json/v2.makeStructArshaler.func1
+         0     0%   100%    78.23kB 23.37%  encoding/json/v2.makeStructArshaler.func2
+         0     0%   100%    78.23kB 23.37%  encoding/json/v2.makeStructFields
+         0     0%   100%    78.23kB 23.37%  encoding/json/v2.makeStructFields.func3
+         0     0%   100%    78.23kB 23.37%  encoding/json/v2.marshalEncode

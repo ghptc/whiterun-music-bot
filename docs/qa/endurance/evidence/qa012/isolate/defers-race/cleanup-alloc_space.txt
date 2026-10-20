@@ -1,0 +1,19 @@
+File: memory-isolate-race
+Build ID: c877d5794f3e4812d3e1537c80c6a10f64d60493
+Type: alloc_space
+Time: 2026-10-20 06:01:57 -03
+Showing nodes accounting for 6.42MB, 98.09% of 6.55MB total
+Showing top 12 nodes out of 59
+      flat  flat%   sum%        cum   cum%
+    1.89MB 28.83% 28.83%     1.89MB 28.83%  compress/flate.(*fastGen).addBlock
+    1.57MB 24.01% 52.84%     2.76MB 42.16%  compress/flate.NewWriter
+    1.20MB 18.35% 71.19%     1.20MB 18.35%  slices.Grow[go.shape.[]uint8,go.shape.uint8]
+    0.60MB  9.21% 80.40%     0.60MB  9.21%  compress/flate.newFastEnc (inline)
+    0.40MB  6.04% 86.44%     1.19MB 18.15%  compress/flate.(*compressor).init
+    0.19MB  2.90% 89.34%     0.19MB  2.90%  compress/flate.newHuffmanEncoder (inline)
+    0.13MB  1.98% 91.32%     0.19MB  2.96%  runtime/pprof.(*profileBuilder).emitLocation
+    0.13MB  1.92% 93.24%     0.13MB  1.92%  runtime.mallocgc
+    0.13MB  1.91% 95.15%     0.13MB  1.91%  runtime/pprof.allFrames
+    0.07MB  1.01% 96.16%     0.07MB  1.01%  runtime/pprof.(*protobuf).string
+    0.06MB  0.98% 97.13%     0.06MB  0.98%  runtime/pprof.(*protobuf).varint (inline)
+    0.06MB  0.96% 98.09%     0.06MB  0.96%  internal/bytealg.MakeNoZero

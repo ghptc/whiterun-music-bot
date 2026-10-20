@@ -84,3 +84,12 @@ Nas amostras periódicas dos primeiros dez minutos, RSS com race: 89,02–287,06
 ![RSS da hora e controle sem race](evidence/qa011/resource-comparison.png)
 
 Dados comparativos e slopes em evidence/qa011/comparison.json. Próxima evidência para liberar campanhas longas: sessão comparável de uma hora sem race e triagem da retenção fora do heap antes de aumentar duração/limites. A QA-011 não eleva limites para presumir aprovação de 6h/12h.
+
+
+## QA-012 — triagem concluída para execução nativa
+
+[Investigação, perfis e limites](rss-investigation.md). Hora real sem race: 3.600,018s, 6.874 seleções. RSS periódico 22,40–29,08MiB, 17,81MiB após retorno/GC, 17,05MiB após repouso de 120s, 15,80MiB após scavenger. HeapSys permaneceu aproximadamente 15MiB e HeapReleased aumentou; não se inferiu estabilidade somente pelo heap baixo. Goroutines/FD retornaram ao baseline e filhos diretos ficaram em zero.
+
+Com mesmo volume fixo, SQLite cancelável reteve aproximadamente 399MiB com race contra 18MiB sem race; retirar o cancelamento somente no controle reduziu o caso race para 47,5MiB, com criação cumulativa de goroutines caindo de 151.236 para 334. Produção preserva cancelamento. Controles sem SQLite/subprocessos também reproduziram retenção sob churn de goroutines; defer vazio não reproduziu. Não há prova byte a byte dos anonymous allocations ou de leak de produção. Liberada execução de 6h/12h sem race, ainda pendentes; prolongadas com race continuam bloqueadas no envelope atual.
+
+![Controles QA-012](evidence/qa012/memory-comparison.png)

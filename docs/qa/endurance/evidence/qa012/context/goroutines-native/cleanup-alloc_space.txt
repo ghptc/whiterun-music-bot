@@ -1,0 +1,20 @@
+File: memory-context
+Build ID: 2723d97fc9c42110a63f95e082f054c9ef836ae5
+Type: alloc_space
+Time: 2026-10-20 06:05:39 -03
+Showing nodes accounting for 18.35MB, 97.92% of 18.74MB total
+Dropped 28 nodes (cum <= 0.09MB)
+Showing top 12 nodes out of 33
+      flat  flat%   sum%        cum   cum%
+   15.70MB 83.76% 83.76%    18.62MB 99.33%  main.run
+    0.94MB  5.04% 88.80%     0.94MB  5.04%  compress/flate.(*fastGen).addBlock
+    0.79MB  4.19% 92.99%     1.50MB  8.00%  compress/flate.NewWriter (inline)
+    0.45MB  2.41% 95.41%     0.45MB  2.41%  compress/flate.newFastEnc (inline)
+    0.20MB  1.06% 96.46%     0.71MB  3.81%  compress/flate.(*compressor).init
+    0.15MB   0.8% 97.26%     0.15MB   0.8%  slices.Grow[go.shape.[]uint8,go.shape.uint8] (inline)
+    0.13MB  0.67% 97.92%     0.13MB  0.67%  runtime.mallocgc
+         0     0% 97.92%     0.94MB  5.04%  compress/flate.(*Writer).Close (inline)
+         0     0% 97.92%     0.94MB  5.04%  compress/flate.(*compressor).close
+         0     0% 97.92%     0.94MB  5.04%  compress/flate.(*compressor).deflateFast
+         0     0% 97.92%     0.94MB  5.04%  compress/flate.(*fastEncL1).encode
+         0     0% 97.92%     0.94MB  5.04%  compress/gzip.(*Writer).Close

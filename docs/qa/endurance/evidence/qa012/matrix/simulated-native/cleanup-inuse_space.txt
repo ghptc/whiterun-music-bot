@@ -1,0 +1,19 @@
+File: memory
+Build ID: 3b2b8123766db1cfd0ad97fff422985626250056
+Type: inuse_space
+Time: 2026-10-20 06:05:57 -03
+Showing nodes accounting for 256.38kB, 100% of 256.38kB total
+Showing top 12 nodes out of 20
+      flat  flat%   sum%        cum   cum%
+  192.34kB 75.02% 75.02%   192.34kB 75.02%  runtime.mallocgc
+   64.05kB 24.98%   100%    64.05kB 24.98%  internal/bytealg.MakeNoZero
+         0     0%   100%    64.05kB 24.98%  main.main
+         0     0%   100%    64.05kB 24.98%  main.run
+         0     0%   100%    64.05kB 24.98%  path/filepath.Join (inline)
+         0     0%   100%    64.05kB 24.98%  path/filepath.join
+         0     0%   100%    64.05kB 24.98%  runtime.(*scavengerState).init
+         0     0%   100%    64.05kB 24.98%  runtime.acquireSudog
+         0     0%   100%    64.05kB 24.98%  runtime.bgscavenge
+         0     0%   100%    64.05kB 24.98%  runtime.ensureSigM.func1
+         0     0%   100%    64.05kB 24.98%  runtime.main
+         0     0%   100%    64.23kB 25.05%  runtime.malg

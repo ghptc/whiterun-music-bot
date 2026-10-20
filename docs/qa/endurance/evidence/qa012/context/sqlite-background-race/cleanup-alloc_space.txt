@@ -1,0 +1,20 @@
+File: memory-context-race
+Build ID: 0cc48aebaa27f7129342f54ac2ae3c821e231226
+Type: alloc_space
+Time: 2026-10-20 06:05:09 -03
+Showing nodes accounting for 596.79MB, 94.08% of 634.33MB total
+Dropped 103 nodes (cum <= 3.17MB)
+Showing top 12 nodes out of 48
+      flat  flat%   sum%        cum   cum%
+  195.85MB 30.87% 30.87%   629.03MB 99.16%  whiterun/internal/storage.(*DB).SaveGuild
+   90.52MB 14.27% 45.14%    90.52MB 14.27%  bytes.Clone (inline)
+   84.06MB 13.25% 58.40%   103.46MB 16.31%  encoding/json/jsontext.(*encoderState).WriteToken
+   78.02MB 12.30% 70.69%   222.49MB 35.07%  encoding/json/v2.makeStructArshaler.func2
+   51.27MB  8.08% 78.78%    51.27MB  8.08%  reflect.unsafe_New
+   31.68MB  4.99% 83.77%    31.68MB  4.99%  encoding/json/jsontext.stateMachine.MayAppendDelim (partial-inline)
+   18.44MB  2.91% 86.68%    18.44MB  2.91%  internal/strconv.AppendBool
+   12.19MB  1.92% 88.60%    12.19MB  1.92%  database/sql.driverArgsConnLocked
+   10.02MB  1.58% 90.18%    10.02MB  1.58%  encoding/json/jsontext.init.func1
+    9.25MB  1.46% 91.64%    25.02MB  3.94%  fmt.Sprintf
+    8.54MB  1.35% 92.99%     8.54MB  1.35%  slices.Grow[go.shape.[]uint8,go.shape.uint8] (inline)
+    6.95MB  1.10% 94.08%     6.95MB  1.10%  fmt.init.func1

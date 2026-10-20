@@ -1,0 +1,19 @@
+File: memory-isolate
+Build ID: 324fd9646f304eb4eebacb9bf46f84acbfe067f0
+Type: alloc_space
+Time: 2026-10-20 06:01:27 -03
+Showing nodes accounting for 6310.36kB, 98.00% of 6439.28kB total
+Showing top 12 nodes out of 64
+      flat  flat%   sum%        cum   cum%
+ 1933.02kB 30.02% 30.02%  1933.02kB 30.02%  compress/flate.(*fastGen).addBlock
+ 1610.02kB 25.00% 55.02%  3071.31kB 47.70%  compress/flate.NewWriter (inline)
+  926.67kB 14.39% 69.41%   926.67kB 14.39%  compress/flate.newFastEnc (inline)
+  596.24kB  9.26% 78.67%   596.24kB  9.26%  slices.Grow[go.shape.[]uint8,go.shape.uint8] (inline)
+  404.98kB  6.29% 84.96%  1461.29kB 22.69%  compress/flate.(*compressor).init
+  256.47kB  3.98% 88.94%   256.47kB  3.98%  runtime/pprof.allFrames
+  129.63kB  2.01% 90.96%   129.63kB  2.01%  compress/flate.newHuffmanEncoder (inline)
+  129.07kB  2.00% 92.96%   129.07kB  2.00%  runtime/pprof.(*profileBuilder).emitLocation
+  128.10kB  1.99% 94.95%   128.10kB  1.99%  runtime.mallocgc
+   66.02kB  1.03% 95.98%  3997.49kB 62.08%  runtime/pprof.writeHeapInternal
+   65.13kB  1.01% 96.99%    65.13kB  1.01%  encoding/json/v2.makeStructFields.func3
+      65kB  1.01% 98.00%       65kB  1.01%  runtime/pprof.(*protobuf).string

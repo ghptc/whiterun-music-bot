@@ -1,0 +1,19 @@
+File: memory-race
+Build ID: a6f1bc9e0c7fe1da4dca1060bfba53bfe2067472
+Type: inuse_space
+Time: 2026-10-20 06:07:35 -03
+Showing nodes accounting for 257.85kB, 100% of 257.85kB total
+Showing top 12 nodes out of 21
+      flat  flat%   sum%        cum   cum%
+  129.24kB 50.12% 50.12%   129.24kB 50.12%  runtime.mallocgc
+   64.56kB 25.04% 75.16%    64.56kB 25.04%  _.goready.func1
+   64.05kB 24.84%   100%    64.05kB 24.84%  internal/bytealg.MakeNoZero
+         0     0%   100%    64.05kB 24.84%  main.main
+         0     0%   100%    64.05kB 24.84%  main.run
+         0     0%   100%    64.05kB 24.84%  path/filepath.Join (inline)
+         0     0%   100%    64.05kB 24.84%  path/filepath.join
+         0     0%   100%       65kB 25.21%  runtime.allocm
+         0     0%   100%       65kB 25.21%  runtime.entersyscallblock.func2
+         0     0%   100%       65kB 25.21%  runtime.handoffp
+         0     0%   100%    64.05kB 24.84%  runtime.main
+         0     0%   100%    64.23kB 24.91%  runtime.malg

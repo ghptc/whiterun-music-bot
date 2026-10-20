@@ -1,0 +1,19 @@
+File: memory
+Build ID: 3b2b8123766db1cfd0ad97fff422985626250056
+Type: alloc_space
+Time: 2026-10-20 05:46:23 -03
+Showing nodes accounting for 3436.70kB, 98.17% of 3500.75kB total
+Showing top 12 nodes out of 68
+      flat  flat%   sum%        cum   cum%
+  966.51kB 27.61% 27.61%   966.51kB 27.61%  compress/flate.(*fastGen).addBlock
+  805.01kB 23.00% 50.60%  1332.97kB 38.08%  compress/flate.NewWriter (inline)
+  489.47kB 13.98% 64.59%   489.47kB 13.98%  slices.Grow[go.shape.[]uint8,go.shape.uint8] (inline)
+  463.34kB 13.24% 77.82%   463.34kB 13.24%  compress/flate.newFastEnc (inline)
+  193.11kB  5.52% 83.34%   193.11kB  5.52%  runtime.mallocgc
+  129.27kB  3.69% 87.03%  3243.59kB 92.65%  main.run.func1
+   66.40kB  1.90% 88.93%    66.40kB  1.90%  runtime/metrics.runtime_readMetrics
+   65.32kB  1.87% 90.79%  1684.54kB 48.12%  runtime/pprof.writeHeapInternal
+   64.88kB  1.85% 92.65%    64.88kB  1.85%  encoding/json/v2.makeStructFields
+   64.69kB  1.85% 94.49%    64.69kB  1.85%  runtime/pprof.(*protobuf).varint (inline)
+   64.63kB  1.85% 96.34%    64.63kB  1.85%  compress/flate.newHuffmanEncoder (inline)
+   64.08kB  1.83% 98.17%    64.08kB  1.83%  compress/gzip.NewWriterLevel

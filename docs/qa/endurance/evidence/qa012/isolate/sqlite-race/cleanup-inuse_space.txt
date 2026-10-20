@@ -1,0 +1,19 @@
+File: memory-isolate-race
+Build ID: c877d5794f3e4812d3e1537c80c6a10f64d60493
+Type: inuse_space
+Time: 2026-10-20 05:59:56 -03
+Showing nodes accounting for 257.47kB, 100% of 257.47kB total
+Showing top 12 nodes out of 22
+      flat  flat%   sum%        cum   cum%
+  128.29kB 49.83% 49.83%   128.29kB 49.83%  runtime.mallocgc
+   65.13kB 25.30% 75.12%    65.13kB 25.30%  unicode.map.init.0
+   64.05kB 24.88%   100%    64.05kB 24.88%  internal/bytealg.MakeNoZero
+         0     0%   100%    64.05kB 24.88%  main.main
+         0     0%   100%    64.05kB 24.88%  main.run
+         0     0%   100%    64.05kB 24.88%  path/filepath.Join (inline)
+         0     0%   100%    64.05kB 24.88%  path/filepath.join
+         0     0%   100%    64.05kB 24.88%  runtime.acquireSudog
+         0     0%   100%    65.13kB 25.30%  runtime.doInit (inline)
+         0     0%   100%    65.13kB 25.30%  runtime.doInit1
+         0     0%   100%    64.05kB 24.88%  runtime.ensureSigM.func1
+         0     0%   100%   129.18kB 50.17%  runtime.main

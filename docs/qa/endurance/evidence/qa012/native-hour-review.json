@@ -1,0 +1,207 @@
+{
+  "real_playback_seconds": 3600.017542178,
+  "wrapper_seconds_including_idle": 3720.052529182,
+  "idle_seconds": 120,
+  "cleanup_ms": 11.239565,
+  "counts": {
+    "accepted": 7000,
+    "selected": 6874,
+    "pending": 126,
+    "announced": 6628,
+    "frames": 345626,
+    "batches": 14
+  },
+  "terminals": {
+    "completed": 6146,
+    "error_interrupted": 480,
+    "shutdown_interrupted": 2,
+    "unavailable": 246
+  },
+  "harness_resources": {
+    "rss_bytes": {
+      "baseline": 12750848,
+      "sampled_peak": 30494720,
+      "cleanup": 19738624
+    },
+    "heap_bytes": {
+      "baseline": 223808,
+      "sampled_peak": 6556064,
+      "cleanup": 1360816
+    },
+    "goroutines": {
+      "baseline": 4,
+      "sampled_peak": 354,
+      "cleanup": 4
+    },
+    "file_descriptors": {
+      "baseline": 11,
+      "sampled_peak": 32,
+      "cleanup": 11
+    },
+    "child_processes": {
+      "baseline": 0,
+      "sampled_peak": 4,
+      "cleanup": 0
+    },
+    "threads": {
+      "baseline": 7,
+      "sampled_peak": 11,
+      "cleanup": 11
+    },
+    "cpu_seconds": {
+      "baseline": 0.007959,
+      "sampled_peak": 124.041608,
+      "cleanup": 124.041608
+    },
+    "reaped_children_cpu_seconds": {
+      "baseline": 0,
+      "sampled_peak": 252.897629,
+      "cleanup": 252.897629
+    }
+  },
+  "diagnostic_phases": {
+    "baseline": {
+      "elapsed_seconds": 0.000260588,
+      "rss_bytes": 10366976,
+      "heap_alloc": 158088,
+      "heap_sys": 3866624,
+      "heap_inuse": 647168,
+      "heap_idle": 3219456,
+      "heap_released": 3088384,
+      "sys": 8149256,
+      "total_alloc": 183976,
+      "num_gc": 1,
+      "gc_cpu_fraction": 0.04471321562271861,
+      "pause_total_ns": 11111,
+      "goroutines": 3,
+      "goroutines_created": 12
+    },
+    "cleanup_gc": {
+      "elapsed_seconds": 3600.021897108,
+      "rss_bytes": 18673664,
+      "heap_alloc": 696392,
+      "heap_sys": 15925248,
+      "heap_inuse": 1482752,
+      "heap_idle": 14442496,
+      "heap_released": 12009472,
+      "sys": 22649096,
+      "total_alloc": 46307810232,
+      "num_gc": 21373,
+      "gc_cpu_fraction": 0.0011306063182033534,
+      "pause_total_ns": 1100362840,
+      "goroutines": 3,
+      "goroutines_created": 7372471
+    },
+    "idle_gc": {
+      "elapsed_seconds": 3720.032794989,
+      "rss_bytes": 17879040,
+      "heap_alloc": 611776,
+      "heap_sys": 15958016,
+      "heap_inuse": 1376256,
+      "heap_idle": 14581760,
+      "heap_released": 12894208,
+      "sys": 22649096,
+      "total_alloc": 46313498800,
+      "num_gc": 21378,
+      "gc_cpu_fraction": 0.0010942305886916875,
+      "pause_total_ns": 1100433344,
+      "goroutines": 3,
+      "goroutines_created": 7372471
+    },
+    "forced_scavenge": {
+      "elapsed_seconds": 3720.042973304,
+      "rss_bytes": 16564224,
+      "heap_alloc": 611776,
+      "heap_sys": 15958016,
+      "heap_inuse": 1376256,
+      "heap_idle": 14581760,
+      "heap_released": 14499840,
+      "sys": 22649096,
+      "total_alloc": 46319311112,
+      "num_gc": 21382,
+      "gc_cpu_fraction": 0.0010943012098955443,
+      "pause_total_ns": 1100484592,
+      "goroutines": 3,
+      "goroutines_created": 7372471
+    }
+  },
+  "latencies": {
+    "announcement_after_frame": {
+      "count": 6628,
+      "max_ms": 582.880882,
+      "mean_ms": 11.060203326342789
+    },
+    "cache_hit_resolution": {
+      "count": 7000,
+      "max_ms": 0.068852,
+      "mean_ms": 0.004217938571428572
+    },
+    "cache_miss_resolution": {
+      "count": 7000,
+      "max_ms": 59.495949,
+      "mean_ms": 3.119936532285714
+    },
+    "delivery_first_frame": {
+      "count": 6628,
+      "max_ms": 218.186534,
+      "mean_ms": 39.34882931004828
+    },
+    "enqueue": {
+      "count": 14,
+      "max_ms": 67.820379,
+      "mean_ms": 25.05305257142857
+    },
+    "first_frame": {
+      "count": 6628,
+      "max_ms": 800.34176,
+      "mean_ms": 50.40941200528063
+    },
+    "transition": {
+      "count": 6872,
+      "max_ms": 1850.105714,
+      "mean_ms": 18.862522632275905
+    }
+  },
+  "checkpoints": {
+    "matrix/warm-race/soak/qa-only.db": {
+      "bytes": 1560576,
+      "sha256": "50bb07d0f404b50b339ad92ef62eebbca71c569d21b1ac78edf294442dfbaf1c"
+    },
+    "matrix/disabled-native/soak/qa-only.db": {
+      "bytes": 1605632,
+      "sha256": "206a3c21ed8d5daa835d50719e5ccdc86aca7097acc24d90d868ea472f8c9c4f"
+    },
+    "matrix/cold-native/soak/qa-only.db": {
+      "bytes": 1609728,
+      "sha256": "d09d4e4f1493e2fdda3f211a423164141556a600d61b45a003d86f0cc33cb6d7"
+    },
+    "matrix/disabled-race/soak/qa-only.db": {
+      "bytes": 1560576,
+      "sha256": "784a7c22e617db49bc04a24749de52c2f343eb777612100e3cbe24675df7fa1b"
+    },
+    "matrix/warm-native/soak/qa-only.db": {
+      "bytes": 1605632,
+      "sha256": "1a89029f8607865557a94cc060de19c95a701f2e80e1d2c02d7bed3143a09912"
+    },
+    "native-hour/soak/qa-only.db": {
+      "bytes": 8708096,
+      "sha256": "fa865ce5dd9e0098a53d9c10dc424d13eed9182dbf81b9bc8bad4a40d4ac408a"
+    },
+    "isolate/sqlite-native/qa-only.db": {
+      "bytes": 458752,
+      "sha256": "61358c1e9be23e556fdac0188b2c798543f56977dbee38ebc6c5899f7096ef39"
+    },
+    "isolate/sqlite-race/qa-only.db": {
+      "bytes": 458752,
+      "sha256": "61358c1e9be23e556fdac0188b2c798543f56977dbee38ebc6c5899f7096ef39"
+    },
+    "context/sqlite-background-native/qa-only.db": {
+      "bytes": 458752,
+      "sha256": "61358c1e9be23e556fdac0188b2c798543f56977dbee38ebc6c5899f7096ef39"
+    },
+    "context/sqlite-background-race/qa-only.db": {
+      "bytes": 458752,
+      "sha256": "61358c1e9be23e556fdac0188b2c798543f56977dbee38ebc6c5899f7096ef39"
+    }
+  }
+}

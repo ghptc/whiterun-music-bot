@@ -1,0 +1,19 @@
+File: memory-race
+Build ID: a6f1bc9e0c7fe1da4dca1060bfba53bfe2067472
+Type: inuse_space
+Time: 2026-10-20 06:05:25 -03
+Showing nodes accounting for 529.83kB, 100% of 529.83kB total
+Showing top 12 nodes out of 46
+      flat  flat%   sum%        cum   cum%
+  129.05kB 24.36% 24.36%   129.05kB 24.36%  runtime.mallocgc
+   78.23kB 14.77% 39.12%    78.23kB 14.77%  reflect.compiledTypelinks
+   66.40kB 12.53% 51.66%    66.40kB 12.53%  runtime/metrics.runtime_readMetrics
+   64.05kB 12.09% 63.75%    64.05kB 12.09%  context.(*cancelCtx).Done
+   64.05kB 12.09% 75.83%    64.05kB 12.09%  internal/bytealg.MakeNoZero
+   64.03kB 12.09% 87.92%    64.03kB 12.09%  encoding/json/v2.makeStructArshaler (inline)
+   64.01kB 12.08%   100%   142.24kB 26.85%  encoding/json/v2.makeStructFields
+         0     0%   100%   206.27kB 38.93%  encoding/json.(*Encoder).Encode
+         0     0%   100%   206.27kB 38.93%  encoding/json/v2.MarshalEncode
+         0     0%   100%    64.03kB 12.09%  encoding/json/v2.lookupArshaler
+         0     0%   100%    64.03kB 12.09%  encoding/json/v2.makeDefaultArshaler
+         0     0%   100%   206.27kB 38.93%  encoding/json/v2.makeInterfaceArshaler.func1

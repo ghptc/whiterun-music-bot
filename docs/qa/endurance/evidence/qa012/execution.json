@@ -1,0 +1,61 @@
+{
+  "captured_at": "2026-10-20T09:48:16.008417+00:00",
+  "tools_commit": "70b8184",
+  "production_changes": false,
+  "environment": {
+    "PATH": "/usr/bin:/bin",
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "256MiB",
+    "GORACE": "atexit_sleep_ms=0"
+  },
+  "binaries": {
+    "memory-context-race": "23cd5ce0ac594fd31ea04a78dc7962d39c18489f7a87a018fdeda0703a80a0f4",
+    "memory-context": "3482be383de286643fb10212f596a44ca539f196b28f9cb36a7b35e57071c500",
+    "memory-isolate": "9c6eced772d3f77f12e82a45b10e7ea306208c0c0142a2fa137ae429e34a9b60",
+    "memory-isolate-race": "98113f89bb2e56d7ea073a230fb7679003da6ec2c2e99787ea63e646318bf254",
+    "memory-race": "5b4e937c976b28c8e638e096c5d49fd7a0c309154082f4255185441e62d85333",
+    "memory": "99b3d3b9060c3db51fdf39ba78e970e8588990517ea3b4af3e6d0375029d7e1d"
+  },
+  "compression": "gzip mtime=0; original uncompressed SHA256 in profile-index.json",
+  "complete_runs": [
+    "native-hour",
+    "matrix/cycles-race",
+    "matrix/baseline-native",
+    "matrix/cycles-native",
+    "matrix/baseline-race",
+    "matrix/warm-native",
+    "matrix/simulated-native",
+    "matrix/disabled-race",
+    "matrix/simulated-race",
+    "matrix/cold-native",
+    "matrix/disabled-native",
+    "matrix/warm-race",
+    "isolate/defers-native",
+    "isolate/plain-race",
+    "isolate/plain-native",
+    "isolate/sqlite-native",
+    "isolate/sqlite-race",
+    "isolate/defers-race",
+    "context/goroutines-race",
+    "context/goroutines-native",
+    "context/sqlite-background-native",
+    "context/sqlite-background-race"
+  ],
+  "raw_checkpoints": "owned QA directories under .qa-runs/qa012; no databases exported",
+  "limits_requested": {
+    "MemoryMax": 2147483648,
+    "MemorySwapMax": 0,
+    "CPUQuota": "100% per service",
+    "Nice": 10,
+    "CPUWeight": 10,
+    "IOWeight": 10,
+    "TasksMax": 128,
+    "NOFILE": 256,
+    "FSIZE": 536870912,
+    "NoNewPrivileges": true,
+    "RestrictAddressFamilies": [
+      "AF_UNIX"
+    ]
+  },
+  "limitations": "Services are transient and successful completed units were unloaded automatically; later show output has defaults, NOT historical effective properties. Per-command executions and journal resource summaries are retained. Baseline native-hour active limits captured separately. Instrumentation versions added isolated modes while campaigns ran; play/source code unchanged. Each binary hash retained."
+}

@@ -1,0 +1,13 @@
+{
+  "Out": "/home/gabriel/Projects/whiterun-music-bot/.qa-runs/qa012/native-hour/soak",
+  "Duration": 3600000000000,
+  "Sample": 10000000000,
+  "Audio": 1000000000,
+  "Playlist": 500,
+  "Guilds": 2,
+  "Seed": 20261019,
+  "Warm": true,
+  "Resume": false,
+  "Faults": true,
+  "DisableCache": false
+}

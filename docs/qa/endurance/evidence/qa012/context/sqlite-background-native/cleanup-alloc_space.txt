@@ -1,0 +1,20 @@
+File: memory-context
+Build ID: 2723d97fc9c42110a63f95e082f054c9ef836ae5
+Type: alloc_space
+Time: 2026-10-20 06:03:51 -03
+Showing nodes accounting for 566.73MB, 97.04% of 584.01MB total
+Dropped 89 nodes (cum <= 2.92MB)
+Showing top 12 nodes out of 40
+      flat  flat%   sum%        cum   cum%
+  197.59MB 33.83% 33.83%   579.71MB 99.26%  whiterun/internal/storage.(*DB).SaveGuild
+   91.32MB 15.64% 49.47%    91.32MB 15.64%  bytes.Clone (inline)
+   86.68MB 14.84% 64.31%   107.60MB 18.42%  encoding/json/jsontext.(*encoderState).WriteToken
+   52.64MB  9.01% 73.33%    52.64MB  9.01%  reflect.unsafe_New
+   47.39MB  8.11% 81.44%   196.63MB 33.67%  encoding/json/v2.makeStructArshaler.func2
+   33.29MB  5.70% 87.14%    33.29MB  5.70%  encoding/json/jsontext.stateMachine.MayAppendDelim (partial-inline)
+   20.06MB  3.44% 90.58%    20.06MB  3.44%  internal/strconv.AppendBool (inline)
+   11.07MB  1.90% 92.47%    11.07MB  1.90%  database/sql.driverArgsConnLocked
+       9MB  1.54% 94.01%    13.26MB  2.27%  fmt.Sprintf
+    8.24MB  1.41% 95.42%     8.24MB  1.41%  slices.Grow[go.shape.[]uint8,go.shape.uint8] (inline)
+    5.31MB  0.91% 96.33%    26.07MB  4.46%  database/sql.(*DB).execDC
+    4.13MB  0.71% 97.04%     4.13MB  0.71%  fmt.(*pp).printValue

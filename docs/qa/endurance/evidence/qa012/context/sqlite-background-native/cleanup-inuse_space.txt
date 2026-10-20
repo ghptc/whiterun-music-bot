@@ -1,0 +1,19 @@
+File: memory-context
+Build ID: 2723d97fc9c42110a63f95e082f054c9ef836ae5
+Type: inuse_space
+Time: 2026-10-20 06:03:51 -03
+Showing nodes accounting for 265.58kB, 100% of 265.58kB total
+Showing top 12 nodes out of 25
+      flat  flat%   sum%        cum   cum%
+  128.10kB 48.24% 48.24%   128.10kB 48.24%  runtime.mallocgc
+   73.42kB 27.65% 75.88%    73.42kB 27.65%  reflect.compiledTypelinks
+   64.05kB 24.12%   100%    64.05kB 24.12%  internal/bytealg.MakeNoZero
+         0     0%   100%    73.42kB 27.65%  encoding/json.(*Encoder).Encode
+         0     0%   100%    73.42kB 27.65%  encoding/json/v2.MarshalEncode
+         0     0%   100%    73.42kB 27.65%  encoding/json/v2.marshalEncode
+         0     0%   100%   137.48kB 51.76%  main.main
+         0     0%   100%   137.48kB 51.76%  main.run
+         0     0%   100%    73.42kB 27.65%  main.run.func1
+         0     0%   100%    64.05kB 24.12%  path/filepath.Join (inline)
+         0     0%   100%    64.05kB 24.12%  path/filepath.join
+         0     0%   100%    73.42kB 27.65%  reflect.(*rtype).ptrTo

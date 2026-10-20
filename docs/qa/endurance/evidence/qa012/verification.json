@@ -1,0 +1,16 @@
+{
+  "complete_campaigns": 22,
+  "real_hour_seconds": 3600.017542178,
+  "idle_seconds": 120,
+  "exports_verified": 448,
+  "database_exports": false,
+  "qa_processes_remaining": [],
+  "long_race_allowed": false,
+  "native_6h_12h_execution_allowed_with_isolation": true,
+  "6h_12h_status": "not started, not approved",
+  "production_code_changed": false,
+  "limits": "not proof of all production/Discord/native allocations; no byte-level attribution for old QA011",
+  "auxiliary_probes": 2,
+  "sampled_child_pids_checked": 660,
+  "sampled_child_pids_still_present": []
+}

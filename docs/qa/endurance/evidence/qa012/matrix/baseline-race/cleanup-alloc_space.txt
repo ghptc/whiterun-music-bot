@@ -1,0 +1,19 @@
+File: memory-race
+Build ID: a6f1bc9e0c7fe1da4dca1060bfba53bfe2067472
+Type: alloc_space
+Time: 2026-10-20 05:47:54 -03
+Showing nodes accounting for 3295.42kB, 98.09% of 3359.43kB total
+Showing top 12 nodes out of 74
+      flat  flat%   sum%        cum   cum%
+  966.51kB 28.77% 28.77%   966.51kB 28.77%  compress/flate.(*fastGen).addBlock
+  536.67kB 15.98% 44.75%  1048.06kB 31.20%  compress/flate.NewWriter (inline)
+  486.60kB 14.48% 59.23%   486.60kB 14.48%  slices.Grow[go.shape.[]uint8,go.shape.uint8] (inline)
+  308.89kB  9.19% 68.42%   308.89kB  9.19%  compress/flate.newFastEnc (inline)
+  202.49kB  6.03% 74.45%   511.38kB 15.22%  compress/flate.(*compressor).init
+  200.50kB  5.97% 80.42%  3167.03kB 94.27%  main.run.func1
+  129.63kB  3.86% 84.28%   129.63kB  3.86%  runtime/pprof.(*profileBuilder).emitLocation
+  128.36kB  3.82% 88.10%   128.36kB  3.82%  runtime.mallocgc
+  128.16kB  3.82% 91.92%   128.16kB  3.82%  runtime/pprof.allFrames
+   78.23kB  2.33% 94.24%    78.23kB  2.33%  reflect.compiledTypelinks
+   65.32kB  1.94% 96.19%   143.55kB  4.27%  encoding/json/v2.makeStructFields
+   64.05kB  1.91% 98.09%    64.05kB  1.91%  internal/bytealg.MakeNoZero

@@ -1,0 +1,35 @@
+[
+  {
+    "command": [
+      "go",
+      "test",
+      "./...",
+      "-count=1"
+    ],
+    "started_at": "2026-10-20T09:09:21.517231+00:00",
+    "elapsed_seconds": 24.52222907199757,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./...",
+      "-count=1"
+    ],
+    "started_at": "2026-10-20T09:09:46.039610+00:00",
+    "elapsed_seconds": 36.62047071599227,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "go",
+      "vet",
+      "./..."
+    ],
+    "started_at": "2026-10-20T09:10:22.660254+00:00",
+    "elapsed_seconds": 0.07068756500666495,
+    "exit_code": 0
+  }
+]

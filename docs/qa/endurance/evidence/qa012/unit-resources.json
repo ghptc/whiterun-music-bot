@@ -1,0 +1,62 @@
+[
+  {
+    "__REALTIME_TIMESTAMP": "1792485922884770",
+    "USER_UNIT": "qa012-native-hour.service",
+    "USER_INVOCATION_ID": "a611a1c31ca94c919da1ec3891b89924",
+    "MESSAGE": "Started [systemd-run] /usr/bin/env -i PATH=/usr/bin:/bin GOMAXPROCS=2 GOMEMLIMIT=256MiB /home/gabriel/Projects/whiterun-music-bot/.qa-runs/qa012/memory -out /home/gabriel/Projects/whiterun-music-bot/.qa-runs/qa012/native-hour -duration 1h -idle 120s."
+  },
+  {
+    "__REALTIME_TIMESTAMP": "1792485923867226",
+    "USER_UNIT": "qa012-matrix.service",
+    "USER_INVOCATION_ID": "e125140f8e4646cdb921a2bbcafd2a15",
+    "MESSAGE": "Started [systemd-run] /usr/bin/python3 scripts/qa012_matrix.py --out .qa-runs/qa012/matrix --native .qa-runs/qa012/memory --race .qa-runs/qa012/memory-race."
+  },
+  {
+    "__REALTIME_TIMESTAMP": "1792486696937281",
+    "USER_UNIT": "qa012-isolate.service",
+    "USER_INVOCATION_ID": "52c2fe261dd041e8914accae7b37bf30",
+    "MESSAGE": "Started [systemd-run] /usr/bin/python3 scripts/qa012_matrix.py --isolate --out .qa-runs/qa012/isolate --native .qa-runs/qa012/memory-isolate --race .qa-runs/qa012/memory-isolate-race."
+  },
+  {
+    "__REALTIME_TIMESTAMP": "1792486947672537",
+    "USER_UNIT": "qa012-isolate.service",
+    "USER_INVOCATION_ID": "52c2fe261dd041e8914accae7b37bf30",
+    "MESSAGE": "qa012-isolate.service: Consumed 1min 10.155s CPU time over 4min 10.735s wall clock time, 397.7M memory peak.",
+    "CPU_USAGE_NSEC": "70155370000",
+    "MEMORY_PEAK": "417030144",
+    "MEMORY_SWAP_PEAK": "0"
+  },
+  {
+    "__REALTIME_TIMESTAMP": "1792487030585300",
+    "USER_UNIT": "qa012-context.service",
+    "USER_INVOCATION_ID": "6ddb84d81f574b4390b21c077b7bd3b9",
+    "MESSAGE": "Started [systemd-run] /usr/bin/python3 scripts/qa012_matrix.py --context --out .qa-runs/qa012/context --native .qa-runs/qa012/memory-context --race .qa-runs/qa012/memory-context-race."
+  },
+  {
+    "__REALTIME_TIMESTAMP": "1792487200231108",
+    "USER_UNIT": "qa012-context.service",
+    "USER_INVOCATION_ID": "6ddb84d81f574b4390b21c077b7bd3b9",
+    "MESSAGE": "qa012-context.service: Consumed 49.164s CPU time over 2min 49.645s wall clock time, 112M memory peak.",
+    "CPU_USAGE_NSEC": "49164990000",
+    "MEMORY_PEAK": "117538816",
+    "MEMORY_SWAP_PEAK": "0"
+  },
+  {
+    "__REALTIME_TIMESTAMP": "1792487286044221",
+    "USER_UNIT": "qa012-matrix.service",
+    "USER_INVOCATION_ID": "e125140f8e4646cdb921a2bbcafd2a15",
+    "MESSAGE": "qa012-matrix.service: Consumed 4min 33.727s CPU time over 22min 42.176s wall clock time, 192M memory peak.",
+    "CPU_USAGE_NSEC": "273727366000",
+    "MEMORY_PEAK": "201404416",
+    "MEMORY_SWAP_PEAK": "0"
+  },
+  {
+    "__REALTIME_TIMESTAMP": "1792489642942812",
+    "USER_UNIT": "qa012-native-hour.service",
+    "USER_INVOCATION_ID": "a611a1c31ca94c919da1ec3891b89924",
+    "MESSAGE": "qa012-native-hour.service: Consumed 6min 17.382s CPU time over 1h 2min 57ms wall clock time, 75.2M memory peak.",
+    "CPU_USAGE_NSEC": "377382129000",
+    "MEMORY_PEAK": "78917632",
+    "MEMORY_SWAP_PEAK": "0"
+  }
+]

@@ -73,3 +73,10 @@ Evidências: [manifesto](evidence/qa011/execution.json), [estado final systemd](
 A sessão 1h não foi truncada nem retomada para compor sua duração. Checkpoint conservado em .qa-runs/qa011-20261020T022653Z/1h; retomar cria novo segmento. Não houve Discord real ou escrita em banco operacional.
 
 Controle sem race: iniciado em 2026-10-20 08:18:17,492 UTC, encerrado às 08:28:17 UTC, 600,029097983s reais. Mesma seed, lote, áudio, guilds, cache/faults e limites; executado posteriormente, não simultaneamente nem sob carga de host garantidamente idêntica. Houve 42 unavailable, 82 error_interrupted e duas shutdown_interrupted, além das 1.022 conclusões. Recursos voltaram a três goroutines/dez FD/zero filhos; RSS de cleanup 18.591.744 bytes. O controle é diagnóstico curto, não uma hora sem instrumentação. Nenhuma sessão foi interrompida nesta QA-011; 6h e 12h permanecem não iniciadas.
+
+
+## QA-012 — uma hora sem race e diagnóstico
+
+Campanha concluída: **3.600,017542178s reais**, duas guilds, FFmpeg/local WAV de 1s, cache quente, faults, seed 20261019 e playlist 500. Depois, 120s ociosos reais; wrapper total 3.720,052529182s. 7.000 entradas aceitas, 6.874 selecionadas, 126 pendentes, 6.872 transições e 6.628 anúncios vinculados a frames. Concluídas 6.146; indisponíveis 246; erros controlados 480; interrompidas no shutdown 2. Ledger reconciliado pelo exportador QA-010, nenhuma seleção sem terminal ou perda silenciosa detectada. Seis lotes completos de 500 posições por guild drenados, sétimo parcial.
+
+RSS periódico 22,40–29,08MiB; após retorno/GC 17,81MiB, após repouso 17,05MiB, após scavenger 15,80MiB. Goroutines e FD voltaram ao baseline; zero filhos diretos após cleanup. 21 controles adicionais concluídos; nenhuma campanha interrompida. As campanhas 6h/12h não foram iniciadas nem aprovadas: liberada somente execução local protegida sem race. Detalhes, causas e limitações em [QA-012](rss-investigation.md), dados em evidence/qa012/. Discord real não exercitado; não é homologação da release.

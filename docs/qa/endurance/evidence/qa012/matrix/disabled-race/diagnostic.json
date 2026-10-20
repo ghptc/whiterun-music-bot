@@ -1,0 +1,13 @@
+{
+  "count": 10000,
+  "error": "\u003cnil\u003e",
+  "go_version": "go1.27.1-X:nodwarf5",
+  "idle_seconds": 30,
+  "mem_profile_rate": 65536,
+  "mode": "play",
+  "no_cache": true,
+  "real_elapsed_seconds": 210.832702183,
+  "requested_seconds": 180,
+  "selected": 0,
+  "warm": false
+}

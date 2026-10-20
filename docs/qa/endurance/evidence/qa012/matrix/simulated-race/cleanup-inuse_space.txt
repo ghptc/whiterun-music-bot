@@ -1,0 +1,19 @@
+File: memory-race
+Build ID: a6f1bc9e0c7fe1da4dca1060bfba53bfe2067472
+Type: inuse_space
+Time: 2026-10-20 06:06:34 -03
+Showing nodes accounting for 388.50kB, 100% of 388.50kB total
+Showing top 12 nodes out of 44
+      flat  flat%   sum%        cum   cum%
+  128.29kB 33.02% 33.02%   128.29kB 33.02%  runtime.mallocgc
+   68.08kB 17.52% 50.55%    68.08kB 17.52%  hash/crc32.slicingMakeTable
+   64.05kB 16.49% 67.03%   128.09kB 32.97%  whiterun/internal/player.(*GuildPlayer).run
+   64.05kB 16.49% 83.52%    64.05kB 16.49%  internal/bytealg.MakeNoZero
+   64.03kB 16.48%   100%    64.03kB 16.48%  log/slog.Value.Kind (inline)
+         0     0%   100%    68.08kB 17.52%  compress/gzip.(*Writer).Write
+         0     0%   100%    68.08kB 17.52%  hash/crc32.Update (inline)
+         0     0%   100%    68.08kB 17.52%  hash/crc32.archInitIEEE (inline)
+         0     0%   100%    68.08kB 17.52%  hash/crc32.init.func2
+         0     0%   100%    68.08kB 17.52%  hash/crc32.update
+         0     0%   100%    64.03kB 16.48%  log/slog.(*Logger).Info (inline)
+         0     0%   100%    64.03kB 16.48%  log/slog.(*Logger).log

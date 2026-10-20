@@ -1,0 +1,20 @@
+File: memory
+Build ID: 3b2b8123766db1cfd0ad97fff422985626250056
+Type: alloc_space
+Time: 2026-10-20 06:05:57 -03
+Showing nodes accounting for 4071.22MB, 98.28% of 4142.64MB total
+Dropped 102 nodes (cum <= 20.71MB)
+Showing top 12 nodes out of 21
+      flat  flat%   sum%        cum   cum%
+ 3898.71MB 94.11% 94.11%  3902.84MB 94.21%  whiterun/internal/player.(*GuildPlayer).announceStart
+   77.29MB  1.87% 95.98%  4101.10MB 99.00%  whiterun/internal/player.(*GuildPlayer).run
+   35.98MB  0.87% 96.85%    35.98MB  0.87%  whiterun/internal/player.(*GuildPlayer).EnqueueMany
+   29.09MB   0.7% 97.55%    29.09MB   0.7%  log/slog.argsToAttrSlice
+   28.08MB  0.68% 98.23%    28.08MB  0.68%  log/slog.(*Record).Add
+    0.81MB  0.02% 98.25%    38.23MB  0.92%  main.simulate
+    0.75MB 0.018% 98.26%    25.96MB  0.63%  log/slog.(*TextHandler).WithAttrs
+    0.50MB 0.012% 98.28%  3913.04MB 94.46%  main.simulate.func1.func1
+         0     0% 98.28%    31.90MB  0.77%  log/slog.(*Logger).Info (inline)
+         0     0% 98.28%    56.48MB  1.36%  log/slog.(*Logger).With
+         0     0% 98.28%    31.90MB  0.77%  log/slog.(*Logger).log
+         0     0% 98.28%    25.21MB  0.61%  log/slog.(*commonHandler).withAttrs

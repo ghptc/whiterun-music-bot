@@ -1,13 +1,13 @@
 # Bloqueios de release após QA-010
 
-**v1.0 não está homologada.** A aprovação local descrita nesta etapa não aprova estabilidade de horas nem Discord real.
+**v1.0 não está homologada.** A hora local foi executada, mas não aprova 6h/12h ou Discord real.
 
 | Gate | Estado | Próxima evidência necessária |
 |---|---|---|
-| 1h contínua | TEMPO/INTEGRIDADE APROVADOS; RECURSOS BLOQUEADOS | 3.600,141s reais executados na QA-011; concluir triagem do crescimento de RSS |
-| 6h / 12h contínuas | PENDENTE | runner dedicado, segmentos íntegros, relatório de cleanup/repouso e sem extrapolação de tempo |
+| 1h contínua | APROVADA LOCALMENTE SEM RACE NA QA-012 | 3.600,018s, integridade e RSS estável; hora QA-011 com race continua com restrição de recursos |
+| 6h / 12h contínuas | EXECUÇÃO LOCAL SEM RACE LIBERADA; RESULTADOS PENDENTES | runner protegido, limites e coleta; segmentos integrais e cleanup/repouso; não iniciadas |
 | Playlist 500 completa em cada guild | APROVADA LOCALMENTE NA QA-011 | três lotes de 500 posições drenados por guild, com falhas classificadas; E2E real segue pendente |
-| Crescimento sustentado de RSS/heap/cache | BLOQUEADO / EM TRIAGEM | RSS ~1,18GiB após uma hora com race, heap pós-GC ~0,93MiB; comparar build sem race e atribuir crescimento antes de liberar 6h/12h |
+| Crescimento sustentado de RSS/heap/cache | TRIAGEM LOCAL SUFICIENTE PARA EXECUÇÃO NATIVA; RACE PROLONGADO RESTRITO | QA-012 isolou efeito da instrumentação/churn; nativo estável por uma hora; detalhes internos de anonymous allocations e DAVE real não demonstrados |
 | Discord Voice/DAVE audível, reconnect e permissões | PENDENTE | executar checklist autorizado com clientes reais e imagem de release |
 | Falhas externas prolongadas | PENDENTE | provedor/rede real controlada e recuperação durante sessão prolongada |
 | Crash físico em commit/fsync e ENOSPC | PENDENTE | filesystem/volume exclusivo e reprodução controlada; SIGKILL mid-transaction não prova resistência a perda de energia |
@@ -29,3 +29,8 @@ Nenhum defeito novo de produção confirmado exige correção nesta etapa. Se um
 ## QA-011
 
 A campanha de uma hora terminou no tempo integral, exit=0, fila reconciliada, FD/goroutines ao baseline e zero filhos diretos. Há crescimento sustentado de RSS que impede a aprovação operacional global. As campanhas 6h/12h permanecem não iniciadas pela condição explícita de aprovação da primeira campanha; não por um resultado verde presumido. Controle diagnóstico sem race concluído em 600,029s, com RSS de cleanup 17,73MiB; não substitui uma sessão prolongada. Nenhum Discord real acessado, nenhum serviço de produção interrompido, checkpoints exclusivos de QA preservados.
+
+
+## QA-012 — decisão atual
+
+[Investigação](rss-investigation.md): 21 controles e uma hora nativa concluídos. Carga fixa reproduz retenção sob race associada a goroutines curtas de cancelamento SQLite; não se confirmou vazamento de produção. Sem mudança em player/media/storage ou dependências. Execução protegida de 6h/12h sem race liberada, aprovação dessas durações pendente. Prolongadas com race no envelope atual não liberadas. Atribuição fina de memória nativa do sanitizer e memória DAVE/Discord real permanecem limitações; a release continua bloqueada pelos gates restantes.

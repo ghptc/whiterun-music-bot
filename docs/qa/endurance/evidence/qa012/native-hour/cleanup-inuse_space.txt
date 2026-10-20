@@ -1,0 +1,19 @@
+File: memory
+Build ID: 3b2b8123766db1cfd0ad97fff422985626250056
+Type: inuse_space
+Time: 2026-10-20 06:45:22 -03
+Showing nodes accounting for 619.60kB, 100% of 619.60kB total
+Showing top 12 nodes out of 42
+      flat  flat%   sum%        cum   cum%
+  320.80kB 51.78% 51.78%   320.80kB 51.78%  runtime.mallocgc
+  106.61kB 17.21% 68.98%   106.61kB 17.21%  encoding/json/v2.makeStructArshaler.func2
+   64.08kB 10.34% 79.32%    64.08kB 10.34%  internal/sync.newIndirectNode[go.shape.interface {},go.shape.interface {}] (inline)
+   64.05kB 10.34% 89.66%    64.05kB 10.34%  os/signal.NotifyContext.func1
+   64.05kB 10.34%   100%    64.05kB 10.34%  internal/bytealg.MakeNoZero
+         0     0%   100%   170.69kB 27.55%  encoding/json.Marshal (inline)
+         0     0%   100%    64.08kB 10.34%  encoding/json.MarshalIndent
+         0     0%   100%   170.69kB 27.55%  encoding/json/v2.Marshal
+         0     0%   100%    64.08kB 10.34%  encoding/json/v2.lookupArshaler
+         0     0%   100%    64.08kB 10.34%  encoding/json/v2.makeInterfaceArshaler.func1
+         0     0%   100%    64.08kB 10.34%  encoding/json/v2.makeMapArshaler.func2
+         0     0%   100%   106.61kB 17.21%  encoding/json/v2.makeSliceArshaler.func2

@@ -1,0 +1,20 @@
+File: memory-race
+Build ID: a6f1bc9e0c7fe1da4dca1060bfba53bfe2067472
+Type: alloc_space
+Time: 2026-10-20 06:06:34 -03
+Showing nodes accounting for 4400.33MB, 98.11% of 4485.07MB total
+Dropped 92 nodes (cum <= 22.43MB)
+Showing top 12 nodes out of 29
+      flat  flat%   sum%        cum   cum%
+ 3891.62MB 86.77% 86.77%  3946.07MB 87.98%  whiterun/internal/player.(*GuildPlayer).announceStart
+  320.94MB  7.16% 93.92%   320.94MB  7.16%  log/slog/internal/buffer.init.func1
+   82.92MB  1.85% 95.77%  4435.52MB 98.90%  whiterun/internal/player.(*GuildPlayer).run
+   37.92MB  0.85% 96.62%    37.92MB  0.85%  whiterun/internal/player.(*GuildPlayer).EnqueueMany
+   28.96MB  0.65% 97.26%    28.96MB  0.65%  log/slog.(*Record).Add
+   28.09MB  0.63% 97.89%    28.09MB  0.63%  log/slog.argsToAttrSlice
+    6.06MB  0.14% 98.03%    25.65MB  0.57%  fmt.Sprintf
+    1.69MB 0.038% 98.06%    46.37MB  1.03%  main.simulate
+    1.44MB 0.032% 98.10%  3959.45MB 88.28%  main.simulate.func1.func1
+    0.69MB 0.015% 98.11%    30.82MB  0.69%  log/slog.(*TextHandler).WithAttrs
+         0     0% 98.11%   363.43MB  8.10%  log/slog.(*Logger).Info (inline)
+         0     0% 98.11%    59.53MB  1.33%  log/slog.(*Logger).With
