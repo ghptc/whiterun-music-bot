@@ -125,3 +125,10 @@ metadados copiados pode enganar comparação textual. Não existe fingerprinting
 acústico ou prova criptográfica da gravação. A ausência de ISRC/explicit na fonte
 de áudio não comprova igualdade desses atributos. Nenhum teste local comprova
 copyright, disponibilidade futura ou áudio audível no Discord real.
+
+## CR-007.1 — Auto Pilot
+
+A real captured Auto Pilot release exposed a false rejection of terminal
+`(Album Version)` labels. The matcher now normalizes that specific studio label
+while preserving version, artist, duration and provenance checks and first
+confirmation ordering. See [evidence, reproduction and historical limits](auto-pilot-fidelity.md).

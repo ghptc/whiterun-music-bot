@@ -1,0 +1,36 @@
+{
+  "Total": 302,
+  "Matches": [
+    {
+      "Position": 4,
+      "Track": {
+        "SpotifyArtworkURL": "https://i.scdn.co/image/ab67616d0000b2730fa7b83a64a2501b6de8db39",
+        "SpotifyID": "3hWu4Z5IkREyWNT4zuuXM5",
+        "ISRC": "USIR10000329",
+        "Explicit": false,
+        "RequestedBy": "",
+        "MatchStatus": "",
+        "MatchReason": "",
+        "Live": false,
+        "Position": 4,
+        "Total": 302,
+        "RequestedSource": "spotify",
+        "SourceURL": "https://open.spotify.com/track/3hWu4Z5IkREyWNT4zuuXM5",
+        "Artist": "Queens of the Stone Age",
+        "Artists": [
+          "Queens of the Stone Age"
+        ],
+        "Album": "Rated R - Deluxe Edition",
+        "VerifyBeforePlay": false,
+        "VideoID": "",
+        "Channel": "",
+        "Title": "Auto Pilot",
+        "URL": "",
+        "Duration": 240986000000
+      }
+    }
+  ],
+  "PlaylistID": "6BL3uZVI7Q41TtpsLbmmLt",
+  "CapturedAt": "2026-10-20T09:10:37-03:00",
+  "MetadataSource": "api"
+}

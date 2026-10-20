@@ -30,7 +30,8 @@ resolution assertion kills. Compile failures are not counted as killed mutants.
 contract checks, including both guild scopes. [Auto Pilot investigation](auto-pilot-fidelity.md)
 records live Spotify/YouTube metadata, format availability and a read-only
 production-volume inspection. These probes do not validate Discord messages,
-voice packets, audio CDN delivery or audible playback. The original 302-track
-playlist/session is not correlated without its URL, logs and runtime image.
+voice packets, audio CDN delivery or audible playback. The user-supplied playlist was confirmed to contain 302 tracks, with the exact
+Auto Pilot ID at position 4. Its historical runtime image and resolver logs
+remain uncorrelated.
 
 There is no claim of real Discord E2E homologation.

@@ -52,7 +52,12 @@ func coverage(want, got string) float64 {
 
 var featureClause = regexp.MustCompile(`(?i)\s*[\(\[]?\b(?:feat\.?|ft\.?|featuring)\s+[^)\]–—]*[)\]]?`)
 
+// A terminal label used by official catalog uploads names the studio recording,
+// not an alternate performance. Keep all version/artist/duration gates intact.
+var albumVersionSuffix = regexp.MustCompile(`(?i)\s*\(album version\)\s*$`)
+
 func recordingTitle(s string) string {
+	s = albumVersionSuffix.ReplaceAllString(s, "")
 	parts := strings.Split(s, " - ")
 	for i := range parts {
 		parts[i] = featureClause.ReplaceAllString(parts[i], " ")

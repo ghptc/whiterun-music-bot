@@ -205,3 +205,6 @@ searches and playlist-only URLs are rejected with force. Video links containing
 playlist parameters still select only that video. Omitting force or choosing
 false keeps the existing behavior. Queue order and voice permissions apply
 normally. See [Force Play](docs/force-play.md) for validation and limitations.
+
+CR-007.1: [Auto Pilot fidelity evidence](docs/auto-pilot-fidelity.md) records the
+302-track playlist's position 4 and the real `(Album Version)` false-negative fix.
