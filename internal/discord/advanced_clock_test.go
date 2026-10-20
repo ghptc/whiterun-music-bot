@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 	"testing"
 	"testing/synctest"
@@ -22,7 +21,7 @@ func TestAdvancedDiscordAckSchedules(t *testing.T) {
 				b, recorder := testBot(t)
 				calls := 0
 				firstPayload := ""
-				client := rest.NewClient("fixture", rest.WithLogger(b.log), rest.WithRateLimiter(&advancedBudgetLimiter{}), rest.WithHTTPClient(&http.Client{Transport: queueTransport(func(req *http.Request) (*http.Response, error) {
+				client := rest.NewClient("fixture", rest.WithLogger(b.log), rest.WithRateLimiter(newManagedRESTLimiter(b.log)), rest.WithHTTPClient(&http.Client{Transport: queueTransport(func(req *http.Request) (*http.Response, error) {
 					calls++
 					if len(b.guilds) != 0 {
 						t.Fatal("work before acknowledgement")
@@ -84,36 +83,4 @@ func TestAdvancedDiscordAckSchedules(t *testing.T) {
 			})
 		})
 	}
-}
-
-// The stock disgo limiter has an unjoinable maintenance goroutine (QA008-D03).
-// This injected limiter models retry timing only. Real limiter contract tests
-// remain in queue_delivery_test.go; do not claim this proves their scheduling.
-type advancedBudgetLimiter struct{ reset time.Time }
-
-func (*advancedBudgetLimiter) MaxRetries() int       { return 3 }
-func (*advancedBudgetLimiter) Close(context.Context) {}
-func (l *advancedBudgetLimiter) Reset()              { l.reset = time.Time{} }
-func (l *advancedBudgetLimiter) Wait(ctx context.Context, _ *rest.CompiledEndpoint) error {
-	if deadline, ok := ctx.Deadline(); ok && !l.reset.IsZero() && l.reset.After(deadline) {
-		return context.DeadlineExceeded
-	}
-	timer := time.NewTimer(max(time.Duration(0), time.Until(l.reset)))
-	defer timer.Stop()
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-timer.C:
-		return nil
-	}
-}
-func (l *advancedBudgetLimiter) Unlock(_ *rest.CompiledEndpoint, response *http.Response) error {
-	if response != nil && response.StatusCode == 429 {
-		seconds, err := strconv.ParseFloat(response.Header.Get("Retry-After"), 64)
-		if err != nil {
-			return err
-		}
-		l.reset = time.Now().Add(time.Duration(seconds * float64(time.Second)))
-	}
-	return nil
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/disgoorg/disgo/cache"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/gateway"
+	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/disgo/voice"
 	"github.com/disgoorg/godave"
 	"github.com/disgoorg/snowflake/v2"
@@ -58,7 +59,9 @@ type Bot struct {
 func New(ctx context.Context, token string, appID snowflake.ID, log *slog.Logger) (*Bot, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	b := &Bot{ctx: ctx, cancel: cancel, log: log, resolver: media.CollectionResolver{YouTube: media.Resolver{Binary: "yt-dlp", Cache: &media.SearchCache{}}, Log: log, Limiter: media.NewMatchLimiter()}, streamer: player.Streamer{YTDLP: "yt-dlp", FFmpeg: "ffmpeg"}, guilds: make(map[snowflake.ID]*guild), searches: make(chan struct{}, 4), voiceWake: make(chan struct{}, 1)}
+	limiter := newManagedRESTLimiter(log.With("name", "rest_rate_limiter"))
 	c, err := disgo.New(token, bot.WithLogger(log),
+		bot.WithRestClientConfigOpts(rest.WithRateLimiter(limiter)),
 		bot.WithGatewayConfigOpts(gateway.WithIntents(gateway.IntentGuilds, gateway.IntentGuildVoiceStates)),
 		bot.WithCacheConfigOpts(cache.WithCaches(cache.FlagGuilds, cache.FlagVoiceStates, cache.FlagMembers)),
 		bot.WithVoiceManagerConfigOpts(voice.WithConnCreateFunc(newVoiceConn)),
@@ -67,6 +70,7 @@ func New(ctx context.Context, token string, appID snowflake.ID, log *slog.Logger
 	)
 	if err != nil {
 		cancel()
+		limiter.Close(context.Background())
 		return nil, err
 	}
 	if c.ApplicationID != appID {
