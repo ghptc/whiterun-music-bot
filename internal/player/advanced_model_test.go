@@ -25,6 +25,7 @@ type advancedModel struct {
 	current, loop              string
 	attached, paused, autoplay bool
 	serial                     int
+	generation                 uint64
 }
 
 func (m *advancedModel) settle() {
@@ -55,7 +56,7 @@ func advancedCompare(t *testing.T, p *GuildPlayer, m *advancedModel, step int) {
 	if s.Current != nil {
 		id = s.Current.Title
 	}
-	if id != m.current || !slices.Equal(advancedIDs(s.Queued), m.queue) || !slices.Equal(advancedIDs(p.History()), m.history) || s.Loop != m.loop || s.Paused != m.paused || s.Autoplay != m.autoplay {
+	if id != m.current || !slices.Equal(advancedIDs(s.Queued), m.queue) || !slices.Equal(advancedIDs(p.History()), m.history) || s.Loop != m.loop || s.Paused != m.paused || s.Autoplay != m.autoplay || p.Ticket() != m.generation {
 		t.Fatalf("step %d got current=%q queue=%v history=%v loop=%q paused=%v autoplay=%v; model=%+v", step, id, advancedIDs(s.Queued), advancedIDs(p.History()), s.Loop, s.Paused, s.Autoplay, m)
 	}
 	tracks := append([]media.Track{}, s.Queued...)
@@ -77,7 +78,8 @@ func advancedCompare(t *testing.T, p *GuildPlayer, m *advancedModel, step int) {
 
 // Bytes form a replayable command language shared with native fuzzing. Each
 // pair is (opcode, argument); all operations are followed by quiescence.
-func advancedRunSequence(t *testing.T, sequence []byte) {
+func advancedRunSequence(t *testing.T, sequence []byte) { advancedRunSequenceMode(t, sequence, false) }
+func advancedRunSequenceMode(t *testing.T, sequence []byte, durable bool) {
 	t.Helper()
 	synctest.Test(t, func(t *testing.T) {
 		finish := make(chan error)
@@ -93,6 +95,13 @@ func advancedRunSequence(t *testing.T, sequence []byte) {
 			}
 		})
 		defer p.Close(context.Background())
+		var store *qa013ModelStore
+		if durable {
+			store = &qa013ModelStore{}
+			if err := p.ConfigureStore(store, "model"); err != nil {
+				t.Fatal(err)
+			}
+		}
 		other := New(context.Background(), slog.New(slog.NewTextHandler(io.Discard, nil)), nil)
 		defer other.Close(context.Background())
 		otherBefore := other.State()
@@ -121,6 +130,7 @@ func advancedRunSequence(t *testing.T, sequence []byte) {
 				wantError = m.attached
 				if !wantError {
 					m.attached = true
+					m.generation++
 				}
 			case 1: // enqueue atomic batch, including exact capacity and overflow
 				count := arg % 6
@@ -256,6 +266,7 @@ func advancedRunSequence(t *testing.T, sequence []byte) {
 				}
 			case 11:
 				removed := p.Clear()
+				m.generation++
 				if removed != len(m.queue) {
 					t.Fatal("clear count", removed, len(m.queue))
 				}
@@ -263,12 +274,14 @@ func advancedRunSequence(t *testing.T, sequence []byte) {
 				m.loop = "off"
 			case 12:
 				p.Stop()
+				m.generation++
 				m.queue = nil
 				m.current = ""
 				m.paused = false
 				m.loop = "off"
 			case 13:
 				p.Leave(context.Background())
+				m.generation++
 				m.attached = false
 				m.queue = nil
 				m.current = ""
@@ -283,6 +296,7 @@ func advancedRunSequence(t *testing.T, sequence []byte) {
 			case 16:
 				ticket := p.Ticket()
 				p.Stop()
+				m.generation++
 				m.queue = nil
 				m.current = ""
 				m.paused = false
@@ -313,6 +327,9 @@ func advancedRunSequence(t *testing.T, sequence []byte) {
 			m.settle()
 			synctest.Wait()
 			advancedCompare(t, p, m, step/2)
+			if durable {
+				qa013CompareDurable(t, store, m, step/2)
+			}
 			if !reflect.DeepEqual(otherBefore, other.State()) {
 				t.Fatal("other guild mutated")
 			}
