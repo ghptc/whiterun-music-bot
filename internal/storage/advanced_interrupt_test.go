@@ -40,7 +40,8 @@ func TestAdvancedInterruptedSQLiteTransaction(t *testing.T) {
 				t.Fatal(err)
 			}
 			db := openTest(t)
-			ctx := context.Background()
+			ctx, stop := context.WithTimeout(context.Background(), 10*time.Second)
+			defer stop()
 			old := player.DurableState{Loop: "queue", Queue: []media.Track{{Title: "original"}}, History: []media.Track{{Title: "past"}}}
 			if err := db.SaveGuild(ctx, "1", old); err != nil {
 				t.Fatal(err)
@@ -49,7 +50,7 @@ func TestAdvancedInterruptedSQLiteTransaction(t *testing.T) {
 				t.Fatal(err)
 			}
 			trigger := fmt.Sprintf("CREATE TRIGGER interruption AFTER %s ON %s BEGIN SELECT %s(); END", stage.event, stage.table, name)
-			if _, err := db.db.Exec(trigger); err != nil {
+			if _, err := db.db.ExecContext(ctx, trigger); err != nil {
 				t.Fatal(err)
 			}
 			bounded, cancel := context.WithTimeout(ctx, 5*time.Second)

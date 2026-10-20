@@ -1,15 +1,19 @@
 package discord
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+	"whiterun/internal/player"
+	"whiterun/internal/storage"
 
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/voice"
@@ -173,5 +177,62 @@ func TestHardeningYouTubeCollectionSkippedNotice(t *testing.T) {
 	b.command(qualityInteraction(t, "play", 3, "https://www.youtube.com/playlist?list=PLfixture"))
 	if !strings.Contains(r.response, "Added 1 tracks") || !strings.Contains(r.response, "1 unavailable tracks were skipped") {
 		t.Fatal("partial import loss hidden", r.response)
+	}
+}
+
+func TestHardeningReplyFailureIsReported(t *testing.T) {
+	for _, failure := range []bool{false, true} {
+		t.Run(fmt.Sprint(failure), func(t *testing.T) {
+			b, r := testBot(t)
+			var logs bytes.Buffer
+			b.log = slog.New(slog.NewTextHandler(&logs, nil))
+			if failure {
+				b.client.Rest = &queueUpdateFailureRest{Rest: r}
+			}
+			b.command(qualityInteraction(t, "lyrics", 3, ""))
+			if strings.Contains(logs.String(), "command response failed") != failure {
+				t.Fatalf("response delivery health misreported: %s", logs.String())
+			}
+		})
+	}
+}
+
+func TestHardeningSuccessfulPlayPersistsAnnouncementDestination(t *testing.T) {
+	db, err := storage.Open(filepath.Join(t.TempDir(), "guild.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	b, r := testBot(t)
+	b.ConfigureStore(db)
+	defer b.Close(context.Background())
+	g, _ := idleGuild(t, b, 1)
+	listener(b, 1, 3, false)
+	g.announcementChannel.Store(99)
+	b.searches = make(chan struct{}, 4)
+	binary := filepath.Join(t.TempDir(), "yt-dlp")
+	if err := os.WriteFile(binary, []byte("#!/bin/sh\necho '{\"id\":\"abcdefghijk\",\"title\":\"song\",\"duration\":120}'\n"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	b.resolver.YouTube.Binary = binary
+	b.command(qualityInteraction(t, "play", 3, "https://youtube.com/watch?v=abcdefghijk"))
+	if !strings.Contains(r.response, "Queued") {
+		t.Fatal("play failed", r.response)
+	}
+	settings, err := db.LoadSettings(context.Background(), "1")
+	if err != nil || settings["announcement_channel"] != "99" {
+		t.Fatal("successful play lost announcement destination", settings, err)
+	}
+}
+
+func TestHardeningSkipNoticeSingularAndPlural(t *testing.T) {
+	for _, tc := range []struct {
+		count int
+		want  string
+	}{{1, "Skipped 1 track."}, {2, "Skipped 2 tracks."}} {
+		got := skipText(player.SkipResult{Skipped: tc.count})
+		if !strings.HasPrefix(got, tc.want) {
+			t.Fatal("skip result misreported", got)
+		}
 	}
 }

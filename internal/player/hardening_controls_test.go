@@ -150,3 +150,16 @@ func TestHardeningPreviousFillsQueueCapacity(t *testing.T) {
 		synctest.Wait()
 	})
 }
+
+func TestHardeningReplayRejectsFullQueue(t *testing.T) {
+	p := qualityDetached(t)
+	p.current = &media.Track{Title: "current"}
+	p.queue = make([]queueEntry, MaxQueueTracks)
+	before := p.State()
+	if err := p.Replay(); err == nil {
+		t.Fatal("replay exceeded queue capacity")
+	}
+	if !reflect.DeepEqual(before, p.State()) {
+		t.Fatal("rejected replay changed queue or current")
+	}
+}

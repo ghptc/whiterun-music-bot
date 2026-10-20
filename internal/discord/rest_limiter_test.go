@@ -226,3 +226,14 @@ func TestDefectLimiterRouteCooldownIsolation(t *testing.T) {
 		}
 	})
 }
+
+func TestDefectBotConstructionFailureClosesLimiter(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		_, err := New(context.Background(), "invalid-token", 1, slog.New(slog.NewTextHandler(io.Discard, nil)))
+		if err == nil {
+			t.Fatal("invalid token accepted")
+		}
+		synctest.Wait()
+		// A live maintenance worker makes synctest reject the bubble on return.
+	})
+}
