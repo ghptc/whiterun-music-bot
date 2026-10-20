@@ -1,0 +1,39 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/discord
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkQueueV2/1-8 	  126042	      1917 ns/op	         6.000 components	         1.000 messages	         0 missing-artworks	    2129 B/op	      35 allocs/op
+BenchmarkQueueV2/1-8 	  123698	      1845 ns/op	         6.000 components	         1.000 messages	         0 missing-artworks	    2129 B/op	      35 allocs/op
+BenchmarkQueueV2/1-8 	  146382	      1646 ns/op	         6.000 components	         1.000 messages	         0 missing-artworks	    2129 B/op	      35 allocs/op
+BenchmarkQueueV2/10-8         	   21364	     10748 ns/op	        43.00 components	         2.000 messages	         0 missing-artworks	   16295 B/op	     255 allocs/op
+BenchmarkQueueV2/10-8         	   23143	     10550 ns/op	        43.00 components	         2.000 messages	         0 missing-artworks	   16295 B/op	     255 allocs/op
+BenchmarkQueueV2/10-8         	   22977	     10293 ns/op	        43.00 components	         2.000 messages	         0 missing-artworks	   16295 B/op	     255 allocs/op
+BenchmarkQueueV2/20-8         	   10000	     20909 ns/op	        84.00 components	         3.000 messages	         0 missing-artworks	   32207 B/op	     499 allocs/op
+BenchmarkQueueV2/20-8         	   10000	     20958 ns/op	        84.00 components	         3.000 messages	         0 missing-artworks	   32206 B/op	     499 allocs/op
+BenchmarkQueueV2/20-8         	   10000	     21025 ns/op	        84.00 components	         3.000 messages	         0 missing-artworks	   32207 B/op	     499 allocs/op
+BenchmarkQueueV2/123-8        	    1929	    122356 ns/op	       507.0 components	        14.00 messages	         0 missing-artworks	  193834 B/op	    3006 allocs/op
+BenchmarkQueueV2/123-8        	    1722	    136937 ns/op	       507.0 components	        14.00 messages	         0 missing-artworks	  193838 B/op	    3006 allocs/op
+BenchmarkQueueV2/123-8        	    1862	    120074 ns/op	       507.0 components	        14.00 messages	         0 missing-artworks	  193833 B/op	    3006 allocs/op
+BenchmarkQueueV2/500-8        	     493	    499344 ns/op	      2057 components	        56.00 messages	         0 missing-artworks	  772392 B/op	   12485 allocs/op
+BenchmarkQueueV2/500-8        	     469	    526022 ns/op	      2057 components	        56.00 messages	         0 missing-artworks	  772410 B/op	   12485 allocs/op
+BenchmarkQueueV2/500-8        	     426	    535785 ns/op	      2057 components	        56.00 messages	         0 missing-artworks	  772415 B/op	   12485 allocs/op
+BenchmarkQueueV2/1000-8       	     214	   1157624 ns/op	      4113 components	       112.0 messages	         0 missing-artworks	 1540096 B/op	   25270 allocs/op
+BenchmarkQueueV2/1000-8       	     222	   1068665 ns/op	      4113 components	       112.0 messages	         0 missing-artworks	 1540056 B/op	   25269 allocs/op
+BenchmarkQueueV2/1000-8       	     220	   1117997 ns/op	      4113 components	       112.0 messages	         0 missing-artworks	 1540039 B/op	   25269 allocs/op
+PASS
+ok  	whiterun/internal/discord	4.211s
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/player
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkQualitySnapshot/1-8 	 1000000	       212.1 ns/op	     770 B/op	       6 allocs/op
+BenchmarkQualitySnapshot/1-8 	 1000000	       202.8 ns/op	     770 B/op	       6 allocs/op
+BenchmarkQualitySnapshot/1-8 	 1163036	       200.5 ns/op	     770 B/op	       6 allocs/op
+BenchmarkQualitySnapshot/500-8         	    2300	    110660 ns/op	  794262 B/op	    2020 allocs/op
+BenchmarkQualitySnapshot/500-8         	    1683	    147662 ns/op	  794262 B/op	    2020 allocs/op
+BenchmarkQualitySnapshot/500-8         	    2389	     98357 ns/op	  794260 B/op	    2020 allocs/op
+BenchmarkQualitySnapshot/1000-8        	     686	    339527 ns/op	 2359576 B/op	    4024 allocs/op
+BenchmarkQualitySnapshot/1000-8        	     710	    346040 ns/op	 2359577 B/op	    4024 allocs/op
+BenchmarkQualitySnapshot/1000-8        	     657	    342836 ns/op	 2359578 B/op	    4024 allocs/op
+PASS
+ok  	whiterun/internal/player	2.095s

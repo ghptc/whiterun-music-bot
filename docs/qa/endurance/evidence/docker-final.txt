@@ -1,0 +1,81 @@
+time="2026-10-19T23:20:54-03:00" level=warning msg="buildx Docker CLI plugin not found: falling back to the classic builder. BuildKit-only build features (multi-arch, secrets, ssh, additional contexts, ...) will not be available"
+ Image whiterun-music-bot-bard Building
+ Image whiterun-music-bot-bard Building
+Sending build context to Docker daemon  524.5kB
+Sending build context to Docker daemon  2.028MB
+
+Step 1/22 : FROM golang:1.27-bookworm AS test-env
+ ---> 648f440f42a0
+Step 2/22 : RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg     && rm -rf /var/lib/apt/lists/*     && ffmpeg -version     && ffmpeg -hide_banner -loglevel error -f lavfi -i anullsrc=r=48000:cl=stereo        -t 0.1 -c:a libopus -f opus -y /dev/null
+ ---> Using cache
+ ---> fcb3ccc82117
+Step 3/22 : WORKDIR /src
+ ---> Using cache
+ ---> f9acd273ef9d
+Step 4/22 : COPY go.mod go.sum ./
+ ---> Using cache
+ ---> 5cd76b74461e
+Step 5/22 : RUN GODEBUG=netedns0=0 go mod download
+ ---> Using cache
+ ---> 866ed85c2844
+Step 6/22 : COPY cmd ./cmd
+ ---> Using cache
+ ---> 48e55d2b6b6f
+Step 7/22 : COPY internal ./internal
+ ---> ef12d29757f1
+Step 8/22 : FROM test-env AS build
+ ---> ef12d29757f1
+Step 9/22 : RUN go vet ./... && go test ./... && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/bard ./cmd/bot && sha256sum /out/bard
+ ---> Running in 9d84109bd188
+ok  	whiterun/cmd/bot	0.001s
+?   	whiterun/cmd/profile	[no test files]
+?   	whiterun/cmd/qa-soak	[no test files]
+ok  	whiterun/internal/discord	6.354s
+ok  	whiterun/internal/media	0.191s
+ok  	whiterun/internal/player	24.097s
+ok  	whiterun/internal/qasoak	0.018s
+ok  	whiterun/internal/storage	0.597s
+4382b08d58865b27e8dc5122d18bd1fb21438229df4972a009cd5dde878e9f77  /out/bard
+ ---> Removed intermediate container 9d84109bd188
+ ---> 9280cb75030d
+Step 10/22 : FROM denoland/deno:bin-2.5.6 AS deno
+ ---> 2f5f9d651af3
+Step 11/22 : FROM debian:bookworm-slim AS runtime
+ ---> 88200866dfff
+Step 12/22 : ARG YTDLP_VERSION=2026.08.19
+ ---> Using cache
+ ---> 40e6c0955b2e
+Step 13/22 : RUN apt-get update && apt-get install -y --no-install-recommends     ca-certificates ffmpeg python3 python3-venv     && python3 -m venv /opt/yt-dlp     && /opt/yt-dlp/bin/pip install --no-cache-dir "yt-dlp[default]==${YTDLP_VERSION}"     && rm -rf /var/lib/apt/lists/*     && useradd --create-home --uid 10001 bard
+ ---> Using cache
+ ---> 72b988e79c25
+Step 14/22 : COPY --from=deno /deno /usr/local/bin/deno
+ ---> Using cache
+ ---> 75cb8661075e
+Step 15/22 : COPY --from=build /out/bard /usr/local/bin/bard
+ ---> Using cache
+ ---> fcd2ce032928
+Step 16/22 : ENV GODEBUG="netedns0=0"     PATH="/opt/yt-dlp/bin:${PATH}"     DENO_DIR=/tmp/deno     PYTHONDONTWRITEBYTECODE=1
+ ---> Using cache
+ ---> 6f090aa70c9d
+Step 17/22 : RUN ffmpeg -version && yt-dlp --version && deno --version     && ffmpeg -hide_banner -loglevel error -f lavfi -i anullsrc=r=48000:cl=stereo        -t 0.1 -c:a libopus -f opus -y /dev/null
+ ---> Using cache
+ ---> afb7160c6791
+Step 18/22 : RUN mkdir -p /home/bard/data && chown bard:bard /home/bard/data
+ ---> Using cache
+ ---> ce8fede377b0
+Step 19/22 : USER bard
+ ---> Using cache
+ ---> dbd0eacb3d88
+Step 20/22 : WORKDIR /home/bard
+ ---> Using cache
+ ---> 46bd398697f0
+Step 21/22 : ENTRYPOINT ["bard"]
+ ---> Using cache
+ ---> 0c9b68da3081
+Step 22/22 : LABEL com.docker.compose.image.builder=classic
+ ---> Using cache
+ ---> fcfaf692a5af
+Successfully built fcfaf692a5af
+Successfully tagged whiterun-music-bot-bard:latest
+ Image whiterun-music-bot-bard Built
+ Image whiterun-music-bot-bard Built

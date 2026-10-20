@@ -1,0 +1,57 @@
+[
+  {
+    "campaign": "smoke",
+    "segment": "20261020T020544.446102305Z",
+    "seconds": 12.169707022,
+    "selected": 60,
+    "announced": 57,
+    "completed": 52,
+    "transitions": 58,
+    "pending": 186,
+    "status": "pass"
+  },
+  {
+    "campaign": "soak-123",
+    "segment": "20261020T020731.061483299Z",
+    "seconds": 60.173630416,
+    "selected": 284,
+    "announced": 272,
+    "completed": 249,
+    "transitions": 282,
+    "pending": 208,
+    "status": "pass"
+  },
+  {
+    "campaign": "soak-123",
+    "segment": "20261020T021039.319373481Z",
+    "seconds": 20.252183061,
+    "selected": 71,
+    "announced": 68,
+    "completed": 64,
+    "transitions": 69,
+    "pending": 139,
+    "status": "pass"
+  },
+  {
+    "campaign": "soak-500",
+    "segment": "20261020T020839.252159436Z",
+    "seconds": 120.634153596,
+    "selected": 194,
+    "announced": 186,
+    "completed": 169,
+    "transitions": 192,
+    "pending": 806,
+    "status": "pass"
+  },
+  {
+    "campaign": "delivery",
+    "segment": "20261020T021520.577024217Z",
+    "seconds": 20.05948612,
+    "selected": 68,
+    "announced": 65,
+    "completed": 58,
+    "transitions": 67,
+    "pending": 55,
+    "status": "pass"
+  }
+]

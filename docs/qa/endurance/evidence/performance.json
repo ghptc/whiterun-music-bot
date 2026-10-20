@@ -1,0 +1,62 @@
+{
+  "20261020T020731.061483299Z": {
+    "cleanup_ms": 158.350845,
+    "latencies": {
+      "first_frame": {
+        "count": 272,
+        "mean_ms": 114.43522861397058,
+        "max_ms": 229.101555
+      },
+      "transition": {
+        "count": 282,
+        "mean_ms": 148.61767233687945,
+        "max_ms": 781.971511
+      },
+      "cache_miss_resolution": {
+        "count": 492,
+        "mean_ms": 3.9315851219512195,
+        "max_ms": 5.254546
+      },
+      "cache_hit_resolution": {
+        "count": 492,
+        "mean_ms": 0.015182376016260163,
+        "max_ms": 0.103026
+      }
+    }
+  },
+  "20261020T021039.319373481Z": {
+    "cleanup_ms": 247.902554,
+    "latencies": {
+      "first_frame": {
+        "count": 68,
+        "mean_ms": 162.4534967352941,
+        "max_ms": 219.757493
+      },
+      "transition": {
+        "count": 69,
+        "mean_ms": 228.3073125652174,
+        "max_ms": 281.104514
+      }
+    }
+  },
+  "20261020T020839.252159436Z": {
+    "cleanup_ms": 622.156955,
+    "latencies": {
+      "first_frame": {
+        "count": 186,
+        "mean_ms": 434.1170715376344,
+        "max_ms": 544.124757
+      },
+      "transition": {
+        "count": 192,
+        "mean_ms": 615.6311883489583,
+        "max_ms": 726.009681
+      },
+      "cache_miss_resolution": {
+        "count": 1000,
+        "mean_ms": 5.432062997000001,
+        "max_ms": 23.691677
+      }
+    }
+  }
+}

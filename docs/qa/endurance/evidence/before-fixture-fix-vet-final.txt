@@ -1,0 +1,1 @@
+internal/qasoak/accounting_test.go:9:9: range var tc copies lock: struct{name string; g whiterun/internal/qasoak.guildRun; valid bool} contains whiterun/internal/qasoak.guildRun contains sync.Mutex

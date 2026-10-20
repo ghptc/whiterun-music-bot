@@ -1,0 +1,86 @@
+{
+  "cache_memory_bytes": null,
+  "cleanup_ms": 4.084421,
+  "config": {
+    "Out": "/tmp/bard-qa010-pilot",
+    "Duration": 8000000000,
+    "Sample": 1000000000,
+    "Audio": 100000000,
+    "Playlist": 123,
+    "Guilds": 2,
+    "Seed": 20261019,
+    "Warm": true,
+    "Resume": false,
+    "Faults": true
+  },
+  "continuous_target_completed": true,
+  "discord_e2e": false,
+  "go_version": "go1.27.1-X:nodwarf5",
+  "guilds": [
+    {
+      "accepted": 0,
+      "announced": 0,
+      "batches": 0,
+      "frames": 0,
+      "guild": "1",
+      "latencies": {
+        "cache_hit_resolution": {
+          "count": 7,
+          "max_ms": 0.02618,
+          "mean_ms": 0.020271428571428572,
+          "p50_ms": 0.032768,
+          "p95_ms": 0.032768,
+          "p99_ms": 0.032768,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "cache_miss_resolution": {
+          "count": 8,
+          "max_ms": 1005.583794,
+          "mean_ms": 999.997103125,
+          "p50_ms": 1073.741824,
+          "p95_ms": 1073.741824,
+          "p99_ms": 1073.741824,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        }
+      },
+      "pending": 0,
+      "selected": 0,
+      "terminal": {}
+    },
+    {
+      "accepted": 0,
+      "announced": 0,
+      "batches": 0,
+      "frames": 0,
+      "guild": "2",
+      "latencies": {
+        "cache_hit_resolution": {
+          "count": 7,
+          "max_ms": 0.027973,
+          "mean_ms": 0.019140571428571427,
+          "p50_ms": 0.032768,
+          "p95_ms": 0.032768,
+          "p99_ms": 0.032768,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "cache_miss_resolution": {
+          "count": 8,
+          "max_ms": 1005.638948,
+          "mean_ms": 999.95908225,
+          "p50_ms": 1073.741824,
+          "p95_ms": 1073.741824,
+          "p99_ms": 1073.741824,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        }
+      },
+      "pending": 0,
+      "selected": 0,
+      "terminal": {}
+    }
+  ],
+  "real_elapsed_seconds": 8.016677625,
+  "segment": "20261020T020501.230605789Z",
+  "started_at": "2026-10-20T02:05:01.230620878Z",
+  "status": "pass",
+  "target_seconds": 8
+}

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/gabriel/Projects/whiterun-music-bot/scripts/qa010_report.py", line 52, in <module>
+    assert guild['selected'] > 0 and guild['announced'] > 0, 'vacuous playback evidence'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: vacuous playback evidence

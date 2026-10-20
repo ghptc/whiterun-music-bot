@@ -1,0 +1,32 @@
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/guild
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/history_delete
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/history_insert
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/catalog
+--- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState (0.12s)
+    --- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/guild (0.03s)
+    --- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/history_delete (0.03s)
+    --- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/history_insert (0.03s)
+    --- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/catalog (0.03s)
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/guild
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/history_delete
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/history_insert
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/catalog
+--- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState (0.12s)
+    --- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/guild (0.03s)
+    --- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/history_delete (0.03s)
+    --- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/history_insert (0.03s)
+    --- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/catalog (0.03s)
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/guild
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/history_delete
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/history_insert
+=== RUN   TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/catalog
+--- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState (0.12s)
+    --- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/guild (0.03s)
+    --- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/history_delete (0.03s)
+    --- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/history_insert (0.03s)
+    --- PASS: TestEnduranceKillDuringSQLiteWriteRecoversCommittedState/catalog (0.03s)
+PASS
+ok  	whiterun/internal/storage	1.370s

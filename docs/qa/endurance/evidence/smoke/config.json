@@ -1,0 +1,12 @@
+{
+  "Out": "/tmp/bard-qa010-smoke",
+  "Duration": 12000000000,
+  "Sample": 1000000000,
+  "Audio": 100000000,
+  "Playlist": 123,
+  "Guilds": 2,
+  "Seed": 20261019,
+  "Warm": true,
+  "Resume": false,
+  "Faults": true
+}

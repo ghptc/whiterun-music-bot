@@ -1,0 +1,12 @@
+{
+  "Out": "/tmp/bard-qa010-delivery",
+  "Duration": 20000000000,
+  "Sample": 1000000000,
+  "Audio": 100000000,
+  "Playlist": 123,
+  "Guilds": 1,
+  "Seed": 20261019,
+  "Warm": false,
+  "Resume": false,
+  "Faults": true
+}

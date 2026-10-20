@@ -1,0 +1,56 @@
+[
+  {
+    "segment": "20261020T020839.252159436Z",
+    "status": "pass",
+    "continuous_seconds": 120.634153596,
+    "target_completed": true,
+    "resource_samples": 61,
+    "resources": {
+      "rss_bytes": {
+        "baseline": 35110912,
+        "peak": 178995200,
+        "after_cleanup": 174391296
+      },
+      "heap_bytes": {
+        "baseline": 278728,
+        "peak": 5586672,
+        "after_cleanup": 1634584
+      },
+      "goroutines": {
+        "baseline": 3,
+        "peak": 16,
+        "after_cleanup": 3
+      },
+      "file_descriptors": {
+        "baseline": 10,
+        "peak": 19,
+        "after_cleanup": 10
+      },
+      "child_processes": {
+        "baseline": 0,
+        "peak": 2,
+        "after_cleanup": 0
+      },
+      "threads": {
+        "baseline": 8,
+        "peak": 14,
+        "after_cleanup": 14
+      },
+      "cpu_seconds": {
+        "baseline": 0.009485,
+        "peak": 106.569685,
+        "after_cleanup": 106.569685
+      },
+      "reaped_children_cpu_seconds": {
+        "baseline": 0.549748,
+        "peak": 9.478158,
+        "after_cleanup": 9.478158
+      }
+    },
+    "selected": 194,
+    "announced": 186,
+    "completed": 169,
+    "pending": 806,
+    "ledger_reconciled": true
+  }
+]

@@ -1,0 +1,51 @@
+[
+  {
+    "name": "full",
+    "command": [
+      "go",
+      "test",
+      "./...",
+      "-count=1"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 28.504,
+    "synthetic_compose_environment": false
+  },
+  {
+    "name": "race",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./...",
+      "-count=1"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 39.414,
+    "synthetic_compose_environment": false
+  },
+  {
+    "name": "vet",
+    "command": [
+      "go",
+      "vet",
+      "./..."
+    ],
+    "exit_code": 1,
+    "elapsed_seconds": 0.323,
+    "synthetic_compose_environment": false
+  },
+  {
+    "name": "docker",
+    "command": [
+      "docker",
+      "compose",
+      "--env-file",
+      "/dev/null",
+      "build"
+    ],
+    "exit_code": 1,
+    "elapsed_seconds": 10.479,
+    "synthetic_compose_environment": true
+  }
+]

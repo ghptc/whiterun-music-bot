@@ -1,0 +1,2 @@
+ok  	whiterun/internal/qasoak	1.061s
+ok  	whiterun/internal/media	1.025s

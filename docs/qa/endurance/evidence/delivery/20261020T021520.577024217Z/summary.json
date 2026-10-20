@@ -1,0 +1,97 @@
+{
+  "cache_memory_bytes": null,
+  "cleanup_ms": 47.233446,
+  "config": {
+    "Out": "/tmp/bard-qa010-delivery",
+    "Duration": 20000000000,
+    "Sample": 1000000000,
+    "Audio": 100000000,
+    "Playlist": 123,
+    "Guilds": 1,
+    "Seed": 20261019,
+    "Warm": false,
+    "Resume": false,
+    "Faults": true
+  },
+  "continuous_target_completed": true,
+  "discord_e2e": false,
+  "go_version": "go1.27.1-X:nodwarf5",
+  "guilds": [
+    {
+      "accepted": 123,
+      "announced": 65,
+      "batches": 1,
+      "frames": 661,
+      "guild": "1",
+      "latencies": {
+        "announcement_after_frame": {
+          "count": 65,
+          "max_ms": 46.012266,
+          "mean_ms": 43.74687456923077,
+          "p50_ms": 67.108864,
+          "p95_ms": 67.108864,
+          "p99_ms": 67.108864,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "cache_miss_resolution": {
+          "count": 123,
+          "max_ms": 3.98547,
+          "mean_ms": 3.519870219512195,
+          "p50_ms": 4.194304,
+          "p95_ms": 4.194304,
+          "p99_ms": 4.194304,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "delivery_first_frame": {
+          "count": 65,
+          "max_ms": 25.773702,
+          "mean_ms": 24.748196446153845,
+          "p50_ms": 33.554432,
+          "p95_ms": 33.554432,
+          "p99_ms": 33.554432,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "enqueue": {
+          "count": 1,
+          "max_ms": 42.412087,
+          "mean_ms": 42.412087,
+          "p50_ms": 67.108864,
+          "p95_ms": 67.108864,
+          "p99_ms": 67.108864,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "first_frame": {
+          "count": 65,
+          "max_ms": 70.898044,
+          "mean_ms": 68.49614240000001,
+          "p50_ms": 134.217728,
+          "p95_ms": 134.217728,
+          "p99_ms": 134.217728,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "transition": {
+          "count": 67,
+          "max_ms": 89.461902,
+          "mean_ms": 86.06459191044776,
+          "p50_ms": 134.217728,
+          "p95_ms": 134.217728,
+          "p99_ms": 134.217728,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        }
+      },
+      "pending": 55,
+      "selected": 68,
+      "terminal": {
+        "completed": 58,
+        "error_interrupted": 6,
+        "shutdown_interrupted": 1,
+        "unavailable": 3
+      }
+    }
+  ],
+  "real_elapsed_seconds": 20.05948612,
+  "segment": "20261020T021520.577024217Z",
+  "started_at": "2026-10-20T02:15:20.577043363Z",
+  "status": "pass",
+  "target_seconds": 20
+}

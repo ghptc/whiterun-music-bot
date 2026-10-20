@@ -1,0 +1,95 @@
+{
+  "cache_memory_bytes": null,
+  "cleanup_ms": 247.902554,
+  "config": {
+    "Out": "/tmp/bard-qa010-123",
+    "Duration": 20000000000,
+    "Sample": 2000000000,
+    "Audio": 100000000,
+    "Playlist": 123,
+    "Guilds": 2,
+    "Seed": 20261019,
+    "Warm": true,
+    "Resume": true,
+    "Faults": true
+  },
+  "continuous_target_completed": true,
+  "discord_e2e": false,
+  "go_version": "go1.27.1-X:nodwarf5",
+  "guilds": [
+    {
+      "accepted": 105,
+      "announced": 34,
+      "batches": 0,
+      "frames": 358,
+      "guild": "1",
+      "latencies": {
+        "first_frame": {
+          "count": 34,
+          "max_ms": 219.757493,
+          "mean_ms": 158.72302702941175,
+          "p50_ms": 268.435456,
+          "p95_ms": 268.435456,
+          "p99_ms": 268.435456,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "transition": {
+          "count": 34,
+          "max_ms": 281.091024,
+          "mean_ms": 234.18956717647058,
+          "p50_ms": 268.435456,
+          "p95_ms": 536.870912,
+          "p99_ms": 536.870912,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        }
+      },
+      "pending": 70,
+      "selected": 35,
+      "terminal": {
+        "completed": 32,
+        "error_interrupted": 2,
+        "unavailable": 1
+      }
+    },
+    {
+      "accepted": 105,
+      "announced": 34,
+      "batches": 0,
+      "frames": 359,
+      "guild": "2",
+      "latencies": {
+        "first_frame": {
+          "count": 34,
+          "max_ms": 210.556324,
+          "mean_ms": 166.18396644117647,
+          "p50_ms": 268.435456,
+          "p95_ms": 268.435456,
+          "p99_ms": 268.435456,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "transition": {
+          "count": 35,
+          "max_ms": 281.104514,
+          "mean_ms": 222.5931223714286,
+          "p50_ms": 268.435456,
+          "p95_ms": 536.870912,
+          "p99_ms": 536.870912,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        }
+      },
+      "pending": 69,
+      "selected": 36,
+      "terminal": {
+        "completed": 32,
+        "error_interrupted": 2,
+        "shutdown_interrupted": 1,
+        "unavailable": 1
+      }
+    }
+  ],
+  "real_elapsed_seconds": 20.252183061,
+  "segment": "20261020T021039.319373481Z",
+  "started_at": "2026-10-20T02:10:39.319396335Z",
+  "status": "pass",
+  "target_seconds": 20
+}

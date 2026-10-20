@@ -1,0 +1,26 @@
+=== RUN   TestEnduranceTwentyUsers
+=== RUN   TestEnduranceTwentyUsers/41
+    endurance_stress_test.go:144: seed=41 users=20 guilds=2 operations=2000
+=== RUN   TestEnduranceTwentyUsers/20261019
+    endurance_stress_test.go:144: seed=20261019 users=20 guilds=2 operations=2000
+--- PASS: TestEnduranceTwentyUsers (0.04s)
+    --- PASS: TestEnduranceTwentyUsers/41 (0.02s)
+    --- PASS: TestEnduranceTwentyUsers/20261019 (0.02s)
+=== RUN   TestEnduranceTwentyUsers
+=== RUN   TestEnduranceTwentyUsers/41
+    endurance_stress_test.go:144: seed=41 users=20 guilds=2 operations=2000
+=== RUN   TestEnduranceTwentyUsers/20261019
+    endurance_stress_test.go:144: seed=20261019 users=20 guilds=2 operations=2000
+--- PASS: TestEnduranceTwentyUsers (0.04s)
+    --- PASS: TestEnduranceTwentyUsers/41 (0.02s)
+    --- PASS: TestEnduranceTwentyUsers/20261019 (0.02s)
+=== RUN   TestEnduranceTwentyUsers
+=== RUN   TestEnduranceTwentyUsers/41
+    endurance_stress_test.go:144: seed=41 users=20 guilds=2 operations=2000
+=== RUN   TestEnduranceTwentyUsers/20261019
+    endurance_stress_test.go:144: seed=20261019 users=20 guilds=2 operations=2000
+--- PASS: TestEnduranceTwentyUsers (0.04s)
+    --- PASS: TestEnduranceTwentyUsers/41 (0.02s)
+    --- PASS: TestEnduranceTwentyUsers/20261019 (0.02s)
+PASS
+ok  	whiterun/internal/player	1.118s

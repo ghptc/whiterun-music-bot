@@ -1,0 +1,31 @@
+time="2026-10-19T23:12:17-03:00" level=warning msg="buildx Docker CLI plugin not found: falling back to the classic builder. BuildKit-only build features (multi-arch, secrets, ssh, additional contexts, ...) will not be available"
+ Image whiterun-music-bot-bard Building
+ Image whiterun-music-bot-bard Building
+Sending build context to Docker daemon  524.5kB
+Sending build context to Docker daemon  1.735MB
+
+Step 1/22 : FROM golang:1.27-bookworm AS test-env
+ ---> 648f440f42a0
+Step 2/22 : RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg     && rm -rf /var/lib/apt/lists/*     && ffmpeg -version     && ffmpeg -hide_banner -loglevel error -f lavfi -i anullsrc=r=48000:cl=stereo        -t 0.1 -c:a libopus -f opus -y /dev/null
+ ---> Using cache
+ ---> fcb3ccc82117
+Step 3/22 : WORKDIR /src
+ ---> Using cache
+ ---> f9acd273ef9d
+Step 4/22 : COPY go.mod go.sum ./
+ ---> Using cache
+ ---> 5cd76b74461e
+Step 5/22 : RUN GODEBUG=netedns0=0 go mod download
+ ---> Using cache
+ ---> 866ed85c2844
+Step 6/22 : COPY cmd ./cmd
+ ---> Using cache
+ ---> 48e55d2b6b6f
+Step 7/22 : COPY internal ./internal
+ ---> 2844f6dd164d
+Step 8/22 : FROM test-env AS build
+ ---> 2844f6dd164d
+Step 9/22 : RUN go vet ./... && go test ./... && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/bard ./cmd/bot && sha256sum /out/bard
+ ---> Running in 2b6f7ad9d9e8
+[91minternal/qasoak/accounting_test.go:9:9: range var tc copies lock: struct{name string; g whiterun/internal/qasoak.guildRun; valid bool} contains whiterun/internal/qasoak.guildRun contains sync.Mutex
+[0mThe command '/bin/sh -c go vet ./... && go test ./... && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/bard ./cmd/bot && sha256sum /out/bard' returned a non-zero code: 1

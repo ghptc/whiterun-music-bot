@@ -1,0 +1,9 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/discord
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkEnduranceLocalACK-8   	   14070	     16947 ns/op	   11184 B/op	     125 allocs/op
+BenchmarkEnduranceLocalACK-8   	   14227	     16833 ns/op	   11069 B/op	     125 allocs/op
+BenchmarkEnduranceLocalACK-8   	   13766	     17306 ns/op	   11106 B/op	     125 allocs/op
+PASS
+ok  	whiterun/internal/discord	0.720s
