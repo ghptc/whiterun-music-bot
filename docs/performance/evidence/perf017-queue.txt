@@ -1,7 +1,7 @@
 goos: linux
 goarch: amd64
 pkg: whiterun/internal/discord
-cpu: AMD Ryzen 7 9800X3D 8-Core Processor           
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
 BenchmarkQueueV2/1-8 	  179652	      1291 ns/op	         6.000 components	         1.000 messages	         0 missing-artworks	       513.0 payload-bytes	    1800 B/op	      27 allocs/op
 BenchmarkQueueV2/1-8 	  182976	      1294 ns/op	         6.000 components	         1.000 messages	         0 missing-artworks	       513.0 payload-bytes	    1800 B/op	      27 allocs/op
 BenchmarkQueueV2/1-8 	  186333	      1308 ns/op	         6.000 components	         1.000 messages	         0 missing-artworks	       513.0 payload-bytes	    1800 B/op	      27 allocs/op

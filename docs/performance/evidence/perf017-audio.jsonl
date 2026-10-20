@@ -1,0 +1,2 @@
+{"page_duration_us": 1000000, "first_audio_packet_ms": [1507.317, 1509.473, 1504.096, 1503.369, 1503.896, 1503.859, 1503.987, 1504.513], "median_ms": 1504.0415, "ten_second_payload_bytes": 121173, "ten_second_cpu_ms": 63.491, "children_peak_rss_kib": 45928}
+{"page_duration_us": 20000, "first_audio_packet_ms": [18.257, 23.876, 23.676, 23.965, 23.147, 23.083, 23.445, 23.103], "median_ms": 23.296, "ten_second_payload_bytes": 134403, "ten_second_cpu_ms": 66.355, "children_peak_rss_kib": 47888}

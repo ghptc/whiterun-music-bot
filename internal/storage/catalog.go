@@ -9,7 +9,28 @@ import (
 	"whiterun/internal/media"
 )
 
-func (s *DB) SaveCatalog(ctx context.Context, t media.Track) error {
+type catalogWriter interface {
+	ExecContext(context.Context, string, ...any) (sql.Result, error)
+}
+
+func (s *DB) SaveCatalog(ctx context.Context, t media.Track) error { return saveCatalog(ctx, s.db, t) }
+
+// SaveCatalogBatch commits collection metadata once, without changing catalog semantics.
+func (s *DB) SaveCatalogBatch(ctx context.Context, tracks []media.Track) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	for _, t := range tracks {
+		if err := saveCatalog(ctx, tx, t); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
+func saveCatalog(ctx context.Context, writer catalogWriter, t media.Track) error {
 	if t.SpotifyID == "" || t.RequestedSource != "spotify" {
 		return fmt.Errorf("catalog requires Spotify metadata")
 	}
@@ -19,7 +40,7 @@ func (s *DB) SaveCatalog(ctx context.Context, t media.Track) error {
 	if err != nil {
 		return err
 	}
-	_, err = s.db.ExecContext(ctx, `INSERT INTO music_catalog(spotify_id,metadata,updated_at) VALUES(?,?,?) ON CONFLICT(spotify_id) DO UPDATE SET metadata=CASE
+	_, err = writer.ExecContext(ctx, `INSERT INTO music_catalog(spotify_id,metadata,updated_at) VALUES(?,?,?) ON CONFLICT(spotify_id) DO UPDATE SET metadata=CASE
  WHEN coalesce(json_extract(excluded.metadata,'$.SpotifyArtworkURL'),'')='' THEN
  json_set(excluded.metadata,'$.SpotifyArtworkURL',coalesce(json_extract(music_catalog.metadata,'$.SpotifyArtworkURL'),''))
  ELSE excluded.metadata END,updated_at=excluded.updated_at`, t.SpotifyID, string(raw), time.Now().Unix())

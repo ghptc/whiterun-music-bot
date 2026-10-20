@@ -81,7 +81,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 		markResolved()
 	}, written: func() { t.Timing.Event("ffmpeg_first_input", streamStart) }}
 
-	ff := media.Command(ctx, s.FFmpeg, "-hide_banner", "-loglevel", "error", "-nostdin", "-i", "pipe:0", "-vn", "-ac", "2", "-ar", "48000", "-c:a", "libopus", "-b:a", "96k", "-vbr", "off", "-application", "audio", "-frame_duration", "20", "-f", "opus", "-flush_packets", "1", "pipe:1")
+	ff := media.Command(ctx, s.FFmpeg, "-hide_banner", "-loglevel", "error", "-nostdin", "-i", "pipe:0", "-vn", "-ac", "2", "-ar", "48000", "-c:a", "libopus", "-b:a", "96k", "-vbr", "off", "-application", "audio", "-frame_duration", "20", "-f", "opus", "-flush_packets", "1", "-page_duration", "20000", "pipe:1")
 	ff.Stdin = input
 	ffErr := &media.LimitedBuffer{Limit: 512, Tail: true}
 	ff.Stderr = ffErr

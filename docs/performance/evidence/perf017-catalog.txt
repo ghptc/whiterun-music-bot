@@ -1,0 +1,18 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/storage
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkCatalogCollection/10/batch=false-8         	    2198	    153917 ns/op	   23794 B/op	     190 allocs/op
+BenchmarkCatalogCollection/10/batch=false-8         	    2320	    153031 ns/op	   23775 B/op	     190 allocs/op
+BenchmarkCatalogCollection/10/batch=false-8         	    2311	    153805 ns/op	   23776 B/op	     190 allocs/op
+BenchmarkCatalogCollection/10/batch=true-8          	    2413	    145239 ns/op	   24392 B/op	     207 allocs/op
+BenchmarkCatalogCollection/10/batch=true-8          	    2439	    145419 ns/op	   24333 B/op	     207 allocs/op
+BenchmarkCatalogCollection/10/batch=true-8          	    2448	    145047 ns/op	   24332 B/op	     207 allocs/op
+BenchmarkCatalogCollection/302/batch=false-8        	      76	   4676009 ns/op	  718121 B/op	    5740 allocs/op
+BenchmarkCatalogCollection/302/batch=false-8        	      75	   4716265 ns/op	  718147 B/op	    5740 allocs/op
+BenchmarkCatalogCollection/302/batch=false-8        	      75	   4725675 ns/op	  718182 B/op	    5740 allocs/op
+BenchmarkCatalogCollection/302/batch=true-8         	      81	   4328531 ns/op	  723406 B/op	    6049 allocs/op
+BenchmarkCatalogCollection/302/batch=true-8         	      80	   4312178 ns/op	  723431 B/op	    6049 allocs/op
+BenchmarkCatalogCollection/302/batch=true-8         	      84	   4296737 ns/op	  723413 B/op	    6049 allocs/op
+PASS
+ok  	whiterun/internal/storage	4.246s
