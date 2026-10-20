@@ -12,3 +12,5 @@
 /coverage-summary.txt
 
 /scripts/__pycache__/
+
+/.qa-runs/

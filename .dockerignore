@@ -5,3 +5,5 @@
 bin
 bard
 coverage.out
+
+.qa-runs
