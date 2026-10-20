@@ -1,0 +1,61 @@
+name: Advanced reliability QA-008
+on:
+  workflow_dispatch:
+    inputs:
+      fuzz_seconds:
+        description: Seconds per native Go fuzz target (1-3600)
+        default: '60'
+        required: true
+permissions:
+  contents: read
+jobs:
+  exploration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Install local audio runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg openssl
+      - name: Explore all deterministic model seeds under race detector
+        run: go test -race ./internal/player ./internal/media ./internal/storage ./internal/discord -run '^TestAdvanced' -count=1 -timeout=5m
+      - name: Native fuzz campaigns
+        env:
+          QA_FUZZ_SECONDS: ${{ inputs.fuzz_seconds }}
+        run: python3 -B scripts/qa008_fuzz.py --seconds "$QA_FUZZ_SECONDS"
+      - name: Install pinned mutation tool
+        run: GOBIN="$RUNNER_TEMP/qa008-tools" go install github.com/go-gremlins/gremlins/cmd/gremlins@v0.6.0
+      - name: Systematic mutation campaigns
+        run: python3 -B scripts/qa008_mutation.py --tool "$RUNNER_TEMP/qa008-tools/gremlins"
+      - name: Offline executable integration coverage
+        run: python3 -B scripts/qa008_binary_coverage.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa008-exploration
+          path: |
+            docs/qa/advanced/evidence/
+            internal/**/testdata/fuzz/
+  vulnerability-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Install pinned security scanner
+        run: GOBIN="$RUNNER_TEMP/qa008-tools" go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
+      - name: Scan source reachability
+        run: python3 -B scripts/qa008_security.py --tool "$RUNNER_TEMP/qa008-tools/govulncheck"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa008-security
+          path: docs/qa/advanced/evidence/security/
