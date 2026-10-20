@@ -6,6 +6,7 @@ import (
 	"slices"
 	"testing"
 	"testing/synctest"
+	"time"
 
 	"whiterun/internal/media"
 )
@@ -142,6 +143,32 @@ func (f *lifecycleFixture) check(stage string) {
 	m := &f.model
 	if current != m.current || !slices.Equal(lifecycleTitles(s.Queued), m.queue) || !slices.Equal(lifecycleTitles(f.g.player.History()), m.history) || s.Loop != m.loop || s.Paused != m.paused || s.Autoplay != m.autoplay || f.g.player.Ticket() != m.generation || s.CurrentStarted != (m.current != "") {
 		f.t.Fatalf("%s state mismatch: current=%q queue=%v history=%v loop=%q paused=%v autoplay=%v generation=%d oracle=%+v", stage, current, lifecycleTitles(s.Queued), lifecycleTitles(f.g.player.History()), s.Loop, s.Paused, s.Autoplay, f.g.player.Ticket(), m)
+	}
+	tracks := append(append([]media.Track{}, s.Queued...), f.g.player.History()...)
+	if s.Current != nil {
+		tracks = append(tracks, *s.Current)
+	}
+	for _, tr := range tracks {
+		id, art, position, total := "", "", 0, 0
+		switch tr.Title {
+		case "a", "b", "c", "d":
+			id = "id-" + tr.Title
+			art = "https://i.scdn.co/image/" + tr.Title
+			position = int(tr.Title[0]-'a') + 1
+			total = 4
+		case "request":
+			id = "0123456789012345678901"
+			art = "https://i.scdn.co/image/fixture"
+			position, total = 1, 1
+			if tr.RequestedBy != "3" && tr.RequestedBy != "4" {
+				f.t.Fatal("requester identity lost", tr)
+			}
+		default:
+			f.t.Fatal("invented recording", tr.Title)
+		}
+		if tr.SpotifyID != id || tr.SpotifyArtworkURL != art || tr.Position != position || tr.Total != total || tr.Duration != time.Minute {
+			f.t.Fatal("recording metadata changed", stage, tr)
+		}
 	}
 	saved, err := f.store.LoadGuild(context.Background(), "1")
 	if err != nil {
