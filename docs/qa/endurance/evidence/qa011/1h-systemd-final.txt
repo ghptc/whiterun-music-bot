@@ -1,0 +1,13 @@
+ActiveState=active
+SubState=exited
+MainPID=0
+Result=success
+ExecMainStartTimestamp=Mon 2026-10-19 23:27:20 -03
+ExecMainExitTimestamp=Tue 2026-10-20 00:27:20 -03
+ExecMainCode=1
+ExecMainStatus=0
+ControlGroup=
+MemoryCurrent=[not set]
+MemoryPeak=1314050048
+CPUUsageNSec=1696672347000
+TasksCurrent=[not set]

@@ -1,0 +1,25 @@
+Id=qa011-1h-20261020t022653z.service
+ActiveState=active
+SubState=exited
+MainPID=0
+Result=success
+ExecMainStartTimestamp=Mon 2026-10-19 23:27:20 -03
+ExecMainExitTimestamp=Tue 2026-10-20 00:27:20 -03
+ExecMainCode=1
+ExecMainStatus=0
+ControlGroup=
+MemoryPeak=1314050048
+CPUUsageNSec=1696672347000
+
+Id=qa011-control-10m-20261020t022653z.service
+ActiveState=active
+SubState=exited
+MainPID=0
+Result=success
+ExecMainStartTimestamp=Tue 2026-10-20 05:18:17 -03
+ExecMainExitTimestamp=Tue 2026-10-20 05:28:17 -03
+ExecMainCode=1
+ExecMainStatus=0
+ControlGroup=
+MemoryPeak=64303104
+CPUUsageNSec=65909956000

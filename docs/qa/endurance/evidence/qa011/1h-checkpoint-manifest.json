@@ -1,0 +1,16 @@
+{
+  "directory": "/home/gabriel/Projects/whiterun-music-bot/.qa-runs/qa011-20261020T022653Z/1h",
+  "files": [
+    {
+      "file": "qa-only.db",
+      "bytes": 5177344,
+      "sha256": "061a01bb5adb06901a81bda3c36b744d86047a79266fd9b812deea46ebcfb1d9"
+    },
+    {
+      "file": "qa010-owned.json",
+      "bytes": 276,
+      "sha256": "ed02ad68caa0953541ebf71c4e817cccd52795362ba674700c63eae935031256"
+    }
+  ],
+  "checkpoint_exported_to_git": false
+}

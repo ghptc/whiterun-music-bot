@@ -1,0 +1,32 @@
+[
+  {
+    "metric": "delivery_first_frame",
+    "count": 3760,
+    "mean_ms": 58.01518850558511,
+    "max_ms": 135.527417
+  },
+  {
+    "metric": "announcement_after_frame",
+    "count": 3760,
+    "mean_ms": 327.1240660215426,
+    "max_ms": 730.677303
+  },
+  {
+    "metric": "transition",
+    "count": 3898,
+    "mean_ms": 485.8601233447922,
+    "max_ms": 5650.049558
+  },
+  {
+    "metric": "cache_miss_resolution",
+    "count": 4000,
+    "mean_ms": 8.353582738000002,
+    "max_ms": 71.874723
+  },
+  {
+    "metric": "cache_hit_resolution",
+    "count": 4000,
+    "mean_ms": 0.02609960425,
+    "max_ms": 52.899053
+  }
+]

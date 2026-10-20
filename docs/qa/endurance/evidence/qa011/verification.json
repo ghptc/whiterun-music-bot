@@ -1,0 +1,34 @@
+{
+  "campaigns": [
+    {
+      "campaign": "1h",
+      "export_hashes": {
+        "summary.json": "d4ae769c4ef824b93e8378250a8b994ba9949605c6712e2d8a69dfaa3136958e",
+        "events.jsonl": "5a88c36f45cf5aaa6fbea4431c79f5aaafbfdc012562f367009db6528ba23dba",
+        "resources.jsonl": "97cc5bda900cde2f901c064038b3a52890332a752f085f5d1d5eab7bf7ee46c4"
+      },
+      "actual_seconds": 3600.141040267,
+      "time_target_completed": true,
+      "harness_passed": true,
+      "export_byte_exact": true,
+      "ledger_reconciled": true
+    },
+    {
+      "campaign": "control-10m",
+      "export_hashes": {
+        "summary.json": "47a768872f085017dd4c04485e52e336e1a096011829327cb6104bbe7608a786",
+        "events.jsonl": "b22ef0514a080f2c54711208d6d0978b9dcd06fd356fb9174e3971cea02fc043",
+        "resources.jsonl": "da8ed54afccce548627ee6b61bb427953c17282fb704ad785eca4e9045bb90fb"
+      },
+      "actual_seconds": 600.029097983,
+      "time_target_completed": true,
+      "harness_passed": true,
+      "export_byte_exact": true,
+      "ledger_reconciled": true
+    }
+  ],
+  "operational_memory_gate": "NOT APPROVED",
+  "6h": "NOT STARTED",
+  "12h": "NOT STARTED",
+  "production_or_harness_changes": false
+}

@@ -1,0 +1,16 @@
+{
+  "directory": "/home/gabriel/Projects/whiterun-music-bot/.qa-runs/qa011-20261020T022653Z/control-10m",
+  "files": [
+    {
+      "file": "qa-only.db",
+      "bytes": 2818048,
+      "sha256": "86cfce1183290fd995f8af0193c1b6fa36c2c5ad6c93b9d924a94cb308f12b98"
+    },
+    {
+      "file": "qa010-owned.json",
+      "bytes": 284,
+      "sha256": "7d5aa2d9b9ae18b8f38a1ff85f4f258f06a3ace5c06d8e3b9942a7506234e188"
+    }
+  ],
+  "checkpoint_exported_to_git": false
+}

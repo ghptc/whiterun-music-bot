@@ -4,10 +4,10 @@
 
 | Gate | Estado | Próxima evidência necessária |
 |---|---|---|
-| 1h contínua | PENDENTE | executar CLI/workflow pelo tempo integral, reconciliar ledger e recursos |
+| 1h contínua | TEMPO/INTEGRIDADE APROVADOS; RECURSOS BLOQUEADOS | 3.600,141s reais executados na QA-011; concluir triagem do crescimento de RSS |
 | 6h / 12h contínuas | PENDENTE | runner dedicado, segmentos íntegros, relatório de cleanup/repouso e sem extrapolação de tempo |
-| Playlist 500 completa em cada guild | PENDENTE | drenar todas as posições, além do aceite/preservação já demonstrados |
-| Crescimento sustentado de RSS/heap/cache | INCONCLUSIVO em sessões curtas | séries por horas, ciclos equivalentes, pós-GC/repouso, perfil de retenção; não classificar RSS crescente isoladamente como leak |
+| Playlist 500 completa em cada guild | APROVADA LOCALMENTE NA QA-011 | três lotes de 500 posições drenados por guild, com falhas classificadas; E2E real segue pendente |
+| Crescimento sustentado de RSS/heap/cache | BLOQUEADO / EM TRIAGEM | RSS ~1,18GiB após uma hora com race, heap pós-GC ~0,93MiB; comparar build sem race e atribuir crescimento antes de liberar 6h/12h |
 | Discord Voice/DAVE audível, reconnect e permissões | PENDENTE | executar checklist autorizado com clientes reais e imagem de release |
 | Falhas externas prolongadas | PENDENTE | provedor/rede real controlada e recuperação durante sessão prolongada |
 | Crash físico em commit/fsync e ENOSPC | PENDENTE | filesystem/volume exclusivo e reprodução controlada; SIGKILL mid-transaction não prova resistência a perda de energia |
@@ -25,3 +25,7 @@
 - Suíte completa, race, vet e Docker: consultar validation.json para os códigos finais, inclusive logs anteriores de falha de fixture preservados.
 
 Nenhum defeito novo de produção confirmado exige correção nesta etapa. Se uma campanha futura falhar, preservar diretório/checkpoint/seed, reproduzir deterministicamente, registrar causa/impacto/severidade e regressão antes de alterar produção. UI e arquitetura continuam congeladas.
+
+## QA-011
+
+A campanha de uma hora terminou no tempo integral, exit=0, fila reconciliada, FD/goroutines ao baseline e zero filhos diretos. Há crescimento sustentado de RSS que impede a aprovação operacional global. As campanhas 6h/12h permanecem não iniciadas pela condição explícita de aprovação da primeira campanha; não por um resultado verde presumido. Controle diagnóstico sem race concluído em 600,029s, com RSS de cleanup 17,73MiB; não substitui uma sessão prolongada. Nenhum Discord real acessado, nenhum serviço de produção interrompido, checkpoints exclusivos de QA preservados.

@@ -1,6 +1,6 @@
 # Homologação Discord real — não executada
 
-**Todos os itens abaixo estão PENDENTES.** Reprodução FFmpeg local, SDK contra localhost, mocks e readiness unitário não aprovam Discord Voice/DAVE.
+**Todos os itens abaixo estão PENDENTES.** QA-011 executou uma hora local, sem Discord; isso não aprova V13 nem qualquer outro item externo. Reprodução FFmpeg local, SDK contra localhost, mocks e readiness unitário não aprovam Discord Voice/DAVE.
 
 ## Preparação e autorização
 

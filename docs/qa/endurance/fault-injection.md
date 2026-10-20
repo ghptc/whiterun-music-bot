@@ -38,3 +38,9 @@ History/current recovery é regido pela política existente: Current salvo pode 
 | QA010-H02 | baixa, bloqueio de build QA | range copiava estrutura com mutex na tabela de accounting | fixture usa ponteiros; falha vet/Docker anterior preservada e validação repetida |
 
 Nenhum defeito novo de produção foi confirmado nos cenários executados. Não houve alteração de produção silenciosa nem mutante restaurado parcialmente. Falhas físicas de disco, netem prolongado, comportamento real de provedor e reconexão DAVE continuam pendentes; não foram substituídos por mocks declarados como E2E.
+
+## QA-011 — resultados após uma hora
+
+O mesmo harness foi executado por 3.600,141s reais com 140 indisponibilidades de fonte e 274 interrupções de transporte/contexto. O ledger registrou 414 avanços após falha e 140 cadeias recuperadas até uma faixa completed. As duas interrupções finais são shutdown planejado, não erros ocultos nem skips de usuário. Não houve cadeia de falhas sem recuperação, terminal perdido ou filho próprio remanescente após cleanup.
+
+Nova observação QA011-R01: RSS cresceu sustentadamente no binário com race, com heap Go baixo e estável. Severidade: bloqueio da aprovação operacional/continuidade 6h–12h; impacto em produção ainda não confirmado. Causa raiz não estabelecida; overhead documentado de race é hipótese consistente e foi confrontado com controle de dez minutos sem race (RSS baixo, sem tendência comparável). Reprodução: comando original e hash em evidence/qa011/execution.json; séries em evidence/qa011/1h/. Nenhuma correção de produção proposta como confirmada e nenhuma refatoração realizada. Não há reprodução de defeito funcional novo a converter em regressão antes da triagem desse consumo.

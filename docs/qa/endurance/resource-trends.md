@@ -1,6 +1,6 @@
 # Recursos, latência e baselines locais
 
-Séries brutas em resources.jsonl; baseline e cleanup têm GC explícito, amostras intermediárias usam o GC normal. Medições são do processo do harness, instrumentado com race; CPU dos filhos reaped está separada. Coletas periódicas podem não capturar um pico de subprocesso curto.
+Séries brutas em resources.jsonl; baseline e cleanup têm GC explícito, amostras intermediárias usam o GC normal. Nas tabelas QA-010, medições são do processo do harness instrumentado com race; a seção QA-011 distingue o controle sem race. CPU dos filhos reaped está separada. Coletas periódicas podem não capturar um pico de subprocesso curto.
 
 ![Séries temporais locais](evidence/resource-trends.png)
 
@@ -55,3 +55,32 @@ Medição de configuração inicial, não coeficiente universal de memória do b
 Médias/máximos extraídos de sumários; p50/p95/p99 do harness são limites superiores de buckets, não percentis exatos. Traces dos comandos guardam duração individual da API Go e erros esperados, não latência de slash commands pela rede. Há três repetições dos benchmarks (benchmarks.txt, ack-benchmark.txt), executadas em host compartilhado com outras verificações.
 
 Nenhum SLA foi inventado. Para fixar budget: repetir baseline/candidato em runner dedicado e mesma imagem, alternar ordem, usar várias amostras/benchstat e investigar dispersão antes de bloquear release por números. Nesta etapa, gates rígidos são comportamentais (corrupção, deadlock, processo próprio restante, perda de identidade); performance permanece baseline observado. Latência de ACK e Queue reais de Discord segue pendente.
+
+## QA-011 — uma hora real, com race
+
+| Métrica | Baseline | Pico amostrado | Após cleanup/GC |
+|---|---:|---:|---:|
+| RSS bytes | 36.904.960 | 1.271.418.880 | 1.268.924.416 |
+| Heap Go bytes | 153.128 | 5.441.752 | 978.464 |
+| Goroutines | 3 | 22 | 3 |
+| FD | 10 | 22 | 10 |
+| Filhos diretos | 0 | 3 | 0 |
+| Threads | 6 | 10 | 10 |
+
+CPU própria acumulada: 1.541,36s; filhos reaped: 155,05s. CPU total da unidade systemd: 1.696,67s; memória de pico da unidade, incluindo filhos: 1.314.050.048 bytes. A unidade terminou exit=0, sem MainPID ativo. Houve 361 amostras; 359 periódicas e pontos baseline/cleanup.
+
+RSS manteve inclinação positiva: 20,41MiB/min na janela inicial de dez minutos, 19,42 entre 10–30min, 18,17 entre 30–50min e 16,70 entre 50–60min. Nenhuma extrapolação foi contada como sessão executada. No final, o RSS estava cerca de 1,18GiB, enquanto o heap após GC era 0,93MiB. Isso é **crescimento sustentado observado**, não prova isolada de vazamento de objetos Go ou de produção. O gate operacional permanece bloqueado até atribuição/validação adequada.
+
+A documentação primária do Go descreve memória adicional da instrumentação race, inclusive para defer/recover em goroutines de longa vida, que não aparece em ReadMemStats/pprof. Esse mecanismo é compatível com a divergência observada, mas não foi feita atribuição quantitativa aos call sites do Bardo. [Go: Runtime Overhead](https://go.dev/doc/articles/race_detector). O controle sem race concluiu 600,029s, com o mesmo harness/workload e limites. Dez minutos não demonstram estabilidade de uma hora sem instrumentação.
+
+Médias por guild de entrega do primeiro frame: 57,90/58,13ms; callback após entrega: 323,55/330,70ms; transição: 489,59/482,13ms. Máximos de transição 5,50/5,65s incluem reabastecimento de lotes e restrição de CPU. Cache miss médio 8,33/8,38ms; hit médio 0,0392/0,0130ms. Histogramas continuam sendo limites superiores de buckets, não percentis exatos. Latência real de Discord continua não medida.
+
+Não se repetiu qualquer modificação/refatoração de produção para reduzir o RSS do teste. Campanhas de 6h/12h com o mesmo binário race e envelope de 2GiB não serão liberadas com base apenas na hipótese de overhead. Ver evidence/qa011/1h-resource-review.json para as regressões lineares por janela e as séries brutas para auditar a análise.
+
+### Controle concluído sem race
+
+Nas amostras periódicas dos primeiros dez minutos, RSS com race: 89,02–287,06MiB, inclinação 20,41MiB/min; sem race: 20,66–25,11MiB, inclinação 0,109MiB/min. O controle terminou com RSS de 17,73MiB e heap de 1,45MiB após cleanup/GC. Goroutines 3→24→3, FD 10→27→10 e filhos 0→4→0. Selecionou 1.148 faixas em dez minutos, contra 3.900 na hora instrumentada: volume/duração não são idênticos, e não foi feita comparação sob throughput fixo. A associação com instrumentação é forte; atribuição quantitativa de toda a diferença e ausência de vazamento de produção permanecem não demonstradas. Não há correção de produção justificada por esses dados.
+
+![RSS da hora e controle sem race](evidence/qa011/resource-comparison.png)
+
+Dados comparativos e slopes em evidence/qa011/comparison.json. Próxima evidência para liberar campanhas longas: sessão comparável de uma hora sem race e triagem da retenção fora do heap antes de aumentar duração/limites. A QA-011 não eleva limites para presumir aprovação de 6h/12h.

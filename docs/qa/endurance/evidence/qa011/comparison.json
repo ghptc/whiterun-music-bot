@@ -1,0 +1,48 @@
+{
+  "1h": {
+    "first_10_minutes_samples": 59,
+    "rss_min_MiB": 89.0234375,
+    "rss_max_MiB": 287.0625,
+    "rss_slope_MiB_per_minute": 20.405593754224544,
+    "after_cleanup": {
+      "at": "2026-10-20T03:27:20.636226773Z",
+      "cache_memory_bytes": null,
+      "child_pids": {},
+      "child_processes": 0,
+      "cpu_seconds": 1541.362632,
+      "elapsed_seconds": 3600.140806197,
+      "file_descriptors": 10,
+      "goroutines": 3,
+      "heap_bytes": 978464,
+      "heap_objects": 3812,
+      "phase": "after_cleanup_gc",
+      "reaped_children_cpu_seconds": 155.047815,
+      "rss_bytes": 1268924416,
+      "threads": 10,
+      "total_alloc_bytes": 29045304760
+    }
+  },
+  "control-10m": {
+    "first_10_minutes_samples": 59,
+    "rss_min_MiB": 20.65625,
+    "rss_max_MiB": 25.109375,
+    "rss_slope_MiB_per_minute": 0.10903712908283081,
+    "after_cleanup": {
+      "at": "2026-10-20T08:28:17.520628724Z",
+      "cache_memory_bytes": null,
+      "child_pids": {},
+      "child_processes": 0,
+      "cpu_seconds": 21.350479,
+      "elapsed_seconds": 600.028987331,
+      "file_descriptors": 10,
+      "goroutines": 3,
+      "heap_bytes": 1523648,
+      "heap_objects": 7217,
+      "phase": "after_cleanup_gc",
+      "reaped_children_cpu_seconds": 44.48071,
+      "rss_bytes": 18591744,
+      "threads": 10,
+      "total_alloc_bytes": 8211607776
+    }
+  }
+}

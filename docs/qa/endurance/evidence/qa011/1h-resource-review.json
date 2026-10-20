@@ -1,0 +1,62 @@
+{
+  "real_seconds": 3600.141040267,
+  "harness_status": "pass",
+  "continuous_target_completed": true,
+  "operational_gate": "not_approved: sustained RSS growth requires explanation",
+  "rss_windows": [
+    {
+      "window_seconds": [
+        0,
+        600
+      ],
+      "samples": 59,
+      "rss_first_MiB": 89.0234375,
+      "rss_last_MiB": 287.0625,
+      "rss_slope_MiB_per_minute": 20.405593754224544,
+      "heap_min_MiB": 1.6396102905273438,
+      "heap_max_MiB": 4.490264892578125
+    },
+    {
+      "window_seconds": [
+        600,
+        1800
+      ],
+      "samples": 120,
+      "rss_first_MiB": 292.7265625,
+      "rss_last_MiB": 644.046875,
+      "rss_slope_MiB_per_minute": 19.42126560911835,
+      "heap_min_MiB": 1.5583724975585938,
+      "heap_max_MiB": 5.088165283203125
+    },
+    {
+      "window_seconds": [
+        1800,
+        3000
+      ],
+      "samples": 120,
+      "rss_first_MiB": 649.90625,
+      "rss_last_MiB": 1044.31640625,
+      "rss_slope_MiB_per_minute": 18.172262638994045,
+      "heap_min_MiB": 1.5571136474609375,
+      "heap_max_MiB": 5.189659118652344
+    },
+    {
+      "window_seconds": [
+        3000,
+        3600
+      ],
+      "samples": 60,
+      "rss_first_MiB": 1047.69140625,
+      "rss_last_MiB": 1212.51953125,
+      "rss_slope_MiB_per_minute": 16.701199365116423,
+      "heap_min_MiB": 1.8540878295898438,
+      "heap_max_MiB": 5.048881530761719
+    }
+  ],
+  "transitions": 3898,
+  "post_failure_selections": 414,
+  "recovered_chains_to_completion": 140,
+  "unrecovered_failure_chains": 0,
+  "go_race_reference": "https://go.dev/doc/articles/race_detector",
+  "diagnosis": "Sustained RSS growth with stable Go heap. Race overhead is documented and consistent; exact attribution is not demonstrated by a short non-race control. No production leak confirmed."
+}

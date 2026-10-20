@@ -1,0 +1,29 @@
+.qa-runs/qa011-soak-control: go1.27.1-X:nodwarf5
+	path	whiterun/cmd/qa-soak
+	mod	whiterun	v0.0.0-20261020022347-27a49ba5575d+dirty
+	dep	github.com/dustin/go-humanize	v1.0.1	h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY=
+	dep	github.com/google/uuid	v1.6.0	h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+	dep	github.com/remyoudompheng/bigfft	v0.0.0-20230129092748-24d4a6f8daec	h1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=
+	dep	golang.org/x/exp	v0.0.0-20250620022241-b7579e27df2b	h1:M2rDM6z3Fhozi9O7NWsxAkg/yqS/lQJ6PmkyIV3YP+o=
+	dep	golang.org/x/net	v0.56.0	h1:Rw8j/hFzGvJUZwNBXnAtf5sVDVt+65SK2C7IxCxZt5o=
+	dep	golang.org/x/sys	v0.47.0	h1:o7XGOvZQCADBQQ4Y7VNq2dRWQR7JmOUW8Kxx4ZsNgWs=
+	dep	golang.org/x/text	v0.40.0	h1:Ub2Z6/xjgF1WrYQz2nuITOEegKFtiIy+rieRJ5lHZKs=
+	dep	modernc.org/libc	v1.66.10	h1:yZkb3YeLx4oynyR+iUsXsybsX4Ubx7MQlSYEw4yj59A=
+	dep	modernc.org/mathutil	v1.7.1	h1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=
+	dep	modernc.org/memory	v1.11.0	h1:o4QC8aMQzmcwCK3t3Ux/ZHmwFPzE6hf2Y5LbkRs+hbI=
+	dep	modernc.org/sqlite	v1.39.1	h1:H+/wGFzuSCIEVCvXYVHX5RQglwhMOvtHSv+VtidL2r4=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	CGO_ENABLED=1
+	build	CGO_CFLAGS=
+	build	CGO_CPPFLAGS=
+	build	CGO_CXXFLAGS=
+	build	CGO_LDFLAGS=
+	build	GOARCH=amd64
+	build	GOEXPERIMENT=nodwarf5
+	build	GOOS=linux
+	build	GOAMD64=v1
+	build	vcs=git
+	build	vcs.revision=27a49ba5575d13f9e782f674b51b7ebb0fa7a3fe
+	build	vcs.time=2026-10-20T02:23:47Z
+	build	vcs.modified=true

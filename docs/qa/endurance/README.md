@@ -1,6 +1,6 @@
 # QA-010 — Endurance e confiabilidade operacional
 
-**Status: harness e campanhas locais curtas validados; estabilidade de horas e release ainda não homologadas.** Maior segmento contínuo executado: 120,63 segundos. Nenhuma sessão de 1h, 6h ou 12h foi aprovada. Produção, Spotify Fidelity, Force Play e UI não foram alterados.
+**QA-011: uma hora real executada e integridade aprovada; gate operacional de memória ainda bloqueado.** Maior segmento contínuo: 3.600,141 segundos. Há crescimento sustentado de RSS no binário com race, ainda em triagem; não é diagnóstico confirmado de vazamento de produção. Campanhas 6h/12h não iniciadas nem aprovadas. Ver [resultados QA-011](soak-results.md#qa-011--campanha-real-de-uma-hora). Produção, Spotify Fidelity, Force Play, UI e o harness não foram alterados na QA-011.
 
 ## Inventário reutilizado
 
@@ -27,7 +27,7 @@ go build -race -o /tmp/qa-soak ./cmd/qa-soak
 /tmp/qa-soak -out /tmp/qa010-12h -duration 12h -playlist 500 -guilds 2 -warm -faults
 ```
 
-Esses comandos são instruções, não resultados executados. Duração usa relógio monotônico real; nenhum synctest ou avanço virtual no soak. Sources de 100ms tornam o workload intensivo em transições/processos e persistência; não representam músicas naturais de três minutos.
+Os exemplos 6h/12h são planejamento e estão bloqueados após a observação QA011-R01; não representam aprovação nem autorização para ignorar a triagem de memória. Esses comandos são instruções, não resultados executados. Duração usa relógio monotônico real; nenhum synctest ou avanço virtual no soak. Sources de 100ms tornam o workload intensivo em transições/processos e persistência; não representam músicas naturais de três minutos.
 
 `-out` precisa ser um diretório novo. Para recuperar um checkpoint do próprio harness:
 
@@ -82,4 +82,12 @@ Quality separa `-short`, integração/cobertura e race. Endurance é workflow_di
 
 [Resultados](soak-results.md) · [Recursos/performance](resource-trends.md) · [Falhas](fault-injection.md) · [E2E](discord-e2e-checklist.md) · [Bloqueios](release-blockers.md).
 
-Logs de Docker/benchmarks com whitespace de terminal têm apresentação .txt normalizada para git diff --check e cópia exata em .raw.json adjacente, incluindo carriage returns/ANSI. Nenhuma falha foi descartada.
+Logs de Docker/benchmarks/build-info com whitespace de terminal têm apresentação .txt normalizada para git diff --check e cópia exata em .raw.json adjacente, incluindo carriage returns/ANSI. Nenhuma falha foi descartada.
+
+## QA-011 — execução existente, sem nova infraestrutura
+
+Foi reutilizado cmd/qa-soak e scripts/qa010_report.py. Builds com e sem race são do mesmo commit 27a49ba. O comando de uma hora usou `-duration 1h -sample 10s -playlist 500 -guilds 2 -audio 1s -warm -faults -seed 20261019`, com duração monotônica integral. Manifesto/hashes/limites/estatísticas systemd e ledger em evidence/qa011/. A campanha sem race de dez minutos é controle diagnóstico, nunca substituta da hora.
+
+Checkpoint: `.qa-runs/qa011-20261020T022653Z/1h`. O diretório é excluído do Git e do contexto de build Docker, contém somente SQLite/fixtures de QA e permanece no disco do workspace para retomada; o exportador copia apenas métricas/ledger, não o banco. Comando de retomada compatível: `.qa-runs/qa011-soak -out .qa-runs/qa011-20261020T022653Z/1h -resume -duration 1h -sample 10s -playlist 500 -guilds 2 -audio 1s -warm -faults -seed 20261019`. Uma retomada sempre gera outro segmento e não prolonga retroativamente o anterior.
+
+A hora executada teve CPUQuota=100% (um núcleo), prioridade nice 10, MemoryMax=2GiB, TasksMax=128, NOFILE=256 e arquivo individual até 512MiB. Rede IP foi bloqueada no serviço. O ambiente foi filtrado para PATH/GOMAXPROCS/GOMEMLIMIT/GORACE; não houve leitura de .env, token, volume operacional ou acesso Discord. Nenhum serviço do bot foi reiniciado/parado. Limites de execução são proteção do host compartilhado, não critérios de performance fabricados.

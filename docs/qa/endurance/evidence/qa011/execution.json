@@ -1,0 +1,60 @@
+{
+  "root": "/home/gabriel/Projects/whiterun-music-bot/.qa-runs/qa011-20261020T022653Z",
+  "baseline_commit": "27a49ba5575d13f9e782f674b51b7ebb0fa7a3fe",
+  "prepared_at": "2026-10-20T02:26:53.851486+00:00",
+  "environment": "local offline; no production volumes or Discord; runtime env whitelist",
+  "hard_limits": {
+    "memory_max_bytes": 2147483648,
+    "cpu_quota": "100% (one core)",
+    "tasks_max": 128,
+    "nofile": 256,
+    "file_size_max_bytes": 536870912
+  },
+  "runtime": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "256MiB (soft)",
+    "GORACE": "atexit_sleep_ms=0"
+  },
+  "campaigns": {
+    "1h": {
+      "status": "completed; integrity passed; operational gate blocked by RSS growth",
+      "playlist": 500,
+      "guilds": 2,
+      "audio": "1s",
+      "warm": true,
+      "faults": true,
+      "seed": 20261019,
+      "unit": "qa011-1h-20261020t022653z.service",
+      "run_directory": "/home/gabriel/Projects/whiterun-music-bot/.qa-runs/qa011-20261020T022653Z/1h",
+      "resource_policy": "systemd service, IP socket families forbidden; CPUAccounting deprecated by installed systemd, CPUUsageNSec remains available",
+      "real_seconds": 3600.141040267,
+      "harness_exit_code": 0,
+      "operational_approved": false
+    },
+    "6h": {
+      "status": "pending: 1h operational gate not approved"
+    },
+    "12h": {
+      "status": "pending: 1h operational gate not approved"
+    },
+    "control-10m": {
+      "status": "completed; diagnostic control passed",
+      "purpose": "matched non-race control for resource attribution, not an endurance gate",
+      "duration": "10m",
+      "playlist": 500,
+      "guilds": 2,
+      "audio": "1s",
+      "warm": true,
+      "faults": true,
+      "seed": 20261019,
+      "binary_sha256": "4e3313bd631cdc0d21a33ddfe817de003b3faba08ac4f516b4339769f2409417",
+      "unit": "qa011-control-10m-20261020t022653z.service",
+      "real_seconds": 600.029097983,
+      "harness_exit_code": 0
+    }
+  },
+  "binary_sha256": "91e9463cc2594ab7fef4ac65458c83e922da2df87714de16c7d86bbd69b9bc5d",
+  "finished_review": "1h completed, integrity passed; resource gate remains unapproved. 6h/12h not started. Control 10m completed; attribution pending.",
+  "owned_systemd_units": "stopped only after both main processes had exited successfully",
+  "source_changes": "No changes to cmd/, internal/, scripts/, go.mod or go.sum. Only reports and exclusions for owned checkpoints in Git/Docker."
+}

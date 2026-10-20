@@ -1,0 +1,16 @@
+ActiveState=active
+SubState=running
+MainPID=955720
+Result=success
+ExecMainStartTimestamp=Mon 2026-10-19 23:27:20 -03
+ExecMainStatus=0
+ControlGroup=/user.slice/user-1000.slice/user@1000.service/app.slice/qa011-1h-20261020t022653z.service
+MemoryCurrent=118718464
+MemoryPeak=158789632
+CPUUsageNSec=40917286000
+CPUQuotaPerSecUSec=1s
+MemoryMax=2147483648
+TasksMax=128
+LimitFSIZE=536870912
+LimitNOFILE=256
+RestrictAddressFamilies=AF_UNIX

@@ -1,0 +1,12 @@
+{
+  "Out": "/home/gabriel/Projects/whiterun-music-bot/.qa-runs/qa011-20261020T022653Z/control-10m",
+  "Duration": 600000000000,
+  "Sample": 10000000000,
+  "Audio": 1000000000,
+  "Playlist": 500,
+  "Guilds": 2,
+  "Seed": 20261019,
+  "Warm": true,
+  "Resume": false,
+  "Faults": true
+}
