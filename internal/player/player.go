@@ -305,6 +305,11 @@ func (p *GuildPlayer) run() {
 		ready, pending := p.queueCountsLocked()
 		attemptLog.Info("player_transition", "sequence", sequence, "ready", ready, "pending", pending, "halted", p.halted, "provider_blocked", p.providerBlocked, "state", "transitioning", "next_pending", len(p.queue) > 0 && p.queue[0].Pending)
 		if p.ctx.Err() == nil {
+			// EOF must re-evaluate the resolver window too: a pending head
+			// cannot commit while its collection coordinator is still asleep.
+			if len(p.queue) > 0 && p.queue[0].Pending {
+				p.signal("playback_end")
+			}
 			p.persistLocked()
 		}
 		close(done)

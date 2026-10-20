@@ -13,10 +13,14 @@ EOF, a assinatura exata acima é verificada antes de liberar o matcher. A próxi
 faixa deve ser 302, sem skip. Stop cancela workers e não permite ressurreição.
 Relógio virtual e canais substituem sleeps e dependências externas.
 
-`TestQA013Production302LostNotificationManualSkip` injeta o caminho histórico:
-mesma permutação, mas notificação somente ao scheduler. O resolver fica dormindo;
-a assinatura é verificada e skip **manual no teste** descarta a cabeça e inicia
-posição original 3. É reprodução diagnóstica do incidente, não solução automática.
+A QA-013 originalmente usava `TestQA013Production302LostNotificationManualSkip`
+para reproduzir o desbloqueio histórico por skip manual. FIX-014 substitui esse
+caso por `TestQA013Production302LostNotificationAdvancesAfterEOF`: a mesma
+notificação perdida é injetada antes do EOF, mas agora a posição 302 precisa
+iniciar automaticamente quando sua resolução terminar, sem skip. O novo caso
+falhou antes do ajuste de EOF com `current=nil` e passou depois dele.
+`TestFIX014StopDuringEOFWaitDoesNotResurrect` cancela durante essa espera e
+verifica fila vazia antes de qualquer segundo stop, mesmo após liberar o matcher.
 
 O mutante `lost-resolver-window-wakeup` remove exclusivamente o broadcast
 introduzido pelo hotfix, em cópia descartável do código. A regressão de 302
@@ -31,3 +35,8 @@ python3 scripts/qa013_mutations.py
 A causa já foi corrigida no commit `941a876`: a mudança de janela precisa acordar
 `CollectionJob.wake` e `GuildPlayer.wake`. A campanha QA-013 acrescenta prova
 regressiva; não adiciona outra correção funcional nem altera Fidelity.
+
+FIX-014 acrescenta a reavaliação explícita dos coordenadores no término da
+reprodução quando a cabeça está pendente. O broadcast de shuffle continua
+necessário para prefetch imediato; EOF passa a ser também um ponto independente
+de progresso. Detalhes e validação em [fix-014-playback-stall.md](../../fix-014-playback-stall.md).
