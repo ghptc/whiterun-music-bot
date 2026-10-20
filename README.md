@@ -208,3 +208,9 @@ normally. See [Force Play](docs/force-play.md) for validation and limitations.
 
 CR-007.1: [Auto Pilot fidelity evidence](docs/auto-pilot-fidelity.md) records the
 302-track playlist's position 4 and the real `(Album Version)` false-negative fix.
+
+Structured logs also persist asynchronously in a separate `bard-logs.db` in the
+existing volume, with a configurable 500 MiB physical budget and FIFO retention.
+Console JSON continues if persistence is unavailable. Use `bard logs --last 100`,
+`bard logs --track <spotify-id>` or `bard logs --since 1h --level ERROR` for JSONL
+history without Discord API access. See [retention, privacy, CLI and recovery](docs/persistent-logging.md).

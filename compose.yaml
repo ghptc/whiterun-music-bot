@@ -13,6 +13,8 @@ services:
       SPOTIFY_REFRESH_TOKEN: ${SPOTIFY_REFRESH_TOKEN:-}
       SPOTIFY_MARKET: ${SPOTIFY_MARKET:-}
       BARD_DB_PATH: /home/bard/data/bard.db
+      BARD_LOG_DB_PATH: /home/bard/data/bard-logs.db
+      BARD_LOG_DB_MAX_BYTES: ${BARD_LOG_DB_MAX_BYTES:-524288000}
       SPOTIFY_MATCH_POLICY: ${SPOTIFY_MATCH_POLICY:-}
     volumes:
       - bard-data:/home/bard/data

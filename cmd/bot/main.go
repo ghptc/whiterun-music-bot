@@ -18,12 +18,32 @@ import (
 	"whiterun/internal/storage"
 )
 
-func main() {
-	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+func main() { os.Exit(mainExit()) }
+func mainExit() int {
+	console := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	if len(os.Args) > 1 && os.Args[1] == "logs" {
+		if err := logsCommand(os.Args[2:], os.Stdout, os.Stderr); err != nil {
+			slog.New(slog.NewJSONHandler(os.Stderr, nil)).Error("logs_query_failed", "error", err)
+			return 1
+		}
+		return 0
+	}
+	log, store := persistentLogger(console)
+	// Third-party packages using slog.Default share the same structured sink.
+	slog.SetDefault(log)
+	result := 0
 	if err := run(log); err != nil {
 		log.Error("bot stopped", "error", err)
-		os.Exit(1)
+		result = 1
 	}
+	if store != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := store.Close(ctx); err != nil {
+			console.Warn("log_persistence_flush_timeout")
+		}
+	}
+	return result
 }
 func configuredSpotify(log *slog.Logger) *media.Spotify {
 	return &media.Spotify{Log: log, ClientID: strings.TrimSpace(os.Getenv("SPOTIFY_CLIENT_ID")), ClientSecret: strings.TrimSpace(os.Getenv("SPOTIFY_CLIENT_SECRET")), RefreshToken: strings.TrimSpace(os.Getenv("SPOTIFY_REFRESH_TOKEN")), Market: strings.TrimSpace(os.Getenv("SPOTIFY_MARKET"))}
@@ -79,10 +99,7 @@ func run(log *slog.Logger) error {
 	if err := b.ConfigureMatchPolicy(policy); err != nil {
 		return err
 	}
-	path := os.Getenv("BARD_DB_PATH")
-	if path == "" {
-		path = "bard.db"
-	}
+	path := operationalPath()
 	db, err := storage.Open(path)
 	if err != nil {
 		return fmt.Errorf("database: %w", err)
