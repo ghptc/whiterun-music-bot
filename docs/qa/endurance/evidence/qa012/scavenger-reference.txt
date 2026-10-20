@@ -5,4 +5,3 @@ func FreeOSMemory()
     as much memory to the operating system as possible. (Even if this is not
     called, the runtime gradually returns memory to the operating system in a
     background task.)
-

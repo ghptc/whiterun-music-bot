@@ -150,3 +150,5 @@ Regressões permanentes: identidade/ordem e encerramento dos controles simulados
 Não restaram processos dos executáveis QA-012. Todos os PIDs de filhos amostrados na hora foram conferidos após encerramento, sem sobreviventes; essa observação complementa filho direto zero no cleanup, sem pretender inventário de todos os processos do host. Unidades systemd transitórias encerraram e foram descarregadas automaticamente. O arquivo native-active-limits.txt contém limites efetivos enquanto a hora rodava; o journal filtrado contém consumo final. Não interpretar valores default de unidades descarregadas como limites históricos.
 
 70b8184 registra ferramenta e regressões; relatório/evidências registrados em commit separado. Não houve refatoração ou mudança de comportamento de produção. Atribuição interna fina da memória instrumentada permanece limitação explícita, e a liberação local de execução não encerra todos os gates de QA/release.
+
+Os dois outputs go doc foram normalizados para remover linhas vazias extras no EOF apontadas por diff --check; as saídas exatas e hashes ficam nos arquivos .raw.json adjacentes. Essa correção de apresentação não altera medições.

@@ -1,0 +1,5 @@
+{
+  "source": "go doc output",
+  "original_sha256": "6daf08a285f38ef9cb516fe11e5c526a97b52cedbe38134abc80241a7fac2858",
+  "text": "package debug // import \"runtime/debug\"\n\nfunc FreeOSMemory()\n    FreeOSMemory forces a garbage collection followed by an attempt to return\n    as much memory to the operating system as possible. (Even if this is not\n    called, the runtime gradually returns memory to the operating system in a\n    background task.)\n\n"
+}
