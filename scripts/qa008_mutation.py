@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import shlex
 import subprocess
 from qa008_support import bounded_run
 import tempfile
@@ -15,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
 parser.add_argument("--tool", default="/tmp/bard-qa008-tools/gremlins")
 parser.add_argument("--campaign", choices=["player", "fidelity", "storage", "permissions", "all"], default="all")
+parser.add_argument("--evidence-dir", default="docs/qa/advanced/evidence/mutation")
+parser.add_argument("--test-pattern", default="^(TestAdvanced|TestQuality|TestForce|TestCommandsRequireGuildAndVoice|TestHardening|TestDefect)")
 args = parser.parse_args()
 go = shutil.which("go")
 if not go or not Path(args.tool).is_file():
@@ -25,7 +28,7 @@ targets = {
     "storage": ("storage", ["sqlite.go"], "negation"),
     "permissions": ("discord", ["commands.go"], "negation"),
 }
-evidence = ROOT / "docs/qa/advanced/evidence/mutation"
+evidence = ROOT / args.evidence_dir
 evidence.mkdir(parents=True, exist_ok=True)
 failed = False
 for name, (package, files, operator) in targets.items():
@@ -51,15 +54,25 @@ for name, (package, files, operator) in targets.items():
         wrapper_dir.mkdir()
         wrapper = wrapper_dir / "go"
         # Select bounded, relevant tests but leave source and tests untouched.
+        logs = evidence / (name + "-tests")
+        logs.mkdir(exist_ok=True)
+        # Preserve every command and its output. Gremlins treats go test exit=1
+        # as KILLED even for command-line/setup failures; these need review.
         wrapper.write_text('#!/bin/sh\nif [ "$1" = test ]; then\n'
-                           f' exec "{go}" "$@" "-run=^(TestAdvanced|TestQuality|TestForce|TestCommandsRequireGuildAndVoice)" -timeout=20s\n'
-                           f'fi\nexec "{go}" "$@"\n')
+                           ' record=$(mktemp "$QA_MUTATION_LOG/test-XXXXXX")\n'
+                           ' printf "%s\\n" "$PWD" "$@" > "$record"\n'
+                           ' if [ "$PWD" != "$QA_MUTATION_SOURCE" ]; then diff -ru --exclude="*_test.go" "$QA_MUTATION_SOURCE/internal/$QA_MUTATION_PACKAGE" "$PWD" >> "$record"; fi\n'
+                           f' {shlex.quote(go)} "$@" {shlex.quote("-run=" + args.test_pattern)} -timeout=60s >> "$record" 2>&1\n'
+                           ' result=$?\n cat "$record"\n exit "$result"\n'
+                           f'fi\nexec {shlex.quote(go)} "$@"\n')
         wrapper.chmod(0o700)
         env = dict(os.environ, PATH=str(wrapper_dir) + os.pathsep + os.environ["PATH"],
-                   BARD_QA_MODEL_SEED="41", GOMAXPROCS="2", GOMEMLIMIT="512MiB")
+                   BARD_QA_MODEL_SEED="41", GOMAXPROCS="2", GOMEMLIMIT="512MiB",
+                   QA_MUTATION_LOG=str(logs), QA_MUTATION_SOURCE=str(work),
+                   QA_MUTATION_PACKAGE=package)
         report = work / "mutation.json"
         command = [str(Path(args.tool).resolve()), "unleash", "./internal/" + package,
-                   "--output", str(report), "--workers=2", "--test-cpu=2",
+                   "--output", str(report), "--workers=2",
                    "--timeout-coefficient=50", "--arithmetic-base=false",
                    "--increment-decrement=false", "--invert-negatives=false",
                    "--conditionals-boundary=" + str(operator == "boundary").lower(),
@@ -88,8 +101,17 @@ for name, (package, files, operator) in targets.items():
                     status = mutant["status"]
                     counts[status] = counts.get(status, 0) + 1
             metadata["statuses"] = counts
+            infrastructure = []
+            for record in logs.glob("test-*"):
+                output_text = record.read_text(errors="replace")
+                if any(marker in output_text for marker in (
+                    "[setup failed]", "[build failed]", "panic: test timed out",
+                    "flag provided but not defined", "no tests to run")):
+                    infrastructure.append(record.name)
+            metadata["infrastructure_failures"] = infrastructure
+            failed = failed or bool(infrastructure)
             # Never count timeout, compile error or missing coverage as killed.
-            failed = failed or bool(counts.get("LIVED") or counts.get("TIMED OUT") or counts.get("NOT VIABLE"))
+            failed = failed or bool(counts.get("LIVED") or counts.get("TIMED OUT") or counts.get("NOT VIABLE") or counts.get("NOT COVERED"))
             (evidence / (name + "-run.json")).write_text(json.dumps(metadata, indent=2)+"\n")
         else:
             failed = True

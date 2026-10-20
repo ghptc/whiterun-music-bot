@@ -11,16 +11,17 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 TARGETS = [
  ("media", "MediaURLs"), ("media", "RecordingMetadata"),
- ("media", "DiagnosticBudget"), ("player", "Ogg"),
+ ("media", "DiagnosticBudget"), ("media", "DurationValidity"), ("player", "Ogg"),
  ("player", "Timestamp"), ("player", "Queue"), ("discord", "QueueArguments"),
 ]
 parser = argparse.ArgumentParser()
 parser.add_argument("--seconds", type=int, default=15)
 parser.add_argument("--workers", type=int, default=2)
+parser.add_argument("--evidence-dir", default="docs/qa/advanced/evidence/fuzz")
 args = parser.parse_args()
 if not 1 <= args.seconds <= 3600 or not 1 <= args.workers <= 8:
     parser.error("seconds must be 1..3600 and workers 1..8")
-evidence = ROOT / "docs/qa/advanced/evidence/fuzz"
+evidence = ROOT / args.evidence_dir
 evidence.mkdir(parents=True, exist_ok=True)
 summary = []
 for package, name in TARGETS:
