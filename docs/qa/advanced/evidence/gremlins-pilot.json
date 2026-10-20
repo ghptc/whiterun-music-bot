@@ -1,0 +1,31 @@
+{
+  "command": [
+    "/tmp/bard-qa008-tools/gremlins",
+    "unleash",
+    "./internal/player",
+    "--dry-run",
+    "--output",
+    "/tmp/bard-qa008-gremlins-p6u_0hgh/report.json",
+    "--exclude-files",
+    "internal/player/ogg.go",
+    "--exclude-files",
+    "internal/player/lifecycle.go",
+    "--exclude-files",
+    "internal/player/previous.go",
+    "--exclude-files",
+    "internal/player/pause.go",
+    "--exclude-files",
+    "internal/player/collection.go",
+    "--exclude-files",
+    "internal/player/durable.go",
+    "--exclude-files",
+    "internal/player/queue.go",
+    "--exclude-files",
+    "internal/player/stream.go",
+    "--exclude-files",
+    "internal/player/player.go"
+  ],
+  "exit_code": 1,
+  "elapsed_seconds": 0.011469817007309757,
+  "output": "Starting...\nGathering coverage... go: github.com/ncruces/go-strftime@v0.1.9: Get \"https://proxy.golang.org/github.com/ncruces/go-strftime/@v/v0.1.9.info\": dial tcp: lookup proxy.golang.org on 100.100.100.100:53: no such host\nERROR: failed to gather coverage: impossible to download modules: exit status 1\n"
+}

@@ -1,0 +1,14 @@
+{
+  "passed_leaf_cases": 3165,
+  "per_package": {
+    "whiterun/internal/player": 2401,
+    "whiterun/internal/media": 452,
+    "whiterun/internal/discord": 259,
+    "whiterun/internal/storage": 52,
+    "whiterun/cmd/bot": 1
+  },
+  "model_sequences": 2048,
+  "linearization_input_seeds": 128,
+  "advanced_fuzz_seed_cases": 47,
+  "advanced_non_generated_leaf_cases": 26
+}

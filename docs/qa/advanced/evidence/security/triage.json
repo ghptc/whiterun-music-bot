@@ -1,0 +1,151 @@
+[
+  {
+    "id": "GO-2026-6603",
+    "summary": "HTTP/2 server memory exhaustion due to Trailer headers in net/http",
+    "module": "golang.org/x/net",
+    "version": "v0.56.0",
+    "fixed": "v0.60.0",
+    "affected_packages_in_reported_module": [
+      "golang.org/x/net/http2"
+    ],
+    "imported_affected_packages": [],
+    "call_trace": false,
+    "advisory": "https://pkg.go.dev/vuln/GO-2026-6603"
+  },
+  {
+    "id": "GO-2026-6610",
+    "summary": "HTTP/2 transport accepts malformed framing-related headers in net/http",
+    "module": "golang.org/x/net",
+    "version": "v0.56.0",
+    "fixed": "v0.60.0",
+    "affected_packages_in_reported_module": [
+      "golang.org/x/net/http2"
+    ],
+    "imported_affected_packages": [],
+    "call_trace": false,
+    "advisory": "https://pkg.go.dev/vuln/GO-2026-6610"
+  },
+  {
+    "id": "GO-2026-6611",
+    "summary": "Excessive CPU consumption from repeated initial window changes in net/http",
+    "module": "golang.org/x/net",
+    "version": "v0.56.0",
+    "fixed": "v0.60.0",
+    "affected_packages_in_reported_module": [
+      "golang.org/x/net/http2"
+    ],
+    "imported_affected_packages": [],
+    "call_trace": false,
+    "advisory": "https://pkg.go.dev/vuln/GO-2026-6611"
+  },
+  {
+    "id": "GO-2026-6612",
+    "summary": "Double flow control refund on HTTP/2 server streams in net/http",
+    "module": "golang.org/x/net",
+    "version": "v0.56.0",
+    "fixed": "v0.60.0",
+    "affected_packages_in_reported_module": [
+      "golang.org/x/net/http2"
+    ],
+    "imported_affected_packages": [],
+    "call_trace": false,
+    "advisory": "https://pkg.go.dev/vuln/GO-2026-6612"
+  },
+  {
+    "id": "GO-2026-6617",
+    "summary": "HTTP/2 server crash due to HPACK encoder race in net/http",
+    "module": "golang.org/x/net",
+    "version": "v0.56.0",
+    "fixed": "v0.60.0",
+    "affected_packages_in_reported_module": [
+      "golang.org/x/net/http2"
+    ],
+    "imported_affected_packages": [],
+    "call_trace": false,
+    "advisory": "https://pkg.go.dev/vuln/GO-2026-6617"
+  },
+  {
+    "id": "GO-2026-6629",
+    "summary": "Panic parsing crafted input in x/text/secure/precis in golang.org/x/text",
+    "module": "golang.org/x/text",
+    "version": "v0.40.0",
+    "fixed": "v0.41.0",
+    "affected_packages_in_reported_module": [
+      "golang.org/x/text/secure/precis"
+    ],
+    "imported_affected_packages": [],
+    "call_trace": false,
+    "advisory": "https://pkg.go.dev/vuln/GO-2026-6629"
+  },
+  {
+    "id": "GO-2026-5841",
+    "summary": "OOB read in github.com/klauspost/compress/s2",
+    "module": "github.com/klauspost/compress",
+    "version": "v1.18.4",
+    "fixed": "v1.18.7",
+    "affected_packages_in_reported_module": [
+      "github.com/klauspost/compress/s2"
+    ],
+    "imported_affected_packages": [],
+    "call_trace": false,
+    "advisory": "https://pkg.go.dev/vuln/GO-2026-5841"
+  },
+  {
+    "id": "GO-2026-5932",
+    "summary": "The golang.org/x/crypto/openpgp package is unmaintained, unsafe by design, and has known security issues",
+    "module": "golang.org/x/crypto",
+    "version": "v0.54.0",
+    "fixed": null,
+    "affected_packages_in_reported_module": [
+      "golang.org/x/crypto/openpgp",
+      "golang.org/x/crypto/openpgp/packet",
+      "golang.org/x/crypto/openpgp/armor",
+      "golang.org/x/crypto/openpgp/clearsign",
+      "golang.org/x/crypto/openpgp/errors",
+      "golang.org/x/crypto/openpgp/elgamal",
+      "golang.org/x/crypto/openpgp/s2k"
+    ],
+    "imported_affected_packages": [],
+    "call_trace": false,
+    "advisory": "https://pkg.go.dev/vuln/GO-2026-5932"
+  },
+  {
+    "id": "GO-2026-6303",
+    "summary": "Source-address critical option not enforced for non-public-key auth callbacks in golang.org/x/crypto/ssh",
+    "module": "golang.org/x/crypto",
+    "version": "v0.54.0",
+    "fixed": "v0.55.0",
+    "affected_packages_in_reported_module": [
+      "golang.org/x/crypto/ssh"
+    ],
+    "imported_affected_packages": [],
+    "call_trace": false,
+    "advisory": "https://pkg.go.dev/vuln/GO-2026-6303"
+  },
+  {
+    "id": "GO-2026-6354",
+    "summary": "Prevent DoS on deadlocked undecided channel in golang.org/x/crypto/ssh",
+    "module": "golang.org/x/crypto",
+    "version": "v0.54.0",
+    "fixed": "v0.56.0",
+    "affected_packages_in_reported_module": [
+      "golang.org/x/crypto/ssh"
+    ],
+    "imported_affected_packages": [],
+    "call_trace": false,
+    "advisory": "https://pkg.go.dev/vuln/GO-2026-6354"
+  },
+  {
+    "id": "GO-2026-6355",
+    "summary": "Prevent DoS on deadlocked established channel in golang.org/x/crypto/ssh",
+    "module": "golang.org/x/crypto",
+    "version": "v0.54.0",
+    "fixed": "v0.56.0",
+    "affected_packages_in_reported_module": [
+      "golang.org/x/crypto/ssh"
+    ],
+    "imported_affected_packages": [],
+    "call_trace": false,
+    "advisory": "https://pkg.go.dev/vuln/GO-2026-6355"
+  }
+]

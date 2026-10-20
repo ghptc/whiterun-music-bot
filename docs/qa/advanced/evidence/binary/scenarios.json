@@ -1,0 +1,47 @@
+[
+  {
+    "case": "missing-token",
+    "exit_code": 1,
+    "expected": "DISCORD_TOKEN is required"
+  },
+  {
+    "case": "invalid-application",
+    "exit_code": 1,
+    "expected": "DISCORD_APPLICATION_ID"
+  },
+  {
+    "case": "invalid-guild",
+    "exit_code": 1,
+    "expected": "DISCORD_GUILD_ID"
+  },
+  {
+    "case": "missing-runtime",
+    "exit_code": 1,
+    "expected": "required runtime yt-dlp"
+  },
+  {
+    "case": "invalid-policy-json",
+    "exit_code": 1,
+    "expected": "SPOTIFY_MATCH_POLICY"
+  },
+  {
+    "case": "invalid-policy-values",
+    "exit_code": 1,
+    "expected": "invalid Spotify match policy"
+  },
+  {
+    "case": "corrupt-sqlite",
+    "exit_code": 1,
+    "expected": "database"
+  },
+  {
+    "case": "diagnose-no-arguments",
+    "exit_code": 1,
+    "expected": "requires playlist URLs"
+  },
+  {
+    "case": "diagnose-rejected-url",
+    "exit_code": 1,
+    "expected": "Invalid Spotify link"
+  }
+]

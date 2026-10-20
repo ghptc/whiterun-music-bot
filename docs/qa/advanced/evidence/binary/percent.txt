@@ -1,0 +1,5 @@
+	whiterun/cmd/bot		coverage: 68.7% of statements
+	whiterun/internal/discord		coverage: 1.3% of statements
+	whiterun/internal/media		coverage: 1.2% of statements
+	whiterun/internal/player		coverage: 0.0% of statements
+	whiterun/internal/storage		coverage: 6.6% of statements

@@ -49,3 +49,7 @@ A suíte atual mistura testes rápidos e integração local; -short ainda não s
 Leitura: inventory.md, risk-traceability.md, coverage-report.md, mutation-report.md, concurrency-report.md, findings.md, integration-plan.md, e2e-plan.md, performance-plan.md e release-criteria.md. Evidências brutas em evidence/.
 
 O CI ganhou job separado de stress e mutação. Soak local é opt-in com -tags soak e BARD_QA_SOAK_DURATION; a suíte padrão não executa sessões prolongadas. E2E essencial e soak operacional impedem homologação de release neste momento.
+
+## QA-008
+
+Exploração avançada, defeitos conhecidos e evidências adicionais: [advanced/README.md](advanced/README.md). O baseline acima permanece histórico.

@@ -1,0 +1,1 @@
+{"time":"2026-10-19T21:06:41.880886165-03:00","level":"ERROR","msg":"bot stopped","error":"SPOTIFY_MATCH_POLICY: unexpected end of JSON input"}

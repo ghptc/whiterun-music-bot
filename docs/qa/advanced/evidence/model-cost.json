@@ -1,0 +1,15 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./internal/player",
+    "-run",
+    "^TestAdvancedModelSequences$",
+    "-count=1",
+    "-timeout=2m"
+  ],
+  "elapsed_seconds": 13.258408934998442,
+  "exit_code": 0,
+  "output": "ok  \twhiterun/internal/player\t13.053s\n"
+}

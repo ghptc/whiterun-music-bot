@@ -1,0 +1,9 @@
+--- FAIL: TestKnownIssuesNegativeExtractorDuration (0.00s)
+    advanced_knownissues_test.go:16: QA008-D01: malformed provider duration escaped: -1s
+FAIL
+FAIL	whiterun/internal/media	0.003s
+--- FAIL: TestKnownIssuesEmptyOpusPacket (0.00s)
+    advanced_knownissues_test.go:16: QA008-D02: empty audio packet delivered as Opus: delivered=1 err=<nil>
+FAIL
+FAIL	whiterun/internal/player	0.001s
+FAIL

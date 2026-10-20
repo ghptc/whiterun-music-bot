@@ -1,0 +1,62 @@
+[
+  {
+    "target": "FuzzAdvancedMediaURLs",
+    "file": "internal/media/testdata/fuzz/FuzzAdvancedMediaURLs/f2f1bb2b4123163c",
+    "provenance": "native fuzz discovery cache, QA-008 bounded campaign",
+    "reason": "malformed URL authority/escaping"
+  },
+  {
+    "target": "FuzzAdvancedMediaURLs",
+    "file": "internal/media/testdata/fuzz/FuzzAdvancedMediaURLs/5c19709a556b4909",
+    "provenance": "native fuzz discovery cache, QA-008 bounded campaign",
+    "reason": "malformed URL authority/escaping"
+  },
+  {
+    "target": "FuzzAdvancedMediaURLs",
+    "file": "internal/media/testdata/fuzz/FuzzAdvancedMediaURLs/bf5ee1bf3f1fb87e",
+    "provenance": "native fuzz discovery cache, QA-008 bounded campaign",
+    "reason": "malformed URL authority/escaping"
+  },
+  {
+    "target": "FuzzAdvancedOgg",
+    "file": "internal/player/testdata/fuzz/FuzzAdvancedOgg/78223e8ac3f7a6ea",
+    "provenance": "native fuzz discovery cache, QA-008 bounded campaign",
+    "reason": "malformed container header/lacing"
+  },
+  {
+    "target": "FuzzAdvancedOgg",
+    "file": "internal/player/testdata/fuzz/FuzzAdvancedOgg/44e5e0884666652e",
+    "provenance": "native fuzz discovery cache, QA-008 bounded campaign",
+    "reason": "malformed container header/lacing"
+  },
+  {
+    "target": "FuzzAdvancedOgg",
+    "file": "internal/player/testdata/fuzz/FuzzAdvancedOgg/1b4a3733ca8ba4c5",
+    "provenance": "native fuzz discovery cache, QA-008 bounded campaign",
+    "reason": "malformed container header/lacing"
+  },
+  {
+    "target": "FuzzAdvancedTimestamp",
+    "file": "internal/player/testdata/fuzz/FuzzAdvancedTimestamp/82c2975c430ac608",
+    "provenance": "native fuzz discovery cache, QA-008 bounded campaign",
+    "reason": "malformed base-60 command input"
+  },
+  {
+    "target": "FuzzAdvancedTimestamp",
+    "file": "internal/player/testdata/fuzz/FuzzAdvancedTimestamp/c908d15e31b0b689",
+    "provenance": "native fuzz discovery cache, QA-008 bounded campaign",
+    "reason": "malformed base-60 command input"
+  },
+  {
+    "target": "FuzzAdvancedQueueArguments",
+    "file": "internal/discord/testdata/fuzz/FuzzAdvancedQueueArguments/5fde1004fed39405",
+    "provenance": "native fuzz discovery cache, QA-008 bounded campaign",
+    "reason": "Unicode/limit rendering boundary"
+  },
+  {
+    "target": "FuzzAdvancedQueueArguments",
+    "file": "internal/discord/testdata/fuzz/FuzzAdvancedQueueArguments/a870bdcdb3266be7",
+    "provenance": "native fuzz discovery cache, QA-008 bounded campaign",
+    "reason": "Unicode/limit rendering boundary"
+  }
+]

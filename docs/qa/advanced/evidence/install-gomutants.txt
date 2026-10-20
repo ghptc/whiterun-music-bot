@@ -1,0 +1,2 @@
+go: downloading github.com/gomutants/gomutants v0.5.0
+go: github.com/gomutants/gomutants@v0.5.0: github.com/gomutants/gomutants@v0.5.0: Get "https://proxy.golang.org/github.com/gomutants/gomutants/@v/v0.5.0.zip": dial tcp: lookup proxy.golang.org on 100.100.100.100:53: no such host

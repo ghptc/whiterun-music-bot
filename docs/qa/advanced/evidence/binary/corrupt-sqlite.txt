@@ -1,0 +1,1 @@
+{"time":"2026-10-19T21:06:41.899101406-03:00","level":"ERROR","msg":"bot stopped","error":"database: file is not a database (26)"}

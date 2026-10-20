@@ -1,0 +1,1 @@
+{"time":"2026-10-19T21:06:41.856270171-03:00","level":"ERROR","msg":"bot stopped","error":"DISCORD_GUILD_ID must be a valid guild ID"}

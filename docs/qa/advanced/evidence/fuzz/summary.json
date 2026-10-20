@@ -1,0 +1,142 @@
+[
+  {
+    "target": "FuzzAdvancedMediaURLs",
+    "command": [
+      "go",
+      "test",
+      "./internal/media",
+      "-run=^$",
+      "-fuzz=^FuzzAdvancedMediaURLs$",
+      "-fuzztime=15s",
+      "-parallel=2",
+      "-timeout=75s"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 27.941,
+    "workers": 2,
+    "gomemlimit": "256MiB per process (soft runtime limit)",
+    "executions": 275637,
+    "new_interesting": 150,
+    "total_interesting": 159
+  },
+  {
+    "target": "FuzzAdvancedRecordingMetadata",
+    "command": [
+      "go",
+      "test",
+      "./internal/media",
+      "-run=^$",
+      "-fuzz=^FuzzAdvancedRecordingMetadata$",
+      "-fuzztime=15s",
+      "-parallel=2",
+      "-timeout=75s"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 16.383,
+    "workers": 2,
+    "gomemlimit": "256MiB per process (soft runtime limit)",
+    "executions": 36962,
+    "new_interesting": 113,
+    "total_interesting": 119
+  },
+  {
+    "target": "FuzzAdvancedDiagnosticBudget",
+    "command": [
+      "go",
+      "test",
+      "./internal/media",
+      "-run=^$",
+      "-fuzz=^FuzzAdvancedDiagnosticBudget$",
+      "-fuzztime=15s",
+      "-parallel=2",
+      "-timeout=75s"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 16.203,
+    "workers": 2,
+    "gomemlimit": "256MiB per process (soft runtime limit)",
+    "executions": 679356,
+    "new_interesting": 3,
+    "total_interesting": 5
+  },
+  {
+    "target": "FuzzAdvancedOgg",
+    "command": [
+      "go",
+      "test",
+      "./internal/player",
+      "-run=^$",
+      "-fuzz=^FuzzAdvancedOgg$",
+      "-fuzztime=15s",
+      "-parallel=2",
+      "-timeout=75s"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 16.301,
+    "workers": 2,
+    "gomemlimit": "256MiB per process (soft runtime limit)",
+    "executions": 665534,
+    "new_interesting": 8,
+    "total_interesting": 12
+  },
+  {
+    "target": "FuzzAdvancedTimestamp",
+    "command": [
+      "go",
+      "test",
+      "./internal/player",
+      "-run=^$",
+      "-fuzz=^FuzzAdvancedTimestamp$",
+      "-fuzztime=15s",
+      "-parallel=2",
+      "-timeout=75s"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 15.723,
+    "workers": 2,
+    "gomemlimit": "256MiB per process (soft runtime limit)",
+    "executions": 13887,
+    "new_interesting": 8,
+    "total_interesting": 17
+  },
+  {
+    "target": "FuzzAdvancedQueue",
+    "command": [
+      "go",
+      "test",
+      "./internal/player",
+      "-run=^$",
+      "-fuzz=^FuzzAdvancedQueue$",
+      "-fuzztime=15s",
+      "-parallel=2",
+      "-timeout=75s"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 16.21,
+    "workers": 2,
+    "gomemlimit": "256MiB per process (soft runtime limit)",
+    "executions": 36736,
+    "new_interesting": 112,
+    "total_interesting": 115
+  },
+  {
+    "target": "FuzzAdvancedQueueArguments",
+    "command": [
+      "go",
+      "test",
+      "./internal/discord",
+      "-run=^$",
+      "-fuzz=^FuzzAdvancedQueueArguments$",
+      "-fuzztime=15s",
+      "-parallel=2",
+      "-timeout=75s"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 45.545,
+    "workers": 2,
+    "gomemlimit": "256MiB per process (soft runtime limit)",
+    "executions": 53415,
+    "new_interesting": 116,
+    "total_interesting": 120
+  }
+]

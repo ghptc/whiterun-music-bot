@@ -1,0 +1,2730 @@
+{
+  "command": [
+    "/tmp/bard-qa008-tools/gremlins",
+    "unleash",
+    "./internal/player",
+    "--dry-run",
+    "--output",
+    "/tmp/bard-qa008-gremlins-x4wko1f7/report.json",
+    "--exclude-files",
+    "internal/player/ogg.go",
+    "--exclude-files",
+    "internal/player/lifecycle.go",
+    "--exclude-files",
+    "internal/player/previous.go",
+    "--exclude-files",
+    "internal/player/pause.go",
+    "--exclude-files",
+    "internal/player/collection.go",
+    "--exclude-files",
+    "internal/player/durable.go",
+    "--exclude-files",
+    "internal/player/queue.go",
+    "--exclude-files",
+    "internal/player/stream.go",
+    "--exclude-files",
+    "internal/player/player.go"
+  ],
+  "offline_module_replacements": true,
+  "exit_code": 0,
+  "elapsed_seconds": 23.679182968000532,
+  "output": "Starting...\nGathering coverage... done in 23.627198324s\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:71:40\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:74:78\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:71:58\n    RUNNABLE CONDITIONALS_BOUNDARY at collection.go:77:19\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:77:19\n    RUNNABLE CONDITIONALS_BOUNDARY at collection.go:74:41\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:74:19\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:71:17\n    RUNNABLE ARITHMETIC_BASE at collection.go:77:35\n NOT COVERED ARITHMETIC_BASE at collection.go:15:37\n    RUNNABLE INVERT_NEGATIVES at collection.go:77:35\n    RUNNABLE INVERT_NEGATIVES at collection.go:86:347\n    RUNNABLE INCREMENT_DECREMENT at collection.go:83:11\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:88:17\n    RUNNABLE ARITHMETIC_BASE at collection.go:86:347\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:95:12\n    RUNNABLE ARITHMETIC_BASE at collection.go:89:27\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:121:7\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:111:33\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:155:37\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:129:50\n    RUNNABLE INCREMENT_DECREMENT at collection.go:165:11\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:164:14\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:173:15\n    RUNNABLE ARITHMETIC_BASE at collection.go:170:108\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:187:9\n    RUNNABLE ARITHMETIC_BASE at collection.go:176:135\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:187:72\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:187:47\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:190:29\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:190:9\n NOT COVERED INVERT_NEGATIVES at collection.go:202:22\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:218:47\n NOT COVERED ARITHMETIC_BASE at collection.go:202:22\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:232:17\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:220:25\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:237:54\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:237:19\n    RUNNABLE ARITHMETIC_BASE at collection.go:241:44\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:240:13\n    RUNNABLE INCREMENT_DECREMENT at collection.go:265:21\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:260:39\n    RUNNABLE INCREMENT_DECREMENT at collection.go:267:20\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:266:18\n    RUNNABLE INCREMENT_DECREMENT at collection.go:270:24\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:269:53\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:71:75\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:276:11\n    RUNNABLE INCREMENT_DECREMENT at collection.go:273:22\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:276:47\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:279:47\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:279:11\n    RUNNABLE ARITHMETIC_BASE at collection.go:280:158\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:279:63\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:306:11\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:292:15\n    RUNNABLE INVERT_NEGATIVES at collection.go:311:274\n    RUNNABLE ARITHMETIC_BASE at collection.go:309:89\n    RUNNABLE INVERT_NEGATIVES at collection.go:311:258\n    RUNNABLE ARITHMETIC_BASE at collection.go:311:274\n    RUNNABLE INVERT_NEGATIVES at collection.go:311:240\n    RUNNABLE ARITHMETIC_BASE at collection.go:311:258\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:311:317\n    RUNNABLE ARITHMETIC_BASE at collection.go:311:240\n    RUNNABLE ARITHMETIC_BASE at collection.go:315:16\n    RUNNABLE INVERT_NEGATIVES at collection.go:315:16\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:316:16\n    RUNNABLE CONDITIONALS_BOUNDARY at collection.go:316:16\n    RUNNABLE ARITHMETIC_BASE at collection.go:321:60\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:317:18\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:323:84\n    RUNNABLE ARITHMETIC_BASE at collection.go:323:63\n NOT COVERED CONDITIONALS_NEGATION at collection.go:328:27\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:324:18\n    RUNNABLE INCREMENT_DECREMENT at collection.go:339:5\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:338:12\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:74:41\n    RUNNABLE ARITHMETIC_BASE at collection.go:345:69\n    RUNNABLE ARITHMETIC_BASE at collection.go:344:58\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:348:16\n    RUNNABLE CONDITIONALS_BOUNDARY at collection.go:348:16\n    RUNNABLE INVERT_NEGATIVES at collection.go:348:52\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:348:34\n    RUNNABLE INVERT_NEGATIVES at collection.go:351:103\n    RUNNABLE ARITHMETIC_BASE at collection.go:348:52\n    RUNNABLE INVERT_NEGATIVES at collection.go:351:92\n    RUNNABLE ARITHMETIC_BASE at collection.go:351:103\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:358:19\n    RUNNABLE ARITHMETIC_BASE at collection.go:351:92\n    RUNNABLE CONDITIONALS_BOUNDARY at collection.go:364:14\n    RUNNABLE INCREMENT_DECREMENT at collection.go:362:14\n    RUNNABLE INCREMENT_DECREMENT at collection.go:367:10\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:364:14\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:373:19\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:370:16\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:412:19\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:393:21\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:423:17\n    RUNNABLE CONDITIONALS_BOUNDARY at collection.go:423:17\n NOT COVERED CONDITIONALS_NEGATION at collection.go:441:27\n    RUNNABLE INCREMENT_DECREMENT at collection.go:436:13\n NOT COVERED CONDITIONALS_NEGATION at collection.go:445:16\n NOT COVERED CONDITIONALS_BOUNDARY at collection.go:445:16\n    RUNNABLE ARITHMETIC_BASE at collection.go:457:94\n    RUNNABLE ARITHMETIC_BASE at collection.go:457:91\n    RUNNABLE INVERT_NEGATIVES at collection.go:457:91\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:471:56\n    RUNNABLE CONDITIONALS_NEGATION at collection.go:463:32\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:16:14\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:16:14\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:16:30\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:16:30\n    RUNNABLE ARITHMETIC_BASE at controls.go:19:16\n    RUNNABLE INVERT_NEGATIVES at controls.go:19:16\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:29:10\n    RUNNABLE ARITHMETIC_BASE at controls.go:21:41\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:29:20\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:29:10\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:29:32\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:29:20\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:29:53\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:29:32\n    RUNNABLE INVERT_NEGATIVES at controls.go:32:14\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:29:53\n    RUNNABLE INVERT_NEGATIVES at controls.go:32:20\n    RUNNABLE ARITHMETIC_BASE at controls.go:32:14\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:34:7\n    RUNNABLE ARITHMETIC_BASE at controls.go:32:20\n    RUNNABLE ARITHMETIC_BASE at controls.go:35:31\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:34:7\n    RUNNABLE ARITHMETIC_BASE at controls.go:35:35\n    RUNNABLE ARITHMETIC_BASE at controls.go:37:21\n    RUNNABLE ARITHMETIC_BASE at controls.go:37:17\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:58:14\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:47:18\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:58:30\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:58:14\n    RUNNABLE INVERT_NEGATIVES at controls.go:62:41\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:58:30\n    RUNNABLE INVERT_NEGATIVES at controls.go:65:25\n    RUNNABLE ARITHMETIC_BASE at controls.go:62:41\n    RUNNABLE INVERT_NEGATIVES at controls.go:66:28\n    RUNNABLE ARITHMETIC_BASE at controls.go:65:25\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:74:15\n    RUNNABLE ARITHMETIC_BASE at controls.go:66:28\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:77:18\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:77:18\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:88:27\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:88:10\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:107:16\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:88:46\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:107:34\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:107:16\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:112:8\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:107:34\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:112:24\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:112:24\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:116:9\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:116:9\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:116:20\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:116:20\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:121:23\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:121:10\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:121:32\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:121:23\n    RUNNABLE ARITHMETIC_BASE at controls.go:124:20\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:121:32\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:126:11\n    RUNNABLE ARITHMETIC_BASE at controls.go:124:16\n    RUNNABLE ARITHMETIC_BASE at controls.go:126:33\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:126:11\n    RUNNABLE ARITHMETIC_BASE at controls.go:129:30\n    RUNNABLE ARITHMETIC_BASE at controls.go:126:22\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:138:15\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:133:9\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:141:24\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:141:24\n    RUNNABLE CONDITIONALS_NEGATION at controls.go:141:40\n    RUNNABLE CONDITIONALS_BOUNDARY at controls.go:141:40\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:33:13\n NOT COVERED ARITHMETIC_BASE at durable.go:12:30\n    RUNNABLE CONDITIONALS_BOUNDARY at durable.go:33:56\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:33:33\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:37:9\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:33:56\n    RUNNABLE CONDITIONALS_BOUNDARY at durable.go:45:17\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:42:19\n    RUNNABLE ARITHMETIC_BASE at durable.go:45:33\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:45:17\n    RUNNABLE CONDITIONALS_BOUNDARY at durable.go:52:72\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:52:43\n    RUNNABLE INVERT_NEGATIVES at durable.go:53:52\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:52:72\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:61:82\n    RUNNABLE ARITHMETIC_BASE at durable.go:53:52\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:62:15\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:61:110\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:80:35\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:80:13\n    RUNNABLE CONDITIONALS_NEGATION at durable.go:85:70\n    RUNNABLE ARITHMETIC_BASE at lifecycle.go:22:58\n    RUNNABLE ARITHMETIC_BASE at lifecycle.go:22:65\n NOT COVERED CONDITIONALS_NEGATION at lifecycle.go:39:38\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:25:9\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:47:14\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:43:9\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:47:92\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:47:54\n NOT COVERED INVERT_NEGATIVES at lifecycle.go:62:10\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:61:22\n    RUNNABLE ARITHMETIC_BASE at lifecycle.go:70:71\n NOT COVERED ARITHMETIC_BASE at lifecycle.go:62:10\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:82:42\n    RUNNABLE CONDITIONALS_BOUNDARY at lifecycle.go:82:42\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:137:15\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:123:48\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:137:56\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:137:35\n    RUNNABLE CONDITIONALS_BOUNDARY at lifecycle.go:144:20\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:137:89\n    RUNNABLE INVERT_NEGATIVES at lifecycle.go:145:66\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:144:20\n    RUNNABLE CONDITIONALS_BOUNDARY at lifecycle.go:148:18\n    RUNNABLE ARITHMETIC_BASE at lifecycle.go:145:66\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:159:67\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:148:18\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:169:8\n NOT COVERED CONDITIONALS_NEGATION at lifecycle.go:161:66\n    RUNNABLE INCREMENT_DECREMENT at lifecycle.go:184:11\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:175:32\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:205:11\n    RUNNABLE INCREMENT_DECREMENT at lifecycle.go:186:9\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:205:33\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:213:19\n NOT COVERED CONDITIONALS_NEGATION at lifecycle.go:210:36\n    RUNNABLE CONDITIONALS_NEGATION at lifecycle.go:226:8\n NOT COVERED CONDITIONALS_NEGATION at lifecycle.go:235:19\n NOT COVERED CONDITIONALS_NEGATION at lifecycle.go:235:73\n NOT COVERED CONDITIONALS_NEGATION at lifecycle.go:235:40\n NOT COVERED CONDITIONALS_NEGATION at lifecycle.go:240:16\n    RUNNABLE CONDITIONALS_NEGATION at ogg.go:19:19\n    RUNNABLE CONDITIONALS_NEGATION at ogg.go:18:10\n    RUNNABLE CONDITIONALS_NEGATION at ogg.go:30:25\n    RUNNABLE CONDITIONALS_NEGATION at ogg.go:27:10\n    RUNNABLE CONDITIONALS_NEGATION at ogg.go:33:25\n    RUNNABLE CONDITIONALS_NEGATION at ogg.go:30:48\n    RUNNABLE CONDITIONALS_BOUNDARY at ogg.go:33:41\n    RUNNABLE CONDITIONALS_NEGATION at ogg.go:33:19\n    RUNNABLE CONDITIONALS_NEGATION at ogg.go:37:42\n    RUNNABLE CONDITIONALS_NEGATION at ogg.go:33:41\n    RUNNABLE CONDITIONALS_BOUNDARY at ogg.go:42:23\n    RUNNABLE CONDITIONALS_NEGATION at ogg.go:42:23\n    RUNNABLE CONDITIONALS_NEGATION at ogg.go:46:52\n    RUNNABLE ARITHMETIC_BASE at ogg.go:42:12\n    RUNNABLE CONDITIONALS_NEGATION at ogg.go:64:32\n    RUNNABLE CONDITIONALS_NEGATION at ogg.go:49:12\n    RUNNABLE CONDITIONALS_NEGATION at pause.go:20:25\n    RUNNABLE CONDITIONALS_NEGATION at pause.go:20:12\n    RUNNABLE CONDITIONALS_NEGATION at pause.go:37:18\n    RUNNABLE CONDITIONALS_NEGATION at pause.go:32:7\n    RUNNABLE CONDITIONALS_NEGATION at pause.go:46:8\n    RUNNABLE CONDITIONALS_NEGATION at pause.go:43:28\n    RUNNABLE CONDITIONALS_NEGATION at pause.go:85:15\n    RUNNABLE CONDITIONALS_NEGATION at pause.go:52:13\n    RUNNABLE CONDITIONALS_NEGATION at pause.go:85:55\n    RUNNABLE CONDITIONALS_NEGATION at pause.go:85:33\n    RUNNABLE CONDITIONALS_NEGATION at player.go:79:13\n    RUNNABLE CONDITIONALS_NEGATION at player.go:76:17\n    RUNNABLE CONDITIONALS_NEGATION at player.go:97:17\n    RUNNABLE INCREMENT_DECREMENT at player.go:83:14\n    RUNNABLE CONDITIONALS_NEGATION at player.go:97:52\n    RUNNABLE CONDITIONALS_NEGATION at player.go:97:35\n    RUNNABLE CONDITIONALS_NEGATION at player.go:100:17\n    RUNNABLE CONDITIONALS_BOUNDARY at player.go:100:17\n    RUNNABLE ARITHMETIC_BASE at player.go:100:33\n    RUNNABLE INVERT_NEGATIVES at player.go:100:33\n    RUNNABLE ARITHMETIC_BASE at player.go:107:35\n    RUNNABLE CONDITIONALS_NEGATION at player.go:106:21\n    RUNNABLE ARITHMETIC_BASE at player.go:109:90\n    RUNNABLE INVERT_NEGATIVES at player.go:109:90\n    RUNNABLE CONDITIONALS_NEGATION at player.go:116:24\n    RUNNABLE CONDITIONALS_BOUNDARY at player.go:116:24\n    RUNNABLE INCREMENT_DECREMENT at player.go:142:14\n    RUNNABLE INCREMENT_DECREMENT at player.go:126:14\n    RUNNABLE CONDITIONALS_NEGATION at player.go:150:7\n    RUNNABLE CONDITIONALS_NEGATION at player.go:147:10\n    RUNNABLE CONDITIONALS_NEGATION at player.go:156:35\n    RUNNABLE CONDITIONALS_NEGATION at player.go:156:13\n    RUNNABLE CONDITIONALS_NEGATION at player.go:175:14\n    RUNNABLE CONDITIONALS_NEGATION at player.go:171:18\n    RUNNABLE CONDITIONALS_NEGATION at player.go:175:70\n    RUNNABLE CONDITIONALS_NEGATION at player.go:194:15\n    RUNNABLE INCREMENT_DECREMENT at player.go:192:13\n NOT COVERED CONDITIONALS_NEGATION at player.go:214:37\n NOT COVERED CONDITIONALS_NEGATION at player.go:214:17\n NOT COVERED CONDITIONALS_NEGATION at player.go:214:91\n NOT COVERED CONDITIONALS_NEGATION at player.go:214:58\n    RUNNABLE CONDITIONALS_NEGATION at player.go:224:31\n    RUNNABLE CONDITIONALS_NEGATION at player.go:220:16\n    RUNNABLE CONDITIONALS_NEGATION at player.go:227:70\n    RUNNABLE CONDITIONALS_NEGATION at player.go:227:48\n    RUNNABLE CONDITIONALS_NEGATION at player.go:232:17\n    RUNNABLE CONDITIONALS_NEGATION at player.go:228:31\n    RUNNABLE CONDITIONALS_BOUNDARY at player.go:236:62\n    RUNNABLE CONDITIONALS_NEGATION at player.go:236:29\n    RUNNABLE CONDITIONALS_NEGATION at player.go:238:17\n    RUNNABLE CONDITIONALS_NEGATION at player.go:236:62\n    RUNNABLE CONDITIONALS_NEGATION at player.go:245:14\n    RUNNABLE CONDITIONALS_NEGATION at player.go:242:14\n    RUNNABLE INCREMENT_DECREMENT at player.go:256:14\n    RUNNABLE CONDITIONALS_NEGATION at player.go:255:10\n    RUNNABLE CONDITIONALS_NEGATION at player.go:262:207\n    RUNNABLE CONDITIONALS_BOUNDARY at player.go:262:207\n    RUNNABLE CONDITIONALS_NEGATION at player.go:263:18\n NOT COVERED CONDITIONALS_BOUNDARY at player.go:286:26\n    RUNNABLE CONDITIONALS_NEGATION at player.go:268:10\n NOT COVERED CONDITIONALS_NEGATION at player.go:288:20\n NOT COVERED CONDITIONALS_NEGATION at player.go:286:26\n NOT COVERED CONDITIONALS_NEGATION at player.go:320:9\n NOT COVERED CONDITIONALS_NEGATION at player.go:295:14\n NOT COVERED CONDITIONALS_NEGATION at player.go:320:39\n NOT COVERED CONDITIONALS_BOUNDARY at player.go:320:39\n    RUNNABLE CONDITIONALS_NEGATION at previous.go:16:43\n    RUNNABLE CONDITIONALS_NEGATION at previous.go:16:15\n    RUNNABLE CONDITIONALS_NEGATION at previous.go:19:7\n    RUNNABLE INCREMENT_DECREMENT at previous.go:17:4\n    RUNNABLE CONDITIONALS_NEGATION at previous.go:19:45\n    RUNNABLE CONDITIONALS_NEGATION at previous.go:19:27\n    RUNNABLE INCREMENT_DECREMENT at previous.go:24:9\n    RUNNABLE CONDITIONALS_NEGATION at previous.go:23:15\n    RUNNABLE CONDITIONALS_NEGATION at previous.go:26:25\n    RUNNABLE CONDITIONALS_BOUNDARY at previous.go:26:25\n    RUNNABLE INVERT_NEGATIVES at previous.go:29:35\n    RUNNABLE ARITHMETIC_BASE at previous.go:26:17\n    RUNNABLE ARITHMETIC_BASE at previous.go:29:35\n    RUNNABLE INVERT_NEGATIVES at previous.go:34:26\n    RUNNABLE CONDITIONALS_NEGATION at previous.go:31:15\n    RUNNABLE ARITHMETIC_BASE at previous.go:34:26\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:43:79\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:39:15\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:44:13\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:43:107\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:54:78\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:54:39\n    RUNNABLE CONDITIONALS_BOUNDARY at queue.go:67:81\n    RUNNABLE ARITHMETIC_BASE at queue.go:59:156\n    RUNNABLE INCREMENT_DECREMENT at queue.go:79:14\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:67:81\n    RUNNABLE CONDITIONALS_BOUNDARY at queue.go:107:11\n NOT COVERED ARITHMETIC_BASE at queue.go:93:38\n    RUNNABLE CONDITIONALS_BOUNDARY at queue.go:107:24\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:107:11\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:114:15\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:107:24\n    RUNNABLE INVERT_NEGATIVES at queue.go:118:22\n    RUNNABLE INCREMENT_DECREMENT at queue.go:115:17\n    RUNNABLE CONDITIONALS_BOUNDARY at queue.go:126:18\n    RUNNABLE ARITHMETIC_BASE at queue.go:118:22\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:126:18\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:138:17\n    RUNNABLE CONDITIONALS_BOUNDARY at queue.go:138:17\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:144:19\n    RUNNABLE CONDITIONALS_NEGATION at queue.go:141:18\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:40:20\n    RUNNABLE CONDITIONALS_BOUNDARY at stream.go:40:20\n    RUNNABLE CONDITIONALS_BOUNDARY at stream.go:43:18\n    RUNNABLE ARITHMETIC_BASE at stream.go:41:23\n    RUNNABLE ARITHMETIC_BASE at stream.go:44:21\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:43:18\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:52:10\n    RUNNABLE CONDITIONALS_BOUNDARY at stream.go:52:10\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:62:9\n    RUNNABLE ARITHMETIC_BASE at stream.go:53:13\n    RUNNABLE ARITHMETIC_BASE at stream.go:67:92\n    RUNNABLE ARITHMETIC_BASE at stream.go:67:113\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:95:27\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:89:9\n    RUNNABLE ARITHMETIC_BASE at stream.go:113:21\n    RUNNABLE INVERT_NEGATIVES at stream.go:113:21\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:144:16\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:141:20\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:144:39\n    RUNNABLE CONDITIONALS_BOUNDARY at stream.go:144:39\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:154:27\n NOT COVERED CONDITIONALS_NEGATION at stream.go:147:42\n    RUNNABLE ARITHMETIC_BASE at stream.go:169:21\n    RUNNABLE INVERT_NEGATIVES at stream.go:169:21\n    RUNNABLE ARITHMETIC_BASE at stream.go:172:21\n    RUNNABLE INVERT_NEGATIVES at stream.go:172:21\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:191:32\n    RUNNABLE ARITHMETIC_BASE at stream.go:185:60\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:218:41\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:214:16\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:244:44\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:235:10\n    RUNNABLE CONDITIONALS_BOUNDARY at stream.go:253:23\n    RUNNABLE ARITHMETIC_BASE at stream.go:252:22\n    RUNNABLE ARITHMETIC_BASE at stream.go:253:27\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:253:23\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:258:13\n    RUNNABLE ARITHMETIC_BASE at stream.go:254:29\n    RUNNABLE CONDITIONALS_BOUNDARY at stream.go:266:11\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:261:13\n    RUNNABLE ARITHMETIC_BASE at stream.go:267:13\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:266:11\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:300:18\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:284:12\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:308:13\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:305:40\n    RUNNABLE CONDITIONALS_BOUNDARY at stream.go:313:35\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:313:12\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:316:12\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:313:35\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:316:35\n    RUNNABLE CONDITIONALS_BOUNDARY at stream.go:316:35\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:319:34\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:319:19\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:322:34\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:322:19\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:326:19\n    RUNNABLE CONDITIONALS_BOUNDARY at stream.go:326:19\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:331:19\n    RUNNABLE CONDITIONALS_BOUNDARY at stream.go:331:19\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:343:62\n    RUNNABLE ARITHMETIC_BASE at stream.go:336:29\n    RUNNABLE ARITHMETIC_BASE at stream.go:366:41\n    RUNNABLE ARITHMETIC_BASE at stream.go:365:22\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:371:20\n    RUNNABLE ARITHMETIC_BASE at stream.go:366:18\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:375:20\n    RUNNABLE CONDITIONALS_BOUNDARY at stream.go:375:20\n    RUNNABLE ARITHMETIC_BASE at stream.go:376:37\n    RUNNABLE INVERT_NEGATIVES at stream.go:376:37\n    RUNNABLE CONDITIONALS_BOUNDARY at stream.go:423:16\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:414:12\n    RUNNABLE CONDITIONALS_BOUNDARY at stream.go:437:7\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:423:16\n    RUNNABLE CONDITIONALS_NEGATION at stream.go:437:7\n\nDry run completed in 44 milliseconds 450 microseconds\nRunnable: 408, Not covered: 30\nMutator coverage: 93.15%\n",
+  "report": {
+    "go_module": "whiterun",
+    "files": [
+      {
+        "file_name": "durable.go",
+        "mutations": [
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 33,
+            "column": 13
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "NOT COVERED",
+            "line": 12,
+            "column": 30
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 33,
+            "column": 56
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 33,
+            "column": 33
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 37,
+            "column": 9
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 33,
+            "column": 56
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 45,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 42,
+            "column": 19
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 45,
+            "column": 33
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 45,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 52,
+            "column": 72
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 52,
+            "column": 43
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 53,
+            "column": 52
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 52,
+            "column": 72
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 61,
+            "column": 82
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 53,
+            "column": 52
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 62,
+            "column": 15
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 61,
+            "column": 110
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 80,
+            "column": 35
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 80,
+            "column": 13
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 85,
+            "column": 70
+          }
+        ]
+      },
+      {
+        "file_name": "lifecycle.go",
+        "mutations": [
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 22,
+            "column": 58
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 22,
+            "column": 65
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 39,
+            "column": 38
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 25,
+            "column": 9
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 47,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 43,
+            "column": 9
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 47,
+            "column": 92
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 47,
+            "column": 54
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "NOT COVERED",
+            "line": 62,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 61,
+            "column": 22
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 70,
+            "column": 71
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "NOT COVERED",
+            "line": 62,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 82,
+            "column": 42
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 82,
+            "column": 42
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 137,
+            "column": 15
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 123,
+            "column": 48
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 137,
+            "column": 56
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 137,
+            "column": 35
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 144,
+            "column": 20
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 137,
+            "column": 89
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 145,
+            "column": 66
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 144,
+            "column": 20
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 148,
+            "column": 18
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 145,
+            "column": 66
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 159,
+            "column": 67
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 148,
+            "column": 18
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 169,
+            "column": 8
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 161,
+            "column": 66
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 184,
+            "column": 11
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 175,
+            "column": 32
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 205,
+            "column": 11
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 186,
+            "column": 9
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 205,
+            "column": 33
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 213,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 210,
+            "column": 36
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 226,
+            "column": 8
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 235,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 235,
+            "column": 73
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 235,
+            "column": 40
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 240,
+            "column": 16
+          }
+        ]
+      },
+      {
+        "file_name": "ogg.go",
+        "mutations": [
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 19,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 18,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 30,
+            "column": 25
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 27,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 33,
+            "column": 25
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 30,
+            "column": 48
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 33,
+            "column": 41
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 33,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 37,
+            "column": 42
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 33,
+            "column": 41
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 42,
+            "column": 23
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 42,
+            "column": 23
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 46,
+            "column": 52
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 42,
+            "column": 12
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 64,
+            "column": 32
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 49,
+            "column": 12
+          }
+        ]
+      },
+      {
+        "file_name": "pause.go",
+        "mutations": [
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 20,
+            "column": 25
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 20,
+            "column": 12
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 37,
+            "column": 18
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 32,
+            "column": 7
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 46,
+            "column": 8
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 43,
+            "column": 28
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 85,
+            "column": 15
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 52,
+            "column": 13
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 85,
+            "column": 55
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 85,
+            "column": 33
+          }
+        ]
+      },
+      {
+        "file_name": "stream.go",
+        "mutations": [
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 40,
+            "column": 20
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 40,
+            "column": 20
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 43,
+            "column": 18
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 41,
+            "column": 23
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 44,
+            "column": 21
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 43,
+            "column": 18
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 52,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 52,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 62,
+            "column": 9
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 53,
+            "column": 13
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 67,
+            "column": 92
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 67,
+            "column": 113
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 95,
+            "column": 27
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 89,
+            "column": 9
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 113,
+            "column": 21
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 113,
+            "column": 21
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 144,
+            "column": 16
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 141,
+            "column": 20
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 144,
+            "column": 39
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 144,
+            "column": 39
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 154,
+            "column": 27
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 147,
+            "column": 42
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 169,
+            "column": 21
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 169,
+            "column": 21
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 172,
+            "column": 21
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 172,
+            "column": 21
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 191,
+            "column": 32
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 185,
+            "column": 60
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 218,
+            "column": 41
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 214,
+            "column": 16
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 244,
+            "column": 44
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 235,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 253,
+            "column": 23
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 252,
+            "column": 22
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 253,
+            "column": 27
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 253,
+            "column": 23
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 258,
+            "column": 13
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 254,
+            "column": 29
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 266,
+            "column": 11
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 261,
+            "column": 13
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 267,
+            "column": 13
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 266,
+            "column": 11
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 300,
+            "column": 18
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 284,
+            "column": 12
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 308,
+            "column": 13
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 305,
+            "column": 40
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 313,
+            "column": 35
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 313,
+            "column": 12
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 316,
+            "column": 12
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 313,
+            "column": 35
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 316,
+            "column": 35
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 316,
+            "column": 35
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 319,
+            "column": 34
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 319,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 322,
+            "column": 34
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 322,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 326,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 326,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 331,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 331,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 343,
+            "column": 62
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 336,
+            "column": 29
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 366,
+            "column": 41
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 365,
+            "column": 22
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 371,
+            "column": 20
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 366,
+            "column": 18
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 375,
+            "column": 20
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 375,
+            "column": 20
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 376,
+            "column": 37
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 376,
+            "column": 37
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 423,
+            "column": 16
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 414,
+            "column": 12
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 437,
+            "column": 7
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 423,
+            "column": 16
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 437,
+            "column": 7
+          }
+        ]
+      },
+      {
+        "file_name": "collection.go",
+        "mutations": [
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 71,
+            "column": 40
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 74,
+            "column": 78
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 71,
+            "column": 58
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 77,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 77,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 74,
+            "column": 41
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 74,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 71,
+            "column": 17
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 77,
+            "column": 35
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "NOT COVERED",
+            "line": 15,
+            "column": 37
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 77,
+            "column": 35
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 86,
+            "column": 347
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 83,
+            "column": 11
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 88,
+            "column": 17
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 86,
+            "column": 347
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 95,
+            "column": 12
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 89,
+            "column": 27
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 121,
+            "column": 7
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 111,
+            "column": 33
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 155,
+            "column": 37
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 129,
+            "column": 50
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 165,
+            "column": 11
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 164,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 173,
+            "column": 15
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 170,
+            "column": 108
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 187,
+            "column": 9
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 176,
+            "column": 135
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 187,
+            "column": 72
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 187,
+            "column": 47
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 190,
+            "column": 29
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 190,
+            "column": 9
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "NOT COVERED",
+            "line": 202,
+            "column": 22
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 218,
+            "column": 47
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "NOT COVERED",
+            "line": 202,
+            "column": 22
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 232,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 220,
+            "column": 25
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 237,
+            "column": 54
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 237,
+            "column": 19
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 241,
+            "column": 44
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 240,
+            "column": 13
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 265,
+            "column": 21
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 260,
+            "column": 39
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 267,
+            "column": 20
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 266,
+            "column": 18
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 270,
+            "column": 24
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 269,
+            "column": 53
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 71,
+            "column": 75
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 276,
+            "column": 11
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 273,
+            "column": 22
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 276,
+            "column": 47
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 279,
+            "column": 47
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 279,
+            "column": 11
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 280,
+            "column": 158
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 279,
+            "column": 63
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 306,
+            "column": 11
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 292,
+            "column": 15
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 311,
+            "column": 274
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 309,
+            "column": 89
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 311,
+            "column": 258
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 311,
+            "column": 274
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 311,
+            "column": 240
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 311,
+            "column": 258
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 311,
+            "column": 317
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 311,
+            "column": 240
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 315,
+            "column": 16
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 315,
+            "column": 16
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 316,
+            "column": 16
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 316,
+            "column": 16
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 321,
+            "column": 60
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 317,
+            "column": 18
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 323,
+            "column": 84
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 323,
+            "column": 63
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 328,
+            "column": 27
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 324,
+            "column": 18
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 339,
+            "column": 5
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 338,
+            "column": 12
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 74,
+            "column": 41
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 345,
+            "column": 69
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 344,
+            "column": 58
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 348,
+            "column": 16
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 348,
+            "column": 16
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 348,
+            "column": 52
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 348,
+            "column": 34
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 351,
+            "column": 103
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 348,
+            "column": 52
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 351,
+            "column": 92
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 351,
+            "column": 103
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 358,
+            "column": 19
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 351,
+            "column": 92
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 364,
+            "column": 14
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 362,
+            "column": 14
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 367,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 364,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 373,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 370,
+            "column": 16
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 412,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 393,
+            "column": 21
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 423,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 423,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 441,
+            "column": 27
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 436,
+            "column": 13
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 445,
+            "column": 16
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "NOT COVERED",
+            "line": 445,
+            "column": 16
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 457,
+            "column": 94
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 457,
+            "column": 91
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 457,
+            "column": 91
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 471,
+            "column": 56
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 463,
+            "column": 32
+          }
+        ]
+      },
+      {
+        "file_name": "controls.go",
+        "mutations": [
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 16,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 16,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 16,
+            "column": 30
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 16,
+            "column": 30
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 19,
+            "column": 16
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 19,
+            "column": 16
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 29,
+            "column": 10
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 21,
+            "column": 41
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 29,
+            "column": 20
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 29,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 29,
+            "column": 32
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 29,
+            "column": 20
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 29,
+            "column": 53
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 29,
+            "column": 32
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 32,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 29,
+            "column": 53
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 32,
+            "column": 20
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 32,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 34,
+            "column": 7
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 32,
+            "column": 20
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 35,
+            "column": 31
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 34,
+            "column": 7
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 35,
+            "column": 35
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 37,
+            "column": 21
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 37,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 58,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 47,
+            "column": 18
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 58,
+            "column": 30
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 58,
+            "column": 14
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 62,
+            "column": 41
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 58,
+            "column": 30
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 65,
+            "column": 25
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 62,
+            "column": 41
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 66,
+            "column": 28
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 65,
+            "column": 25
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 74,
+            "column": 15
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 66,
+            "column": 28
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 77,
+            "column": 18
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 77,
+            "column": 18
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 88,
+            "column": 27
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 88,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 107,
+            "column": 16
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 88,
+            "column": 46
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 107,
+            "column": 34
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 107,
+            "column": 16
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 112,
+            "column": 8
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 107,
+            "column": 34
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 112,
+            "column": 24
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 112,
+            "column": 24
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 116,
+            "column": 9
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 116,
+            "column": 9
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 116,
+            "column": 20
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 116,
+            "column": 20
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 121,
+            "column": 23
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 121,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 121,
+            "column": 32
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 121,
+            "column": 23
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 124,
+            "column": 20
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 121,
+            "column": 32
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 126,
+            "column": 11
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 124,
+            "column": 16
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 126,
+            "column": 33
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 126,
+            "column": 11
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 129,
+            "column": 30
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 126,
+            "column": 22
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 138,
+            "column": 15
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 133,
+            "column": 9
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 141,
+            "column": 24
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 141,
+            "column": 24
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 141,
+            "column": 40
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 141,
+            "column": 40
+          }
+        ]
+      },
+      {
+        "file_name": "player.go",
+        "mutations": [
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 79,
+            "column": 13
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 76,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 97,
+            "column": 17
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 83,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 97,
+            "column": 52
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 97,
+            "column": 35
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 100,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 100,
+            "column": 17
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 100,
+            "column": 33
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 100,
+            "column": 33
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 107,
+            "column": 35
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 106,
+            "column": 21
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 109,
+            "column": 90
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 109,
+            "column": 90
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 116,
+            "column": 24
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 116,
+            "column": 24
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 142,
+            "column": 14
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 126,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 150,
+            "column": 7
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 147,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 156,
+            "column": 35
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 156,
+            "column": 13
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 175,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 171,
+            "column": 18
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 175,
+            "column": 70
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 194,
+            "column": 15
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 192,
+            "column": 13
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 214,
+            "column": 37
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 214,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 214,
+            "column": 91
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 214,
+            "column": 58
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 224,
+            "column": 31
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 220,
+            "column": 16
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 227,
+            "column": 70
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 227,
+            "column": 48
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 232,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 228,
+            "column": 31
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 236,
+            "column": 62
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 236,
+            "column": 29
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 238,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 236,
+            "column": 62
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 245,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 242,
+            "column": 14
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 256,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 255,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 262,
+            "column": 207
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 262,
+            "column": 207
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 263,
+            "column": 18
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "NOT COVERED",
+            "line": 286,
+            "column": 26
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 268,
+            "column": 10
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 288,
+            "column": 20
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 286,
+            "column": 26
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 320,
+            "column": 9
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 295,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "NOT COVERED",
+            "line": 320,
+            "column": 39
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "NOT COVERED",
+            "line": 320,
+            "column": 39
+          }
+        ]
+      },
+      {
+        "file_name": "previous.go",
+        "mutations": [
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 16,
+            "column": 43
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 16,
+            "column": 15
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 19,
+            "column": 7
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 17,
+            "column": 4
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 19,
+            "column": 45
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 19,
+            "column": 27
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 24,
+            "column": 9
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 23,
+            "column": 15
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 26,
+            "column": 25
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 26,
+            "column": 25
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 29,
+            "column": 35
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 26,
+            "column": 17
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 29,
+            "column": 35
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 34,
+            "column": 26
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 31,
+            "column": 15
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 34,
+            "column": 26
+          }
+        ]
+      },
+      {
+        "file_name": "queue.go",
+        "mutations": [
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 43,
+            "column": 79
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 39,
+            "column": 15
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 44,
+            "column": 13
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 43,
+            "column": 107
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 54,
+            "column": 78
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 54,
+            "column": 39
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 67,
+            "column": 81
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 59,
+            "column": 156
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 79,
+            "column": 14
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 67,
+            "column": 81
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 107,
+            "column": 11
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "NOT COVERED",
+            "line": 93,
+            "column": 38
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 107,
+            "column": 24
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 107,
+            "column": 11
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 114,
+            "column": 15
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 107,
+            "column": 24
+          },
+          {
+            "type": "INVERT_NEGATIVES",
+            "status": "RUNNABLE",
+            "line": 118,
+            "column": 22
+          },
+          {
+            "type": "INCREMENT_DECREMENT",
+            "status": "RUNNABLE",
+            "line": 115,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 126,
+            "column": 18
+          },
+          {
+            "type": "ARITHMETIC_BASE",
+            "status": "RUNNABLE",
+            "line": 118,
+            "column": 22
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 126,
+            "column": 18
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 138,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_BOUNDARY",
+            "status": "RUNNABLE",
+            "line": 138,
+            "column": 17
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 144,
+            "column": 19
+          },
+          {
+            "type": "CONDITIONALS_NEGATION",
+            "status": "RUNNABLE",
+            "line": 141,
+            "column": 18
+          }
+        ]
+      }
+    ],
+    "test_efficacy": 0,
+    "mutations_coverage": 93.15068493150685,
+    "mutants_total": 0,
+    "mutants_killed": 0,
+    "mutants_lived": 0,
+    "mutants_not_viable": 0,
+    "mutants_not_covered": 30,
+    "elapsed_time": 0.044450928,
+    "mutator_statistics": {
+      "arithmetic_base": 75,
+      "conditionals_negation": 253,
+      "conditionals_boundary": 60,
+      "increment_decrement": 21,
+      "invert_negatives": 29
+    }
+  }
+}

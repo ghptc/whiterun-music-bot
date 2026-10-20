@@ -1,0 +1,2 @@
+{"time":"2026-10-19T21:06:41.912552402-03:00","level":"INFO","msg":"Spotify production diagnostic","binary_sha256":"9c6d7da6e25ad2d333dc31f6259bf5d474692d6e8b1b922e2423295589285dbc","dns_edns_disabled":false,"market":"","credentials_configured":false,"refresh_configured":false}
+{"time":"2026-10-19T21:06:41.912574665-03:00","level":"ERROR","msg":"bot stopped","error":"Invalid Spotify link. Use an open.spotify.com track, album, or playlist URL."}

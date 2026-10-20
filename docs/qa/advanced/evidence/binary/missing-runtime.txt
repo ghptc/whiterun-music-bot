@@ -1,0 +1,1 @@
+{"time":"2026-10-19T21:06:41.857550969-03:00","level":"ERROR","msg":"bot stopped","error":"required runtime yt-dlp: exec: \"yt-dlp\": executable file not found in $PATH"}

@@ -1,0 +1,26 @@
+[
+  {
+    "method": "CONNECT",
+    "authority": "discord.com:443"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v10/gateway"
+  },
+  {
+    "method": "CONNECT",
+    "authority": "discord.com:443"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v10/gateway"
+  },
+  {
+    "method": "CONNECT",
+    "authority": "discord.com:443"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v10/gateway"
+  }
+]

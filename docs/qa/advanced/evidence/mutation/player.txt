@@ -1,0 +1,37 @@
+Starting...
+Gathering coverage... done in 1.738001708s
+      KILLED CONDITIONALS_BOUNDARY at controls.go:16:30
+      KILLED CONDITIONALS_BOUNDARY at controls.go:16:14
+      KILLED CONDITIONALS_BOUNDARY at controls.go:29:20
+      KILLED CONDITIONALS_BOUNDARY at controls.go:29:10
+      KILLED CONDITIONALS_BOUNDARY at controls.go:29:53
+      KILLED CONDITIONALS_BOUNDARY at controls.go:29:32
+      KILLED CONDITIONALS_BOUNDARY at controls.go:34:7
+      KILLED CONDITIONALS_BOUNDARY at controls.go:58:14
+      KILLED CONDITIONALS_BOUNDARY at controls.go:58:30
+      KILLED CONDITIONALS_BOUNDARY at controls.go:77:18
+      KILLED CONDITIONALS_BOUNDARY at controls.go:107:16
+      KILLED CONDITIONALS_BOUNDARY at controls.go:107:34
+      KILLED CONDITIONALS_BOUNDARY at controls.go:116:9
+      KILLED CONDITIONALS_BOUNDARY at controls.go:112:24
+      KILLED CONDITIONALS_BOUNDARY at controls.go:116:20
+      KILLED CONDITIONALS_BOUNDARY at controls.go:121:23
+      KILLED CONDITIONALS_BOUNDARY at controls.go:121:32
+ NOT COVERED CONDITIONALS_BOUNDARY at controls.go:141:24
+ NOT COVERED CONDITIONALS_BOUNDARY at controls.go:141:40
+      KILLED CONDITIONALS_BOUNDARY at controls.go:126:11
+      KILLED CONDITIONALS_BOUNDARY at durable.go:33:56
+      KILLED CONDITIONALS_BOUNDARY at durable.go:45:17
+      KILLED CONDITIONALS_BOUNDARY at durable.go:52:72
+ NOT COVERED CONDITIONALS_BOUNDARY at queue.go:67:81
+      KILLED CONDITIONALS_BOUNDARY at previous.go:26:25
+      KILLED CONDITIONALS_BOUNDARY at queue.go:107:24
+      KILLED CONDITIONALS_BOUNDARY at queue.go:107:11
+      KILLED CONDITIONALS_BOUNDARY at queue.go:126:18
+      KILLED CONDITIONALS_BOUNDARY at queue.go:138:17
+
+Mutation testing completed in 6 seconds 435 milliseconds
+Killed: 26, Lived: 0, Not covered: 3
+Timed out: 0, Not viable: 0, Skipped: 0
+Test efficacy: 100.00%
+Mutator coverage: 89.66%

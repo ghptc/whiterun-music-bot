@@ -1,0 +1,10 @@
+fuzz: elapsed: 0s, gathering baseline coverage: 0/9 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 9/9 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 79791 (26594/sec), new interesting: 126 (total: 135)
+fuzz: elapsed: 6s, execs: 171564 (30590/sec), new interesting: 146 (total: 155)
+fuzz: elapsed: 9s, execs: 174447 (961/sec), new interesting: 148 (total: 157)
+fuzz: elapsed: 12s, execs: 174447 (0/sec), new interesting: 148 (total: 157)
+fuzz: elapsed: 15s, execs: 275637 (33751/sec), new interesting: 150 (total: 159)
+fuzz: elapsed: 16s, execs: 275637 (0/sec), new interesting: 150 (total: 159)
+PASS
+ok  	whiterun/internal/media	16.007s

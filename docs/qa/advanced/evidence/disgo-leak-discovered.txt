@@ -1,0 +1,30 @@
+1999/12/31 22:00:00 WARN rate limit exceeded name=rest_rate_limiter endpoint=/interactions/10/test/callback retry_after=2
+--- FAIL: TestAdvancedDiscordAckSchedules (0.00s)
+    --- FAIL: TestAdvancedDiscordAckSchedules/429_within_budget (0.00s)
+panic: deadlock: main bubble goroutine has exited but blocked goroutines remain [recovered, repanicked]
+
+goroutine 22 [running]:
+testing.tRunner.func1.2({0x1ac2bf8, 0xc000133068})
+	/usr/lib/go/src/testing/testing.go:2123 +0x419
+testing.tRunner.func1()
+	/usr/lib/go/src/testing/testing.go:2126 +0x65f
+panic({0x1ac2bf8?, 0xc000133068?})
+	/usr/lib/go/src/runtime/panic.go:859 +0x125
+internal/synctest.Run(0xc000138f40)
+	/usr/lib/go/src/runtime/synctest.go:247 +0x2f4
+testing/synctest.Test(0xc0002026c8, 0xc000132948)
+	/usr/lib/go/src/testing/synctest/synctest.go:291 +0x125
+whiterun/internal/discord.TestAdvancedDiscordAckSchedules.func1(0xc0002026c8)
+	/home/gabriel/Projects/whiterun-music-bot/internal/discord/advanced_clock_test.go:20 +0xa6
+testing.tRunner(0xc0002026c8, 0xc000132900)
+	/usr/lib/go/src/testing/testing.go:2193 +0x21d
+created by testing.(*T).Run in goroutine 21
+	/usr/lib/go/src/testing/testing.go:2258 +0xb13
+
+goroutine 25 [chan receive (durable), synctest bubble 1]:
+github.com/disgoorg/disgo/rest.(*rateLimiterImpl).cleanup(0xc0001359c0)
+	/home/gabriel/go/pkg/mod/github.com/disgoorg/disgo@v0.19.6/rest/rest_rate_limiter.go:73 +0x97
+created by github.com/disgoorg/disgo/rest.NewRateLimiter in goroutine 24
+	/home/gabriel/go/pkg/mod/github.com/disgoorg/disgo@v0.19.6/rest/rest_rate_limiter.go:51 +0x246
+FAIL	whiterun/internal/discord	0.009s
+FAIL
