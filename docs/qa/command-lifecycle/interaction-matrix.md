@@ -56,6 +56,12 @@ fora da fila e comandos pós-leave são rejeições intencionais, não cenários
   pending, falha, épocas e destination. Não há confirmação de áudio Discord real.
 - Streams/processos: FFmpeg real com fontes simuladas, cancelamento, morte de
   subprocessos, EOF, teardown, descritores e stress nas suítes existentes.
+- TestQA013CommandPersistenceRollbackAndRecovery injeta ABORT em transação SQLite
+  depois do ACK: efeito em memória continua, commit falho não é parcial e EOF
+  posterior recupera persistência após remover o fault.
+- TestQA013AnnouncementFailureDoesNotBlockNextTrack falha o primeiro anúncio
+  e verifica anúncio da sucessora; TestQA013ConcurrentGuildIsolation executa
+  play simultâneo em duas guilds e stop em apenas uma.
 - Persistência: restart por comando, isolation/artwork/ledger, rollback e interrupção
   transacional, kill de processo em DB temporário, cache e logstore existentes.
 - Logging: CommandToTransitionPersistentCorrelation verifica envelopes SQLite,

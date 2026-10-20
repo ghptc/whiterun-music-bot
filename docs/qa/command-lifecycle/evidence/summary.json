@@ -1,0 +1,602 @@
+{
+  "normal": {
+    "packages": [
+      {
+        "package": "whiterun/cmd/bot",
+        "result": "pass",
+        "elapsed_seconds": 0.032
+      },
+      {
+        "package": "whiterun/cmd/qa-memory",
+        "result": "pass",
+        "elapsed_seconds": 0.058
+      },
+      {
+        "package": "whiterun/cmd/qa-soak",
+        "result": "pass",
+        "elapsed_seconds": 0.475
+      },
+      {
+        "package": "whiterun/cmd/profile",
+        "result": "pass",
+        "elapsed_seconds": 0.478
+      },
+      {
+        "package": "whiterun/internal/qasoak",
+        "result": "pass",
+        "elapsed_seconds": 0.006
+      },
+      {
+        "package": "whiterun/internal/storage",
+        "result": "pass",
+        "elapsed_seconds": 0.332
+      },
+      {
+        "package": "whiterun/internal/logstore",
+        "result": "pass",
+        "elapsed_seconds": 0.607
+      },
+      {
+        "package": "whiterun/internal/media",
+        "result": "pass",
+        "elapsed_seconds": 0.661
+      },
+      {
+        "package": "whiterun/internal/discord",
+        "result": "pass",
+        "elapsed_seconds": 10.249
+      },
+      {
+        "package": "whiterun/internal/player",
+        "result": "pass",
+        "elapsed_seconds": 39.322
+      }
+    ],
+    "leaf_results": {
+      "pass": 5228,
+      "skip": 5
+    },
+    "qa013_passed_leaves_by_contract": {
+      "TestQA013AnnouncementFailureDoesNotBlockNextTrack": 1,
+      "TestQA013CommandAcknowledgementAndReplyFaults": 44,
+      "TestQA013CommandPersistenceRollbackAndRecovery": 1,
+      "TestQA013CommandToTransitionPersistentCorrelation": 1,
+      "TestQA013ConcurrentGuildIsolation": 1,
+      "TestQA013ConcurrentPlayRequestsAndEOF": 1,
+      "TestQA013ConcurrentQueueAndMutations": 1,
+      "TestQA013CriticalCommandSequences": 12,
+      "TestQA013DurableModelSequences": 256,
+      "TestQA013EOFDuringDiscordSkip": 64,
+      "TestQA013EveryCommandSQLiteRestart": 22,
+      "TestQA013InvalidArgumentsContinuePlayback": 8,
+      "TestQA013OrderedCommandPairs": 1452,
+      "TestQA013PermissionRejectionPreservesSubsequentPlayback": 17,
+      "TestQA013Production302LostNotificationManualSkip": 1,
+      "TestQA013Production302ShuffleEOF": 1,
+      "TestQA013ProgressiveMutationSequences": 6,
+      "TestQA013RegistryLifecycleCoverage": 1,
+      "TestQA013StartingControlNeverAnnouncesCanceledAttempt": 4
+    },
+    "skipped": [
+      {
+        "package": "whiterun/internal/storage",
+        "test": "TestExistingDatabaseUpgrade"
+      },
+      {
+        "package": "whiterun/internal/media",
+        "test": "TestLiveResolverTiming"
+      },
+      {
+        "package": "whiterun/internal/logstore",
+        "test": "TestDefault500MiBSaturation"
+      },
+      {
+        "package": "whiterun/internal/media",
+        "test": "TestSpotifyPublicLargeLiveRegression"
+      },
+      {
+        "package": "whiterun/internal/media",
+        "test": "TestSpotifyEmbedLiveRegression"
+      }
+    ]
+  },
+  "race": {
+    "packages": [
+      {
+        "package": "whiterun/cmd/profile",
+        "result": "skip",
+        "elapsed_seconds": 0
+      },
+      {
+        "package": "whiterun/cmd/qa-soak",
+        "result": "skip",
+        "elapsed_seconds": 0
+      },
+      {
+        "package": "whiterun/cmd/bot",
+        "result": "pass",
+        "elapsed_seconds": 1.056
+      },
+      {
+        "package": "whiterun/cmd/qa-memory",
+        "result": "pass",
+        "elapsed_seconds": 1.538
+      },
+      {
+        "package": "whiterun/internal/qasoak",
+        "result": "pass",
+        "elapsed_seconds": 1.061
+      },
+      {
+        "package": "whiterun/internal/media",
+        "result": "pass",
+        "elapsed_seconds": 3.441
+      },
+      {
+        "package": "whiterun/internal/storage",
+        "result": "pass",
+        "elapsed_seconds": 3.896
+      },
+      {
+        "package": "whiterun/internal/logstore",
+        "result": "pass",
+        "elapsed_seconds": 8.014
+      },
+      {
+        "package": "whiterun/internal/discord",
+        "result": "pass",
+        "elapsed_seconds": 28.705
+      },
+      {
+        "package": "whiterun/internal/player",
+        "result": "pass",
+        "elapsed_seconds": 75.387
+      }
+    ],
+    "leaf_results": {
+      "pass": 5228,
+      "skip": 5
+    },
+    "qa013_passed_leaves_by_contract": {
+      "TestQA013AnnouncementFailureDoesNotBlockNextTrack": 1,
+      "TestQA013CommandAcknowledgementAndReplyFaults": 44,
+      "TestQA013CommandPersistenceRollbackAndRecovery": 1,
+      "TestQA013CommandToTransitionPersistentCorrelation": 1,
+      "TestQA013ConcurrentGuildIsolation": 1,
+      "TestQA013ConcurrentPlayRequestsAndEOF": 1,
+      "TestQA013ConcurrentQueueAndMutations": 1,
+      "TestQA013CriticalCommandSequences": 12,
+      "TestQA013DurableModelSequences": 256,
+      "TestQA013EOFDuringDiscordSkip": 64,
+      "TestQA013EveryCommandSQLiteRestart": 22,
+      "TestQA013InvalidArgumentsContinuePlayback": 8,
+      "TestQA013OrderedCommandPairs": 1452,
+      "TestQA013PermissionRejectionPreservesSubsequentPlayback": 17,
+      "TestQA013Production302LostNotificationManualSkip": 1,
+      "TestQA013Production302ShuffleEOF": 1,
+      "TestQA013ProgressiveMutationSequences": 6,
+      "TestQA013RegistryLifecycleCoverage": 1,
+      "TestQA013StartingControlNeverAnnouncesCanceledAttempt": 4
+    },
+    "skipped": [
+      {
+        "package": "whiterun/internal/media",
+        "test": "TestLiveResolverTiming"
+      },
+      {
+        "package": "whiterun/internal/storage",
+        "test": "TestExistingDatabaseUpgrade"
+      },
+      {
+        "package": "whiterun/internal/media",
+        "test": "TestSpotifyPublicLargeLiveRegression"
+      },
+      {
+        "package": "whiterun/internal/media",
+        "test": "TestSpotifyEmbedLiveRegression"
+      },
+      {
+        "package": "whiterun/internal/logstore",
+        "test": "TestDefault500MiBSaturation"
+      }
+    ]
+  },
+  "raw_directory": ".qa-runs/qa013",
+  "fuzz": [
+    {
+      "target": "fuzz-discord",
+      "passed": true,
+      "executions": 20260,
+      "new_interesting": 45,
+      "corpus_total": 191
+    },
+    {
+      "target": "fuzz-media",
+      "passed": true,
+      "executions": 263635,
+      "new_interesting": 25,
+      "corpus_total": 315
+    },
+    {
+      "target": "fuzz-player",
+      "passed": true,
+      "executions": 1952,
+      "new_interesting": 8,
+      "corpus_total": 144
+    },
+    {
+      "target": "fuzz-timestamp",
+      "passed": true,
+      "executions": 651974,
+      "new_interesting": 3,
+      "corpus_total": 22
+    }
+  ],
+  "tested_source_commit": "0c77c4d794df607b18028b6d8a9f0e4a67c69831",
+  "benchmarks": {
+    "BenchmarkQA013CommandDispatch/help-8": [
+      {
+        "ns/op": 4034.0,
+        "local_ack_ns/op": 1910.0,
+        "B/op": 1994.0,
+        "allocs/op": 28.0
+      },
+      {
+        "ns/op": 4079.0,
+        "local_ack_ns/op": 1930.0,
+        "B/op": 1994.0,
+        "allocs/op": 28.0
+      },
+      {
+        "ns/op": 3987.0,
+        "local_ack_ns/op": 1888.0,
+        "B/op": 1994.0,
+        "allocs/op": 28.0
+      }
+    ],
+    "BenchmarkQA013CommandDispatch/queue-8": [
+      {
+        "ns/op": 8475.0,
+        "local_ack_ns/op": 2145.0,
+        "B/op": 3304.0,
+        "allocs/op": 57.0
+      },
+      {
+        "ns/op": 8504.0,
+        "local_ack_ns/op": 2160.0,
+        "B/op": 3304.0,
+        "allocs/op": 57.0
+      },
+      {
+        "ns/op": 8541.0,
+        "local_ack_ns/op": 2162.0,
+        "B/op": 3304.0,
+        "allocs/op": 57.0
+      }
+    ],
+    "BenchmarkQA013CommandDispatch/pause-8": [
+      {
+        "ns/op": 4011.0,
+        "local_ack_ns/op": 1889.0,
+        "B/op": 1651.0,
+        "allocs/op": 25.0
+      },
+      {
+        "ns/op": 4031.0,
+        "local_ack_ns/op": 1905.0,
+        "B/op": 1651.0,
+        "allocs/op": 25.0
+      },
+      {
+        "ns/op": 4024.0,
+        "local_ack_ns/op": 1892.0,
+        "B/op": 1651.0,
+        "allocs/op": 25.0
+      }
+    ],
+    "BenchmarkEnduranceLocalACK-8": [
+      {
+        "ns/op": 17801.0,
+        "B/op": 11226.0,
+        "allocs/op": 125.0
+      },
+      {
+        "ns/op": 17655.0,
+        "B/op": 11169.0,
+        "allocs/op": 125.0
+      },
+      {
+        "ns/op": 17722.0,
+        "B/op": 11140.0,
+        "allocs/op": 125.0
+      }
+    ],
+    "BenchmarkQueueV2/1-8": [
+      {
+        "ns/op": 1481.0,
+        "components": 6.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 1929.0,
+        "allocs/op": 31.0
+      },
+      {
+        "ns/op": 1486.0,
+        "components": 6.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 1929.0,
+        "allocs/op": 31.0
+      },
+      {
+        "ns/op": 1487.0,
+        "components": 6.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 1929.0,
+        "allocs/op": 31.0
+      }
+    ],
+    "BenchmarkQueueV2/10-8": [
+      {
+        "ns/op": 12701.0,
+        "components": 33.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 26138.0,
+        "allocs/op": 218.0
+      },
+      {
+        "ns/op": 12659.0,
+        "components": 33.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 26139.0,
+        "allocs/op": 218.0
+      },
+      {
+        "ns/op": 12618.0,
+        "components": 33.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 26138.0,
+        "allocs/op": 218.0
+      }
+    ],
+    "BenchmarkQueueV2/20-8": [
+      {
+        "ns/op": 24698.0,
+        "components": 34.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 52277.0,
+        "allocs/op": 390.0
+      },
+      {
+        "ns/op": 24625.0,
+        "components": 34.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 52278.0,
+        "allocs/op": 390.0
+      },
+      {
+        "ns/op": 24562.0,
+        "components": 34.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 52278.0,
+        "allocs/op": 390.0
+      }
+    ],
+    "BenchmarkQueueV2/123-8": [
+      {
+        "ns/op": 158776.0,
+        "components": 34.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 454665.0,
+        "allocs/op": 2145.0
+      },
+      {
+        "ns/op": 158220.0,
+        "components": 34.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 454668.0,
+        "allocs/op": 2145.0
+      },
+      {
+        "ns/op": 159758.0,
+        "components": 34.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 454664.0,
+        "allocs/op": 2145.0
+      }
+    ],
+    "BenchmarkQueueV2/500-8": [
+      {
+        "ns/op": 186424.0,
+        "components": 34.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 533744.0,
+        "allocs/op": 2681.0
+      },
+      {
+        "ns/op": 186677.0,
+        "components": 34.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 533746.0,
+        "allocs/op": 2682.0
+      },
+      {
+        "ns/op": 187179.0,
+        "components": 34.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 533749.0,
+        "allocs/op": 2682.0
+      }
+    ],
+    "BenchmarkQueueV2/1000-8": [
+      {
+        "ns/op": 196985.0,
+        "components": 34.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 533953.0,
+        "allocs/op": 2682.0
+      },
+      {
+        "ns/op": 196129.0,
+        "components": 34.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 533948.0,
+        "allocs/op": 2682.0
+      },
+      {
+        "ns/op": 196084.0,
+        "components": 34.0,
+        "messages": 1.0,
+        "missing-artworks": 0.0,
+        "B/op": 533945.0,
+        "allocs/op": 2682.0
+      }
+    ],
+    "BenchmarkQA013EOFTransition-8": [
+      {
+        "ns/op": 28271.0,
+        "first_frame_ns/op": 14139.0,
+        "transition_ns/op": 12988.0,
+        "B/op": 92528.0,
+        "allocs/op": 180.0
+      },
+      {
+        "ns/op": 27852.0,
+        "first_frame_ns/op": 13834.0,
+        "transition_ns/op": 12873.0,
+        "B/op": 92602.0,
+        "allocs/op": 181.0
+      },
+      {
+        "ns/op": 28092.0,
+        "first_frame_ns/op": 13994.0,
+        "transition_ns/op": 12939.0,
+        "B/op": 92588.0,
+        "allocs/op": 180.0
+      }
+    ],
+    "BenchmarkQA013QueueCommit/0-8": [
+      {
+        "ns/op": 13054.0,
+        "B/op": 1171.0,
+        "allocs/op": 29.0
+      },
+      {
+        "ns/op": 12678.0,
+        "B/op": 1160.0,
+        "allocs/op": 29.0
+      },
+      {
+        "ns/op": 12701.0,
+        "B/op": 1161.0,
+        "allocs/op": 29.0
+      }
+    ],
+    "BenchmarkQA013QueueCommit/302-8": [
+      {
+        "ns/op": 2812766.0,
+        "B/op": 1184839.0,
+        "allocs/op": 5189.0
+      },
+      {
+        "ns/op": 2798115.0,
+        "B/op": 1184539.0,
+        "allocs/op": 5187.0
+      },
+      {
+        "ns/op": 2812641.0,
+        "B/op": 1184575.0,
+        "allocs/op": 5187.0
+      }
+    ],
+    "BenchmarkQA013QueueCommit/1000-8": [
+      {
+        "ns/op": 9174837.0,
+        "B/op": 4191535.0,
+        "allocs/op": 17078.0
+      },
+      {
+        "ns/op": 9232371.0,
+        "B/op": 4191574.0,
+        "allocs/op": 17077.0
+      },
+      {
+        "ns/op": 9260783.0,
+        "B/op": 4192389.0,
+        "allocs/op": 17083.0
+      }
+    ],
+    "BenchmarkFastMatchRealFixture-8": [
+      {
+        "ns/op": 121026.0,
+        "B/op": 203629.0,
+        "allocs/op": 3131.0
+      },
+      {
+        "ns/op": 120365.0,
+        "B/op": 203845.0,
+        "allocs/op": 3131.0
+      },
+      {
+        "ns/op": 119850.0,
+        "B/op": 203728.0,
+        "allocs/op": 3131.0
+      }
+    ],
+    "BenchmarkCachedSpotifyIdentity-8": [
+      {
+        "ns/op": 66394.0,
+        "B/op": 108345.0,
+        "allocs/op": 1659.0
+      },
+      {
+        "ns/op": 66013.0,
+        "B/op": 108453.0,
+        "allocs/op": 1659.0
+      },
+      {
+        "ns/op": 66547.0,
+        "B/op": 108392.0,
+        "allocs/op": 1659.0
+      }
+    ]
+  },
+  "overall_statement_coverage": "78.6%",
+  "vet_output_empty": true,
+  "storage_crash_passed": true,
+  "stress_passed": true,
+  "docker_build_passed": true,
+  "docker_image_id": "20d8dea91603",
+  "raw_sha256": {
+    "benchmarks.log": "a8a58139083f90e653096e0e5ac20d63cc4c95f5cd18096a7a1105378f9be1ce",
+    "coverage-functions.log": "83e718ebbdee34286be5c4d346c90f2d67c4cedcc16a18ac93cb22df22c09cfc",
+    "dispatch-benchmarks.log": "25493a9822162faaf8c39d91d5820bb89828e55f5a97956690e58017803d11c3",
+    "docker-build.log": "8cb726cfe673ce9cad45a9dc8f2afca5763679862419c472c8446c2685df7772",
+    "fuzz-discord.log": "4190a4fc73e6d394921966f8122d91e72139be9e66c2c5272959df7a6799ac5c",
+    "fuzz-media.log": "9110c3a324c8cf1a868bd8f9ca7498b7df74650ba6ab4fa9007453e78a9e7345",
+    "fuzz-player.log": "db56b483ef88a659d20c0e3a9d0e11f4d96006994cc560e443ea08a9b0ecbe31",
+    "fuzz-timestamp.log": "3b93d072db84c1ce656164b6103d29968bc1e01ce9d12704b16e99dccbb52864",
+    "mutations.log": "603ec66cbed39b62e553aea67f4a2340e9691568c6a8bb4004c40601a56bfe1b",
+    "race.jsonl": "b948f5047d9175d9aec6fcd15beb85e84543224265b8de38bd6a46eb56e43c70",
+    "source-commit.txt": "469a030face9366ff4feca1f75c4cce66f65929da48b2107e0e315ed0b29b8ab",
+    "storage-crash.log": "f1c72a8c8aa1fd37f812b17817478c7b4a0204261dfd1c9eb7c01c197a8a6ebd",
+    "stress.log": "a49f7a2eda20ab38b8fdd99409f16121bcf54a80c8b225849f10f6dfa9917386",
+    "test.jsonl": "1fa14c23c44127de49faf539f421a3a601446e45c95ba54b74ca442a35ccd42c",
+    "vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

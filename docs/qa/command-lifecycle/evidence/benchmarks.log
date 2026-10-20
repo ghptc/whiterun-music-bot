@@ -1,0 +1,36 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/player
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor           
+BenchmarkQA013EOFTransition-8   	    8533	     28271 ns/op	     14139 first_frame_ns/op	     12988 transition_ns/op	   92528 B/op	     180 allocs/op
+BenchmarkQA013EOFTransition-8   	   10000	     27852 ns/op	     13834 first_frame_ns/op	     12873 transition_ns/op	   92602 B/op	     181 allocs/op
+BenchmarkQA013EOFTransition-8   	    9658	     28092 ns/op	     13994 first_frame_ns/op	     12939 transition_ns/op	   92588 B/op	     180 allocs/op
+PASS
+ok  	whiterun/internal/player	0.794s
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/storage
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor           
+BenchmarkQA013QueueCommit/0-8 	   18410	     13054 ns/op	    1171 B/op	      29 allocs/op
+BenchmarkQA013QueueCommit/0-8 	   18853	     12678 ns/op	    1160 B/op	      29 allocs/op
+BenchmarkQA013QueueCommit/0-8 	   18864	     12701 ns/op	    1161 B/op	      29 allocs/op
+BenchmarkQA013QueueCommit/302-8         	      84	   2812766 ns/op	 1184839 B/op	    5189 allocs/op
+BenchmarkQA013QueueCommit/302-8         	      85	   2798115 ns/op	 1184539 B/op	    5187 allocs/op
+BenchmarkQA013QueueCommit/302-8         	      84	   2812641 ns/op	 1184575 B/op	    5187 allocs/op
+BenchmarkQA013QueueCommit/1000-8        	      25	   9174837 ns/op	 4191535 B/op	   17078 allocs/op
+BenchmarkQA013QueueCommit/1000-8        	      25	   9232371 ns/op	 4191574 B/op	   17077 allocs/op
+BenchmarkQA013QueueCommit/1000-8        	      25	   9260783 ns/op	 4192389 B/op	   17083 allocs/op
+PASS
+ok  	whiterun/internal/storage	2.134s
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/media
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor           
+BenchmarkFastMatchRealFixture-8    	    2007	    121026 ns/op	  203629 B/op	    3131 allocs/op
+BenchmarkFastMatchRealFixture-8    	    1994	    120365 ns/op	  203845 B/op	    3131 allocs/op
+BenchmarkFastMatchRealFixture-8    	    2010	    119850 ns/op	  203728 B/op	    3131 allocs/op
+BenchmarkCachedSpotifyIdentity-8   	    3691	     66394 ns/op	  108345 B/op	    1659 allocs/op
+BenchmarkCachedSpotifyIdentity-8   	    3339	     66013 ns/op	  108453 B/op	    1659 allocs/op
+BenchmarkCachedSpotifyIdentity-8   	    3728	     66547 ns/op	  108392 B/op	    1659 allocs/op
+PASS
+ok  	whiterun/internal/media	1.442s

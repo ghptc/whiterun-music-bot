@@ -1,0 +1,36 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/discord
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor           
+BenchmarkQA013CommandDispatch/help-8         	   59198	      4034 ns/op	      1910 local_ack_ns/op	    1994 B/op	      28 allocs/op
+BenchmarkQA013CommandDispatch/help-8         	   58740	      4079 ns/op	      1930 local_ack_ns/op	    1994 B/op	      28 allocs/op
+BenchmarkQA013CommandDispatch/help-8         	   59736	      3987 ns/op	      1888 local_ack_ns/op	    1994 B/op	      28 allocs/op
+BenchmarkQA013CommandDispatch/queue-8        	   28411	      8475 ns/op	      2145 local_ack_ns/op	    3304 B/op	      57 allocs/op
+BenchmarkQA013CommandDispatch/queue-8        	   27909	      8504 ns/op	      2160 local_ack_ns/op	    3304 B/op	      57 allocs/op
+BenchmarkQA013CommandDispatch/queue-8        	   28028	      8541 ns/op	      2162 local_ack_ns/op	    3304 B/op	      57 allocs/op
+BenchmarkQA013CommandDispatch/pause-8        	   59730	      4011 ns/op	      1889 local_ack_ns/op	    1651 B/op	      25 allocs/op
+BenchmarkQA013CommandDispatch/pause-8        	   60607	      4031 ns/op	      1905 local_ack_ns/op	    1651 B/op	      25 allocs/op
+BenchmarkQA013CommandDispatch/pause-8        	   58437	      4024 ns/op	      1892 local_ack_ns/op	    1651 B/op	      25 allocs/op
+BenchmarkEnduranceLocalACK-8                 	   13448	     17801 ns/op	   11226 B/op	     125 allocs/op
+BenchmarkEnduranceLocalACK-8                 	   13507	     17655 ns/op	   11169 B/op	     125 allocs/op
+BenchmarkEnduranceLocalACK-8                 	   13562	     17722 ns/op	   11140 B/op	     125 allocs/op
+BenchmarkQueueV2/1-8                         	  156526	      1481 ns/op	         6.000 components	         1.000 messages	         0 missing-artworks	    1929 B/op	      31 allocs/op
+BenchmarkQueueV2/1-8                         	  164103	      1486 ns/op	         6.000 components	         1.000 messages	         0 missing-artworks	    1929 B/op	      31 allocs/op
+BenchmarkQueueV2/1-8                         	  161025	      1487 ns/op	         6.000 components	         1.000 messages	         0 missing-artworks	    1929 B/op	      31 allocs/op
+BenchmarkQueueV2/10-8                        	   19053	     12701 ns/op	        33.00 components	         1.000 messages	         0 missing-artworks	   26138 B/op	     218 allocs/op
+BenchmarkQueueV2/10-8                        	   18913	     12659 ns/op	        33.00 components	         1.000 messages	         0 missing-artworks	   26139 B/op	     218 allocs/op
+BenchmarkQueueV2/10-8                        	   19058	     12618 ns/op	        33.00 components	         1.000 messages	         0 missing-artworks	   26138 B/op	     218 allocs/op
+BenchmarkQueueV2/20-8                        	   10000	     24698 ns/op	        34.00 components	         1.000 messages	         0 missing-artworks	   52277 B/op	     390 allocs/op
+BenchmarkQueueV2/20-8                        	    9876	     24625 ns/op	        34.00 components	         1.000 messages	         0 missing-artworks	   52278 B/op	     390 allocs/op
+BenchmarkQueueV2/20-8                        	    9873	     24562 ns/op	        34.00 components	         1.000 messages	         0 missing-artworks	   52278 B/op	     390 allocs/op
+BenchmarkQueueV2/123-8                       	    1537	    158776 ns/op	        34.00 components	         1.000 messages	         0 missing-artworks	  454665 B/op	    2145 allocs/op
+BenchmarkQueueV2/123-8                       	    1509	    158220 ns/op	        34.00 components	         1.000 messages	         0 missing-artworks	  454668 B/op	    2145 allocs/op
+BenchmarkQueueV2/123-8                       	    1533	    159758 ns/op	        34.00 components	         1.000 messages	         0 missing-artworks	  454664 B/op	    2145 allocs/op
+BenchmarkQueueV2/500-8                       	    1287	    186424 ns/op	        34.00 components	         1.000 messages	         0 missing-artworks	  533744 B/op	    2681 allocs/op
+BenchmarkQueueV2/500-8                       	    1281	    186677 ns/op	        34.00 components	         1.000 messages	         0 missing-artworks	  533746 B/op	    2682 allocs/op
+BenchmarkQueueV2/500-8                       	    1276	    187179 ns/op	        34.00 components	         1.000 messages	         0 missing-artworks	  533749 B/op	    2682 allocs/op
+BenchmarkQueueV2/1000-8                      	    1220	    196985 ns/op	        34.00 components	         1.000 messages	         0 missing-artworks	  533953 B/op	    2682 allocs/op
+BenchmarkQueueV2/1000-8                      	    1219	    196129 ns/op	        34.00 components	         1.000 messages	         0 missing-artworks	  533948 B/op	    2682 allocs/op
+BenchmarkQueueV2/1000-8                      	    1220	    196084 ns/op	        34.00 components	         1.000 messages	         0 missing-artworks	  533945 B/op	    2682 allocs/op
+PASS
+ok  	whiterun/internal/discord	7.219s

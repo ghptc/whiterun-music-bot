@@ -15,7 +15,7 @@
       "mutant": "lost-resolver-window-wakeup",
       "status": "killed",
       "exit_code": 1,
-      "elapsed_seconds": 1.349,
+      "elapsed_seconds": 2.387,
       "failing_tests": [
         "--- FAIL: TestQA013Production302ShuffleEOF (0.00s)"
       ]
@@ -24,7 +24,7 @@
       "mutant": "execute-after-failed-ack",
       "status": "killed",
       "exit_code": 1,
-      "elapsed_seconds": 1.245,
+      "elapsed_seconds": 1.777,
       "failing_tests": [
         "--- FAIL: TestQA013CommandAcknowledgementAndReplyFaults (0.02s)",
         "--- FAIL: TestQA013CommandAcknowledgementAndReplyFaults/play/ack (0.00s)",
@@ -44,11 +44,11 @@
       "mutant": "default-skip-two",
       "status": "killed",
       "exit_code": 1,
-      "elapsed_seconds": 1.222,
+      "elapsed_seconds": 1.775,
       "failing_tests": [
         "--- FAIL: TestQA013CommandAcknowledgementAndReplyFaults (0.02s)",
         "--- FAIL: TestQA013CommandAcknowledgementAndReplyFaults/skip/reply (0.00s)",
-        "--- FAIL: TestQA013OrderedCommandPairs (0.61s)",
+        "--- FAIL: TestQA013OrderedCommandPairs (0.77s)",
         "--- FAIL: TestQA013OrderedCommandPairs/playing/summon/skip (0.00s)",
         "--- FAIL: TestQA013OrderedCommandPairs/playing/play/skip (0.00s)",
         "--- FAIL: TestQA013OrderedCommandPairs/playing/now/skip (0.00s)",
@@ -64,11 +64,11 @@
       "mutant": "move-loses-slot",
       "status": "killed",
       "exit_code": 1,
-      "elapsed_seconds": 1.326,
+      "elapsed_seconds": 1.984,
       "failing_tests": [
-        "--- FAIL: TestQA013CommandAcknowledgementAndReplyFaults (0.02s)",
+        "--- FAIL: TestQA013CommandAcknowledgementAndReplyFaults (0.03s)",
         "--- FAIL: TestQA013CommandAcknowledgementAndReplyFaults/move/reply (0.00s)",
-        "--- FAIL: TestQA013OrderedCommandPairs (0.61s)",
+        "--- FAIL: TestQA013OrderedCommandPairs (0.80s)",
         "--- FAIL: TestQA013OrderedCommandPairs/playing/summon/move (0.00s)",
         "--- FAIL: TestQA013OrderedCommandPairs/playing/play/move (0.00s)",
         "--- FAIL: TestQA013OrderedCommandPairs/playing/now/move (0.00s)",
@@ -84,7 +84,7 @@
       "mutant": "stop-retains-queue",
       "status": "killed",
       "exit_code": 1,
-      "elapsed_seconds": 1.434,
+      "elapsed_seconds": 1.827,
       "failing_tests": [
         "--- FAIL: TestQA013Production302ShuffleEOF (0.00s)",
         "--- FAIL: TestQA013CommandAcknowledgementAndReplyFaults (0.03s)",
