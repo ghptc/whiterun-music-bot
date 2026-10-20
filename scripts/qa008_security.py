@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+from qa008_support import bounded_run
 
 ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
@@ -20,23 +21,16 @@ if not tool:
     (evidence/"status.json").write_text(json.dumps(status,indent=2)+"\n")
     print(json.dumps(status))
     raise SystemExit(2)
-version = subprocess.run([tool,"-version"],capture_output=True,text=True,timeout=30)
+version = bounded_run([tool,"-version"],capture_output=True,text=True,timeout=30)
 (evidence/"version.txt").write_text(version.stdout+version.stderr)
 try:
-    run = subprocess.run([tool,"-json","./..."],cwd=ROOT,capture_output=True,text=True,timeout=300)
+    run = bounded_run([tool,"-json","./..."],cwd=ROOT,capture_output=True,text=True,timeout=300)
     output, code = run.stdout+run.stderr, run.returncode
 except subprocess.TimeoutExpired as exc:
     output, code = str(exc), 124
 (evidence/"govulncheck.jsonl").write_text(output)
 # JSON findings must be investigated: exit code zero alone in JSON mode is not
 # a finding count, and an incomplete/no-progress stream is not a clean scan.
-messages = []
-for line in output.splitlines():
-    try:
-        messages.append(json.loads(line))
-    except json.JSONDecodeError:
-        pass
-# govulncheck emits pretty JSON objects, so also decode concatenated objects.
 messages = []
 decoder = json.JSONDecoder()
 remaining = output
@@ -49,8 +43,11 @@ while remaining.strip():
         break
 findings = [m["finding"] for m in messages if "finding" in m]
 complete = code in (0,3) and not remaining.strip() and any("progress" in m for m in messages)
-status = {"status":"FINDINGS" if complete and findings else "COMPLETE" if complete else "INCONCLUSIVE",
-          "exit_code":code,"findings":findings}
+sbom = next((m["SBOM"] for m in messages if "SBOM" in m), {})
+stdlib_version_known = sbom.get("go_version", "").startswith("go1.")
+called = [f for f in findings if any(frame.get("function") for frame in f.get("trace", []))]
+status = {"status":"INCONCLUSIVE" if not complete else "CALLED_FINDINGS" if called else "PARTIAL" if not stdlib_version_known else "MODULE_FINDINGS" if findings else "COMPLETE",
+          "exit_code":code,"called_findings":len(called),"module_findings":len(findings),"stdlib_version_known":stdlib_version_known,"sbom_go_version":sbom.get("go_version"),"findings":findings}
 (evidence/"status.json").write_text(json.dumps(status,indent=2)+"\n")
 print(json.dumps(status))
-raise SystemExit(1 if findings else 0 if complete else 2)
+raise SystemExit(1 if called else 0 if complete and stdlib_version_known else 2)

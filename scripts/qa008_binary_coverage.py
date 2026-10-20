@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+from qa008_support import bounded_run
+from qa008_discord_fixture import discord_constructor_fixture
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,7 +16,7 @@ with tempfile.TemporaryDirectory(prefix="bard-qa008-binary-") as temporary:
     work = Path(temporary)
     binary = work / "bard"
     build = ["go", "build", "-cover", "-coverpkg=./...", "-o", str(binary), "./cmd/bot"]
-    result = subprocess.run(build, cwd=ROOT, text=True, capture_output=True, timeout=120)
+    result = bounded_run(build, cwd=ROOT, text=True, capture_output=True, timeout=120)
     (EVIDENCE / "build.txt").write_text(result.stdout + result.stderr)
     if result.returncode:
         raise SystemExit(result.returncode)
@@ -41,23 +43,29 @@ with tempfile.TemporaryDirectory(prefix="bard-qa008-binary-") as temporary:
         ("diagnose-rejected-url", ["spotify-diagnose","https://open.spotify.com/not-a-resource"], {}, "Invalid Spotify link"),
     ]
     records = []
-    for name, args, override, expected in fixtures:
-        # Explicit whitelist: no real credentials, home config or production DB.
-        env = {"PATH":str(tools),"GOCOVERDIR":str(cov),"BARD_DB_PATH":str(work/"never-open-production.db")}
-        env.update(override)
-        run = subprocess.run([str(binary),*args], env=env, cwd=work,
-                             text=True, capture_output=True, timeout=10)
-        output = run.stdout + run.stderr
-        (EVIDENCE / (name+".txt")).write_text(output)
-        if run.returncode != 1 or expected not in output:
-            raise SystemExit(f"Unexpected offline startup outcome: {name}: {run.returncode}\n{output}")
-        records.append({"case":name,"exit_code":run.returncode,"expected":expected})
-    (EVIDENCE / "scenarios.json").write_text(json.dumps(records,indent=2)+"\n")
+    with discord_constructor_fixture(work) as (network_env, requests):
+        for name, args, override, expected in fixtures:
+            # Explicit whitelist: no real credentials, home config or production DB.
+            env = {**network_env,"PATH":str(tools),"GOCOVERDIR":str(cov),"BARD_DB_PATH":str(work/"never-open-production.db")}
+            env.update(override)
+            run = bounded_run([str(binary),*args], env=env, cwd=work,
+                                 text=True, capture_output=True, timeout=10)
+            output = run.stdout + run.stderr
+            (EVIDENCE / (name+".txt")).write_text(output)
+            if run.returncode != 1 or expected not in output:
+                raise SystemExit(f"Unexpected offline startup outcome: {name}: {run.returncode}\n{output}")
+            records.append({"case":name,"exit_code":run.returncode,"expected":expected})
+        (EVIDENCE / "scenarios.json").write_text(json.dumps(records,indent=2)+"\n")
+    if any(r.get("method")=="BLOCKED" or
+           (r.get("method")=="CONNECT" and r.get("authority")!="discord.com:443") or
+           (r.get("method")=="GET" and r.get("path")!="/api/v10/gateway") for r in requests):
+        raise SystemExit("Unexpected network access blocked by local fixture")
+    (EVIDENCE/"network-fixture.json").write_text(json.dumps(requests,indent=2)+"\n")
     for mode, filename in (("percent","percent.txt"),("func","functions.txt"),("textfmt","integration.cover")):
         command = ["go","tool","covdata",mode,"-i="+str(cov)]
         if mode == "textfmt":
             command += ["-o="+str(EVIDENCE/filename)]
-        result = subprocess.run(command,cwd=ROOT,capture_output=True,text=True,timeout=30)
+        result = bounded_run(command,cwd=ROOT,capture_output=True,text=True,timeout=30)
         if mode != "textfmt" or result.returncode:
             (EVIDENCE/filename).write_text(result.stdout+result.stderr)
         if result.returncode:

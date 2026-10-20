@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+from qa008_support import bounded_run
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,7 +30,7 @@ for package, name in TARGETS:
     env = dict(os.environ, GOMEMLIMIT="256MiB", GOMAXPROCS=str(args.workers))
     start = time.monotonic()
     try:
-        result = subprocess.run(command, cwd=ROOT, env=env, capture_output=True, text=True,
+        result = bounded_run(command, cwd=ROOT, env=env, capture_output=True, text=True,
                                 timeout=args.seconds + 90)
         output, code = result.stdout + result.stderr, result.returncode
     except subprocess.TimeoutExpired as exc:

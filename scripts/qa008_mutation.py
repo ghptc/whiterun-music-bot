@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+from qa008_support import bounded_run
 import tempfile
 import time
 
@@ -68,7 +69,7 @@ for name, (package, files, operator) in targets.items():
                 command += ["--exclude-files", re.escape(source.name) + "$"]
         start = time.monotonic()
         try:
-            result = subprocess.run(command, cwd=work, env=env, capture_output=True,
+            result = bounded_run(command, cwd=work, env=env, capture_output=True,
                                     text=True, timeout=900)
             output, code = result.stdout + result.stderr, result.returncode
         except subprocess.TimeoutExpired as exc:
