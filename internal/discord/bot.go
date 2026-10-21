@@ -21,6 +21,7 @@ import (
 	"github.com/thomas-vilte/dave-go/session"
 	"whiterun/internal/media"
 	"whiterun/internal/player"
+	"whiterun/internal/storage"
 )
 
 type guild struct {
@@ -157,6 +158,10 @@ func (b *Bot) Start(scope snowflake.ID) error {
 	}
 	b.workers.Add(1)
 	go b.watchVoice()
+	if db, ok := b.store.(*storage.DB); ok {
+		b.workers.Add(1)
+		go b.watchCatalogAlerts(db)
+	}
 	b.log.Info("The Bard is connected", "application_id", b.client.ApplicationID, "command_guild", scope)
 	return nil
 }

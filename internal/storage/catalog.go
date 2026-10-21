@@ -22,10 +22,16 @@ func (s *DB) SaveCatalogBatch(ctx context.Context, tracks []media.Track) error {
 		return err
 	}
 	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, "UPDATE catalog_quota SET monitoring=0 WHERE singleton=1"); err != nil {
+		return err
+	}
 	for _, t := range tracks {
 		if err := saveCatalog(ctx, tx, t); err != nil {
 			return err
 		}
+	}
+	if _, err = tx.ExecContext(ctx, "UPDATE catalog_quota SET monitoring=1,used_bytes=used_bytes WHERE singleton=1"); err != nil {
+		return err
 	}
 	return tx.Commit()
 }

@@ -101,11 +101,30 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 		reply("Use one of the Bard's slash commands.")
 		return
 	}
+	id := *e.GuildID()
+	// Count recognized, acknowledged guild commands once per interaction.
+	if metrics, ok := b.store.(interface {
+		RecordCatalogCommand(context.Context, string, string, string, time.Time) error
+	}); ok {
+		valid := false
+		for _, command := range commands() {
+			if command.CommandName() == data.CommandName() {
+				valid = true
+				break
+			}
+		}
+		if valid && e.Channel().MessageChannel != nil {
+			if err := metrics.RecordCatalogCommand(b.ctx, e.ID().String(), id.String(), e.Channel().ID().String(), started); err != nil {
+				b.log.Warn("catalog_activity_write_failed", "error", err)
+			}
+		}
+	}
+
 	if data.CommandName() == "help" {
 		b.replyHelp(e)
 		return
 	}
-	id := *e.GuildID()
+
 	if data.CommandName() == "history" {
 		limit := 10
 		if value, present := data.OptInt("limit"); present {

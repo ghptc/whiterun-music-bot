@@ -1,0 +1,14 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/storage
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkDB022SQLite/100/warm/batch_insert_100-8         	     100	   7311430 ns/op	   7266180 p50_ns	   7621218 p95_ns	   7896124 p99_ns	  246806 B/op	    2019 allocs/op
+BenchmarkDB022SQLite/100/cold_sqlite/batch_insert_100-8  	     100	   7119174 ns/op	   7060577 p50_ns	   7388814 p95_ns	   7790692 p99_ns	  246667 B/op	    2019 allocs/op
+BenchmarkDB022SQLite/1000/warm/batch_insert_100-8        	     100	   7219831 ns/op	   7186328 p50_ns	   7459991 p95_ns	   7530796 p99_ns	  246569 B/op	    2018 allocs/op
+BenchmarkDB022SQLite/1000/cold_sqlite/batch_insert_100-8 	     100	   7307457 ns/op	   7232106 p50_ns	   7830799 p95_ns	   8299624 p99_ns	  246645 B/op	    2019 allocs/op
+BenchmarkDB022SQLite/10000/warm/batch_insert_100-8       	     100	   7082441 ns/op	   7056750 p50_ns	   7218569 p95_ns	   7666184 p99_ns	  246406 B/op	    2018 allocs/op
+BenchmarkDB022SQLite/10000/cold_sqlite/batch_insert_100-8         	     100	   7472195 ns/op	   7435033 p50_ns	   7807023 p95_ns	   7957801 p99_ns	  246401 B/op	    2017 allocs/op
+BenchmarkDB022SQLite/100000/warm/batch_insert_100-8               	     100	   7135216 ns/op	   7127986 p50_ns	   7170528 p95_ns	   7235852 p99_ns	  246464 B/op	    2017 allocs/op
+BenchmarkDB022SQLite/100000/cold_sqlite/batch_insert_100-8        	     100	   7597221 ns/op	   7573406 p50_ns	   7753081 p95_ns	   8162973 p99_ns	  246240 B/op	    2017 allocs/op
+PASS
+ok  	whiterun/internal/storage	19.019s

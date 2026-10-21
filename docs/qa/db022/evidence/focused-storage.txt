@@ -1,0 +1,31 @@
+=== RUN   TestDB022QueryPlans
+    db022_benchmark_test.go:86: track [SEARCH music_catalog USING INDEX sqlite_autoindex_music_catalog_1 (spotify_id=?)]
+    db022_benchmark_test.go:86: playlist [SEARCH catalog_playlists USING INDEX sqlite_autoindex_catalog_playlists_1 (spotify_id=?)]
+    db022_benchmark_test.go:86: position [SEARCH catalog_positions USING INDEX sqlite_autoindex_catalog_positions_2 (playlist_id=? AND position=?)]
+    db022_benchmark_test.go:86: ordered [SEARCH catalog_positions USING INDEX sqlite_autoindex_catalog_positions_1 (playlist_id=?)]
+    db022_benchmark_test.go:86: artist_title [SEARCH music_catalog USING INDEX catalog_artist_title (<expr>=? AND <expr>=?)]
+--- PASS: TestDB022QueryPlans (0.01s)
+=== RUN   TestDB022CrashBeforeCommitHelper
+    db022_crash_test.go:17: subprocess only
+--- SKIP: TestDB022CrashBeforeCommitHelper (0.00s)
+=== RUN   TestDB022ProcessDeathDuringImport
+--- PASS: TestDB022ProcessDeathDuringImport (0.02s)
+=== RUN   TestDB022SchemaUpgradeAndDisposableColumnMigrations
+--- PASS: TestDB022SchemaUpgradeAndDisposableColumnMigrations (0.00s)
+=== RUN   TestDB022PlaylistCRUDRestartAtomicityAndConcurrency
+--- PASS: TestDB022PlaylistCRUDRestartAtomicityAndConcurrency (0.06s)
+=== RUN   TestDB022OfflinePlaylistResolver
+    db022_test.go:261: persisted=123 reconstructed=123 Spotify_cache_hit_calls=0
+--- PASS: TestDB022OfflinePlaylistResolver (0.03s)
+=== RUN   TestDB022HomologationPlaylistLive
+    db022_test.go:307: DB022_SPOTIFY_LIVE=1 imports public homologation playlist
+--- SKIP: TestDB022HomologationPlaylistLive (0.00s)
+=== RUN   TestDB022LogicalQuotaAtomicConcurrentAndWALLimitation
+    db022_test.go:372: logical quota enforced: used=479 limit=479; physical WAL=160712: filesystem enforcement still required
+--- PASS: TestDB022LogicalQuotaAtomicConcurrentAndWALLimitation (0.00s)
+=== RUN   TestDB022AlertWindowTiesPendingAndTransactionalRearm
+--- PASS: TestDB022AlertWindowTiesPendingAndTransactionalRearm (0.00s)
+=== RUN   TestDB022ResolverPropagatesDurableImportFailure
+--- PASS: TestDB022ResolverPropagatesDurableImportFailure (0.00s)
+PASS
+ok  	whiterun/internal/storage	0.127s

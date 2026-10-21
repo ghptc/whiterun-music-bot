@@ -29,7 +29,7 @@ func TestSQLiteMigrationsTransactionsAndIsolation(t *testing.T) {
 		t.Fatal(err)
 	}
 	var versions int
-	if err := db.db.QueryRow("SELECT count(*) FROM migrations").Scan(&versions); err != nil || versions != 3 {
+	if err := db.db.QueryRow("SELECT count(*) FROM migrations").Scan(&versions); err != nil || versions != 5 {
 		t.Fatal(versions, err)
 	}
 	state := player.DurableState{Queue: []media.Track{{Title: "first", SpotifyID: "original", Artists: []string{"artist"}}, {Title: "first", SpotifyID: "original"}}, History: []media.Track{{Title: "past"}}}

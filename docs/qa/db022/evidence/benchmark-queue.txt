@@ -1,0 +1,12 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/storage
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkDB022SQLite/1000/warm/queue_1000-8         	     100	   4221605 ns/op	   4203650 p50_ns	   4513612 p95_ns	   4954285 p99_ns	 7181960 B/op	   27851 allocs/op
+BenchmarkDB022SQLite/1000/cold_sqlite/queue_1000-8  	     100	   4582846 ns/op	   4551685 p50_ns	   4903377 p95_ns	   5274687 p99_ns	 7182759 B/op	   27851 allocs/op
+BenchmarkDB022SQLite/10000/warm/queue_1000-8        	     100	   3741435 ns/op	   3662536 p50_ns	   4230702 p95_ns	   4620217 p99_ns	 7169437 B/op	   27827 allocs/op
+BenchmarkDB022SQLite/10000/cold_sqlite/queue_1000-8 	     100	   3934751 ns/op	   3900842 p50_ns	   4417819 p95_ns	   4528401 p99_ns	 7173114 B/op	   27830 allocs/op
+BenchmarkDB022SQLite/100000/warm/queue_1000-8       	     100	   3487773 ns/op	   3335361 p50_ns	   4167772 p95_ns	   4888358 p99_ns	 7160415 B/op	   27804 allocs/op
+BenchmarkDB022SQLite/100000/cold_sqlite/queue_1000-8         	     100	   3800510 ns/op	   3670482 p50_ns	   4436425 p95_ns	   5255499 p99_ns	 7163785 B/op	   27806 allocs/op
+PASS
+ok  	whiterun/internal/storage	14.935s

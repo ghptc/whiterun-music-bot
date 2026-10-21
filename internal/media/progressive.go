@@ -3,6 +3,7 @@ package media
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -80,6 +81,17 @@ func (r CollectionResolver) spotifyMetadata(ctx context.Context, kind, id string
 		}
 	}()
 
+	if store, ok := r.YouTube.Mappings.(PlaylistCatalogStore); ok && kind == "playlist" {
+		// Unlike the optional per-track cache, a durable playlist snapshot
+		// uses the import deadline. Never turn a database failure into network I/O.
+		cached, hit, err := store.LoadPlaylist(ctx, id)
+		if err != nil {
+			return Collection{}, err
+		}
+		if hit {
+			return cached, nil
+		}
+	}
 	if store, ok := r.YouTube.Mappings.(CatalogStore); ok && kind == "track" {
 		started := time.Now()
 		bounded, cancel := catalogContext(ctx)
@@ -126,6 +138,20 @@ func (r CollectionResolver) spotifyMetadata(ctx context.Context, kind, id string
 		}
 	}
 	c.IsCollection = kind != "track"
+	if store, ok := r.YouTube.Mappings.(PlaylistCatalogStore); ok && kind == "playlist" {
+		complete := true
+		for _, t := range c.Tracks {
+			if t.MetadataPending || t.RequestedSource != "spotify" || t.SpotifyID == "" {
+				complete = false
+				break
+			}
+		}
+		if complete {
+			if err := store.SavePlaylist(ctx, id, c); err != nil {
+				return Collection{}, fmt.Errorf("persist playlist: %w", err)
+			}
+		}
+	}
 	return c, nil
 }
 

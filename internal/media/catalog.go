@@ -65,3 +65,9 @@ func (r CollectionResolver) saveCatalogTracks(ctx context.Context, tracks []Trac
 		r.saveCatalog(bounded, t)
 	}
 }
+
+// PlaylistCatalogStore persists occurrences separately from track metadata.
+type PlaylistCatalogStore interface {
+	LoadPlaylist(context.Context, string) (Collection, bool, error)
+	SavePlaylist(context.Context, string, Collection) error
+}

@@ -8,6 +8,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -18,7 +19,10 @@ import (
 //go:embed migrations/*.sql
 var migrations embed.FS
 
-type DB struct{ db *sql.DB }
+type DB struct {
+	db      *sql.DB
+	alertMu sync.Mutex
+}
 
 func Open(path string) (*DB, error) {
 	db, err := sql.Open("sqlite", path)
