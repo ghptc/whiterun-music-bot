@@ -1,6 +1,8 @@
 # DB-022-QA — relatório de integridade, performance e armazenamento
 
-Data: 21/10/2026. **Aceite global: BLOQUEADO.** Catálogo e alertas possuem evidência funcional, mas a cota física de 10 GiB ainda não é garantida. Não houve deploy, alteração do banco de produção nem envio ao Discord de produção.
+Atualização: os dois bloqueadores foram fechados no ambiente local em [DB-022-FINAL](../db022-final/report.md). O texto e as evidências abaixo preservam o resultado histórico da campanha QA.
+
+Data da campanha QA: 21/10/2026. **Aceite naquele momento: BLOQUEADO.** Catálogo e alertas possuem evidência funcional, mas a cota física de 10 GiB ainda não é garantida. Não houve deploy, alteração do banco de produção nem envio ao Discord de produção.
 
 ## Implementação e schema
 

@@ -8,6 +8,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"sync"
 	"time"
 
@@ -20,17 +21,37 @@ import (
 var migrations embed.FS
 
 type DB struct {
-	db      *sql.DB
-	alertMu sync.Mutex
+	db        *sql.DB
+	alertMu   sync.Mutex
+	physical  *physicalQuota
+	closeOnce sync.Once
+	closeErr  error
 }
 
-func Open(path string) (*DB, error) {
+func Open(path string) (*DB, error) { return OpenWithPhysicalQuota(path, 0) }
+
+func OpenWithPhysicalQuota(path string, limit int64) (*DB, error) {
+	quota, err := openPhysicalQuota(path, limit)
+	if err != nil {
+		return nil, err
+	}
+	success := false
+	defer func() {
+		if !success {
+			quota.close()
+		}
+	}()
+	uri := url.URL{Scheme: "file", Path: quota.path}
+	params := url.Values{"vfs": {quota.name}, "_pragma": {"foreign_keys(ON)", "busy_timeout(3000)", "temp_store(MEMORY)", "mmap_size(0)", "synchronous(FULL)"}}
+	uri.RawQuery = params.Encode()
+	path = uri.String()
+
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		return nil, err
 	}
 	db.SetMaxOpenConns(1)
-	s := &DB{db: db}
+	s := &DB{db: db, physical: quota}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	for _, q := range []string{"PRAGMA foreign_keys=ON", "PRAGMA busy_timeout=3000", "PRAGMA journal_mode=WAL"} {
@@ -43,9 +64,13 @@ func Open(path string) (*DB, error) {
 		db.Close()
 		return nil, err
 	}
+	success = true
 	return s, nil
 }
-func (s *DB) Close() error { return s.db.Close() }
+func (s *DB) Close() error {
+	s.closeOnce.Do(func() { s.closeErr = s.db.Close(); s.physical.close() })
+	return s.closeErr
+}
 func (s *DB) migrate(ctx context.Context) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {

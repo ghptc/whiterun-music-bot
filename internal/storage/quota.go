@@ -73,6 +73,9 @@ func (m *CatalogAlertMonitor) Poll(ctx context.Context, now time.Time) (resultEr
 	defer cancel()
 	m.DB.alertMu.Lock()
 	defer m.DB.alertMu.Unlock()
+	if handled, err := m.pollPhysical(ctx, now); handled {
+		return err
+	}
 	var id, episode, threshold, attempts int
 	var used, limit int64
 	var targetGuild, targetChannel sql.NullString

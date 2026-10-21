@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -235,5 +236,86 @@ func BenchmarkDB022SQLite(b *testing.B) {
 				}
 			}
 		})
+	}
+}
+
+// Run with TMPDIR on a verified persistent filesystem. Two independent SQLite
+// handles and four writers contend on the actual WAL, with no network traffic.
+func BenchmarkDB022DiskConcurrency(b *testing.B) {
+	ctx := context.Background()
+	path := filepath.Join(b.TempDir(), "writers.db")
+	db, err := Open(path)
+	if err != nil {
+		b.Fatal(err)
+	}
+	c := qaPlaylist(1000)
+	if err = db.SavePlaylist(ctx, "concurrent", c); err != nil {
+		b.Fatal(err)
+	}
+	other, err := Open(path)
+	if err != nil {
+		b.Fatal(err)
+	}
+	samples := make([]float64, 0)
+	b.ReportAllocs()
+	b.ResetTimer()
+	for b.Loop() {
+		start := time.Now()
+		var wg sync.WaitGroup
+		errs := make(chan error, 4)
+		for i := range 4 {
+			wg.Go(func() {
+				writer := db
+				if i%2 == 1 {
+					writer = other
+				}
+				track := c.Tracks[i]
+				track.Title = "Concurrent durable update"
+				errs <- writer.SaveCatalog(ctx, track)
+			})
+		}
+		wg.Wait()
+		close(errs)
+		for e := range errs {
+			if e != nil {
+				b.Fatal(e)
+			}
+		}
+		samples = append(samples, float64(time.Since(start).Nanoseconds()))
+	}
+	b.StopTimer()
+	slices.Sort(samples)
+	for _, q := range []struct {
+		name string
+		p    float64
+	}{{"p50_ns", .5}, {"p95_ns", .95}, {"p99_ns", .99}} {
+		b.ReportMetric(samples[int(math.Ceil(q.p*float64(len(samples))))-1], q.name)
+	}
+	usage, err := db.PhysicalUsage(ctx)
+	if err != nil || usage.Files > usage.Limit || usage.Peak > usage.Limit {
+		b.Fatal(usage, err)
+	}
+	b.ReportMetric(float64(usage.Peak), "physical_peak_bytes")
+	if err = other.Close(); err != nil {
+		b.Fatal(err)
+	}
+	if err = db.Close(); err != nil {
+		b.Fatal(err)
+	}
+	db, err = Open(path)
+	if err != nil {
+		b.Fatal(err)
+	}
+	defer db.Close()
+	after, hit, err := db.LoadPlaylist(ctx, "concurrent")
+	if err != nil || !hit || len(after.Tracks) != 1000 || after.Tracks[0].Title != "Concurrent durable update" {
+		b.Fatal(hit, len(after.Tracks), err)
+	}
+	if err = qaQueue(ctx, after.Tracks); err != nil {
+		b.Fatal(err)
+	}
+	var integrity string
+	if err = db.db.QueryRow("PRAGMA integrity_check").Scan(&integrity); err != nil || integrity != "ok" {
+		b.Fatal(integrity, err)
 	}
 }

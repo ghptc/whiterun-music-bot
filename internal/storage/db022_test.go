@@ -398,7 +398,7 @@ func TestDB022LogicalQuotaAtomicConcurrentAndWALLimitation(t *testing.T) {
 	if info.Size() <= after.Limit {
 		t.Fatal("fixture must demonstrate physical WAL overhead exceeds payload quota")
 	}
-	t.Logf("logical quota enforced: used=%d limit=%d; physical WAL=%d: filesystem enforcement still required", after.Used, after.Limit, info.Size())
+	t.Logf("logical quota enforced: used=%d limit=%d; physical WAL=%d: logical payload quota alone is insufficient; VFS physical cap applies separately", after.Used, after.Limit, info.Size())
 	if err = db.Close(); err != nil {
 		t.Fatal(err)
 	}

@@ -21,6 +21,15 @@ func TestDB022CrashBeforeCommitHelper(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer db.Close()
+
+	if os.Getenv("DB022_CRASH_COMMIT") == "1" {
+		track := catalogTrack()
+		track.SpotifyID = "committed-before-crash"
+		track.Title = "durable WAL"
+		if err = db.SaveCatalog(context.Background(), track); err != nil {
+			t.Fatal(err)
+		}
+	}
 	tx, err := db.db.Begin()
 	if err != nil {
 		t.Fatal(err)
@@ -38,10 +47,18 @@ func TestDB022CrashBeforeCommitHelper(t *testing.T) {
 		time.Sleep(time.Second)
 	}
 }
-func TestDB022ProcessDeathDuringImport(t *testing.T) {
+func TestDB022ProcessDeathDuringImport(t *testing.T)    { db022ProcessDeath(t, false) }
+func TestDB022PhysicalCrashWithPendingWAL(t *testing.T) { db022ProcessDeath(t, true) }
+func db022ProcessDeath(t *testing.T, physical bool) {
 	ctx := context.Background()
 	path := filepath.Join(t.TempDir(), "crash.db")
-	db, err := Open(path)
+	var db *DB
+	var err error
+	if physical {
+		db, err = OpenWithPhysicalQuota(path, 2<<20)
+	} else {
+		db, err = Open(path)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,6 +73,9 @@ func TestDB022ProcessDeathDuringImport(t *testing.T) {
 	defer cancel()
 	cmd := exec.CommandContext(childCtx, os.Args[0], "-test.run=^TestDB022CrashBeforeCommitHelper$", "-test.timeout=15s")
 	cmd.Env = append(os.Environ(), "DB022_CRASH_PATH="+path)
+	if physical {
+		cmd.Env = append(cmd.Env, "DB022_CRASH_COMMIT=1")
+	}
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		t.Fatal(err)
@@ -80,6 +100,16 @@ func TestDB022ProcessDeathDuringImport(t *testing.T) {
 		t.Fatal(err)
 	}
 	_ = cmd.Wait()
+	if physical {
+		info, e := os.Stat(path + "-wal")
+		if e != nil || info.Size() == 0 {
+			t.Fatal("fixture must retain real WAL", e)
+		}
+		if bytes := physicalFiles(t, path); bytes > 2<<20 {
+			t.Fatal("crash overshoot", bytes)
+		}
+		t.Logf("SIGKILL retained WAL=%d bytes", info.Size())
+	}
 	db, err = Open(path)
 	if err != nil {
 		t.Fatal(err)
@@ -92,6 +122,16 @@ func TestDB022ProcessDeathDuringImport(t *testing.T) {
 	u, err := db.CatalogUsage(ctx)
 	if err != nil || u.Used > u.Limit {
 		t.Fatal(u, err)
+	}
+	if physical {
+		track, hit, e := db.LoadCatalog(ctx, "committed-before-crash")
+		if e != nil || !hit || track.Title != "durable WAL" {
+			t.Fatal("committed WAL lost", hit, e)
+		}
+		u, e := db.PhysicalUsage(ctx)
+		if e != nil || u.Files > u.Limit {
+			t.Fatal(u, e)
+		}
 	}
 	assertCatalogIntegrity(t, db)
 }

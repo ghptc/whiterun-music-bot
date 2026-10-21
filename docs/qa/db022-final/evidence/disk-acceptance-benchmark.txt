@@ -1,0 +1,59 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/storage
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkDB022SQLite/100/warm/track_id-8         	     100	      6630 ns/op	      5852 p50_ns	      6512 p95_ns	     14287 p99_ns	    2574 B/op	      25 allocs/op
+BenchmarkDB022SQLite/100/warm/playlist_id-8      	     100	      4023 ns/op	      3316 p50_ns	      3898 p95_ns	      6552 p99_ns	     444 B/op	      14 allocs/op
+BenchmarkDB022SQLite/100/warm/position-8         	     100	      9340 ns/op	      8697 p50_ns	      9588 p95_ns	     15660 p99_ns	    2606 B/op	      26 allocs/op
+BenchmarkDB022SQLite/100/warm/remove_position-8  	     100	     34648 ns/op	     30899 p50_ns	     41920 p95_ns	    121212 p99_ns	     858 B/op	      13 allocs/op
+BenchmarkDB022SQLite/100/warm/playlist_100-8     	     100	    337658 ns/op	    303460 p50_ns	    477864 p95_ns	    592904 p99_ns	  330715 B/op	    2241 allocs/op
+BenchmarkDB022SQLite/100/cold_sqlite/track_id-8  	     100	     11908 ns/op	     10950 p50_ns	     14267 p95_ns	     18675 p99_ns	    2574 B/op	      25 allocs/op
+BenchmarkDB022SQLite/100/cold_sqlite/playlist_id-8         	     100	      7484 ns/op	      6864 p50_ns	      8817 p95_ns	     10450 p99_ns	     444 B/op	      14 allocs/op
+BenchmarkDB022SQLite/100/cold_sqlite/position-8            	     100	     18366 ns/op	     17283 p50_ns	     20068 p95_ns	     28655 p99_ns	    2606 B/op	      26 allocs/op
+BenchmarkDB022SQLite/100/cold_sqlite/remove_position-8     	     100	     40781 ns/op	     39225 p50_ns	     41940 p95_ns	     65506 p99_ns	     452 B/op	      12 allocs/op
+BenchmarkDB022SQLite/100/cold_sqlite/playlist_100-8        	     100	    376832 ns/op	    339870 p50_ns	    528841 p95_ns	    663920 p99_ns	  330549 B/op	    2240 allocs/op
+BenchmarkDB022SQLite/1000/warm/track_id-8                  	     100	      7121 ns/op	      6022 p50_ns	      6492 p95_ns	     29887 p99_ns	    2574 B/op	      25 allocs/op
+BenchmarkDB022SQLite/1000/warm/playlist_id-8               	     100	      3707 ns/op	      3306 p50_ns	      3697 p95_ns	      5630 p99_ns	     444 B/op	      14 allocs/op
+BenchmarkDB022SQLite/1000/warm/position-8                  	     100	      9588 ns/op	      8837 p50_ns	     11201 p95_ns	     16251 p99_ns	    2685 B/op	      31 allocs/op
+BenchmarkDB022SQLite/1000/warm/remove_position-8           	     100	     28674 ns/op	     26331 p50_ns	     31109 p95_ns	    104259 p99_ns	     701 B/op	      14 allocs/op
+BenchmarkDB022SQLite/1000/warm/playlist_100-8              	     100	    348290 ns/op	    310724 p50_ns	    484697 p95_ns	    642589 p99_ns	  331813 B/op	    2341 allocs/op
+BenchmarkDB022SQLite/1000/warm/playlist_1000-8             	     100	   3394893 ns/op	   3366848 p50_ns	   3686018 p95_ns	   3754891 p99_ns	 3485085 B/op	   24754 allocs/op
+BenchmarkDB022SQLite/1000/warm/queue_1000-8                	     100	   4102339 ns/op	   4077607 p50_ns	   4466832 p95_ns	   4876105 p99_ns	 7184019 B/op	   27855 allocs/op
+BenchmarkDB022SQLite/1000/cold_sqlite/track_id-8           	     100	     13045 ns/op	     12053 p50_ns	     13566 p95_ns	     20900 p99_ns	    2574 B/op	      25 allocs/op
+BenchmarkDB022SQLite/1000/cold_sqlite/playlist_id-8        	     100	      8073 ns/op	      7023 p50_ns	      9629 p95_ns	     33585 p99_ns	     444 B/op	      14 allocs/op
+BenchmarkDB022SQLite/1000/cold_sqlite/position-8           	     100	     20634 ns/op	     19908 p50_ns	     23635 p95_ns	     27623 p99_ns	    2685 B/op	      31 allocs/op
+BenchmarkDB022SQLite/1000/cold_sqlite/remove_position-8    	     100	     48273 ns/op	     44244 p50_ns	     60987 p95_ns	    127483 p99_ns	     618 B/op	      14 allocs/op
+BenchmarkDB022SQLite/1000/cold_sqlite/playlist_100-8       	     100	    391425 ns/op	    356883 p50_ns	    542117 p95_ns	    603724 p99_ns	  331785 B/op	    2341 allocs/op
+BenchmarkDB022SQLite/1000/cold_sqlite/playlist_1000-8      	     100	   3700459 ns/op	   3692551 p50_ns	   4015239 p95_ns	   4204250 p99_ns	 3485878 B/op	   24755 allocs/op
+BenchmarkDB022SQLite/1000/cold_sqlite/queue_1000-8         	     100	   4472694 ns/op	   4451813 p50_ns	   4713744 p95_ns	   5873822 p99_ns	 7183380 B/op	   27854 allocs/op
+BenchmarkDB022SQLite/10000/warm/track_id-8                 	     100	      7133 ns/op	      6112 p50_ns	      6663 p95_ns	     15389 p99_ns	    2521 B/op	      25 allocs/op
+BenchmarkDB022SQLite/10000/warm/playlist_id-8              	     100	      3856 ns/op	      3317 p50_ns	      3607 p95_ns	     12453 p99_ns	     444 B/op	      14 allocs/op
+BenchmarkDB022SQLite/10000/warm/position-8                 	     100	     12365 ns/op	      9148 p50_ns	     19216 p95_ns	     83740 p99_ns	    2638 B/op	      29 allocs/op
+BenchmarkDB022SQLite/10000/warm/remove_position-8          	     100	     29152 ns/op	     26441 p50_ns	     31580 p95_ns	     97857 p99_ns	     620 B/op	      14 allocs/op
+BenchmarkDB022SQLite/10000/warm/playlist_100-8             	     100	    341808 ns/op	    313319 p50_ns	    463346 p95_ns	    554480 p99_ns	  331248 B/op	    2340 allocs/op
+BenchmarkDB022SQLite/10000/warm/playlist_1000-8            	     100	   3289473 ns/op	   3246939 p50_ns	   3595686 p95_ns	   4233485 p99_ns	 3477394 B/op	   24738 allocs/op
+BenchmarkDB022SQLite/10000/warm/queue_1000-8               	     100	   3914205 ns/op	   3715965 p50_ns	   4633751 p95_ns	   8396296 p99_ns	 7169705 B/op	   27826 allocs/op
+BenchmarkDB022SQLite/10000/cold_sqlite/track_id-8          	     100	      9451 ns/op	      8096 p50_ns	     11542 p95_ns	     34125 p99_ns	    2574 B/op	      25 allocs/op
+BenchmarkDB022SQLite/10000/cold_sqlite/playlist_id-8       	     100	      5555 ns/op	      4619 p50_ns	      5561 p95_ns	     31340 p99_ns	     444 B/op	      14 allocs/op
+BenchmarkDB022SQLite/10000/cold_sqlite/position-8          	     100	     19114 ns/op	     16361 p50_ns	     30668 p95_ns	     72459 p99_ns	    2638 B/op	      29 allocs/op
+BenchmarkDB022SQLite/10000/cold_sqlite/remove_position-8   	     100	     45275 ns/op	     36691 p50_ns	    108538 p95_ns	    122815 p99_ns	     472 B/op	      14 allocs/op
+BenchmarkDB022SQLite/10000/cold_sqlite/playlist_100-8      	     100	    374955 ns/op	    355049 p50_ns	    508603 p95_ns	    574849 p99_ns	  331263 B/op	    2340 allocs/op
+BenchmarkDB022SQLite/10000/cold_sqlite/playlist_1000-8     	     100	   3550336 ns/op	   3540921 p50_ns	   3970472 p95_ns	   4061897 p99_ns	 3477797 B/op	   24739 allocs/op
+BenchmarkDB022SQLite/10000/cold_sqlite/queue_1000-8        	     100	   3939560 ns/op	   3913544 p50_ns	   4264514 p95_ns	   4522047 p99_ns	 7172553 B/op	   27828 allocs/op
+BenchmarkDB022SQLite/100000/warm/track_id-8                	     100	      7587 ns/op	      6202 p50_ns	      7174 p95_ns	     13396 p99_ns	    2574 B/op	      25 allocs/op
+BenchmarkDB022SQLite/100000/warm/playlist_id-8             	     100	      4374 ns/op	      3306 p50_ns	      6132 p95_ns	      6994 p99_ns	     444 B/op	      14 allocs/op
+BenchmarkDB022SQLite/100000/warm/position-8                	     100	     11966 ns/op	      9438 p50_ns	     14808 p95_ns	    105712 p99_ns	    2638 B/op	      29 allocs/op
+BenchmarkDB022SQLite/100000/warm/remove_position-8         	     100	     28825 ns/op	     26891 p50_ns	     31310 p95_ns	     41660 p99_ns	     523 B/op	      14 allocs/op
+BenchmarkDB022SQLite/100000/warm/playlist_100-8            	     100	    374821 ns/op	    345460 p50_ns	    450562 p95_ns	    893719 p99_ns	  330690 B/op	    2339 allocs/op
+BenchmarkDB022SQLite/100000/warm/playlist_1000-8           	     100	   3614073 ns/op	   3275703 p50_ns	   5920472 p95_ns	   6710833 p99_ns	 3473778 B/op	   24730 allocs/op
+BenchmarkDB022SQLite/100000/warm/queue_1000-8              	     100	   4540610 ns/op	   3828321 p50_ns	   7793974 p95_ns	   8679408 p99_ns	 7164110 B/op	   27806 allocs/op
+BenchmarkDB022SQLite/100000/cold_sqlite/track_id-8         	     100	     18642 ns/op	      8787 p50_ns	     40568 p95_ns	     60496 p99_ns	    2574 B/op	      25 allocs/op
+BenchmarkDB022SQLite/100000/cold_sqlite/playlist_id-8      	     100	      5892 ns/op	      4379 p50_ns	      8987 p95_ns	     30257 p99_ns	     444 B/op	      14 allocs/op
+BenchmarkDB022SQLite/100000/cold_sqlite/position-8         	     100	     38218 ns/op	     20459 p50_ns	     87477 p95_ns	    163392 p99_ns	    2638 B/op	      29 allocs/op
+BenchmarkDB022SQLite/100000/cold_sqlite/remove_position-8  	     100	     66084 ns/op	     51067 p50_ns	    139096 p95_ns	    182368 p99_ns	     486 B/op	      14 allocs/op
+BenchmarkDB022SQLite/100000/cold_sqlite/playlist_100-8     	     100	    416474 ns/op	    404985 p50_ns	    529202 p95_ns	    570931 p99_ns	  330694 B/op	    2339 allocs/op
+BenchmarkDB022SQLite/100000/cold_sqlite/playlist_1000-8    	     100	   3961704 ns/op	   3681250 p50_ns	   5628714 p95_ns	   7446770 p99_ns	 3473956 B/op	   24731 allocs/op
+BenchmarkDB022SQLite/100000/cold_sqlite/queue_1000-8       	     100	   4030524 ns/op	   3818192 p50_ns	   5018477 p95_ns	   5406940 p99_ns	 7167601 B/op	   27807 allocs/op
+BenchmarkDB022DiskConcurrency-8                            	     100	   5985960 ns/op	   5526278 p50_ns	  10389236 p95_ns	  10550716 p99_ns	   2711552 physical_peak_bytes	  217017 B/op	     850 allocs/op
+PASS
+ok  	whiterun/internal/storage	19.699s
