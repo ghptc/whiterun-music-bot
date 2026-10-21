@@ -43,6 +43,7 @@ type Track struct {
 	Timing              *Timing `json:"-"`
 }
 type Candidate struct {
+	ReleaseYear  int       `json:"release_year"`
 	Thumbnail    string    `json:"thumbnail"`
 	CheckedAt    time.Time `json:"bard_checked_at,omitempty"`
 	ISRC         string    `json:"isrc"`

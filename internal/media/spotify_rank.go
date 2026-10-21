@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -63,6 +64,22 @@ func recordingTitle(s string) string {
 		parts[i] = featureClause.ReplaceAllString(parts[i], " ")
 	}
 	return strings.Join(parts, " - ")
+}
+
+// Remaster years may be supplied as structured release metadata rather than
+// repeated in the recording title. Never discard the requested edition year.
+var remasterYear = regexp.MustCompile(`(?i)\bremaster(?:ed)?[ (/-]*(19[0-9]{2}|20[0-9]{2})\b`)
+
+var yearRemaster = regexp.MustCompile(`(?i)\b(19[0-9]{2}|20[0-9]{2})[ )/-]*remaster(?:ed)?\b`)
+
+func remasterEdition(s string) []string {
+	if m := remasterYear.FindStringSubmatch(s); len(m) > 0 {
+		return m
+	}
+	return yearRemaster.FindStringSubmatch(s)
+}
+func remasterTitle(s string) string {
+	return yearRemaster.ReplaceAllString(remasterYear.ReplaceAllString(s, "remaster"), "remaster")
 }
 
 var versionMarkers = []string{"live", "remix", "acoustic", "remaster", "instrumental", "karaoke", "slowed", "reverb", "sped up", "nightcore", "8d", "bass boosted", "cover", "mashup"}
@@ -162,10 +179,25 @@ func rankSpotifyPolicy(t Track, c Candidate, provisional bool, policy MatchPolic
 	if len(b.NegativeMarkers) > 0 {
 		return reject("version_or_semantic_mismatch")
 	}
-	b.Title = coverage(recordingTitle(t.Title), title)
+	if match := remasterEdition(t.Title); len(match) > 0 {
+		year, _ := strconv.Atoi(match[1])
+		actual := remasterEdition(c.Title + " " + c.Track + " " + c.Album)
+		if len(actual) > 0 && actual[1] != match[1] {
+			return reject("remaster_year_mismatch")
+		}
+		if !provisional && len(actual) == 0 {
+			if c.ReleaseYear == 0 {
+				return reject("remaster_year_unknown")
+			}
+			if c.ReleaseYear != year {
+				return reject("remaster_year_mismatch")
+			}
+		}
+	}
+	b.Title = coverage(remasterTitle(recordingTitle(t.Title)), remasterTitle(title))
 	// Matching all requested words is insufficient: a concert venue, medley,
 	// or another song appended to the title must not pass as the recording.
-	candidateTitle := " " + normalized(recordingTitle(c.Title)) + " "
+	candidateTitle := " " + normalized(remasterTitle(recordingTitle(c.Title))) + " "
 	for _, artist := range append([]string{t.Artist}, t.Artists...) {
 		if artist != "" {
 			candidateTitle = strings.ReplaceAll(candidateTitle, " "+normalized(artist)+" ", " ")
@@ -174,7 +206,7 @@ func rankSpotifyPolicy(t Track, c Candidate, provisional bool, policy MatchPolic
 	for _, word := range []string{"hq", "visualizer", "visualiser", "lyric", "only"} {
 		candidateTitle = strings.ReplaceAll(candidateTitle, " "+word+" ", " ")
 	}
-	b.TitlePrecision = coverage(candidateTitle, recordingTitle(t.Title))
+	b.TitlePrecision = coverage(candidateTitle, remasterTitle(recordingTitle(t.Title)))
 	if b.TitlePrecision < policy.MinTitlePrecision {
 		return reject("extra_title_content")
 	}
@@ -300,7 +332,26 @@ func deduplicateCandidates(pools ...[]*Candidate) []Candidate {
 	}
 	return result
 }
-func (r Resolver) resolveSpotify(ctx context.Context, query string) (Candidate, error) {
+func (r Resolver) resolveSpotify(ctx context.Context, query string) (selected Candidate, resolutionErr error) {
+	started := time.Now()
+	strategy := "persistent_mapping"
+	timing := TimingFrom(ctx)
+	if timing != nil {
+		timing = timing.Child("resolution_id", fmt.Sprintf("%s:%d", r.Match.SpotifyID, started.UnixNano()))
+		ctx = WithTiming(ctx, timing)
+	}
+	timing.Event("track_resolution_started", started, "spotify_track_id", r.Match.SpotifyID, "strategy", "progressive_metadata")
+	defer func() {
+		reason := "selected"
+		if resolutionErr != nil {
+			reason = "infrastructure_or_context"
+			var m *MatchError
+			if errors.As(resolutionErr, &m) {
+				reason = m.Reason
+			}
+		}
+		timing.Event("track_resolution_completed", started, "spotify_track_id", r.Match.SpotifyID, "strategy", strategy, "reason", reason, "success", resolutionErr == nil, "selected_video_id", selected.ID)
+	}()
 	key := mappingKey(*r.Match, r.matchPolicy())
 	if r.Mappings != nil {
 		started := time.Now()
@@ -343,6 +394,7 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (Candidate, 
 		}
 	}
 
+	strategy = "progressive_metadata"
 	chosen, err := discoverSpotify(ctx, *r.Match, r.matchPolicy(), query,
 		func(target, purpose string) ([]*Candidate, error) {
 			attempt, cancel := context.WithTimeout(ctx, 15*time.Second)
@@ -409,7 +461,7 @@ func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, c
 			continue
 		}
 		decision := CompareSpotify(track, full, policy)
-		timing.Event("spotify_candidate_decision", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", full.ID, "status", decision.Status, "reason", decision.Reason, "ranking_score", decision.Score, "candidate_title", full.Title, "recording_title", full.Track, "recording_artists", full.Artists, "recording_album", full.Album, "duration_seconds", full.Duration, "recording_isrc", full.ISRC, "channel_id", full.ChannelID)
+		timing.Event("spotify_candidate_decision", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", full.ID, "status", decision.Status, "reason", decision.Reason, "ranking_score", decision.Score, "candidate_title", full.Title, "recording_title", full.Track, "recording_artists", full.Artists, "recording_album", full.Album, "duration_seconds", full.Duration, "recording_isrc", full.ISRC, "release_year", full.ReleaseYear, "channel_id", full.ChannelID)
 		switch decision.Status {
 		case MatchConfirmed:
 			timing.Event("spotify_first_confirmed", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", full.ID, "evidence", decision.Reason)
