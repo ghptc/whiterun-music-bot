@@ -1,0 +1,49 @@
+=== RUN   TestSourceSurvivesAudioEOFCleanup
+--- PASS: TestSourceSurvivesAudioEOFCleanup (0.03s)
+=== RUN   TestPipelineSoak125Transitions
+--- PASS: TestPipelineSoak125Transitions (11.66s)
+=== RUN   TestProgressiveWorkerPanicFailsPositionAndAdvances
+--- PASS: TestProgressiveWorkerPanicFailsPositionAndAdvances (0.00s)
+=== RUN   TestAudioStallAndDecoderAfterEOF
+=== RUN   TestAudioStallAndDecoderAfterEOF/stall
+=== RUN   TestAudioStallAndDecoderAfterEOF/decoder_after_eof
+--- PASS: TestAudioStallAndDecoderAfterEOF (0.12s)
+    --- PASS: TestAudioStallAndDecoderAfterEOF/stall (0.10s)
+    --- PASS: TestAudioStallAndDecoderAfterEOF/decoder_after_eof (0.02s)
+=== RUN   TestPanicReapsPipeline
+--- PASS: TestPanicReapsPipeline (0.00s)
+=== RUN   TestExitedSourceLeaderCannotLeakPipeHoldingHelper
+--- PASS: TestExitedSourceLeaderCannotLeakPipeHoldingHelper (0.10s)
+=== RUN   TestREL024LostNotificationRecoversWithoutQueueMutation
+--- PASS: TestREL024LostNotificationRecoversWithoutQueueMutation (0.00s)
+=== RUN   TestREL024HealthDoesNotWaitForDeadlockedWorker
+--- PASS: TestREL024HealthDoesNotWaitForDeadlockedWorker (0.00s)
+=== RUN   TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget
+=== RUN   TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/permanent
+    rel024_test.go:76: calls=3 notifications=0 positions=123/123; recovered=false
+=== RUN   TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/transient
+    rel024_test.go:76: calls=3 notifications=0 positions=123/123; recovered=true
+--- PASS: TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget (0.00s)
+    --- PASS: TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/permanent (0.00s)
+    --- PASS: TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/transient (0.00s)
+=== RUN   TestREL024NetworkRecoveryWithRealFFmpeg
+    rel024_test.go:131: real extractor exits=2; FFmpeg frames delivered; recovery=3.638375078s; positions=123/123
+--- PASS: TestREL024NetworkRecoveryWithRealFFmpeg (3.65s)
+=== RUN   TestREL024FrozenRealFFmpegIsKilledAndReaped
+    rel024_test.go:177: real FFmpeg SIGSTOP: detection/cleanup=998.397422ms; pid reaped; error=audio_stall: no audio progress within idle deadline
+        audio stream: read |0: file already closed
+--- PASS: TestREL024FrozenRealFFmpegIsKilledAndReaped (1.00s)
+=== RUN   TestVoiceUnavailableBeforeAndDuringPlaybackRecoversAfterFiveSeconds
+=== RUN   TestVoiceUnavailableBeforeAndDuringPlaybackRecoversAfterFiveSeconds/false
+=== RUN   TestVoiceUnavailableBeforeAndDuringPlaybackRecoversAfterFiveSeconds/true
+--- PASS: TestVoiceUnavailableBeforeAndDuringPlaybackRecoversAfterFiveSeconds (0.00s)
+    --- PASS: TestVoiceUnavailableBeforeAndDuringPlaybackRecoversAfterFiveSeconds/false (0.00s)
+    --- PASS: TestVoiceUnavailableBeforeAndDuringPlaybackRecoversAfterFiveSeconds/true (0.00s)
+=== RUN   TestVoiceStreamFailureReapsRealAudioProcesses
+=== RUN   TestVoiceStreamFailureReapsRealAudioProcesses/false
+=== RUN   TestVoiceStreamFailureReapsRealAudioProcesses/true
+--- PASS: TestVoiceStreamFailureReapsRealAudioProcesses (0.13s)
+    --- PASS: TestVoiceStreamFailureReapsRealAudioProcesses/false (0.08s)
+    --- PASS: TestVoiceStreamFailureReapsRealAudioProcesses/true (0.04s)
+PASS
+ok  	whiterun/internal/player	16.699s

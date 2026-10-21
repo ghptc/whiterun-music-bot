@@ -1,0 +1,5 @@
+=== RUN   TestREL024SQLiteBusyCheckpointRecoversWithoutNewCommand
+    rel024_health_test.go:75: real SQLITE_BUSY: checkpoint automatically recovered in 3.911352053s; positions=3/3
+--- PASS: TestREL024SQLiteBusyCheckpointRecoversWithoutNewCommand (3.92s)
+PASS
+ok  	whiterun/internal/storage	3.918s

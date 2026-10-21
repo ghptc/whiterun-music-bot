@@ -40,7 +40,7 @@ func buildQueueBaseline(state player.State, limit, from, to *int) (queueView, er
 	body := []d.ContainerSubComponent{}
 	// Budget each candidate together with its complete footer before adding it.
 	units, components := 0, 3 // container, heading, footer
-	units = len(utf16.Encode([]rune("### The Bard · Queue")))
+	units = len(utf16.Encode([]rune("### Queue")))
 	currentOmitted := false
 	footerFor := func(shown, first, last int) string {
 		label := "Now playing"
@@ -137,7 +137,7 @@ func buildQueueBaseline(state player.State, limit, from, to *int) (queueView, er
 		components++
 	}
 	body = append(body, d.TextDisplayComponent{Content: footer})
-	block.Container = musicContainer("The Bard · Queue", body...)
+	block.Container = musicContainer("Queue", body...)
 	view.Blocks = []queueBlock{block}
 	view.Components = components
 	return view, nil

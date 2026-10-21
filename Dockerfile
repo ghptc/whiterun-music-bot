@@ -15,7 +15,9 @@ COPY cmd ./cmd
 COPY internal ./internal
 
 FROM test-env AS build
-RUN go vet ./... && go test ./... && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/bard ./cmd/bot && sha256sum /out/bard
+# The physical-quota VFS deliberately rejects overlay filesystems. BuildKit
+# gives disposable SQLite databases and executable fault fixtures real tmpfs.
+RUN --mount=type=tmpfs,target=/tmp go vet ./... && go test ./... && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/bard ./cmd/bot && sha256sum /out/bard
 
 FROM denoland/deno:bin-2.5.6 AS deno
 

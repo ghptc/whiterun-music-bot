@@ -105,6 +105,9 @@ func (b *Bot) ConfigureMatchPolicy(policy media.MatchPolicy) error {
 func (b *Bot) ConfigureSpotify(s *media.Spotify) { b.resolver.Spotify = s }
 
 func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) error {
+	parent := ctx
+	ctx, cancel := context.WithTimeout(ctx, 45*time.Second)
+	defer cancel()
 	if track.ForcedYouTube {
 		direct, ok, err := media.YouTubeURL(track.URL)
 		if err != nil || !ok || direct != "https://www.youtube.com/watch?v="+track.VideoID || track.RequestedSource != "youtube" {
@@ -121,7 +124,7 @@ func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) e
 			}
 		}
 		if err := b.resolver.YouTube.VerifySpotify(ctx, track); err != nil {
-			if ctx.Err() == nil {
+			if ctx.Err() == nil && !player.IsTransientFailure(err) {
 				b.resolver.YouTube.InvalidateSpotify(ctx, track)
 			}
 			return err
@@ -140,8 +143,10 @@ func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) e
 	if metadata, ok := voice.(interface{ SetPlaybackTrack(media.Track) }); ok {
 		metadata.SetPlaybackTrack(track)
 	}
+	cancel()
+	ctx = parent
 	err := b.streamer.Play(ctx, track, voice)
-	if err != nil && ctx.Err() == nil && !player.IsVoiceFailure(err) {
+	if err != nil && ctx.Err() == nil && !player.IsVoiceFailure(err) && !player.IsTransientFailure(err) {
 		b.resolver.YouTube.InvalidateSpotify(ctx, track)
 	}
 	return err

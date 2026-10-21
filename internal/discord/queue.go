@@ -157,7 +157,7 @@ func buildQueueLayout(state player.State, limit, from, to *int, compactTail bool
 	body := make([]d.ContainerSubComponent, 0, 16)
 	// Budget each candidate together with its complete footer before adding it.
 	units, components := 0, 3 // container, heading, footer
-	units = len(utf16.Encode([]rune("### The Bard · Queue")))
+	units = len(utf16.Encode([]rune("### Queue")))
 	currentOmitted := false
 	footerFor := func(shown, first, last int) string {
 		label := "Now playing"
@@ -265,7 +265,7 @@ func buildQueueLayout(state player.State, limit, from, to *int, compactTail bool
 		components++
 	}
 	body = append(body, d.TextDisplayComponent{Content: footer})
-	block.Container = musicContainer("The Bard · Queue", body...)
+	block.Container = musicContainer("Queue", body...)
 	view.Blocks = []queueBlock{block}
 	view.Components = components
 	return view, nil
@@ -355,7 +355,7 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 	view, err := buildQueueRange(state, limit, from, to)
 	b.log.Info("queue_plan", "interaction_id", e.ID(), "elapsed_us", time.Since(started).Microseconds(), "components", view.Components, "messages", len(view.Blocks), "shown", view.Shown, "total", view.Total, "artwork_missing", view.Missing)
 	if err != nil {
-		view.Blocks = []queueBlock{{Container: musicContainer("The Bard · Queue", d.TextDisplayComponent{Content: err.Error()})}}
+		view.Blocks = []queueBlock{{Container: musicContainer("Queue", d.TextDisplayComponent{Content: err.Error()})}}
 	}
 	ctx := b.ctx
 	finish := func() {}
@@ -383,7 +383,7 @@ func (b *Bot) replyQueue(e *events.ApplicationCommandInteractionCreate, state pl
 		b.log.Warn("queue_delivery_failed", "error", err)
 		fallback, cancel := context.WithTimeout(b.ctx, 3*time.Second)
 		defer cancel()
-		notice := musicContainer("The Bard · Queue", d.TextDisplayComponent{Content: "Unable to display the queue. Try /queue again."})
+		notice := musicContainer("Queue", d.TextDisplayComponent{Content: "Unable to display the queue. Try /queue again."})
 		if failure := sendUpdate(componentUpdate(notice), fallback); failure != nil {
 			b.log.Warn("queue_delivery_notice_failed", "error", failure)
 		}

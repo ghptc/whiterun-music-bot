@@ -38,10 +38,10 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	markResolved := func() { resolvedOnce.Do(func() { close(resolved) }) }
 	resolveTimeout, audioTimeout := s.ResolveTimeout, s.FirstAudioTimeout
 	if resolveTimeout <= 0 {
-		resolveTimeout = 30 * time.Second
+		resolveTimeout = 20 * time.Second
 	}
 	if audioTimeout <= 0 {
-		audioTimeout = 30 * time.Second
+		audioTimeout = 20 * time.Second
 	}
 	monitorCtx, stopMonitors := context.WithCancel(ctx)
 	var monitors sync.WaitGroup
@@ -50,7 +50,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	activity.Store(time.Now().UnixNano())
 	idle := s.IdleTimeout
 	if idle <= 0 {
-		idle = 90 * time.Second
+		idle = 45 * time.Second
 	}
 	go func() {
 		defer monitors.Done()
@@ -448,6 +448,8 @@ func sourceFailure(stderr []byte) string {
 		return "youtube_auth_challenge"
 	case strings.Contains(text, "too many requests") || strings.Contains(text, "rate limit") || strings.Contains(text, "http error 429") || strings.Contains(text, " 429 "):
 		return "youtube_rate_limited"
+	case strings.Contains(text, "temporary failure in name resolution"), strings.Contains(text, "name or service not known"), strings.Contains(text, "connection timed out"), strings.Contains(text, "network is unreachable"), strings.Contains(text, "connection reset"), strings.Contains(text, "http error 500"), strings.Contains(text, "http error 502"), strings.Contains(text, "http error 503"):
+		return "source_network"
 	case strings.Contains(text, "403"):
 		return "source_http_403"
 	case strings.Contains(text, "410"):

@@ -3,6 +3,7 @@ package player
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/rand/v2"
 	"time"
 )
@@ -81,9 +82,12 @@ func (p *GuildPlayer) recoverVoice() {
 	v := p.voice
 	notice := !p.voiceNotice
 	p.voiceNotice = true
+	incident := fmt.Sprintf("%s/voice/%d", p.sessionID, p.sequence)
+	started := time.Now()
 	fn := p.onSkip
 	p.mu.Unlock()
 	defer cancel()
+	p.log.Warn("recovery_started", "incident_id", incident, "component", "voice", "cause", "transport_unavailable")
 	if notice && fn != nil {
 		fn(PlaybackEvent{FailureStage: "voice", SkippedReason: "Discord Voice interrupted. The track and queue are preserved while the Bard reconnects.", State: Suspended})
 	}
@@ -107,6 +111,7 @@ func (p *GuildPlayer) recoverVoice() {
 		}
 		var replacement Voice
 		var err error
+		p.log.Info("recovery_attempted", "incident_id", incident, "component", "voice", "attempt", attempt+1, "duration_ms", time.Since(started).Milliseconds())
 		attemptCtx, stop := context.WithTimeout(ctx, 15*time.Second)
 		if r, ok := v.(RecoverableVoice); ok {
 			replacement, err = r.Recover(attemptCtx)
@@ -124,7 +129,7 @@ func (p *GuildPlayer) recoverVoice() {
 			p.voiceBlocked = false
 			p.voiceRecoveryCancel = nil
 			p.signal("voice_recovered")
-			p.log.Info("voice_circuit_closed", "guild_id", p.guildID, "attempt", attempt+1)
+			p.log.Info("recovery_completed", "incident_id", incident, "component", "voice", "guild_id", p.guildID, "attempt", attempt+1, "duration_ms", time.Since(started).Milliseconds())
 			p.mu.Unlock()
 			// The actual first frame supplies the single relevant recovery update.
 			return
@@ -133,7 +138,7 @@ func (p *GuildPlayer) recoverVoice() {
 		exhausted := p.voiceAttempts >= 5
 		p.mu.Unlock()
 		if exhausted {
-			p.log.Error("voice_recovery_exhausted", "guild_id", p.guildID, "action", "queue preserved; no further automatic streaming")
+			p.log.Error("recovery_failed", "incident_id", incident, "component", "voice", "duration_ms", time.Since(started).Milliseconds(), "guild_id", p.guildID, "action", "queue preserved; no further automatic streaming")
 			return
 		}
 	}

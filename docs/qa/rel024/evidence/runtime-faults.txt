@@ -1,0 +1,27 @@
+=== RUN   TestREL024HealthcheckAndPersistentRestartBudget
+--- PASS: TestREL024HealthcheckAndPersistentRestartBudget (0.00s)
+=== RUN   TestREL024WatchdogSeparatesDegradationAndStalls
+    health_test.go:76: lock stall: detection/restart request=45s (virtual clock), limit=60s
+--- PASS: TestREL024WatchdogSeparatesDegradationAndStalls (0.00s)
+=== RUN   TestREL024BlockedProbeIsSupervisedWithoutGoroutineFlood
+    health_test.go:117: blocked probe restart admitted after 52s; one probe, one restart
+--- PASS: TestREL024BlockedProbeIsSupervisedWithoutGoroutineFlood (0.00s)
+=== RUN   TestREL024ProcessFixture
+    rel024_process_test.go:27: isolated child only
+--- SKIP: TestREL024ProcessFixture (0.00s)
+=== RUN   TestREL024ProcessFaultsPreserve123Positions
+=== RUN   TestREL024ProcessFaultsPreserve123Positions/SIGTERM
+    rel024_process_test.go:135: REL024_READY positions=123/123 voice=detached
+    rel024_process_test.go:192: SIGTERM: restart/read=1.883298ms; positions=123/123; no voice attached; failed logs tolerated
+=== RUN   TestREL024ProcessFaultsPreserve123Positions/SIGKILL
+    rel024_process_test.go:135: REL024_READY positions=123/123 voice=detached
+    rel024_process_test.go:192: SIGKILL: restart/read=887.114µs; positions=123/123; no voice attached; failed logs tolerated
+=== RUN   TestREL024ProcessFaultsPreserve123Positions/panic
+    rel024_process_test.go:135: REL024_READY positions=123/123 voice=detached
+    rel024_process_test.go:192: panic: restart/read=5.637411ms; positions=123/123; no voice attached; failed logs tolerated
+--- PASS: TestREL024ProcessFaultsPreserve123Positions (0.03s)
+    --- PASS: TestREL024ProcessFaultsPreserve123Positions/SIGTERM (0.01s)
+    --- PASS: TestREL024ProcessFaultsPreserve123Positions/SIGKILL (0.01s)
+    --- PASS: TestREL024ProcessFaultsPreserve123Positions/panic (0.01s)
+PASS
+ok  	whiterun/cmd/bot	0.036s

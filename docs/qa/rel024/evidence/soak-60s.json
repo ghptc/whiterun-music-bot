@@ -1,0 +1,187 @@
+{
+  "cache_memory_bytes": null,
+  "cleanup_ms": 6.660985,
+  "config": {
+    "Out": "/tmp/rel024-soak-fixed",
+    "Duration": 60000000000,
+    "Sample": 5000000000,
+    "Audio": 100000000,
+    "Playlist": 123,
+    "Guilds": 2,
+    "Seed": 20261019,
+    "Warm": true,
+    "Resume": false,
+    "Faults": true,
+    "DisableCache": false
+  },
+  "continuous_target_completed": true,
+  "discord_e2e": false,
+  "go_version": "go1.27.3-X:nodwarf5",
+  "guilds": [
+    {
+      "accepted": 246,
+      "announced": 216,
+      "batches": 2,
+      "frames": 2248,
+      "guild": "1",
+      "latencies": {
+        "announcement_after_frame": {
+          "count": 216,
+          "max_ms": 25.980248,
+          "mean_ms": 4.695048402777778,
+          "p50_ms": 4.194304,
+          "p95_ms": 16.777216,
+          "p99_ms": 33.554432,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "cache_hit_resolution": {
+          "count": 246,
+          "max_ms": 0.091024,
+          "mean_ms": 0.0039016869918699184,
+          "p50_ms": 0.004096,
+          "p95_ms": 0.008192,
+          "p99_ms": 0.016384,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "cache_miss_resolution": {
+          "count": 246,
+          "max_ms": 3.669991,
+          "mean_ms": 1.4716927398373982,
+          "p50_ms": 2.097152,
+          "p95_ms": 2.097152,
+          "p99_ms": 4.194304,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "delivery_first_frame": {
+          "count": 216,
+          "max_ms": 136.466775,
+          "mean_ms": 31.101522212962962,
+          "p50_ms": 33.554432,
+          "p95_ms": 67.108864,
+          "p99_ms": 134.217728,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "enqueue": {
+          "count": 2,
+          "max_ms": 4.552396,
+          "mean_ms": 3.654546,
+          "p50_ms": 4.194304,
+          "p95_ms": 8.388608,
+          "p99_ms": 8.388608,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "first_frame": {
+          "count": 216,
+          "max_ms": 150.831214,
+          "mean_ms": 35.79686685185185,
+          "p50_ms": 33.554432,
+          "p95_ms": 134.217728,
+          "p99_ms": 134.217728,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "transition": {
+          "count": 224,
+          "max_ms": 1248.69814,
+          "mean_ms": 49.37177457589286,
+          "p50_ms": 8.388608,
+          "p95_ms": 67.108864,
+          "p99_ms": 2147.483648,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        }
+      },
+      "pending": 30,
+      "selected": 225,
+      "terminal": {
+        "completed": 200,
+        "error_interrupted": 7,
+        "suspended": 9,
+        "unavailable": 9
+      }
+    },
+    {
+      "accepted": 246,
+      "announced": 216,
+      "batches": 2,
+      "frames": 2248,
+      "guild": "2",
+      "latencies": {
+        "announcement_after_frame": {
+          "count": 216,
+          "max_ms": 38.918093,
+          "mean_ms": 4.969351805555556,
+          "p50_ms": 4.194304,
+          "p95_ms": 33.554432,
+          "p99_ms": 67.108864,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "cache_hit_resolution": {
+          "count": 246,
+          "max_ms": 0.01556,
+          "mean_ms": 0.0035736178861788615,
+          "p50_ms": 0.004096,
+          "p95_ms": 0.008192,
+          "p99_ms": 0.008192,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "cache_miss_resolution": {
+          "count": 246,
+          "max_ms": 3.49651,
+          "mean_ms": 1.467573556910569,
+          "p50_ms": 2.097152,
+          "p95_ms": 2.097152,
+          "p99_ms": 4.194304,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "delivery_first_frame": {
+          "count": 216,
+          "max_ms": 149.559747,
+          "mean_ms": 30.128565421296294,
+          "p50_ms": 33.554432,
+          "p95_ms": 134.217728,
+          "p99_ms": 134.217728,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "enqueue": {
+          "count": 2,
+          "max_ms": 5.39183,
+          "mean_ms": 4.7194305,
+          "p50_ms": 4.194304,
+          "p95_ms": 8.388608,
+          "p99_ms": 8.388608,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "first_frame": {
+          "count": 216,
+          "max_ms": 161.961657,
+          "mean_ms": 35.098184768518514,
+          "p50_ms": 33.554432,
+          "p95_ms": 134.217728,
+          "p99_ms": 134.217728,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        },
+        "transition": {
+          "count": 224,
+          "max_ms": 1256.791449,
+          "mean_ms": 49.80779434375,
+          "p50_ms": 8.388608,
+          "p95_ms": 67.108864,
+          "p99_ms": 2147.483648,
+          "quantiles": "upper bounds from fixed power-of-two nanosecond buckets"
+        }
+      },
+      "pending": 30,
+      "selected": 225,
+      "terminal": {
+        "completed": 200,
+        "error_interrupted": 7,
+        "suspended": 9,
+        "unavailable": 9
+      }
+    }
+  ],
+  "real_elapsed_seconds": 60.009696645,
+  "segment": "20261021T231804.158957272Z",
+  "started_at": "2026-10-21T23:18:04.158964726Z",
+  "status": "pass",
+  "target_seconds": 60
+}

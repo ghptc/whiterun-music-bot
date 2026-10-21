@@ -33,7 +33,9 @@ func (p *GuildPlayer) ConfigureStore(store Store, guildID string) error {
 	if p.voice != nil || p.current != nil || len(p.queue) > 0 {
 		return errors.New("configure persistence before attaching voice")
 	}
-	state, err := store.LoadGuild(p.ctx, guildID)
+	ctx, cancel := context.WithTimeout(p.ctx, persistenceTimeout)
+	defer cancel()
+	state, err := store.LoadGuild(ctx, guildID)
 	if err != nil {
 		return err
 	}
@@ -55,6 +57,7 @@ func (p *GuildPlayer) ConfigureStore(store Store, guildID string) error {
 	for _, t := range state.History {
 		p.history = append(p.history, copyTrack(t))
 	}
+	p.diagnosticLocked(0, "state_restored", "component", "player", "positions", len(p.queue), "automatic_playback", false)
 	return nil
 }
 func (p *GuildPlayer) durableLocked() DurableState {
@@ -85,7 +88,42 @@ func (p *GuildPlayer) persistLocked() {
 	if err := p.store.SaveGuild(ctx, p.guildID, p.durableLocked()); err != nil {
 		p.persistenceError = "Latest queue changes could not be saved; recovery may be incomplete."
 		p.log.Error("durable_state_write_failed", "guild_id", p.guildID, "error", err)
+		if !p.retryingPersistence {
+			p.retryingPersistence = true
+			p.persistenceWorkers.Add(1)
+			go p.retryPersistence()
+		}
 	} else {
 		p.persistenceError = ""
+	}
+}
+
+// Retry only a dirty checkpoint, not a command. Persist the latest state under
+// the same lock as queue mutations, with a finite budget and cancellation.
+func (p *GuildPlayer) retryPersistence() {
+	defer p.persistenceWorkers.Done()
+	defer func() { p.mu.Lock(); p.retryingPersistence = false; p.mu.Unlock() }()
+	for attempt := 0; attempt < 3; attempt++ {
+		timer := time.NewTimer(time.Second * time.Duration(1<<attempt))
+		select {
+		case <-p.ctx.Done():
+			timer.Stop()
+			return
+		case <-timer.C:
+		}
+		p.mu.Lock()
+		if p.ctx.Err() != nil || p.store == nil || p.persistenceError == "" {
+			p.mu.Unlock()
+			return
+		}
+		p.persistLocked()
+		ok := p.persistenceError == ""
+		if ok {
+			p.diagnosticLocked(0, "recovery_completed", "component", "checkpoint", "incident_id", p.sessionID+"/checkpoint", "attempt", attempt+1)
+		}
+		p.mu.Unlock()
+		if ok {
+			return
+		}
 	}
 }

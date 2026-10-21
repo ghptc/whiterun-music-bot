@@ -1,0 +1,29 @@
+Functional watchdog detection and real process exit: 52002ms; limit: 60000ms
+Fatal worker panic automatic restart: 454ms; limit: 30000ms
+memory=5.621MiB / 128MiB cpu=0.04% pids=7
+restarts=2 network=none memory_limit=134217728
+=== RUN   TestREL024ProcessFixture
+REL024_READY positions=123/123 voice=detached
+{"time":"2026-10-21T23:20:38.044175208Z","level":"INFO","msg":"runtime_health_changed","gateway_connected":false,"workers_responsive":false,"sqlite_accessible":false}
+{"time":"2026-10-21T23:21:23.046161607Z","level":"ERROR","msg":"process_supervision_triggered","component":"runtime","incident_id":1792624883044444687,"cause":"functional_stall","restart_allowed":true,"error":null}
+REL024_WATCHDOG_RESTART detection_ms=52002
+=== RUN   TestREL024ProcessFixture
+REL024_READY positions=123/123 voice=detached
+panic: REL024 isolated fatal worker panic
+
+goroutine 48 [running]:
+whiterun/cmd/bot.TestREL024ProcessFixture.func2()
+	/home/gabriel/Projects/whiterun-music-bot/cmd/bot/rel024_process_test.go:83 +0x158
+created by whiterun/cmd/bot.TestREL024ProcessFixture in goroutine 20
+	/home/gabriel/Projects/whiterun-music-bot/cmd/bot/rel024_process_test.go:73 +0xbf9
+=== RUN   TestREL024ProcessFixture
+REL024_READY positions=123/123 voice=detached
+--- PASS: TestREL024ProcessFixture (1.14s)
+PASS
+=== RUN   TestREL024ProcessFixture
+REL024_READY positions=123/123 voice=detached
+=== RUN   TestREL024ProcessFixture
+REL024_READY positions=123/123 voice=detached
+--- PASS: TestREL024ProcessFixture (0.01s)
+PASS
+PASS disposable container/volume; 123/123 persisted positions; no real Discord session

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"sync"
+	"time"
 )
 
 // Each track owns a gate. Closing the resume channel wakes all waiters;
@@ -86,6 +87,8 @@ func (p *GuildPlayer) SetPaused(paused bool) (bool, error) {
 	}
 	if !paused && p.halted {
 		p.halted = false
+		p.networkAttempts = 0
+		p.retryAt = time.Time{}
 		p.failures = 0
 		p.signal("resume")
 		return true, nil

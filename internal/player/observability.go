@@ -123,8 +123,8 @@ func (p *GuildPlayer) schedulerEventLocked(level slog.Level, event, reason, expe
 	p.diagnosticLocked(level, event, fields...)
 }
 
-// One timer per wait, one warning per unchanged blocking condition. It observes
-// only: it never cancels, retries or advances playback.
+// Recheck a missed notification without consuming or reordering queue entries.
+// Idle and intentionally suspended states produce no periodic diagnostic noise.
 func (p *GuildPlayer) schedulerWait() bool {
 	started := time.Now()
 	timer := time.NewTimer(schedulerStallAfter)
@@ -165,6 +165,12 @@ func (p *GuildPlayer) schedulerWait() bool {
 				}
 				if reason == "ready" {
 					p.schedulerEventLocked(slog.LevelWarn, "scheduler_stall_detected", "notification_missing", "scheduler_notification", time.Since(started))
+					p.diagnosticLocked(slog.LevelInfo, "recovery_completed", "component", "scheduler", "cause", "notification_missing", "duration_ms", time.Since(started).Milliseconds(), "incident_id", p.sessionID+"/scheduler")
+					waiting = false
+				}
+				if reason == "next_position_pending" || reason == "resolution_in_progress" {
+					p.signal("watchdog_resolver_wakeup")
+					timer.Reset(schedulerStallAfter)
 				}
 				p.mu.Unlock()
 			}

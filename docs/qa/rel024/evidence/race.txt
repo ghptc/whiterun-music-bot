@@ -1,0 +1,8 @@
+ok  	whiterun/internal/discord	(cached)
+ok  	whiterun/internal/logstore	(cached)
+ok  	whiterun/internal/media	(cached)
+ok  	whiterun/internal/perfgate	(cached)
+ok  	whiterun/internal/player	(cached)
+ok  	whiterun/internal/qasoak	(cached)
+ok  	whiterun/internal/storage	(cached)
+ok  	whiterun/cmd/bot	(cached)

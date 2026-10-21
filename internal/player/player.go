@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math/rand/v2"
 	"sync"
 	"time"
 
@@ -22,6 +23,15 @@ type PlayFunc func(context.Context, media.Track, Voice) error
 const MaxQueueTracks = 1000
 
 type GuildPlayer struct {
+	networkIncident        string
+	retryingPersistence    bool
+	persistenceWorkers     sync.WaitGroup
+	networkRecoveryStarted time.Time
+	networkAttempts        int
+	retryAt                time.Time
+	canceledAt             time.Time
+	progress               playbackProgress
+
 	diagnostics         *diagnostics
 	queueVersion        uint64
 	lastSignal          string
@@ -162,6 +172,8 @@ func (p *GuildPlayer) Stop() {
 	p.queue = nil
 	p.loop = "off"
 	p.halted, p.failures = false, 0
+	p.networkAttempts = 0
+	p.retryAt = time.Time{}
 	p.generation++
 	p.mutationLocked("generation_changed")
 	p.cancelTrackLocked("stop")
@@ -182,6 +194,8 @@ func (p *GuildPlayer) Leave(ctx context.Context) {
 	p.queue = nil
 	p.loop = "off"
 	p.halted, p.failures = false, 0
+	p.networkAttempts = 0
+	p.retryAt = time.Time{}
 	p.generation++
 	p.mutationLocked("generation_changed")
 	p.cancelTrackLocked("leave")
@@ -208,6 +222,7 @@ func (p *GuildPlayer) Close(ctx context.Context) {
 	p.Leave(ctx)
 	<-p.done
 	p.jobWorkers.Wait()
+	p.persistenceWorkers.Wait()
 	p.diagnostics.stopOnce.Do(func() { close(p.diagnostics.stop) })
 	select {
 	case <-p.diagnostics.done:
@@ -235,6 +250,17 @@ func (p *GuildPlayer) run() {
 			}
 			continue
 		}
+		if delay := time.Until(p.retryAt); delay > 0 {
+			p.mu.Unlock()
+			timer := time.NewTimer(delay)
+			select {
+			case <-p.ctx.Done():
+			case <-p.wake:
+			case <-timer.C:
+			}
+			timer.Stop()
+			continue
+		}
 		entry := p.queue[0]
 		t := entry.Track
 		p.releaseEntryLocked(entry)
@@ -260,6 +286,7 @@ func (p *GuildPlayer) run() {
 		p.trackDone = done
 		p.trackCancel = cancel
 		p.current = &t
+		p.progress.at.Store(time.Now().UnixNano())
 		p.pause = &pauseGate{}
 		ctx = context.WithValue(ctx, pauseKey{}, p.pause)
 		v := p.voice
@@ -269,12 +296,13 @@ func (p *GuildPlayer) run() {
 		attemptLog := p.log.With(attemptFields...)
 		attemptLog.Info("next_track_selected", "sequence", sequence, "collection_id", entry.jobID, "position", t.Position, "spotify_id", t.SpotifyID, "title", t.Title, "video_id", t.VideoID)
 		attemptLog.Info("track_playback_start", "sequence", sequence, "position", t.Position, "video_id", t.VideoID)
-		err := callPlay(p.play, ctx, t, &startVoice{Voice: v, start: func() { p.announceStart(ctx, t, sequence) }, metadata: func(resolved media.Track) {
+		err := callPlay(p.play, ctx, t, &startVoice{Voice: v, progress: func() { p.progress.at.Store(time.Now().UnixNano()) }, start: func() { p.announceStart(ctx, t, sequence) }, metadata: func(resolved media.Track) {
 			p.mu.Lock()
 			defer p.mu.Unlock()
 			if ctx.Err() == nil && p.current != nil && p.sequence == sequence && p.startedSequence != sequence {
 				final := copyTrack(resolved)
 				p.current = &final
+				p.progress.at.Store(time.Now().UnixNano())
 			}
 		}})
 		category := failureCategory(err)
@@ -287,6 +315,9 @@ func (p *GuildPlayer) run() {
 		expectedCancel := ctx.Err() != nil
 		cancel()
 		p.mu.Lock()
+		if category == "audio_stall" {
+			p.diagnosticLocked(slog.LevelWarn, "playback_stall_detected", "component", "stream", "incident_id", fmt.Sprintf("%s/%d", p.sessionID, sequence), "duration_ms", time.Since(started).Milliseconds(), "result", "local_cancellation")
+		}
 		transportFailure := (isVoiceFailure(err) || isVoiceFailure(context.Cause(ctx))) && p.current != nil && p.ctx.Err() == nil
 		expectedCancel = expectedCancel || p.current == nil || p.ctx.Err() != nil
 		if transportFailure {
@@ -299,6 +330,28 @@ func (p *GuildPlayer) run() {
 			expectedCancel = true
 		}
 		played := p.startedSequence == sequence
+		networkRetry := !played && !expectedCancel && (category == "source_network" || errors.Is(err, context.DeadlineExceeded))
+		if networkRetry {
+			p.queue = append([]queueEntry{{Track: copyTrack(t)}}, p.queue...)
+			if p.networkAttempts == 0 {
+				p.networkRecoveryStarted = time.Now()
+				p.networkIncident = fmt.Sprintf("%s/network/%d", p.sessionID, p.sequence)
+				p.diagnosticLocked(slog.LevelWarn, "recovery_started", "component", "media", "incident_id", p.networkIncident, "cause", category)
+			}
+			p.networkAttempts++
+			p.mutationLocked("network_track_retained")
+			if p.networkAttempts <= 2 {
+				delay := time.Second * time.Duration(1<<(p.networkAttempts-1))
+				p.retryAt = time.Now().Add(delay + time.Duration(rand.Int64N(int64(delay/4)+1)))
+				p.diagnosticLocked(slog.LevelWarn, "recovery_attempted", "component", "media", "incident_id", p.networkIncident, "cause", category, "attempt", p.networkAttempts)
+			} else {
+				p.halted = true
+				p.diagnosticLocked(slog.LevelError, "recovery_failed", "component", "media", "incident_id", p.networkIncident, "cause", category, "attempt", p.networkAttempts, "result", "queue_preserved")
+			}
+			expectedCancel = true
+		} else if !expectedCancel && err == nil {
+			p.networkAttempts = 0
+		}
 		terminal := Finished
 		if transportFailure {
 			terminal = Suspended

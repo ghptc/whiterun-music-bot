@@ -117,6 +117,7 @@ type PlaybackEvent struct {
 	Sequence      uint64
 }
 type startVoice struct {
+	progress func()
 	Voice
 	once     sync.Once
 	start    func()
@@ -126,6 +127,9 @@ type startVoice struct {
 func (v *startVoice) WriteFrame(ctx context.Context, frame []byte) error {
 	if err := v.Voice.WriteFrame(ctx, frame); err != nil {
 		return err
+	}
+	if v.progress != nil {
+		v.progress()
 	}
 	v.once.Do(v.start)
 	return nil
@@ -143,6 +147,10 @@ func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequ
 		return
 	}
 	track = copyTrack(*p.current)
+	if p.networkAttempts > 0 {
+		p.diagnosticLocked(0, "recovery_completed", "component", "media", "incident_id", p.networkIncident, "attempt", p.networkAttempts+1, "duration_ms", time.Since(p.networkRecoveryStarted).Milliseconds())
+		p.networkAttempts = 0
+	}
 	p.startedSequence = sequence
 	if p.voiceIncident {
 		p.voiceIncident = false
@@ -250,4 +258,18 @@ func (v *startVoice) SetPlaybackTrack(t media.Track) {
 	if v.metadata != nil {
 		v.metadata(t)
 	}
+}
+
+// IsTransientFailure distinguishes transport/timeout failures from evidence that
+// a verified recording is wrong or unavailable. Keep persistent mappings intact.
+func IsTransientFailure(err error) bool {
+	if errors.Is(err, context.DeadlineExceeded) {
+		return true
+	}
+	switch failureCategory(err) {
+	case "source_network", "audio_stall", "ffmpeg_start", "yt_dlp_start":
+		return true
+	}
+	var network interface{ Timeout() bool }
+	return errors.As(err, &network)
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sort"
+	"time"
 
 	"whiterun/internal/media"
 )
@@ -87,6 +88,8 @@ func (p *GuildPlayer) Clear() int {
 	p.queue = nil
 	p.loop = "off"
 	p.halted, p.failures = false, 0
+	p.networkAttempts = 0
+	p.retryAt = time.Time{}
 	return n
 }
 
@@ -117,6 +120,11 @@ func (p *GuildPlayer) SkipN(count int) (SkipResult, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	defer p.persistLocked()
+	if p.networkAttempts > 0 {
+		p.networkAttempts = 0
+		p.retryAt = time.Time{}
+		p.halted = false
+	}
 	result := SkipResult{}
 	if p.current != nil {
 		result.Skipped++
@@ -154,6 +162,7 @@ func (p *GuildPlayer) cancelTrackLocked(reason ...string) {
 		p.trackCancel()
 		p.trackCancel = nil
 	}
+	p.canceledAt = time.Now()
 	p.current = nil
 	p.pause = nil
 }
