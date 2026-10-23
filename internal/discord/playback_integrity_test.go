@@ -62,8 +62,9 @@ func TestBotPlaybackRejectsWrongRecordingBeforeStreaming(t *testing.T) {
 		t.Fatal("incompatible recording delivered audio")
 	}
 	writeMetadata("Song")
-	if err := b.play(ctx, track, v); err != nil {
-		t.Fatal(err)
+	var streamErr *player.StreamError
+	if err := b.play(ctx, track, v); !errors.As(err, &streamErr) || streamErr.Category != "audio_eof" {
+		t.Fatal("100ms source must be diagnosed as premature EOF against 210s metadata", err)
 	}
 	if v.frames.Load() <= 5 {
 		t.Fatal("no media frames beyond end silence", v.frames.Load())

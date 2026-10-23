@@ -183,7 +183,7 @@ func TestSQLitePlayerRecoveryWithoutVoice(t *testing.T) {
 		t.Fatal(saved, err)
 	}
 	events, err := db.PlaybackHistory(ctx, "1", 10)
-	if err != nil || len(events) != 2 || events[0].Title != "first" {
+	if err != nil || len(events) != 1 || events[0].Title != "first" {
 		t.Fatal(events, err)
 	}
 }

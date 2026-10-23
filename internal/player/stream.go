@@ -25,6 +25,9 @@ type Streamer struct {
 // audio files, signed stream URLs in queue state, or shell commands.
 func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err error) {
 	started := time.Now()
+	if t.ResumeOffset < 0 || (t.Live && t.ResumeOffset > 0) {
+		return &StreamError{"resume_unsupported", errors.New("saved progress cannot be sought in this source; position retained for explicit skip")}
+	}
 	t.Timing.Event("playback_start", started)
 	defer func() { t.Timing.Event("playback_complete", started, "error", err) }()
 	ctx, cancelCause := context.WithCancelCause(media.WithTiming(parent, t.Timing))
@@ -81,7 +84,15 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 		markResolved()
 	}, written: func() { t.Timing.Event("ffmpeg_first_input", streamStart) }}
 
-	ff := media.Command(ctx, s.FFmpeg, "-hide_banner", "-loglevel", "error", "-nostdin", "-i", "pipe:0", "-vn", "-ac", "2", "-ar", "48000", "-c:a", "libopus", "-b:a", "96k", "-vbr", "off", "-application", "audio", "-frame_duration", "20", "-f", "opus", "-flush_packets", "1", "-page_duration", "20000", "pipe:1")
+	ffArgs := []string{"-hide_banner", "-loglevel", "error", "-nostdin", "-i", "pipe:0", "-vn", "-ac", "2", "-ar", "48000", "-c:a", "libopus", "-b:a", "96k", "-vbr", "off", "-application", "audio", "-frame_duration", "20", "-f", "opus", "-flush_packets", "1", "-page_duration", "20000", "pipe:1"}
+	// Accurate output seek decodes/discards preceding audio. No signed URL or
+	// unreliable byte-range seek; timeout preserves the position rather than
+	// silently replaying the beginning.
+	if t.ResumeOffset > 0 {
+		ffArgs = append(ffArgs[:7], append([]string{"-ss", fmt.Sprintf("%.3f", t.ResumeOffset.Seconds())}, ffArgs[7:]...)...)
+		t.Timing.Event("playback_resume_started", started, "confirmed_ms", t.ResumeOffset.Milliseconds(), "seek", "decode_and_discard")
+	}
+	ff := media.Command(ctx, s.FFmpeg, ffArgs...)
 	ff.Stdin = input
 	ffErr := &media.LimitedBuffer{Limit: 512, Tail: true}
 	ff.Stderr = ffErr
@@ -204,6 +215,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	}()
 	speaking := false
 	firstFrame := true
+	sentFrames := int64(0)
 	next := time.Now()
 	readErr := oggPackets(&firstRead{reader: audio, first: func() { t.Timing.Event("ffmpeg_first_output", streamStart) }}, func(packet []byte) error {
 		if firstFrame {
@@ -245,6 +257,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 			return &StreamError{"voice_send", err}
 		}
 		activity.Store(time.Now().UnixNano())
+		sentFrames++
 		if firstFrame {
 			t.Timing.Event("first_audio_frame", started)
 			firstFrame = false
@@ -330,6 +343,9 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 
 	if len(failures) > 0 {
 		return errors.Join(failures...)
+	}
+	if !t.Live && t.Duration > 0 && t.ResumeOffset+time.Duration(sentFrames)*20*time.Millisecond+2*time.Second < t.Duration {
+		return &StreamError{"audio_eof", errors.New("audio ended before expected recording duration")}
 	}
 	// Discord recommends five silence frames at the end of a transmission.
 	for range 5 {

@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-// RecoverableVoice creates a fresh, fully negotiated transport. It must never
-// return a connection with an invalidated encryption session.
+// RecoverableVoice preserves a proven usable transport or negotiates a fresh
+// one. It must never return an invalidated encryption session.
 type RecoverableVoice interface {
 	Recover(context.Context) (Voice, error)
 }
@@ -61,6 +61,7 @@ func (p *GuildPlayer) suspendVoiceLocked() {
 		p.voiceBlocked = true
 		if !p.voiceIncident {
 			p.voiceIncident = true
+			p.voiceIncidentID = fmt.Sprintf("%s/voice/%d", p.sessionID, p.sequence)
 			p.voiceAttempts = 0
 			p.voiceNotice = false
 		}
@@ -82,14 +83,14 @@ func (p *GuildPlayer) recoverVoice() {
 	v := p.voice
 	notice := !p.voiceNotice
 	p.voiceNotice = true
-	incident := fmt.Sprintf("%s/voice/%d", p.sessionID, p.sequence)
+	incident := p.voiceIncidentID
 	started := time.Now()
 	fn := p.onSkip
 	p.mu.Unlock()
 	defer cancel()
 	p.log.Warn("recovery_started", "incident_id", incident, "component", "voice", "cause", "transport_unavailable")
 	if notice && fn != nil {
-		fn(PlaybackEvent{FailureStage: "voice", SkippedReason: "Discord Voice interrupted. The track and queue are preserved while the Bard reconnects.", State: Suspended})
+		fn(PlaybackEvent{IncidentID: incident, FailureStage: "voice", SkippedReason: "Discord Voice interrupted. The Bard is recovering audio; the queue and confirmed playback progress are preserved.", State: Suspended})
 	}
 	for {
 		p.mu.Lock()

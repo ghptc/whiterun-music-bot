@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os/exec"
 	"strings"
 	"sync"
@@ -107,6 +108,8 @@ const (
 // PlaybackEvent is a copied snapshot. Start events follow the first successful
 // voice frame; skip events carry SkippedReason and never announce a start.
 type PlaybackEvent struct {
+	Resumed       bool
+	IncidentID    string
 	StartedAt     time.Time
 	State         AttemptState
 	FailureStage  string
@@ -128,7 +131,7 @@ func (v *startVoice) WriteFrame(ctx context.Context, frame []byte) error {
 	if err := v.Voice.WriteFrame(ctx, frame); err != nil {
 		return err
 	}
-	if v.progress != nil {
+	if v.progress != nil && !(len(frame) == 3 && frame[0] == 0xf8 && frame[1] == 0xff && frame[2] == 0xfe) {
 		v.progress()
 	}
 	v.once.Do(v.start)
@@ -147,22 +150,31 @@ func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequ
 		return
 	}
 	track = copyTrack(*p.current)
+	resumed := track.ResumeOffset > 0
+	incident := p.voiceIncidentID
+	if p.networkAttempts > 0 {
+		incident = p.networkIncident
+	}
+	if incident == "" && resumed {
+		incident = fmt.Sprintf("%s/resume/%d", p.sessionID, sequence)
+	}
+	if resumed {
+		p.diagnosticLocked(slog.LevelInfo, "playback_resume_completed", "incident_id", incident, "position", track.Position, "confirmed_ms", track.ResumeOffset.Milliseconds())
+	}
 	if p.networkAttempts > 0 {
 		p.diagnosticLocked(0, "recovery_completed", "component", "media", "incident_id", p.networkIncident, "attempt", p.networkAttempts+1, "duration_ms", time.Since(p.networkRecoveryStarted).Milliseconds())
-		p.networkAttempts = 0
 	}
 	p.startedSequence = sequence
 	if p.voiceIncident {
-		p.voiceIncident = false
-		p.voiceAttempts = 0
-		p.voiceNotice = false
 		p.log.Info("voice_audio_resumed", "guild_id", p.guildID, "sequence", sequence)
 	}
-	p.history = append(p.history, copyTrack(track))
+	if !resumed {
+		p.history = append(p.history, copyTrack(track))
+	}
 	if len(p.history) > 100 {
 		p.history = append([]media.Track(nil), p.history[len(p.history)-100:]...)
 	}
-	event := PlaybackEvent{StartedAt: startedAt, Track: copyTrack(track), Sequence: sequence, State: Playing}
+	event := PlaybackEvent{Resumed: resumed, IncidentID: incident, StartedAt: startedAt, Track: copyTrack(track), Sequence: sequence, State: Playing}
 	if len(p.queue) > 0 {
 		next := copyTrack(p.queue[0].Track)
 		event.Next = &next
@@ -174,7 +186,7 @@ func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequ
 	}
 	fn := p.onStart
 	p.persistLocked()
-	if recorder, ok := p.store.(PlaybackRecorder); ok && p.ctx.Err() == nil {
+	if recorder, ok := p.store.(PlaybackRecorder); ok && p.ctx.Err() == nil && !resumed {
 		save, cancel := context.WithTimeout(context.Background(), persistenceTimeout)
 		if err := recorder.RecordPlayback(save, p.guildID, track); err != nil {
 			p.persistenceError = "Playback history could not be saved."

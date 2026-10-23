@@ -113,11 +113,24 @@ func (b *Bot) checkVoiceHealth(id snowflake.ID, g *guild, now time.Time, mainRea
 	terminal := mainReady && known && !sameChannel
 	if terminal {
 		reason = "voice_moved_or_removed"
+	} else if mainReady && !voiceReady {
+		reason = "voice_gateway_unready"
+	} else if mainReady && !known {
+		reason = "voice_membership_unknown"
 	}
 	if g.unhealthySince.IsZero() {
 		g.unhealthySince = now
 		b.log.Warn("voice_unhealthy", "guild_id", id, "main_ready", mainReady, "voice_ready", voiceReady, "cache_known", known, "same_channel", sameChannel, "reason", reason)
 	}
-	g.player.SuspendVoice()
+	// The main gateway reconnects independently (observed hourly). Its cache
+	// is not evidence that the Voice websocket or UDP transport failed.
+	if terminal || !voiceReady {
+		if terminal || now.Sub(g.unhealthySince) >= 5*time.Second {
+			if !g.player.State().VoiceSuspended {
+				b.log.Warn("watchdog_recovery_triggered", "guild_id", id, "component", "voice", "reason", reason, "duration_ms", now.Sub(g.unhealthySince).Milliseconds())
+			}
+			g.player.SuspendVoice()
+		}
+	}
 	return true
 }

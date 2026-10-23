@@ -1,0 +1,16 @@
+{
+  "timestamp_utc": "2026-10-23T20:28:39Z",
+  "guild": "404344088691867649",
+  "channel": "921489232374140978",
+  "channel_type": 2,
+  "requested_duration_seconds": 11100,
+  "connected_voice_ms": 0,
+  "audio_frames": 0,
+  "messages_sent": 0,
+  "result": "blocked_no_human_listeners",
+  "production_deployment": false,
+  "state": "separate temporary SQLite",
+  "duplicate_session_guard": true,
+  "interaction_processing": false,
+  "follow_up": "Real soak deferred by explicit user instruction; automated coverage expanded."
+}

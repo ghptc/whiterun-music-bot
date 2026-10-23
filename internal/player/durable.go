@@ -7,8 +7,8 @@ import (
 	"whiterun/internal/media"
 )
 
-// DurableState contains metadata only. Current restarts from the beginning after
-// explicit voice attachment; unresolved Spotify entries are matched on playback.
+// DurableState contains metadata and confirmed audio checkpoints. Restoration
+// requires explicit voice attachment; no automatic channel rejoin.
 const persistenceTimeout = 3 * time.Second
 
 type DurableState struct {
@@ -41,7 +41,7 @@ func (p *GuildPlayer) ConfigureStore(store Store, guildID string) error {
 	}
 	p.loop, p.autoplay = state.Loop, state.Autoplay
 	tracks := state.Queue
-	if state.Current != nil {
+	if state.Current != nil && !advanceInterrupted(*state.Current) {
 		tracks = append([]media.Track{*state.Current}, tracks...)
 	}
 	if len(tracks) > MaxQueueTracks+1 {
@@ -51,7 +51,7 @@ func (p *GuildPlayer) ConfigureStore(store Store, guildID string) error {
 		p.queue = append(p.queue, queueEntry{Track: copyTrack(t)})
 	}
 	p.store, p.guildID = store, guildID
-	if state.CurrentStarted && state.Current != nil && len(state.History) > 0 {
+	if state.CurrentStarted && state.Current != nil && state.Current.ResumeOffset == 0 && !advanceInterrupted(*state.Current) && len(state.History) > 0 {
 		state.History = state.History[:len(state.History)-1]
 	}
 	for _, t := range state.History {
@@ -64,6 +64,7 @@ func (p *GuildPlayer) durableLocked() DurableState {
 	s := DurableState{Loop: p.loop, Autoplay: p.autoplay, CurrentStarted: p.current != nil && p.startedSequence == p.sequence}
 	if p.current != nil {
 		t := copyTrack(*p.current)
+		t.ResumeOffset = p.confirmedOffset
 		t.Timing = nil
 		s.Current = &t
 	}

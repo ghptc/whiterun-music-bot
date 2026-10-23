@@ -66,8 +66,16 @@ func New(ctx context.Context, token string, appID snowflake.ID, log *slog.Logger
 		bot.WithGatewayConfigOpts(gateway.WithIntents(gateway.IntentGuilds, gateway.IntentGuildVoiceStates)),
 		bot.WithCacheConfigOpts(cache.WithCaches(cache.FlagGuilds, cache.FlagVoiceStates, cache.FlagMembers)),
 		bot.WithVoiceManagerConfigOpts(voice.WithConnCreateFunc(func(guildID, userID snowflake.ID, update voice.StateUpdateFunc, remove func(), opts ...voice.ConnConfigOpt) voice.Conn {
-			opts = append(opts, voice.WithConnGatewayCreateFunc(incidentGatewayFactory(log)))
-			return newVoiceConn(guildID, userID, update, remove, opts...)
+			var c *voiceConn
+			opts = append(opts, voice.WithConnGatewayCreateFunc(func(session godave.Session, event voice.EventHandlerFunc, _ voice.CloseHandlerFunc, gatewayOpts ...voice.GatewayConfigOpt) voice.Gateway {
+				// disgo's default close callback sends a guild leave immediately.
+				// The sole player recovery owner decides when to leave/rejoin;
+				// gateway loss only closes the compromised local UDP transport.
+				return incidentGatewayFactory(log)(session, event, func(voice.Gateway, error, bool) { c.gatewayLost() }, gatewayOpts...)
+			}))
+			c = newVoiceConn(guildID, userID, update, remove, opts...).(*voiceConn)
+			c.log = log.With("guild_id", guildID)
+			return c
 		})),
 		bot.WithEventListenerFunc(b.handle),
 		bot.WithEventListenerFunc(b.voiceStateChanged),
@@ -138,6 +146,7 @@ func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) e
 		}
 		verified.Position, verified.Total, verified.Timing = track.Position, track.Total, track.Timing
 		verified.RequestedBy = track.RequestedBy
+		verified.ResumeOffset = track.ResumeOffset
 		track = verified
 	}
 	if metadata, ok := voice.(interface{ SetPlaybackTrack(media.Track) }); ok {
@@ -253,9 +262,14 @@ func (b *Bot) watchVoice() {
 			if g.conn != nil {
 				state, ok := b.client.Caches.VoiceState(id, b.client.ID())
 				mainReady := b.client.Gateway.Status() == gateway.StatusReady
-				voiceReady := mainReady && ok && state.ChannelID != nil && *state.ChannelID == g.channel && g.conn.Gateway().Status() == voice.StatusReady
+				voiceReady := g.conn.Gateway().Status() == voice.StatusReady
 				sameChannel := ok && state.ChannelID != nil && *state.ChannelID == g.channel
 				if b.checkVoiceHealth(id, g, time.Now(), mainReady, voiceReady, ok, sameChannel) {
+					// Healthy membership caches still permit the normal empty-channel
+					// cleanup when an invalid transport has no queued audio to recover.
+					if mainReady && ok && sameChannel {
+						b.checkEmpty(id, g, time.Now())
+					}
 					g.mu.Unlock()
 					continue
 				}
@@ -266,17 +280,25 @@ func (b *Bot) watchVoice() {
 	}
 }
 
-type transport struct{ conn voice.Conn }
+type transport struct {
+	conn      voice.Conn
+	brokenUDP *atomic.Bool
+}
 
 // Retain the DAVE session to hold audio during encryption handshakes.
 type voiceConn struct {
 	voice.Conn
-	dave      *session.Session
-	closeOnce sync.Once
+	dave            *session.Session
+	closeOnce       sync.Once
+	joinMu          sync.Mutex
+	opening, joined bool
+	joinChannel     snowflake.ID
+	log             *slog.Logger
+	guildID, userID snowflake.ID
 }
 
 func newVoiceConn(guildID, userID snowflake.ID, update voice.StateUpdateFunc, remove func(), opts ...voice.ConnConfigOpt) voice.Conn {
-	c := &voiceConn{}
+	c := &voiceConn{guildID: guildID, userID: userID}
 	opts = append(opts, voice.WithConnDaveSessionCreateFunc(func(log *slog.Logger, id godave.UserID, callbacks godave.Callbacks) godave.Session {
 		c.dave = session.New(id, callbacks, session.WithLogger(log))
 		return c.dave
@@ -298,6 +320,7 @@ func (v transport) WriteFrame(ctx context.Context, frame []byte) error {
 	}
 	if c, ok := v.conn.(*voiceConn); ok {
 		if err := waitVoiceReady(ctx, c.dave, 60*time.Second); err != nil {
+			media.TimingFrom(ctx).Event("dave_session_error", time.Now(), "reason", "encryption_not_ready", "canceled", ctx.Err() != nil)
 			return err
 		}
 	}
@@ -305,9 +328,19 @@ func (v transport) WriteFrame(ctx context.Context, frame []byte) error {
 		return ctx.Err()
 	}
 	if err := v.conn.UDP().SetWriteDeadline(time.Now().Add(3 * time.Second)); err != nil {
+		if v.brokenUDP != nil {
+			v.brokenUDP.Store(true)
+		}
+		media.TimingFrom(ctx).Event("voice_udp_error", time.Now(), "operation", "write_deadline")
 		return err
 	}
 	_, err := v.conn.UDP().Write(frame)
+	if err != nil {
+		if v.brokenUDP != nil {
+			v.brokenUDP.Store(true)
+		}
+		media.TimingFrom(ctx).Event("voice_udp_error", time.Now(), "operation", "write")
+	}
 	if err == nil {
 		media.TimingFrom(ctx).FirstDiscordSend()
 	}

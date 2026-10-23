@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	d "github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/voice"
 	"github.com/disgoorg/godave"
 	"github.com/disgoorg/snowflake/v2"
@@ -134,14 +135,15 @@ func TestVoiceRecoveryReplacesConnectionAndProvesReadiness(t *testing.T) {
 	manager := &freshVoiceManager{}
 	b.client.VoiceManager = manager
 	g, old := idleGuild(t, b, 1)
+	b.client.Caches.AddVoiceState(d.VoiceState{GuildID: 1, UserID: b.client.ID(), ChannelID: new(snowflake.ID(5))})
 	v := b.playbackTransport(1, g, old)
 	replacement, err := v.(player.RecoverableVoice).Recover(context.Background())
 	if err != nil || replacement == nil || !old.closed || len(manager.created) != 1 || g.conn != manager.created[0] {
 		t.Fatalf("fresh recovery: %v", err)
 	}
 	replacement, err = replacement.(player.RecoverableVoice).Recover(context.Background())
-	if err != nil || replacement == nil || len(manager.created) != 2 || !manager.created[0].closed.Load() || g.conn != manager.created[1] {
-		t.Fatalf("second recovery reused transport: %v", err)
+	if err != nil || replacement == nil || len(manager.created) != 1 || manager.created[0].closed.Load() || g.conn != manager.created[0] {
+		t.Fatalf("healthy session was not preserved: %v", err)
 	}
 	if err := confirmVoiceReady(context.Background(), &readyVoiceConn{status: voice.StatusDisconnected}); err == nil {
 		t.Fatal("false readiness accepted")

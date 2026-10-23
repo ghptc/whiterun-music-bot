@@ -145,6 +145,7 @@ func run(log *slog.Logger) error {
 		slog.New(slog.NewJSONHandler(os.Stderr, nil)).Error("process_supervision_triggered", "component", "shutdown", "cause", "grace_deadline_exceeded")
 		os.Exit(1)
 	})
+	log.Info("container_shutdown_requested", "reason", "signal_or_runtime_cancellation")
 	log.Info("shutting down")
 	return nil
 }

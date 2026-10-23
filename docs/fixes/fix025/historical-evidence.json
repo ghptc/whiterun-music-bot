@@ -1,0 +1,488 @@
+{
+  "sqlite_snapshot_sha256": "77c5d5cbcd080993655badba38989146866516cb8893b7004a244a279cc49a57",
+  "record_count": 11732,
+  "first": "2026-10-20T13:10:46.081422+00:00",
+  "last": "2026-10-23T16:29:27.421703+00:00",
+  "events": [
+    {
+      "sqlite_id": 1,
+      "msg": "log_persistence_started",
+      "time": "2026-10-20T13:10:46.081421945Z"
+    },
+    {
+      "sqlite_id": 677,
+      "msg": "shutting down",
+      "time": "2026-10-20T13:23:11.191915983Z"
+    },
+    {
+      "sqlite_id": 688,
+      "msg": "log_persistence_started",
+      "time": "2026-10-20T14:58:09.75611295Z"
+    },
+    {
+      "sqlite_id": 1177,
+      "msg": "shutting down",
+      "time": "2026-10-20T15:03:57.41544286Z"
+    },
+    {
+      "sqlite_id": 1183,
+      "msg": "log_persistence_started",
+      "time": "2026-10-20T15:12:12.519540247Z"
+    },
+    {
+      "sqlite_id": 1629,
+      "msg": "shutting down",
+      "time": "2026-10-20T15:16:54.870000232Z"
+    },
+    {
+      "sqlite_id": 1635,
+      "msg": "log_persistence_started",
+      "time": "2026-10-20T17:49:54.088337065Z"
+    },
+    {
+      "sqlite_id": 3367,
+      "code": 1006,
+      "error": "unexpected EOF",
+      "msg": "voice gateway close received",
+      "reconnect": true,
+      "time": "2026-10-20T18:10:27.666003791Z"
+    },
+    {
+      "sqlite_id": 3368,
+      "err": "failed to open voice gateway connection: websocket: close 4006: Session is no longer valid.",
+      "msg": "failed to reopen voice gateway",
+      "time": "2026-10-20T18:10:27.762047902Z"
+    },
+    {
+      "sqlite_id": 4540,
+      "msg": "shutting down",
+      "time": "2026-10-20T18:11:18.397434425Z"
+    },
+    {
+      "sqlite_id": 4556,
+      "msg": "log_persistence_started",
+      "time": "2026-10-20T18:48:18.437094264Z"
+    },
+    {
+      "sqlite_id": 5865,
+      "error": "websocket: close 1006 (abnormal closure): unexpected EOF",
+      "guild_id": "404344088691867649",
+      "msg": "voice_session_lost",
+      "time": "2026-10-20T19:59:12.074256398Z"
+    },
+    {
+      "sqlite_id": 8290,
+      "err": "voice session already opened or closed",
+      "msg": "error opening voice gateway",
+      "time": "2026-10-20T21:16:13.538781363Z"
+    },
+    {
+      "sqlite_id": 8983,
+      "msg": "shutting down",
+      "time": "2026-10-20T22:36:11.152564099Z"
+    },
+    {
+      "sqlite_id": 8989,
+      "msg": "log_persistence_started",
+      "time": "2026-10-21T17:09:00.813649292Z"
+    },
+    {
+      "sqlite_id": 9063,
+      "msg": "shutting down",
+      "time": "2026-10-21T21:25:51.238573419Z"
+    },
+    {
+      "sqlite_id": 9069,
+      "msg": "log_persistence_started",
+      "time": "2026-10-22T00:08:19.820629899Z"
+    },
+    {
+      "sqlite_id": 10136,
+      "cache_known": true,
+      "guild_id": "698256401922785340",
+      "main_ready": false,
+      "msg": "voice_unhealthy",
+      "reason": "gateway_reconnecting",
+      "same_channel": true,
+      "time": "2026-10-22T01:08:55.692794977Z",
+      "voice_ready": false
+    },
+    {
+      "sqlite_id": 10137,
+      "guild_id": "698256401922785340",
+      "msg": "voice_circuit_open",
+      "time": "2026-10-22T01:08:55.692861283Z"
+    },
+    {
+      "sqlite_id": 10141,
+      "cancel_reason": "voice transport unavailable",
+      "category": "canceled",
+      "elapsed_ms": 160225.515,
+      "ffmpeg_exit_code": -1,
+      "guild_id": "698256401922785340",
+      "msg": "audio_source_exit",
+      "position": 10,
+      "sequence": 10,
+      "spotify_id": "5DGKZEzZho3ZZWkYPIiCyC",
+      "time": "2026-10-22T01:08:55.694394793Z",
+      "video_id": "3RJNhuBV_nE",
+      "yt_exit_code": 0
+    },
+    {
+      "sqlite_id": 10144,
+      "cancel_reason": "voice transport unavailable",
+      "category": "voice_transport",
+      "elapsed_ms": 161289,
+      "error": "context canceled",
+      "guild_id": "698256401922785340",
+      "msg": "track_playback_end",
+      "position": 10,
+      "sequence": 10,
+      "time": "2026-10-22T01:08:55.694558245Z",
+      "video_id": "3RJNhuBV_nE"
+    },
+    {
+      "sqlite_id": 10148,
+      "cause": "transport_unavailable",
+      "component": "voice",
+      "guild_id": "698256401922785340",
+      "incident_id": "1792629263190533464/voice/10",
+      "msg": "recovery_started",
+      "time": "2026-10-22T01:08:55.699477222Z"
+    },
+    {
+      "sqlite_id": 10149,
+      "guild_id": "698256401922785340",
+      "msg": "playback_announcement_delivery",
+      "position": 0,
+      "reason": "Discord Voice interrupted. The track and queue are preserved while the Bard reconnects.",
+      "sequence": 0,
+      "spotify_id": "",
+      "success": true,
+      "time": "2026-10-22T01:08:56.32166177Z",
+      "video_id": ""
+    },
+    {
+      "sqlite_id": 10150,
+      "elapsed_ms": 1000,
+      "guild_id": "698256401922785340",
+      "msg": "voice_recovered",
+      "time": "2026-10-22T01:08:56.693393652Z"
+    },
+    {
+      "sqlite_id": 10151,
+      "attempt": 1,
+      "component": "voice",
+      "duration_ms": 1108,
+      "guild_id": "698256401922785340",
+      "incident_id": "1792629263190533464/voice/10",
+      "msg": "recovery_attempted",
+      "time": "2026-10-22T01:08:56.807497331Z"
+    },
+    {
+      "sqlite_id": 10152,
+      "cache_known": true,
+      "guild_id": "698256401922785340",
+      "main_ready": true,
+      "msg": "voice_unhealthy",
+      "reason": "gateway_reconnecting",
+      "same_channel": true,
+      "time": "2026-10-22T01:08:56.951711363Z",
+      "voice_ready": false
+    },
+    {
+      "sqlite_id": 10159,
+      "err": "voice session already opened or closed",
+      "msg": "error opening voice gateway",
+      "time": "2026-10-22T01:08:57.811325016Z"
+    },
+    {
+      "sqlite_id": 10188,
+      "attempt": 1,
+      "error": "context deadline exceeded",
+      "guild_id": "698256401922785340",
+      "msg": "voice_recovery_failed",
+      "time": "2026-10-22T01:09:11.808120584Z"
+    },
+    {
+      "sqlite_id": 10195,
+      "attempt": 2,
+      "component": "voice",
+      "duration_ms": 18262,
+      "guild_id": "698256401922785340",
+      "incident_id": "1792629263190533464/voice/10",
+      "msg": "recovery_attempted",
+      "time": "2026-10-22T01:09:13.962184347Z"
+    },
+    {
+      "sqlite_id": 10199,
+      "elapsed_ms": 17741,
+      "guild_id": "698256401922785340",
+      "msg": "voice_recovered",
+      "time": "2026-10-22T01:09:14.693503682Z"
+    },
+    {
+      "sqlite_id": 10201,
+      "guild_id": "698256401922785340",
+      "msg": "voice_fresh_session_ready",
+      "time": "2026-10-22T01:09:14.899452609Z",
+      "voice_ready": true
+    },
+    {
+      "sqlite_id": 10202,
+      "attempt": 2,
+      "component": "voice",
+      "duration_ms": 19200,
+      "guild_id": "698256401922785340",
+      "incident_id": "1792629263190533464/voice/10",
+      "msg": "recovery_completed",
+      "time": "2026-10-22T01:09:14.89949009Z"
+    },
+    {
+      "sqlite_id": 10225,
+      "guild_id": "698256401922785340",
+      "msg": "next_track_start",
+      "position": 10,
+      "sequence": 11,
+      "spotify_id": "5DGKZEzZho3ZZWkYPIiCyC",
+      "state": "playing",
+      "time": "2026-10-22T01:09:17.853104314Z",
+      "video_id": "3RJNhuBV_nE"
+    },
+    {
+      "sqlite_id": 10226,
+      "elapsed_ms": 1859.92,
+      "guild_id": "698256401922785340",
+      "msg": "first_audio_frame",
+      "position": 10,
+      "sequence": 11,
+      "spotify_id": "5DGKZEzZho3ZZWkYPIiCyC",
+      "time": "2026-10-22T01:09:17.853143038Z",
+      "video_id": "3RJNhuBV_nE"
+    },
+    {
+      "sqlite_id": 10227,
+      "guild_id": "698256401922785340",
+      "msg": "playback_announcement_delivery",
+      "position": 10,
+      "reason": "",
+      "sequence": 11,
+      "spotify_id": "5DGKZEzZho3ZZWkYPIiCyC",
+      "success": true,
+      "time": "2026-10-22T01:09:18.166792382Z",
+      "video_id": "3RJNhuBV_nE"
+    },
+    {
+      "sqlite_id": 10690,
+      "cancel_reason": null,
+      "category": "youtube_auth_challenge",
+      "elapsed_ms": 3050,
+      "error": "youtube_auth_challenge: exit_code=1: exit status 1: dded client config\n[youtube] KLBxvNPBDxE: Downloading player 55de7e60-main\n[youtube] KLBxvNPBDxE: Downloading web embedded player API JSON\nERROR: [youtube] KLBxvNPBDxE: Sign in to confirm your age. Use --cookies-from-browser or --cookies for the authentication. See  [url]  for how to manually pass cookies. Also see  [url]  for tips on effectively exporting YouTube cookies",
+      "guild_id": "698256401922785340",
+      "msg": "track_playback_end",
+      "position": 20,
+      "sequence": 19,
+      "time": "2026-10-22T01:37:28.406661414Z",
+      "video_id": "KLBxvNPBDxE"
+    },
+    {
+      "sqlite_id": 10848,
+      "cancel_reason": null,
+      "category": "source_http_403",
+      "elapsed_ms": 3496,
+      "error": "source_http_403: exit_code=1: exit status 1: [youtube] Extracting URL: [url]\n[youtube] 7qtIwDi90N4: Downloading webpage\n[youtube] 7qtIwDi90N4: Downloading visionos player API JSON\n[youtube] 7qtIwDi90N4: Downloading m3u8 information\n[info] 7qtIwDi90N4: Downloading 1 format(s): 251\n[info] Writing 'BARD_STREAM_RESOLVED %(id)s' to: /dev/stderr\nBARD_STREAM_RESOLVED 7qtIwDi90N4\nERROR: unable to download video data: HTTP Error 403: Forbidden",
+      "guild_id": "698256401922785340",
+      "msg": "track_playback_end",
+      "position": 23,
+      "sequence": 22,
+      "time": "2026-10-22T01:42:48.418993893Z",
+      "video_id": "7qtIwDi90N4"
+    },
+    {
+      "sqlite_id": 11608,
+      "cache_known": true,
+      "guild_id": "698256401922785340",
+      "main_ready": false,
+      "msg": "voice_unhealthy",
+      "reason": "gateway_reconnecting",
+      "same_channel": true,
+      "time": "2026-10-22T02:08:38.692884793Z",
+      "voice_ready": false
+    },
+    {
+      "sqlite_id": 11609,
+      "guild_id": "698256401922785340",
+      "msg": "voice_circuit_open",
+      "time": "2026-10-22T02:08:38.692971308Z"
+    },
+    {
+      "sqlite_id": 11614,
+      "cancel_reason": "voice transport unavailable",
+      "category": "canceled",
+      "elapsed_ms": 204303.564,
+      "ffmpeg_exit_code": -1,
+      "guild_id": "698256401922785340",
+      "msg": "audio_source_exit",
+      "position": 31,
+      "sequence": 30,
+      "spotify_id": "7KIbDUwumrpG5f30kEYW1v",
+      "time": "2026-10-22T02:08:38.694924317Z",
+      "video_id": "ZaI2IlHwmgQ",
+      "yt_exit_code": -1
+    },
+    {
+      "sqlite_id": 11617,
+      "cancel_reason": "voice transport unavailable",
+      "category": "voice_transport",
+      "elapsed_ms": 205915,
+      "error": "context canceled",
+      "guild_id": "698256401922785340",
+      "msg": "track_playback_end",
+      "position": 31,
+      "sequence": 30,
+      "time": "2026-10-22T02:08:38.695107678Z",
+      "video_id": "ZaI2IlHwmgQ"
+    },
+    {
+      "sqlite_id": 11621,
+      "cause": "transport_unavailable",
+      "component": "voice",
+      "guild_id": "698256401922785340",
+      "incident_id": "1792629263190533464/voice/30",
+      "msg": "recovery_started",
+      "time": "2026-10-22T02:08:38.699431575Z"
+    },
+    {
+      "sqlite_id": 11622,
+      "guild_id": "698256401922785340",
+      "msg": "playback_announcement_delivery",
+      "position": 0,
+      "reason": "Discord Voice interrupted. The track and queue are preserved while the Bard reconnects.",
+      "sequence": 0,
+      "spotify_id": "",
+      "success": true,
+      "time": "2026-10-22T02:08:39.047393222Z",
+      "video_id": ""
+    },
+    {
+      "sqlite_id": 11623,
+      "elapsed_ms": 1000,
+      "guild_id": "698256401922785340",
+      "msg": "voice_recovered",
+      "time": "2026-10-22T02:08:39.693351699Z"
+    },
+    {
+      "sqlite_id": 11624,
+      "attempt": 1,
+      "component": "voice",
+      "duration_ms": 1225,
+      "guild_id": "698256401922785340",
+      "incident_id": "1792629263190533464/voice/30",
+      "msg": "recovery_attempted",
+      "time": "2026-10-22T02:08:39.924901166Z"
+    },
+    {
+      "sqlite_id": 11625,
+      "cache_known": true,
+      "guild_id": "698256401922785340",
+      "main_ready": true,
+      "msg": "voice_unhealthy",
+      "reason": "gateway_reconnecting",
+      "same_channel": true,
+      "time": "2026-10-22T02:08:40.08683375Z",
+      "voice_ready": false
+    },
+    {
+      "sqlite_id": 11632,
+      "err": "voice session already opened or closed",
+      "msg": "error opening voice gateway",
+      "time": "2026-10-22T02:08:40.701210921Z"
+    },
+    {
+      "sqlite_id": 11661,
+      "attempt": 1,
+      "error": "context deadline exceeded",
+      "guild_id": "698256401922785340",
+      "msg": "voice_recovery_failed",
+      "time": "2026-10-22T02:08:54.926090339Z"
+    },
+    {
+      "sqlite_id": 11668,
+      "attempt": 2,
+      "component": "voice",
+      "duration_ms": 18414,
+      "guild_id": "698256401922785340",
+      "incident_id": "1792629263190533464/voice/30",
+      "msg": "recovery_attempted",
+      "time": "2026-10-22T02:08:57.113507373Z"
+    },
+    {
+      "sqlite_id": 11673,
+      "guild_id": "698256401922785340",
+      "msg": "voice_fresh_session_ready",
+      "time": "2026-10-22T02:08:57.574760397Z",
+      "voice_ready": true
+    },
+    {
+      "sqlite_id": 11674,
+      "attempt": 2,
+      "component": "voice",
+      "duration_ms": 18875,
+      "guild_id": "698256401922785340",
+      "incident_id": "1792629263190533464/voice/30",
+      "msg": "recovery_completed",
+      "time": "2026-10-22T02:08:57.574808439Z"
+    },
+    {
+      "sqlite_id": 11680,
+      "elapsed_ms": 17606,
+      "guild_id": "698256401922785340",
+      "msg": "voice_recovered",
+      "time": "2026-10-22T02:08:57.693395552Z"
+    },
+    {
+      "sqlite_id": 11698,
+      "guild_id": "698256401922785340",
+      "msg": "next_track_start",
+      "position": 31,
+      "sequence": 31,
+      "spotify_id": "7KIbDUwumrpG5f30kEYW1v",
+      "state": "playing",
+      "time": "2026-10-22T02:09:00.695189965Z",
+      "video_id": "ZaI2IlHwmgQ"
+    },
+    {
+      "sqlite_id": 11699,
+      "elapsed_ms": 1913.183,
+      "guild_id": "698256401922785340",
+      "msg": "first_audio_frame",
+      "position": 31,
+      "sequence": 31,
+      "spotify_id": "7KIbDUwumrpG5f30kEYW1v",
+      "time": "2026-10-22T02:09:00.695233599Z",
+      "video_id": "ZaI2IlHwmgQ"
+    },
+    {
+      "sqlite_id": 11700,
+      "guild_id": "698256401922785340",
+      "msg": "playback_announcement_delivery",
+      "position": 31,
+      "reason": "",
+      "sequence": 31,
+      "spotify_id": "7KIbDUwumrpG5f30kEYW1v",
+      "success": true,
+      "time": "2026-10-22T02:09:01.097335453Z",
+      "video_id": "ZaI2IlHwmgQ"
+    },
+    {
+      "sqlite_id": 11722,
+      "msg": "shutting down",
+      "time": "2026-10-23T02:54:07.499574101Z"
+    },
+    {
+      "sqlite_id": 11728,
+      "msg": "log_persistence_started",
+      "time": "2026-10-23T10:33:43.664146849Z"
+    }
+  ]
+}

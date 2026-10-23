@@ -88,6 +88,7 @@ func (p *GuildPlayer) Replay() error {
 		return errors.New("The queue is full.")
 	}
 	t := copyTrack(*p.current)
+	t.ResumeOffset = 0
 	p.cancelTrackLocked("replay")
 	p.queue = append([]queueEntry{{Track: t}}, p.queue...)
 	p.persistLocked()

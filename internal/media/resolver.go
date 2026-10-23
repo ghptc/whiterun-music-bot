@@ -15,6 +15,8 @@ import (
 var ErrNoSong = errors.New("The Bard could find no song worthy of playing.")
 
 type Track struct {
+	// ResumeOffset is confirmed outbound audio, never elapsed wall time.
+	ResumeOffset time.Duration `json:",omitempty"`
 	// MetadataPending reserves a validated Spotify occurrence before enrichment.
 	MetadataPending     bool `json:",omitempty"`
 	ForcedYouTube       bool `json:",omitempty"`

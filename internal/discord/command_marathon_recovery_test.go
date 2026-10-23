@@ -60,7 +60,7 @@ func marathonF(t *testing.T) *marathonSession {
 	m.playSong(3, w)
 	m.command("history", nil, 3, w)
 	ledger, err := db.PlaybackHistory(context.Background(), "1", 10)
-	if err != nil || len(ledger) != 2 || ledger[0].Title != "song001" || ledger[1].Title != "song001" {
+	if err != nil || len(ledger) != 1 || ledger[0].Title != "song001" {
 		t.Fatal("restart lost append-only ledger", ledger, err)
 	}
 	w.current = "song002"

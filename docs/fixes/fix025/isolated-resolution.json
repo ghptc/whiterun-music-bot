@@ -1,0 +1,66 @@
+{
+  "Playlist": "35m4wmHSlcS2RNsafX4dEg",
+  "Positions": 123,
+  "Results": [
+    {
+      "SpotifyID": "5PX4uS1LqlWEPL69phPVQQ",
+      "Title": "Pursuit Of Happiness - Extended Steve Aoki Remix",
+      "VideoID": "9Go1GQZcK1U",
+      "Error": "",
+      "Position": 11,
+      "Frames": 50,
+      "ElapsedMS": 7698,
+      "Saved": true,
+      "Decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "SpotifyID": "1xsoW8gAQToUbiokm6Hn5Q",
+      "Title": "Heads Will Roll - A-Trak Remix",
+      "VideoID": "TDyG4YNUXcI",
+      "Error": "",
+      "Position": 17,
+      "Frames": 50,
+      "ElapsedMS": 6696,
+      "Saved": true,
+      "Decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "release_and_identity",
+        "Score": 835
+      }
+    },
+    {
+      "SpotifyID": "3USOTQdPtZlgVurwaqsdI5",
+      "Title": "Fuck Her Gently",
+      "VideoID": "KLBxvNPBDxE",
+      "Error": "youtube_auth_challenge: exit_code=1: exit status 1: dded client config\n[youtube] KLBxvNPBDxE: Downloading player cbcfbf2f-main\n[youtube] KLBxvNPBDxE: Downloading web embedded player API JSON\nERROR: [youtube] KLBxvNPBDxE: Sign in to confirm your age. Use --cookies-from-browser or --cookies for the authentication. See  [url]  for how to manually pass cookies. Also see  [url]  for tips on effectively exporting YouTube cookies",
+      "Position": 20,
+      "Frames": 0,
+      "ElapsedMS": 6216,
+      "Saved": false,
+      "Decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "SpotifyID": "0ffz9KBdCb7oJkSK0W7bbf",
+      "Title": "Beelzeboss (The Final Showdown)",
+      "VideoID": "7qtIwDi90N4",
+      "Error": "",
+      "Position": 23,
+      "Frames": 50,
+      "ElapsedMS": 6735,
+      "Saved": true,
+      "Decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      }
+    }
+  ]
+}

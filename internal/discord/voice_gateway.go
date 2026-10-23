@@ -96,7 +96,7 @@ func (g *incidentGateway) Open(ctx context.Context, state voice.State) error {
 		unexpected := !g.closed
 		g.mu.Unlock()
 		if unexpected {
-			g.log.Warn("voice_session_lost", "guild_id", state.GuildID, "error", err, "action", "fresh session required")
+			g.log.Warn("voice_gateway_closed", "guild_id", state.GuildID, "error", err, "action", "fresh session required")
 			g.Close()
 			// Conn's handler may synchronously close the gateway again.
 			if g.closeHandler != nil {
@@ -196,7 +196,7 @@ func (g *incidentGateway) heartbeat(ctx context.Context, conn *websocket.Conn, i
 		g.awaitingACK = true
 		data := voice.GatewayMessageDataHeartbeat{T: g.nonce, SeqAck: g.seq}
 		g.mu.Unlock()
-		if err := g.Send(ctx, voice.OpcodeHeartbeat, data); err != nil {
+		if err := g.send(ctx, voice.OpcodeHeartbeat, data); err != nil {
 			_ = conn.Close()
 			return
 		}

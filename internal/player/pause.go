@@ -67,7 +67,11 @@ func waitPlayback(ctx context.Context) (bool, error) {
 func (p *GuildPlayer) SetPaused(paused bool) (bool, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if !paused && p.voiceBlocked && len(p.queue) > 0 {
+	if p.voiceBlocked && len(p.queue) > 0 {
+		p.recoveryPaused = paused
+		if paused {
+			return true, nil
+		}
 		if p.voiceAttempts >= 5 {
 			p.voiceAttempts = 0
 		}

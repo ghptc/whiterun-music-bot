@@ -27,6 +27,7 @@ func (p *GuildPlayer) Previous() error {
 		return errors.New("The queue is full.")
 	}
 	previous := copyTrack(p.history[n-1])
+	previous.ResumeOffset = 0
 	prefix := []queueEntry{{Track: previous}}
 	if p.current != nil {
 		prefix = append(prefix, queueEntry{Track: copyTrack(*p.current)})

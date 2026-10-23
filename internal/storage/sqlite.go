@@ -142,6 +142,8 @@ func (s *DB) SaveGuild(ctx context.Context, id string, state player.DurableState
 		tracks = append(tracks, *state.Current)
 	}
 	for _, t := range tracks {
+		// Progress belongs to the guild checkpoint, not catalog identity.
+		t.ResumeOffset = 0
 		b, err := json.Marshal(t)
 		if err != nil {
 			return err

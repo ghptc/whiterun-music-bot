@@ -272,6 +272,14 @@ func rankSpotifyPolicy(t Track, c Candidate, provisional bool, policy MatchPolic
 				}
 			}
 		}
+		// Topic metadata commonly omits the remixer from Artists while naming
+		// the exact remix in Track. Accept that credit only when the requested
+		// and actual structured recording titles explicitly name that remixer.
+		if evidence == 0 && versionPresent(t.Title, "remix") && c.Track != "" &&
+			coverage(artist, t.Title) == 1 && coverage(artist, c.Track) == 1 &&
+			coverage(t.Title, c.Track) == 1 && coverage(c.Track, t.Title) == 1 {
+			evidence = 1
+		}
 		b.Credits += evidence
 	}
 	b.Credits /= float64(len(credited))
