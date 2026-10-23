@@ -191,8 +191,12 @@ func (p *GuildPlayer) Stop() {
 // Leave detaches first, so in-flight searches cannot resurrect playback.
 // Discord orchestration serializes Leave and Attach for each guild.
 func (p *GuildPlayer) Leave(ctx context.Context) {
+	fields := append(p.VoiceLifecycleFields(), "component", "player", "origin", VoiceCloseOrigin(ctx), "reason", "detach_requested", "previous_state", "attached", "next_state", "detached")
 	p.mu.Lock()
 	v := p.voice
+	if v != nil {
+		p.log.Info("voice_disconnect_requested", fields...)
+	}
 	p.voice = nil
 	p.cancelJobsLocked()
 	p.cancelVoiceRecoveryLocked()
@@ -226,6 +230,9 @@ func (p *GuildPlayer) Close(ctx context.Context) {
 	p.store = nil
 	p.mu.Unlock()
 	p.cancel()
+	if VoiceCloseOrigin(ctx) == "unattributed_close" {
+		ctx = VoiceCloseContext(ctx, "player_shutdown")
+	}
 	p.Leave(ctx)
 	<-p.done
 	p.jobWorkers.Wait()

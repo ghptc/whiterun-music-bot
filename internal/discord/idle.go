@@ -3,6 +3,7 @@ package discord
 import (
 	"context"
 	"time"
+	"whiterun/internal/player"
 
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
@@ -58,7 +59,7 @@ func (b *Bot) checkEmpty(id snowflake.ID, g *guild, now time.Time) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	g.leave(ctx, b.ctx)
+	g.leave(player.VoiceCloseContext(ctx, "empty_channel_grace_expired"), b.ctx)
 	b.log.Info("empty voice channel; cleared playback and disconnected", "guild_id", id, "stage", "voice_idle")
 }
 
@@ -122,12 +123,13 @@ func (b *Bot) checkVoiceHealth(id snowflake.ID, g *guild, now time.Time, mainRea
 		g.unhealthySince = now
 		b.log.Warn("voice_unhealthy", "guild_id", id, "main_ready", mainReady, "voice_ready", voiceReady, "cache_known", known, "same_channel", sameChannel, "reason", reason)
 	}
-	// The main gateway reconnects independently (observed hourly). Its cache
+	// The main gateway reconnects independently. Its cache
 	// is not evidence that the Voice websocket or UDP transport failed.
 	if terminal || !voiceReady {
 		if terminal || now.Sub(g.unhealthySince) >= 5*time.Second {
 			if !g.player.State().VoiceSuspended {
-				b.log.Warn("watchdog_recovery_triggered", "guild_id", id, "component", "voice", "reason", reason, "duration_ms", now.Sub(g.unhealthySince).Milliseconds())
+				fields := append(g.player.VoiceLifecycleFields(), "channel_id", g.channel, "component", "watchdog", "origin", "checkVoiceHealth", "reason", reason, "previous_state", "active", "next_state", "suspended", "main_ready", mainReady, "voice_ready", voiceReady, "cache_known", known, "same_channel", sameChannel, "duration_ms", now.Sub(g.unhealthySince).Milliseconds())
+				b.log.Warn("watchdog_voice_action", fields...)
 			}
 			g.player.SuspendVoice()
 		}

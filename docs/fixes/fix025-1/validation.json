@@ -1,0 +1,91 @@
+{
+  "recorded_at_utc": "2026-10-23T23:56:59.554686+00:00",
+  "deployment_performed": false,
+  "real_discord_session_tested": false,
+  "working_tree_includes_preexisting_local_changes": true,
+  "checks": [
+    {
+      "command": "go test ./...",
+      "exit_code": 0,
+      "output_sha256": "8ea284f6f9513f0ee3b29f56e6736035f4d975c784e1003dfbdd7bbdba382c12",
+      "output": [
+        "ok  \twhiterun/cmd/bot\t(cached)",
+        "?   \twhiterun/cmd/profile\t[no test files]",
+        "ok  \twhiterun/cmd/qa-memory\t(cached)",
+        "?   \twhiterun/cmd/qa-soak\t[no test files]",
+        "ok  \twhiterun/internal/discord\t10.419s",
+        "ok  \twhiterun/internal/logstore\t(cached)",
+        "ok  \twhiterun/internal/media\t(cached)",
+        "ok  \twhiterun/internal/perfgate\t(cached)",
+        "ok  \twhiterun/internal/player\t(cached)",
+        "ok  \twhiterun/internal/qasoak\t(cached)",
+        "ok  \twhiterun/internal/storage\t(cached)",
+        "?   \twhiterun/scripts/fix025-resolve\t[no test files]",
+        "?   \twhiterun/scripts/probe-spotify-recovery\t[no test files]"
+      ]
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output": []
+    },
+    {
+      "command": "go test -race ./internal/discord ./internal/player",
+      "exit_code": 0,
+      "output_sha256": "bcd1398a660b04e18e8b19fc89e43ebef16c24e2cfa2826128460d8d9022efbc",
+      "output": [
+        "ok  \twhiterun/internal/discord\t37.626s",
+        "ok  \twhiterun/internal/player\t(cached)"
+      ]
+    },
+    {
+      "command": "go test ./internal/discord ./internal/player -run TestFIX0251 -count=1 -v",
+      "exit_code": 0,
+      "output_sha256": "94eb7c348a71d813dbbbc79e4445ed695cb2f9cbb10685941def911e51ff8af9",
+      "output": [
+        "=== RUN   TestFIX0251ThreeHoursMainGatewayOutagesPreserveVoice",
+        "--- PASS: TestFIX0251ThreeHoursMainGatewayOutagesPreserveVoice (0.00s)",
+        "=== RUN   TestFIX0251VoiceOutageGraceAndRecoveryDoesNotLeave",
+        "--- PASS: TestFIX0251VoiceOutageGraceAndRecoveryDoesNotLeave (0.00s)",
+        "=== RUN   TestFIX0251CloseLogsOriginExactlyOnce",
+        "--- PASS: TestFIX0251CloseLogsOriginExactlyOnce (0.00s)",
+        "=== RUN   TestFIX0251LocalLeaveEchoIsNotReportedAsRemoteDisconnect",
+        "--- PASS: TestFIX0251LocalLeaveEchoIsNotReportedAsRemoteDisconnect (0.00s)",
+        "PASS",
+        "ok  \twhiterun/internal/discord\t0.002s",
+        "=== RUN   TestFIX0251ThreeHoursWithoutVoluntaryLeave",
+        "--- PASS: TestFIX0251ThreeHoursWithoutVoluntaryLeave (0.00s)",
+        "=== RUN   TestFIX0251CloseOriginPreservesCancellation",
+        "--- PASS: TestFIX0251CloseOriginPreservesCancellation (0.00s)",
+        "=== RUN   TestFIX0251ResolverFailurePreservesActiveVoice",
+        "=== RUN   TestFIX0251ResolverFailurePreservesActiveVoice/spotify_unavailable",
+        "=== RUN   TestFIX0251ResolverFailurePreservesActiveVoice/resolution_timeout",
+        "--- PASS: TestFIX0251ResolverFailurePreservesActiveVoice (0.00s)",
+        "    --- PASS: TestFIX0251ResolverFailurePreservesActiveVoice/spotify_unavailable (0.00s)",
+        "    --- PASS: TestFIX0251ResolverFailurePreservesActiveVoice/resolution_timeout (0.00s)",
+        "=== RUN   TestFIX0251EOFRacesVoiceWatchdogWithoutDoubleAdvance",
+        "--- PASS: TestFIX0251EOFRacesVoiceWatchdogWithoutDoubleAdvance (0.00s)",
+        "PASS",
+        "ok  \twhiterun/internal/player\t0.002s"
+      ]
+    },
+    {
+      "command": "docker build -t whiterun-music-bot:fix025-1-validation .",
+      "exit_code": 0,
+      "output_sha256": "76897bc54d14e5de959bf8059a89a51b730c6391c1ae9ecec7cae1cd2c232f08",
+      "output_tail": [
+        "#25 exporting to image",
+        "#25 exporting layers",
+        "#25 exporting layers 0.2s done",
+        "#25 exporting manifest sha256:78740b2909d018535467255b9176f4c4b53ea5faf35853f6f1159ff629d6110e done",
+        "#25 exporting config sha256:88647cf506e130ec09013853b3e09451710f3256eb17fb0eef1db021ba06c2d9 done",
+        "#25 exporting attestation manifest sha256:82edd3062f6d6cbfcfe60be0701b68734a92b8293ba171bfc4204c7b8ca6ad24 done",
+        "#25 exporting manifest list sha256:03211d794f53313119f488215e91371cc85d7b735eb6e4ff353262cc9c2884c3 done",
+        "#25 naming to docker.io/library/whiterun-music-bot:fix025-1-validation done",
+        "#25 unpacking to docker.io/library/whiterun-music-bot:fix025-1-validation 0.1s done",
+        "#25 DONE 0.3s"
+      ]
+    }
+  ]
+}

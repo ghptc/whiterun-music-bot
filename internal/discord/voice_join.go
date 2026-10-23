@@ -11,7 +11,15 @@ func (c *voiceConn) Open(ctx context.Context, channel snowflake.ID, mute, deaf b
 	c.opening, c.joined, c.joinChannel = true, false, channel
 	c.joinMu.Unlock()
 	defer func() { c.joinMu.Lock(); c.opening = false; c.joinMu.Unlock() }()
-	return c.Conn.Open(ctx, channel, mute, deaf)
+	err := c.Conn.Open(ctx, channel, mute, deaf)
+	if c.log != nil {
+		next, reason := "ready", "open_completed"
+		if err != nil {
+			next, reason = "unready", "open_failed"
+		}
+		c.log.Info("voice_lifecycle_state_changed", append(c.voiceFields(), "component", "voice_conn", "origin", "Open", "reason", reason, "previous_state", "opening", "next_state", next)...)
+	}
+	return err
 }
 
 func (c *voiceConn) HandleVoiceStateUpdate(update gateway.EventVoiceStateUpdate) {
@@ -24,6 +32,7 @@ func (c *voiceConn) HandleVoiceStateUpdate(update gateway.EventVoiceStateUpdate)
 	// session. Ignoring it does not authorize audio: Open still needs the real
 	// join, UDP discovery and encryption readiness, or times out.
 	staleLeave := c.opening && !c.joined && update.ChannelID == nil
+	localClose := c.closing
 	if update.ChannelID != nil && *update.ChannelID == c.joinChannel {
 		c.joined = true
 	}
@@ -35,6 +44,13 @@ func (c *voiceConn) HandleVoiceStateUpdate(update gateway.EventVoiceStateUpdate)
 		return
 	}
 	// After a confirmed join, removal must invalidate the session immediately.
+	if update.ChannelID == nil && c.log != nil {
+		event, reason, previous := "voice_disconnect_remote", "membership_removed_actor_unknown", "joined"
+		if localClose {
+			event, reason, previous = "voice_lifecycle_state_changed", "local_close_echo", "closing"
+		}
+		c.log.Warn(event, append(c.voiceFields(), "component", "voice_conn", "origin", "gateway_voice_state_update", "reason", reason, "previous_state", previous, "next_state", "removed")...)
+	}
 	if update.ChannelID == nil && c.dave != nil {
 		_ = c.dave.Close()
 	}
@@ -53,4 +69,16 @@ func (c *voiceConn) gatewayLost() {
 	if c.log != nil {
 		c.log.Warn("voice_session_state_changed", "state", "transport_invalid", "reason", "gateway_closed", "guild_membership", "preserved_until_recovery_or_leave")
 	}
+}
+
+// Snapshot callback is copied under the join mutex and invoked without it.
+func (c *voiceConn) voiceFields() []any {
+	c.joinMu.Lock()
+	snapshot, channel := c.lifecycleFields, c.joinChannel
+	c.joinMu.Unlock()
+	fields := []any{"incident_id", c.correlationID, "guild_id", c.guildID, "channel_id", channel}
+	if snapshot != nil {
+		fields = append(fields, snapshot()...)
+	}
+	return fields
 }

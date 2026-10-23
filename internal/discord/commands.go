@@ -185,7 +185,7 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 			cancel()
 			if err != nil {
 				cleanup, c := context.WithTimeout(context.Background(), 3*time.Second)
-				conn.Close(cleanup)
+				conn.Close(player.VoiceCloseContext(cleanup, "command_join_or_attach_failed"))
 				c()
 				g.mu.Unlock()
 				b.log.Warn("voice join failed", "guild_id", id, "error", err)
@@ -194,7 +194,7 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 			}
 			if err := g.player.Attach(b.playbackTransport(id, g, conn)); err != nil {
 				cleanup, c := context.WithTimeout(context.Background(), 3*time.Second)
-				conn.Close(cleanup)
+				conn.Close(player.VoiceCloseContext(cleanup, "command_join_or_attach_failed"))
 				c()
 				g.mu.Unlock()
 				reply(err.Error())
@@ -402,7 +402,7 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 		reply("Playback stopped. The queue is clear.")
 	case "leave":
 		ctx, cancel := context.WithTimeout(b.ctx, 5*time.Second)
-		g.leave(ctx, b.ctx)
+		g.leave(player.VoiceCloseContext(ctx, "command_leave"), b.ctx)
 		cancel()
 		g.mu.Unlock()
 		reply("The Bard takes his leave.")

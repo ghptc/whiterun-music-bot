@@ -22,6 +22,11 @@ func (v recoveringTransport) Recover(ctx context.Context) (player.Voice, error) 
 }
 
 func (b *Bot) playbackTransport(id snowflake.ID, g *guild, conn voice.Conn) player.Voice {
+	if c, ok := conn.(*voiceConn); ok {
+		c.joinMu.Lock()
+		c.lifecycleFields = g.player.VoiceLifecycleFields
+		c.joinMu.Unlock()
+	}
 	brokenUDP := new(atomic.Bool)
 	return recoveringTransport{transport: transport{conn: conn, brokenUDP: brokenUDP}, recover: func(ctx context.Context) (player.Voice, error) {
 		// Never wait for orchestration while a leave/shutdown is waiting for the
@@ -71,7 +76,7 @@ func (b *Bot) playbackTransport(id snowflake.ID, g *guild, conn voice.Conn) play
 		if g.conn != nil {
 			b.log.Warn("voice_session_state_changed", "guild_id", id, "state", "recreating", "udp_failed", brokenUDP.Load(), "reason", "transport_not_reusable")
 			cleanup, cancel := context.WithTimeout(ctx, 3*time.Second)
-			g.conn.Close(cleanup)
+			g.conn.Close(player.VoiceCloseContext(cleanup, "recovery_transport_not_reusable"))
 			cancel()
 		}
 		// Close removes the old manager entry. CreateConn now constructs a new
@@ -85,7 +90,7 @@ func (b *Bot) playbackTransport(id snowflake.ID, g *guild, conn voice.Conn) play
 		}
 		if err != nil || ctx.Err() != nil {
 			cleanup, stop := context.WithTimeout(context.Background(), 3*time.Second)
-			candidate.Close(cleanup)
+			candidate.Close(player.VoiceCloseContext(cleanup, "recovery_candidate_failed"))
 			stop()
 		}
 		if lockErr := lockVoice(ctx, g); lockErr != nil {

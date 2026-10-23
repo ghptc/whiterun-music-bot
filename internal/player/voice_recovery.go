@@ -88,7 +88,7 @@ func (p *GuildPlayer) recoverVoice() {
 	fn := p.onSkip
 	p.mu.Unlock()
 	defer cancel()
-	p.log.Warn("recovery_started", "incident_id", incident, "component", "voice", "cause", "transport_unavailable")
+	p.log.Warn("voice_recovery_started", append(p.VoiceLifecycleFields(), "incident_id", incident, "component", "voice", "origin", "scheduler", "reason", "transport_unavailable", "previous_state", "suspended", "next_state", "recovering")...)
 	if notice && fn != nil {
 		fn(PlaybackEvent{IncidentID: incident, FailureStage: "voice", SkippedReason: "Discord Voice interrupted. The Bard is recovering audio; the queue and confirmed playback progress are preserved.", State: Suspended})
 	}
@@ -130,12 +130,12 @@ func (p *GuildPlayer) recoverVoice() {
 			p.voiceBlocked = false
 			p.voiceRecoveryCancel = nil
 			p.signal("voice_recovered")
-			p.log.Info("recovery_completed", "incident_id", incident, "component", "voice", "guild_id", p.guildID, "attempt", attempt+1, "duration_ms", time.Since(started).Milliseconds())
+			p.log.Info("voice_recovery_completed", "incident_id", incident, "component", "voice", "origin", "scheduler", "reason", "transport_confirmed", "previous_state", "recovering", "next_state", "attached", "confirmed_ms", p.confirmedOffset.Milliseconds(), "guild_id", p.guildID, "attempt", attempt+1, "duration_ms", time.Since(started).Milliseconds())
 			p.mu.Unlock()
 			// The actual first frame supplies the single relevant recovery update.
 			return
 		}
-		p.log.Warn("voice_recovery_failed", "guild_id", p.guildID, "attempt", attempt+1, "error", err)
+		p.log.Warn("voice_recovery_failed", "incident_id", incident, "component", "voice", "origin", "scheduler", "reason", "attempt_failed", "previous_state", "recovering", "next_state", "suspended", "guild_id", p.guildID, "attempt", attempt+1, "error", err)
 		exhausted := p.voiceAttempts >= 5
 		p.mu.Unlock()
 		if exhausted {

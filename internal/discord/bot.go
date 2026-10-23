@@ -71,7 +71,9 @@ func New(ctx context.Context, token string, appID snowflake.ID, log *slog.Logger
 				// disgo's default close callback sends a guild leave immediately.
 				// The sole player recovery owner decides when to leave/rejoin;
 				// gateway loss only closes the compromised local UDP transport.
-				return incidentGatewayFactory(log)(session, event, func(voice.Gateway, error, bool) { c.gatewayLost() }, gatewayOpts...)
+				gw := incidentGatewayFactory(log)(session, event, func(voice.Gateway, error, bool) { c.gatewayLost() }, gatewayOpts...).(*incidentGateway)
+				gw.lifecycleFields = func() []any { return c.voiceFields() }
+				return gw
 			}))
 			c = newVoiceConn(guildID, userID, update, remove, opts...).(*voiceConn)
 			c.log = log.With("guild_id", guildID)
@@ -224,9 +226,9 @@ func (b *Bot) Close(ctx context.Context) {
 			g.mu.Lock()
 			defer g.mu.Unlock()
 			g.emptySince = time.Time{}
-			g.player.Close(ctx)
+			g.player.Close(player.VoiceCloseContext(ctx, "bot_shutdown"))
 			if g.conn != nil {
-				g.conn.Close(ctx)
+				g.conn.Close(player.VoiceCloseContext(ctx, "bot_shutdown"))
 			}
 			g.conn = nil
 			g.channel = 0
@@ -288,17 +290,19 @@ type transport struct {
 // Retain the DAVE session to hold audio during encryption handshakes.
 type voiceConn struct {
 	voice.Conn
-	dave            *session.Session
-	closeOnce       sync.Once
-	joinMu          sync.Mutex
-	opening, joined bool
-	joinChannel     snowflake.ID
-	log             *slog.Logger
-	guildID, userID snowflake.ID
+	dave                     *session.Session
+	closeOnce                sync.Once
+	joinMu                   sync.Mutex
+	opening, joined, closing bool
+	joinChannel              snowflake.ID
+	log                      *slog.Logger
+	lifecycleFields          func() []any
+	correlationID            string
+	guildID, userID          snowflake.ID
 }
 
 func newVoiceConn(guildID, userID snowflake.ID, update voice.StateUpdateFunc, remove func(), opts ...voice.ConnConfigOpt) voice.Conn {
-	c := &voiceConn{guildID: guildID, userID: userID}
+	c := &voiceConn{guildID: guildID, userID: userID, correlationID: fmt.Sprintf("voice/%s/%d", guildID, time.Now().UnixNano())}
 	opts = append(opts, voice.WithConnDaveSessionCreateFunc(func(log *slog.Logger, id godave.UserID, callbacks godave.Callbacks) godave.Session {
 		c.dave = session.New(id, callbacks, session.WithLogger(log))
 		return c.dave
@@ -308,6 +312,14 @@ func newVoiceConn(guildID, userID snowflake.ID, update voice.StateUpdateFunc, re
 }
 func (c *voiceConn) Close(ctx context.Context) {
 	c.closeOnce.Do(func() {
+		c.joinMu.Lock()
+		c.closing = true
+		channel := c.joinChannel
+		c.joinMu.Unlock()
+		if c.log != nil {
+			fields := append(c.voiceFields(), "component", "voice_conn", "origin", player.VoiceCloseOrigin(ctx), "reason", "connection_close", "channel_id", channel, "previous_state", fmt.Sprint(c.Gateway().Status()), "next_state", "closed")
+			c.log.Info("voice_disconnect_initiated", fields...)
+		}
 		c.Conn.Close(ctx)
 		if c.dave != nil {
 			_ = c.dave.Close()
