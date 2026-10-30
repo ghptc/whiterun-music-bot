@@ -104,6 +104,14 @@ func TestVoiceIncidentAnnouncementHasNoTrackFailureLabel(t *testing.T) {
 	}
 }
 
+func TestProviderIncidentAnnouncementHasNoTrackFailureLabel(t *testing.T) {
+	event := player.PlaybackEvent{FailureStage: "provider", SkippedReason: "YouTube unavailable. Queue preserved.", State: player.Suspended}
+	message := playbackMessage(event)
+	if message.Content != event.SkippedReason || len(message.Embeds) != 0 {
+		t.Fatal("provider incident presented as track failure", message)
+	}
+}
+
 type readyVoiceGateway struct {
 	voice.Gateway
 	status voice.Status

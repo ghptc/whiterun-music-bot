@@ -52,11 +52,11 @@ esac
 		})
 	}
 }
-func TestUnavailableMappingExtractionInvalidatesLocator(t *testing.T) {
+func TestUnavailableExtractorPreservesMapping(t *testing.T) {
 	store := &brokenMappings{cached: Candidate{ID: "abcdefghijk", CheckedAt: time.Now().Add(-time.Hour)}}
 	original := Track{Title: "Song", Artist: "Artist", Duration: 210 * time.Second}
 	_, err := (Resolver{Binary: "/nonexistent/cr002", Mappings: store, Match: &original}).Resolve(context.Background(), "Artist Song")
-	if err == nil || !store.deleted {
+	if ExtractionCategory(err) != "youtube_extractor_failure" || store.deleted {
 		t.Fatal(err, store.deleted)
 	}
 }

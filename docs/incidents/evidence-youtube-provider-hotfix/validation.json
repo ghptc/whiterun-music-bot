@@ -1,0 +1,13 @@
+{
+  "recorded_at": "2026-10-30T05:23:09.817090+00:00",
+  "go_test_all_count_1": 0,
+  "go_vet_all": 0,
+  "race_media_player_discord_count_1": 0,
+  "targeted_provider_extraction_mapping_marathon": 0,
+  "docker_build": 0,
+  "local_image": "sha256:072bac8f6acce85f520668e64c33e7396a5df2d63ae320a5798a9e5b32c00b5f",
+  "image_tag": "bard-provider-hotfix:local",
+  "deployed": false,
+  "production_audio_verified": false,
+  "includes_preexisting_working_tree_changes": true
+}

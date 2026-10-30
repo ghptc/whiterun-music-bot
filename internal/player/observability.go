@@ -74,6 +74,9 @@ func (p *GuildPlayer) mutationLocked(action string, fields ...any) {
 	p.diagnosticLocked(slog.LevelInfo, "queue_mutation", append([]any{"action", action, "queue_size", len(p.queue)}, fields...)...)
 }
 func (p *GuildPlayer) schedulerReasonLocked() (string, string) {
+	return p.schedulerReasonAllowProviderLocked(false)
+}
+func (p *GuildPlayer) schedulerReasonAllowProviderLocked(probe bool) (string, string) {
 	switch {
 	case p.ctx.Err() != nil:
 		return "canceled", "none"
@@ -81,7 +84,7 @@ func (p *GuildPlayer) schedulerReasonLocked() (string, string) {
 		return "voice_detached", "voice_attach"
 	case p.voiceBlocked:
 		return "voice_suspended", "voice_recovery"
-	case p.providerBlocked:
+	case p.providerBlocked && !probe:
 		return "provider_blocked", "provider_recovery"
 	case p.halted:
 		return "halted", "resume"

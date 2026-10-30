@@ -79,6 +79,13 @@ type GuildPlayer struct {
 	voiceNotice         bool
 	voiceEpoch          uint64
 	voiceRecoveryCancel context.CancelFunc
+	playbackProviderID  string
+	providerProbe       bool
+	providerRetries     int
+	providerRetryAt     time.Time
+	providerIncident    string
+	providerGeneration  uint64
+	providerNotice      bool
 	providerBlocked     bool
 	providerReason      string
 	providerChanged     chan struct{}
@@ -257,7 +264,21 @@ func (p *GuildPlayer) run() {
 			p.recoverVoice()
 			continue
 		}
-		if reason, _ := p.schedulerReasonLocked(); reason != "ready" {
+		providerPermit := ""
+		if p.providerBlocked && len(p.queue) > 0 && !p.queue[0].Pending && p.voice != nil && !p.halted {
+			p.mu.Unlock()
+			permit, err := p.waitProvider(p.ctx, nil)
+			if err != nil {
+				return
+			}
+			p.mu.Lock()
+			providerPermit = permit
+		}
+		reason, _ := p.schedulerReasonAllowProviderLocked(providerPermit != "")
+		if reason != "ready" {
+			if providerPermit != "" {
+				p.finishProviderLocked(context.Canceled, providerPermit)
+			}
 			p.mu.Unlock()
 			if !p.schedulerWait() {
 				return
@@ -265,6 +286,9 @@ func (p *GuildPlayer) run() {
 			continue
 		}
 		if delay := time.Until(p.retryAt); delay > 0 {
+			if providerPermit != "" {
+				p.finishProviderLocked(context.Canceled, providerPermit)
+			}
 			p.mu.Unlock()
 			timer := time.NewTimer(delay)
 			select {
@@ -300,6 +324,7 @@ func (p *GuildPlayer) run() {
 		p.trackDone = done
 		p.trackCancel = cancel
 		p.current = &t
+		p.playbackProviderID = providerPermit
 		p.progress.at.Store(time.Now().UnixNano())
 		p.pause = &pauseGate{}
 		p.pause.set(p.recoveryPaused)
@@ -354,6 +379,21 @@ func (p *GuildPlayer) run() {
 				p.mutationLocked("voice_track_completed", "confirmed_ms", retained.ResumeOffset.Milliseconds())
 			}
 			expectedCancel = true
+		}
+		providerFailure := !expectedCancel && isProviderFailure(err) && p.current != nil
+		if providerFailure {
+			retained := copyTrack(*p.current)
+			retained.ResumeOffset = p.confirmedOffset
+			if !advanceInterrupted(retained) {
+				p.queue = append([]queueEntry{{Track: retained}}, p.queue...)
+			}
+			p.recoveryPaused = p.pause.paused()
+			p.blockProviderLocked(providerFailureCategory(err))
+			p.mutationLocked("provider_track_retained")
+			expectedCancel = true
+		}
+		if providerPermit != "" {
+			p.finishProviderLocked(err, providerPermit)
 		}
 		played := p.startedSequence == sequence
 		networkRetry := !expectedCancel && err != nil && !(t.ResumeOffset > 0 && !played && category == "ffmpeg_exit") && ((played && (category == "ffmpeg_exit" || category == "yt_dlp_exit" || category == "source_http_403")) || category == "source_network" || category == "audio_stall" || category == "audio_eof" || errors.Is(err, context.DeadlineExceeded))
@@ -441,6 +481,9 @@ func (p *GuildPlayer) run() {
 		}
 		close(done)
 		p.mu.Unlock()
+		if providerFailure {
+			p.announceProvider()
+		}
 		if err != nil && !expectedCancel {
 			stage := "starting"
 			if played {
@@ -456,47 +499,21 @@ func (p *GuildPlayer) blockProviderLocked(reason string) {
 		return
 	}
 	p.providerBlocked = true
+	if p.providerIncident == "" {
+		p.providerGeneration++
+		p.providerIncident = fmt.Sprintf("%s/provider/%d", p.sessionID, p.providerGeneration)
+		p.providerRetries = 0
+		p.providerNotice = false
+	}
+	p.providerRetryAt = time.Now().Add(providerBackoff(p.providerRetries))
 	p.providerReason = reason
-	p.log.Error("provider_playback_blocked", "provider", "youtube", "category", reason, "action", "queue retained; use resume to retry the same position")
+	p.signal("provider_blocked")
+	p.log.Error("provider_playback_blocked", "provider", "youtube", "category", reason, "incident_id", p.providerIncident, "action", "queue retained; bounded backoff then resume")
 	for _, job := range p.jobs {
-		if job.blockedPosition < 0 {
-			for _, entry := range p.queue {
-				if entry.jobID == job.progress.ID && entry.Pending {
-					job.blockedPosition = entry.position
-					break
-				}
-			}
-		}
 		for _, cancel := range job.searches {
 			if cancel != nil {
 				cancel()
 			}
 		}
 	}
-}
-
-func (p *GuildPlayer) waitProvider(ctx context.Context) error {
-	for {
-		p.mu.Lock()
-		blocked, changed := p.providerBlocked, p.providerChanged
-		p.mu.Unlock()
-		if !blocked {
-			return nil
-		}
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-changed:
-		}
-	}
-}
-
-func (p *GuildPlayer) blockProviderAt(job *CollectionJob, position int, category string) {
-	p.mu.Lock()
-	if job != nil && job.blockedPosition < 0 {
-		job.blockedPosition = position
-	}
-	p.blockProviderLocked(category)
-	p.signal("provider_blocked")
-	p.mu.Unlock()
 }

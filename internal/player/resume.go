@@ -19,6 +19,10 @@ func (p *GuildPlayer) confirmFrame(ctx context.Context, sequence uint64) {
 	}
 	p.confirmedOffset += 20 * time.Millisecond
 	if p.confirmedOffset-p.current.ResumeOffset >= 5*time.Second {
+		if p.playbackProviderID != "" {
+			p.finishProviderLocked(nil, p.playbackProviderID)
+			p.playbackProviderID = ""
+		}
 		p.completeRecoveryLocked()
 	}
 	if p.confirmedOffset-p.checkpointOffset >= 5*time.Second {

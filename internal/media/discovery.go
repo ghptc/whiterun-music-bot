@@ -141,6 +141,9 @@ func selectDiscoveredMatch(ctx context.Context, query string, candidates []Candi
 		verifications++
 		full, err := verify(selected.candidate)
 		if err != nil {
+			if ProviderUnavailable(err) {
+				return Candidate{}, err
+			}
 			if ctx.Err() != nil {
 				return Candidate{}, ctx.Err()
 			}

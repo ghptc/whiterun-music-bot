@@ -245,6 +245,11 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 		g.mu.Unlock()
 		reply("The Bard answers your summons.")
 	case "play":
+		if g.player.State().ProviderBlocked {
+			g.mu.Unlock()
+			reply("YouTube requests are temporarily suspended. The existing queue is preserved. Use /resume to retry.")
+			return
+		}
 		ticket := g.player.Ticket()
 		searchCtx := g.searchCtx
 		g.mu.Unlock()
@@ -270,7 +275,17 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 		timing.Event("play_preparation_complete", started, "success", err == nil, "progressive", progressive)
 		if err != nil {
 			b.log.Warn("media resolution failed", "guild_id", id, "stage", resolutionStage(err), "error", err)
-			if searchCtx.Err() != nil {
+			if media.ProviderUnavailable(err) {
+				g.announcementMu.Lock()
+				if g.announcementChannel.Load() == 0 {
+					if channel := e.Channel(); channel.MessageChannel != nil {
+						g.announcementChannel.Store(uint64(channel.ID()))
+					}
+				}
+				g.announcementMu.Unlock()
+				g.player.SuspendProvider(err)
+				reply("Request could not be queued. The existing queue is preserved; use /queue to see its status.")
+			} else if searchCtx.Err() != nil {
 				reply("Playback changed while searching. Ask the Bard again.")
 			} else if message := spotifyErrorText(err); message != "" {
 				reply(message)
@@ -320,7 +335,7 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 			first = <-job.First
 			err = first.Err
 		}
-		if err == nil {
+		if err == nil && !first.Suspended {
 			timing.Event("play_first_track_resolved", started)
 		}
 		releaseSearch()
@@ -328,7 +343,9 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 			reply(err.Error())
 			return
 		}
-		if progressive {
+		if first.Suspended {
+			reply("Playlist queued. Use /queue to see its status.")
+		} else if progressive {
 			message := "Queued: " + trackTitle(first.Track)
 			if remaining := first.Total - first.Position; remaining > 0 {
 				message += fmt.Sprintf(". Resolving the remaining %d tracks… Use /queue for progress.", remaining)
@@ -359,7 +376,7 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 			reply("Playback is already paused.")
 		} else if changed {
 			if providerBlocked {
-				reply("YouTube recovery requested. Retrying the same track.")
+				reply("YouTube recovery requested.")
 			} else {
 				reply("Playback resumed.")
 			}

@@ -153,7 +153,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 				return parent.Err()
 			}
 			if earlyErr != nil && exitCode(yt) > 0 {
-				return &StreamError{sourceFailure(ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), earlyErr, media.SafeDiagnostic(ytErr.Data))}
+				return &StreamError{sourceFailure(ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), earlyErr, sourceFailure(ytErr.Data))}
 			}
 			if cause := context.Cause(ctx); cause != nil {
 				return cause
@@ -324,7 +324,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	// A positive producer exit is the root cause when decoding its empty output
 	// also fails. Killed processes are cleanup consequences, not source diagnoses.
 	if ytWait != nil && exitCode(yt) > 0 {
-		failures = append([]error{&StreamError{sourceFailure(ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), ytWait, media.SafeDiagnostic(ytErr.Data))}}, failures...)
+		failures = append([]error{&StreamError{sourceFailure(ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), ytWait, sourceFailure(ytErr.Data))}}, failures...)
 	}
 	if ffWait != nil && exitCode(ff) > 0 {
 		failures = append(failures, &StreamError{"ffmpeg_exit", fmt.Errorf("exit_code=%d: %w: %s", exitCode(ff), ffWait, media.SafeDiagnostic(ffErr.Data))})
@@ -337,7 +337,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	}
 	ytTail, ffTail := "", ""
 	if len(failures) > 0 {
-		ytTail, ffTail = media.SafeDiagnostic(ytErr.Data), media.SafeDiagnostic(ffErr.Data)
+		ytTail, ffTail = sourceFailure(ytErr.Data), media.SafeDiagnostic(ffErr.Data)
 	}
 	t.Timing.Event("audio_source_exit", streamStart, "video_id", t.VideoID, "yt_exit_code", exitCode(yt), "ffmpeg_exit_code", exitCode(ff), "category", failureCategory(errors.Join(failures...)), "yt_stderr_tail", ytTail, "ffmpeg_stderr_tail", ffTail)
 
@@ -458,6 +458,12 @@ func (r *firstRead) Read(p []byte) (int, error) {
 }
 
 func sourceFailure(stderr []byte) string {
+	if err := media.ClassifyExtraction(stderr, nil); err != nil {
+		switch category := media.ExtractionCategory(err); category {
+		case "youtube_bot_challenge", "youtube_auth_required", "youtube_rate_limited", "youtube_network_timeout", "youtube_video_unavailable":
+			return category
+		}
+	}
 	text := strings.ToLower(string(stderr))
 	switch {
 	case strings.Contains(text, "sign in to confirm") || strings.Contains(text, "confirm you're not a bot") || strings.Contains(text, "confirm you’re not a bot") || strings.Contains(text, "authentication required") || strings.Contains(text, "login required"):

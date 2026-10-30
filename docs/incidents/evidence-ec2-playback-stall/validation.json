@@ -1,0 +1,9 @@
+{
+  "go_test_all": 0,
+  "go_vet_all": 0,
+  "race_player_discord": 0,
+  "targeted_FIX025_REL024_Voice_Resume": 0,
+  "docker_build": 0,
+  "deployed": false,
+  "production_playback_verified": false
+}

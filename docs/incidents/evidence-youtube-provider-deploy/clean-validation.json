@@ -1,0 +1,16 @@
+{
+  "recorded_at": "2026-10-30T05:33:08.212450+00:00",
+  "source": "git index exported via git archive; unrelated working-tree edits excluded",
+  "validated_tree_before_documentation": "90c287ec6ad9cdb76d1d121488824de3b4f78b83",
+  "go_test_all_count_1": 0,
+  "go_vet_all": 0,
+  "race_media_player_discord_count_1": 0,
+  "docker_build": 0,
+  "unrelated_excluded": [
+    "internal/logstore/store.go",
+    "internal/media/auto_pilot_test.go",
+    "internal/media/resolver_test.go",
+    "scripts/capture-bard-audit.py",
+    "preexisting candidate_parsing_complete telemetry hunk in internal/media/resolver.go"
+  ]
+}

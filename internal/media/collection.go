@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/url"
 	"regexp"
@@ -157,7 +156,12 @@ func (r CollectionResolver) Resolve(ctx context.Context, query string) (Collecti
 	}
 
 	// Fixed workers bound subprocess concurrency. Each slot retains source order.
+	ctx, stopMatching := context.WithCancel(ctx)
+	defer stopMatching()
 	matched := make([]Track, len(result.Tracks))
+	failures := make([]error, len(result.Tracks))
+	var providerMu sync.Mutex
+	var providerErr error
 	jobs := make(chan int)
 	var wg sync.WaitGroup
 	for range 4 {
@@ -165,9 +169,21 @@ func (r CollectionResolver) Resolve(ctx context.Context, query string) (Collecti
 		go func() {
 			defer wg.Done()
 			for i := range jobs {
+				if ctx.Err() != nil {
+					continue
+				}
 				original := result.Tracks[i]
 				track, err := r.MatchSpotify(ctx, original, false)
 				if err != nil {
+					failures[i] = err
+					if ProviderUnavailable(err) {
+						providerMu.Lock()
+						if providerErr == nil {
+							providerErr = err
+						}
+						providerMu.Unlock()
+						stopMatching()
+					}
 					if r.Log != nil {
 						r.Log.Warn("Spotify track match failed", "stage", "spotify_match", "title", original.Title, "artist", original.Artist, "error", err)
 					}
@@ -188,6 +204,9 @@ dispatch:
 	}
 	close(jobs)
 	wg.Wait()
+	if providerErr != nil {
+		return Collection{}, providerErr
+	}
 	if ctx.Err() != nil {
 		return Collection{}, ctx.Err()
 	}
@@ -201,6 +220,9 @@ dispatch:
 	}
 	if len(result.Tracks) == 0 {
 		if kind == "track" {
+			if len(failures) == 1 && ExtractionCategory(failures[0]) != "" {
+				return Collection{}, failures[0]
+			}
 			return Collection{}, ErrSpotifyMatch
 		}
 		return Collection{}, ErrSpotifyMatch
@@ -211,7 +233,9 @@ dispatch:
 
 func (r CollectionResolver) youtube(ctx context.Context, id string) (Collection, error) {
 	target := "https://www.youtube.com/playlist?list=" + id
-	args := append(BaseArgs(), "--yes-playlist", "--flat-playlist", "--playlist-end", "501", "--skip-download", "--dump-single-json", "--ignore-errors", "--", target)
+	// Ignore individual unavailable entries, but never suppress the diagnostics
+	// that distinguish a provider incident from a partial playlist.
+	args := append(metadataBaseArgs(), "--yes-playlist", "--flat-playlist", "--playlist-end", "501", "--skip-download", "--dump-single-json", "--ignore-errors", "--", target)
 	cmd := Command(ctx, r.YouTube.Binary, args...)
 	out, stderr := &LimitedBuffer{Limit: 8 << 20}, &LimitedBuffer{Limit: 8192}
 	cmd.Stdout, cmd.Stderr = out, stderr
@@ -219,8 +243,11 @@ func (r CollectionResolver) youtube(ctx context.Context, id string) (Collection,
 	if ctx.Err() != nil {
 		return Collection{}, ctx.Err()
 	}
+	if failure := ClassifyExtraction(stderr.Data, nil); failure != nil && ProviderUnavailable(failure) {
+		return Collection{}, failure
+	}
 	if out.Truncated {
-		return Collection{}, errors.New("playlist metadata exceeded size limit")
+		return Collection{}, &ExtractionError{Category: "youtube_extractor_failure"}
 	}
 	var data struct {
 		Title   string       `json:"title"`
@@ -228,11 +255,11 @@ func (r CollectionResolver) youtube(ctx context.Context, id string) (Collection,
 		Count   int          `json:"playlist_count"`
 	}
 	if err := json.Unmarshal(out.Data, &data); err != nil {
-		return Collection{}, fmt.Errorf("playlist extraction: %v; decode: %w; %s", runErr, err, stderr.Data)
+		return Collection{}, &ExtractionError{Category: "youtube_extractor_failure"}
 	}
 	// yt-dlp may exit nonzero despite producing usable entries with --ignore-errors.
 	if runErr != nil && r.Log != nil {
-		r.Log.Warn("partial YouTube playlist extraction", "error", runErr, "details", string(stderr.Data))
+		r.Log.Warn("partial YouTube playlist extraction", "category", "youtube_partial_playlist")
 	}
 	if len(data.Entries) > MaxCollectionTracks || data.Count > MaxCollectionTracks {
 		return Collection{}, ErrCollectionTooLarge
@@ -246,6 +273,9 @@ func (r CollectionResolver) youtube(ctx context.Context, id string) (Collection,
 		result.Tracks = append(result.Tracks, Track{Artist: c.Artist, Artists: c.Artists, Album: c.Album, YouTubeThumbnailURL: SafeArtworkURL(c.Thumbnail), Live: c.Live || c.LiveStatus == "is_live", Title: c.Title, Channel: c.Channel, VideoID: c.ID, URL: "https://www.youtube.com/watch?v=" + c.ID, Duration: time.Duration(c.Duration * float64(time.Second)), RequestedSource: "youtube", VerifyBeforePlay: true})
 	}
 	if len(result.Tracks) == 0 {
+		if runErr != nil {
+			return Collection{}, ClassifyExtraction(stderr.Data, runErr)
+		}
 		return Collection{}, ErrNoTracks
 	}
 	return result, nil

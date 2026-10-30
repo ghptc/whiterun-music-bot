@@ -80,8 +80,16 @@ func (p *GuildPlayer) SetPaused(paused bool) (bool, error) {
 	}
 	if !paused && p.providerBlocked {
 		reason := p.providerReason
-		p.providerBlocked = false
-		p.providerReason = ""
+		if p.providerProbe {
+			return true, nil
+		}
+		if len(p.queue) == 0 && len(p.jobs) == 0 {
+			p.resetProviderLocked()
+			p.signal("provider_retry_new_request")
+			return true, nil
+		}
+		p.providerRetries = 0
+		p.providerRetryAt = time.Now()
 		close(p.providerChanged)
 		p.providerChanged = make(chan struct{})
 		p.failures = 0
@@ -109,11 +117,15 @@ func (p *GuildPlayer) SetPaused(paused bool) (bool, error) {
 
 // A stopped or detached session must not carry a provider latch into a fresh one.
 func (p *GuildPlayer) resetProviderLocked() {
-	if !p.providerBlocked {
+	if !p.providerBlocked && p.providerIncident == "" {
 		return
 	}
 	p.providerBlocked = false
 	p.providerReason = ""
+	p.providerIncident = ""
+	p.providerNotice = false
+	p.providerProbe = false
+	p.providerRetries = 0
 	close(p.providerChanged)
 	p.providerChanged = make(chan struct{})
 }

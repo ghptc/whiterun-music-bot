@@ -1,0 +1,4 @@
+{"collected_at": "2026-10-30T05:03:14.009800+00:00"}
+{"tool": "yt-dlp", "rc": 0, "version": "2026.08.19"}
+{"tool": "deno", "rc": 0, "version": "deno 2.5.6 (stable, release, x86_64-unknown-linux-gnu)\nv8 14.0.365.5-rusty\ntypescript 5.9.2"}
+{"probe": "strict_metadata_diagnostic", "rc": 1, "stdout_bytes": 5, "stderr_bytes": 196, "metadata": {"id": null, "title": null, "duration": null, "duration_string": null, "availability": null, "live_status": null, "age_limit": null, "extractor_key": null, "_type": null, "channel": null, "artist": null, "track": null}, "keys": [], "format_count": 0, "duration_key_present": false, "diagnostic_classes": ["Requested format"]}

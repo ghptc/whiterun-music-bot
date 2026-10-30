@@ -55,7 +55,7 @@ func TestHardeningMappingTrustAndFailureRecovery(t *testing.T) {
 		{name: "conflicting full recording invalidates", stale: true, extraction: "mismatch", want: "lmnopqrstuv", saves: 1, deletes: 1},
 		{name: "substituted full ID invalidates", stale: true, extraction: "different", want: "lmnopqrstuv", saves: 1, deletes: 1},
 		{name: "failed invalidation observable but fallback safe", stale: true, extraction: "mismatch", deleteErr: failure, want: "lmnopqrstuv", saves: 1, deletes: 1},
-		{name: "extraction unavailable fails closed", stale: true, extraction: "failure", deletes: 1},
+		{name: "extraction unavailable retains mapping", stale: true, extraction: "failure"},
 		{name: "cancellation after invalidation", stale: true, extraction: "mismatch", cancel: true, deletes: 1},
 		{name: "discovery write failure keeps recording", invalidID: true, saveErr: failure, want: "lmnopqrstuv", saves: 1},
 	} {
@@ -262,7 +262,7 @@ esac
 		t.Fatal(err)
 	}
 	got, err := (Resolver{Binary: binary, Match: &original}).Resolve(context.Background(), "Artist Song")
-	if got.VideoID != "" || err == nil || !strings.Contains(err.Error(), "provider temporarily unavailable") {
+	if got.VideoID != "" || err == nil || ExtractionCategory(err) != "youtube_extractor_failure" {
 		t.Fatalf("provider cause replaced: %+v %v", got, err)
 	}
 }

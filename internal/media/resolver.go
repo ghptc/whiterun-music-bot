@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"math"
 	"net/url"
 	"regexp"
@@ -128,10 +127,10 @@ func (r Resolver) extract(ctx context.Context, target, purpose string, flat bool
 	args := MetadataArgs()
 	count := 1
 	if flat {
-		args = append(BaseArgs(), "--flat-playlist", "--playlist-end", "10")
+		args = append(metadataBaseArgs(), "--flat-playlist", "--playlist-end", "10")
 		count = 10
 	}
-	args = append(args, "--skip-download", "--dump-single-json", "--ignore-errors", "--", target)
+	args = append(args, "--skip-download", "--dump-single-json", "--", target)
 	cmd := Command(ctx, r.Binary, args...)
 	out := &LimitedBuffer{Limit: 8 << 20}
 	stderr := &LimitedBuffer{Limit: 8192}
@@ -141,24 +140,34 @@ func (r Resolver) extract(ctx context.Context, target, purpose string, flat bool
 	timing.Event("yt_dlp_start", started, "purpose", purpose, "category", "metadata", "flat", flat, "candidates", count, "target", target, "started_at", started.UTC())
 	runErr := cmd.Run()
 	timing.Event("yt_dlp_complete", started, "purpose", purpose, "flat", flat, "candidates", count, "error", runErr, "cancel_reason", context.Cause(ctx), "context_error", ctx.Err())
-	if runErr != nil {
-		return searchResult{}, fmt.Errorf("YouTube resolution failed: %w: %s", errors.Join(runErr, ctx.Err()), SafeDiagnostic(stderr.Data))
+	if errors.Is(ctx.Err(), context.Canceled) {
+		return searchResult{}, ctx.Err()
+	}
+	if ctx.Err() != nil {
+		runErr = ctx.Err()
+	}
+	if failure := ClassifyExtraction(stderr.Data, runErr); failure != nil {
+		timing.Event("youtube_extraction_failed", started, "error_category", ExtractionCategory(failure), "purpose", purpose, "stdout_bytes", len(out.Data), "stderr_bytes", len(stderr.Data))
+		return searchResult{}, failure
 	}
 	if out.Truncated {
-		return searchResult{}, errors.New("YouTube metadata exceeded the size limit")
+		return searchResult{}, &ExtractionError{Category: "youtube_extractor_failure"}
 	}
 	parseStart := time.Now()
 	var result searchResult
 	if err := json.Unmarshal(out.Data, &result); err != nil {
-		return result, fmt.Errorf("invalid YouTube metadata: %w", err)
+		return result, &ExtractionError{Category: "youtube_extractor_failure"}
 	}
 	if !validDurationSeconds(result.Duration) {
-		return searchResult{}, errors.New("invalid YouTube duration")
+		return searchResult{}, &ExtractionError{Category: "youtube_metadata_unavailable"}
 	}
 	for i, candidate := range result.Entries {
 		if candidate != nil && !validDurationSeconds(candidate.Duration) {
 			result.Entries[i] = nil
 		}
+	}
+	if !flat && (result.ID == "" || strings.HasPrefix(purpose, "spotify_") && result.Duration <= 0) {
+		return searchResult{}, &ExtractionError{Category: "youtube_metadata_unavailable"}
 	}
 	// Provider JSON cannot set the trusted validation timestamp.
 	result.CheckedAt = time.Time{}
@@ -221,6 +230,9 @@ func (r Resolver) resolveUncached(ctx context.Context, query, direct string, isU
 			if ctx.Err() != nil {
 				return Track{}, ctx.Err()
 			}
+			if ProviderUnavailable(extraErr) {
+				return Track{}, extraErr
+			}
 			if extraErr == nil {
 				seen := make(map[string]bool)
 				for _, c := range candidates {
@@ -270,7 +282,19 @@ func (r Resolver) resolveUncached(ctx context.Context, query, direct string, isU
 // MetadataArgs is used only for direct videos and selected candidates whose
 // lightweight metadata needs verification. Playback retains full format extraction.
 func MetadataArgs() []string {
-	return append(BaseArgs(), "--extractor-args", "youtube:player_client=web;player_skip=js;skip=hls,dash,translated_subs", "--ignore-no-formats-error")
+	// Metadata does not require an audio format. Keep warnings visible and classify
+	// them before accepting JSON, including exit-zero authentication challenges.
+	return append(metadataBaseArgs(), "--extractor-args", "youtube:player_client=web;player_skip=js;skip=hls,dash,translated_subs", "--ignore-no-formats-error")
+}
+func metadataBaseArgs() []string {
+	args := BaseArgs()
+	filtered := args[:0]
+	for _, arg := range args {
+		if arg != "--no-warnings" {
+			filtered = append(filtered, arg)
+		}
+	}
+	return filtered
 }
 
 func BaseArgs() []string {

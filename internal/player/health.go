@@ -28,7 +28,7 @@ func (p *GuildPlayer) Health() Health {
 	default:
 	}
 	reason, _ := p.schedulerReasonLocked()
-	h := Health{Responsive: true, State: reason, Pending: len(p.queue), RecoveryExhausted: (p.voiceBlocked && p.voiceAttempts >= 5) || (p.halted && p.networkAttempts >= 3)}
+	h := Health{Responsive: true, State: reason, Pending: len(p.queue), RecoveryExhausted: (p.voiceBlocked && p.voiceAttempts >= 5) || (p.halted && p.networkAttempts >= 3) || (p.providerBlocked && p.providerRetries >= providerAutomaticRetries && !p.providerProbe)}
 	if p.current != nil {
 		h.State = "buffering"
 		if p.startedSequence == p.sequence {

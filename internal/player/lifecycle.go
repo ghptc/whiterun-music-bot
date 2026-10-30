@@ -29,6 +29,9 @@ func failureCategory(err error) string {
 	if isVoiceFailure(err) {
 		return "voice_transport"
 	}
+	if category := media.ExtractionCategory(err); category != "" {
+		return category
+	}
 	var stream *StreamError
 	if errors.As(err, &stream) {
 		return stream.Category
@@ -47,8 +50,11 @@ func providerFailureCategory(err error) string {
 	if err == nil {
 		return ""
 	}
+	if media.ProviderUnavailable(err) {
+		return media.ExtractionCategory(err)
+	}
 	category := failureCategory(err)
-	if category == "youtube_auth_challenge" || category == "youtube_rate_limited" || category == "youtube_provider_blocked" {
+	if category == "youtube_network_timeout" || category == "youtube_extractor_failure" || category == "youtube_bot_challenge" || category == "youtube_auth_required" || category == "youtube_auth_challenge" || category == "youtube_rate_limited" || category == "youtube_provider_blocked" {
 		return category
 	}
 	text := strings.ToLower(err.Error())
@@ -275,6 +281,9 @@ func (v *startVoice) SetPlaybackTrack(t media.Track) {
 // IsTransientFailure distinguishes transport/timeout failures from evidence that
 // a verified recording is wrong or unavailable. Keep persistent mappings intact.
 func IsTransientFailure(err error) bool {
+	if isProviderFailure(err) || media.ExtractionCategory(err) == "youtube_metadata_unavailable" {
+		return true
+	}
 	if errors.Is(err, context.DeadlineExceeded) {
 		return true
 	}

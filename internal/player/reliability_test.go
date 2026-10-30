@@ -219,52 +219,17 @@ func TestTwoTracksNaturalEOFDeliverIndependentAudio(t *testing.T) {
 	}
 }
 
-// Auth rejection is terminal for this attempt, never a musical mismatch.
-func TestProviderChallengeAdvancesWithoutRetryLoop(t *testing.T) {
+// A provider-wide rejection retains the current occurrence and successors.
+func TestProviderChallengeRetainsPipelineWithoutRetryLoop(t *testing.T) {
 	r := auditPipeline(t, false, true)
-	if len(r.results) != 7 || r.state.ProviderBlocked || r.state.Halted || len(r.state.Entries) != 0 {
-		t.Fatalf("queue stalled: %+v", r.state)
+	if len(r.results) != 2 || !r.state.ProviderBlocked || r.state.Halted || len(r.state.Entries) != 6 {
+		t.Fatalf("provider failure consumed queue: attempts=%d entries=%d blocked=%v", len(r.results), len(r.state.Entries), r.state.ProviderBlocked)
 	}
-	if len(r.frames["1"]) < 3 {
-		t.Fatal("first track had no audio")
+	if len(r.frames["1"]) < 3 || len(r.frames["2"]) != 0 {
+		t.Fatal("wrong audio evidence")
 	}
-	for i, result := range r.results[1:] {
-		if result.title != strconv.Itoa(i+2) {
-			t.Fatal("queue order changed", result)
-		}
-		if i == 0 {
-			if failureCategory(result.err) != "youtube_auth_challenge" || len(r.frames[result.title]) != 0 {
-				t.Fatalf("wrong failure: %+v", result)
-			}
-		} else if result.err != nil || len(r.frames[result.title]) < 3 {
-			t.Fatalf("eligible successor failed: %+v", result)
-		}
-	}
-	if strings.Count(r.events, "ff-start") != 6 {
-		t.Fatal("decoder launched for rejected extraction", r.events)
-	}
-	if strings.Count(r.events, "yt-start ") != 7 {
-		t.Fatal("unbounded attempts", r.events)
-	}
-}
-
-func TestProviderFailureDoesNotBlockProgressiveResolution(t *testing.T) {
-	p, _ := newTestPlayer(t, func(ctx context.Context, _ media.Track, _ Voice) error { <-ctx.Done(); return ctx.Err() })
-	j := begin(t, p, context.Background(), numberedTracks(1, 4), func(ctx context.Context, track media.Track, first bool) (media.Track, error) {
-		if track.Position == 2 {
-			return media.Track{}, errors.New("Sign in to confirm you're not a bot")
-		}
-		return matched(track), nil
-	})
-	firstResult(t, j)
-	jobDone(t, j)
-	if j.progress.Failed != 1 || j.progress.Resolved != 3 || p.State().ProviderBlocked {
-		t.Fatalf("wrong progress: %+v", j.progress)
-	}
-	for _, e := range p.State().Entries {
-		if e.Position == 2 {
-			t.Fatal("unavailable position retained")
-		}
+	if strings.Count(r.events, "yt-start ") != 2 || strings.Count(r.events, "ff-start") != 1 {
+		t.Fatal("cascading extraction", r.events)
 	}
 }
 
@@ -281,7 +246,7 @@ func TestStopAndLeaveReleaseOldProviderBlock(t *testing.T) {
 				return ctx.Err()
 			})
 			add(t, p, "blocked")
-			await(t, func() bool { return p.State().Current == nil && len(p.State().Entries) == 0 })
+			await(t, func() bool { return p.State().Current == nil && p.State().ProviderBlocked })
 			if operation == "stop" {
 				p.Stop()
 			} else {

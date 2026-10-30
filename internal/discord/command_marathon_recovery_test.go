@@ -85,17 +85,24 @@ func marathonG(t *testing.T) *marathonSession {
 	m.playSong(1, w)
 	w.queue = []string{"song002"}
 	m.playSong(2, w)
-	// Permitted fallback is the next already accepted queue entry, never an
-	// unverified replacement or an authentication retry of the failed attempt.
+	// Provider failures retain the affected occurrence and accepted successors.
 	m.finish <- &player.StreamError{Category: "youtube_auth_challenge", Err: errors.New("controlled provider challenge")}
+	synctest.Wait()
+	w.current = ""
+	w.queue = []string{"song001", "song002"}
+	m.check(w, "provider challenge retains logical position")
+	if !m.g.player.State().ProviderBlocked || m.logs.has("track_unavailable", "reason", "youtube_auth_challenge") {
+		t.Fatal("provider rejection consumed queue")
+	}
+	w.current = "song001"
+	w.queue = []string{"song002"}
+	m.command("resume", nil, 3, w)
+	m.finish <- nil
 	synctest.Wait()
 	w.current = "song002"
 	w.queue = nil
 	w.history = append(w.history, "song002")
-	m.check(w, "provider failure advances to accepted successor")
-	if !m.logs.has("track_unavailable", "reason", "youtube_auth_challenge") || m.g.player.State().ProviderBlocked {
-		t.Fatal("provider failure latched playback or lost cause")
-	}
+	m.check(w, "provider recovery resumes once then advances")
 	healthy := m.b.resolver.Search
 	m.b.resolver.Search = func(context.Context, string) (media.Track, error) {
 		return media.Track{}, errors.New("controlled provider outage")

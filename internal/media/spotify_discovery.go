@@ -23,6 +23,9 @@ func discoverSpotify(ctx context.Context, t Track, p MatchPolicy, query string, 
 			reason = m.Reason
 		} else if err != nil {
 			reason = "infrastructure_or_context"
+			if category := ExtractionCategory(err); category != "" {
+				reason = category
+			}
 		}
 		timing.Event("spotify_resolution", started, "spotify_track_id", t.SpotifyID, "search_attempts", attempts, "verification_attempts", verified, "reason", reason, "selected_video_id", chosen.ID)
 	}()
@@ -89,10 +92,18 @@ func discoverSpotify(ctx context.Context, t Track, p MatchPolicy, query string, 
 			return Candidate{}, ctx.Err()
 		}
 		lookup(q.target, q.purpose, q.music)
+		for _, failure := range failures {
+			if ProviderUnavailable(failure) {
+				return Candidate{}, failure
+			}
+		}
 		if len(pools) == 0 {
 			continue
 		}
 		chosen, err = selectSpotifyPolicy(ctx, t, p, deduplicateCandidates(pools...), check)
+		if ProviderUnavailable(err) {
+			return Candidate{}, err
+		}
 		if err == nil {
 			return chosen, nil
 		}

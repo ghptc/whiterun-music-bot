@@ -353,6 +353,9 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (selected Ca
 		reason := "selected"
 		if resolutionErr != nil {
 			reason = "infrastructure_or_context"
+			if category := ExtractionCategory(resolutionErr); category != "" {
+				reason = category
+			}
 			var m *MatchError
 			if errors.As(resolutionErr, &m) {
 				reason = m.Reason
@@ -384,6 +387,9 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (selected Ca
 					TimingFrom(ctx).Event("mapping_write_failed", time.Now())
 				}
 				return full.Candidate, nil
+			}
+			if verifyErr != nil && ExtractionCategory(verifyErr) != "youtube_video_unavailable" {
+				return Candidate{}, verifyErr
 			}
 			bounded, cancel = catalogContext(ctx)
 			deleteErr := deleteMappingVideo(bounded, r.Mappings, key, cached.ID)
@@ -460,6 +466,9 @@ func selectSpotifyPolicy(ctx context.Context, track Track, policy MatchPolicy, c
 			return Candidate{}, err
 		}
 		if err != nil {
+			if ProviderUnavailable(err) {
+				return Candidate{}, err
+			}
 			verificationErrors = append(verificationErrors, err)
 			timing.Event("spotify_candidate_verification_failed", time.Now(), "spotify_track_id", track.SpotifyID, "video_id", candidate.ID)
 			continue

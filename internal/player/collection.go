@@ -35,6 +35,7 @@ type CollectionProgress struct {
 	Total, Resolved, Failed, Skipped int
 }
 type CollectionFirst struct {
+	Suspended                bool
 	Track                    media.Track
 	Position, Total, Skipped int
 	Err                      error
@@ -44,22 +45,21 @@ type CollectionMatcher func(context.Context, media.Track, bool) (media.Track, er
 // CollectionJob is player-owned. Mutable fields below are protected by player.mu;
 // metadata is copied once. Only the coordinator publishes ordered prefixes.
 type CollectionJob struct {
-	First           <-chan CollectionFirst
-	Done            <-chan struct{}
-	wake            chan struct{}
-	first           chan CollectionFirst
-	done            chan struct{}
-	ctx             context.Context
-	cancel          context.CancelFunc
-	player          *GuildPlayer
-	metadata        []media.Track
-	match           CollectionMatcher
-	wanted          []bool
-	searches        []context.CancelFunc
-	recorded        []bool
-	blockedPosition int
-	suspended       bool
-	progress        CollectionProgress
+	First     <-chan CollectionFirst
+	Done      <-chan struct{}
+	wake      chan struct{}
+	firstOnce sync.Once
+	first     chan CollectionFirst
+	done      chan struct{}
+	ctx       context.Context
+	cancel    context.CancelFunc
+	player    *GuildPlayer
+	metadata  []media.Track
+	match     CollectionMatcher
+	wanted    []bool
+	searches  []context.CancelFunc
+	recorded  []bool
+	progress  CollectionProgress
 }
 
 // BeginCollection atomically reserves all positions after complete metadata has
@@ -85,7 +85,7 @@ func (p *GuildPlayer) BeginCollection(parent context.Context, c media.Collection
 	p.nextJob++
 	first := make(chan CollectionFirst, 1)
 	done := make(chan struct{})
-	j := &CollectionJob{wake: make(chan struct{}, 1), First: first, Done: done, first: first, done: done, ctx: ctx, cancel: cancel, player: p, match: match, metadata: make([]media.Track, len(c.Tracks)), wanted: make([]bool, len(c.Tracks)), searches: make([]context.CancelFunc, len(c.Tracks)), recorded: make([]bool, len(c.Tracks)), blockedPosition: -1, progress: CollectionProgress{ID: p.nextJob, Total: len(c.Tracks), MetadataSkipped: c.Skipped}}
+	j := &CollectionJob{wake: make(chan struct{}, 1), First: first, Done: done, first: first, done: done, ctx: ctx, cancel: cancel, player: p, match: match, metadata: make([]media.Track, len(c.Tracks)), wanted: make([]bool, len(c.Tracks)), searches: make([]context.CancelFunc, len(c.Tracks)), recorded: make([]bool, len(c.Tracks)), progress: CollectionProgress{ID: p.nextJob, Total: len(c.Tracks), MetadataSkipped: c.Skipped}}
 	for i, t := range c.Tracks {
 		if t.Position == 0 {
 			t.Position, t.Total = i+1, len(c.Tracks)
@@ -148,18 +148,30 @@ type collectionResolution struct {
 	blocked bool
 }
 
+func (j *CollectionJob) publishFirst(first CollectionFirst) {
+	j.firstOnce.Do(func() { j.first <- first })
+}
+
 func (j *CollectionJob) resolve(index int, first bool) collectionResolution {
 	p := j.player
+	probe, admissionErr := p.waitProvider(j.ctx, func() { j.publishFirst(CollectionFirst{Suspended: true, Total: len(j.metadata)}) })
+	if admissionErr != nil {
+		return collectionResolution{index: index, skipped: true, err: admissionErr}
+	}
 	p.mu.Lock()
-	if p.providerBlocked {
+	if p.providerBlocked && probe == "" {
 		p.mu.Unlock()
 		return collectionResolution{index: index, blocked: true}
 	}
 	if !j.wanted[index] || j.ctx.Err() != nil {
+		if probe != "" {
+			p.finishProviderLocked(context.Canceled, probe)
+		}
 		p.mu.Unlock()
 		return collectionResolution{index: index, skipped: true}
 	}
 	ctx, cancel := context.WithTimeout(j.ctx, CollectionResolveTimeout)
+	providerGeneration := p.providerGeneration
 	j.searches[index] = cancel
 	active := 0
 	for _, job := range p.jobs {
@@ -179,10 +191,22 @@ func (j *CollectionJob) resolve(index int, first bool) collectionResolution {
 
 	p.mu.Lock()
 	skipped := !j.wanted[index]
-	blocked := p.providerBlocked
+	providerFailure := isProviderFailure(err) && !skipped && j.ctx.Err() == nil
+	if providerFailure {
+		p.blockProviderLocked(providerFailureCategory(err))
+	}
+	if probe != "" {
+		p.finishProviderLocked(err, probe)
+	}
+	// An in-flight resolver canceled by an older provider incident may finish
+	// after a successful probe. Its cancellation is not a per-track failure.
+	blocked := providerFailure || (p.providerBlocked && probe == "") || p.providerGeneration != providerGeneration
 	j.searches[index] = nil
 	p.mu.Unlock()
 	cancel()
+	if providerFailure {
+		p.announceProvider()
+	}
 	if blocked {
 		j.event("track_resolution_discarded", started, "position", index+1, "reason", "provider_blocked")
 		return collectionResolution{index: index, blocked: true}
@@ -206,24 +230,6 @@ func (j *CollectionJob) resolve(index int, first bool) collectionResolution {
 	return collectionResolution{index: index, track: track, err: err, skipped: skipped}
 }
 
-func (j *CollectionJob) takeBlockedPosition() int {
-	j.player.mu.Lock()
-	defer j.player.mu.Unlock()
-	index := j.blockedPosition
-	j.blockedPosition = -1
-	return index
-}
-
-func (j *CollectionJob) waitForProvider() error {
-	j.player.mu.Lock()
-	j.suspended = true
-	j.player.mu.Unlock()
-	err := j.player.waitProvider(j.ctx)
-	j.player.mu.Lock()
-	j.suspended = false
-	j.player.mu.Unlock()
-	return err
-}
 func (j *CollectionJob) event(name string, start time.Time, fields ...any) {
 	p := j.player
 	p.mu.Lock()
@@ -238,6 +244,9 @@ func (j *CollectionJob) commit(results []collectionResolution) bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	defer p.persistLocked()
+	if p.providerBlocked {
+		return true
+	}
 	if j.ctx.Err() != nil {
 		p.diagnosticLocked(slog.LevelInfo, "resolution_commit_discarded", "collection_id", j.progress.ID, "reason", "canceled", "cancel_reason", context.Cause(j.ctx))
 		return false
@@ -270,6 +279,10 @@ func (j *CollectionJob) commit(results []collectionResolution) bool {
 func (j *CollectionJob) record(r collectionResolution) {
 	p := j.player
 	p.mu.Lock()
+	if p.providerBlocked {
+		p.mu.Unlock()
+		return
+	}
 	if j.recorded[r.index] {
 		p.mu.Unlock()
 		return
@@ -299,7 +312,6 @@ func (j *CollectionJob) record(r collectionResolution) {
 }
 func (j *CollectionJob) run() {
 	started := time.Now()
-	sentFirst := false
 	defer func() {
 		p := j.player
 		p.mu.Lock()
@@ -318,13 +330,11 @@ func (j *CollectionJob) run() {
 		delete(p.jobs, progress.ID)
 		p.signal()
 		p.mu.Unlock()
-		if !sentFirst {
-			err := j.ctx.Err()
-			if err == nil {
-				err = media.ErrSpotifyMatch
-			}
-			j.first <- CollectionFirst{Err: err, Total: progress.Total, Skipped: progress.Failed + progress.Skipped}
+		err := j.ctx.Err()
+		if err == nil {
+			err = media.ErrSpotifyMatch
 		}
+		j.publishFirst(CollectionFirst{Err: err, Total: progress.Total, Skipped: progress.Failed + progress.Skipped})
 		j.event("background_collection_resolution_complete", started, "spotify_tracks", progress.Total, "youtube_resolved", progress.Resolved, "youtube_failed", progress.Failed, "skipped_positions", progress.Skipped, "unfinished", progress.Total-progress.Resolved-progress.Failed-progress.Skipped, "canceled", j.ctx.Err() != nil)
 		j.cancel()
 		close(j.done)
@@ -342,10 +352,7 @@ func (j *CollectionJob) run() {
 			return
 		}
 		if r.blocked {
-			if j.waitForProvider() != nil {
-				return
-			}
-			j.takeBlockedPosition()
+			j.publishFirst(CollectionFirst{Suspended: true, Total: len(j.metadata)})
 			continue
 		}
 		j.record(r)
@@ -357,9 +364,8 @@ func (j *CollectionJob) run() {
 			continue
 		}
 		firstIndex = i
-		sentFirst = true
 		j.event("first_track_committed", started, "position", i+1)
-		j.first <- CollectionFirst{Track: copyTrack(r.track), Position: i + 1, Total: len(j.metadata), Skipped: i}
+		j.publishFirst(CollectionFirst{Track: copyTrack(r.track), Position: i + 1, Total: len(j.metadata), Skipped: i})
 		break
 	}
 	if firstIndex < 0 || firstIndex == len(j.metadata)-1 {
@@ -457,20 +463,6 @@ func (j *CollectionJob) run() {
 		}
 		workers.Wait()
 		if blocked {
-			if j.waitForProvider() != nil {
-				return
-			}
-			position := j.takeBlockedPosition()
-			if position >= 0 {
-				r := j.resolve(position, false)
-				if r.blocked {
-					continue
-				}
-				j.record(r)
-				if !j.commit([]collectionResolution{r}) {
-					return
-				}
-			}
 			continue
 		}
 		j.event("collection_prefix_committed", started, "through_position", indexes[len(indexes)-1]+1)

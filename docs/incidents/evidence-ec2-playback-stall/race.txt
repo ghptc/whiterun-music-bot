@@ -1,0 +1,2 @@
+ok  	whiterun/internal/player	71.362s
+ok  	whiterun/internal/discord	35.825s
