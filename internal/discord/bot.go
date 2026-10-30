@@ -42,19 +42,20 @@ type guild struct {
 	announcements       chan announcement
 }
 type Bot struct {
-	store     player.Store
-	client    *bot.Client
-	ctx       context.Context
-	cancel    context.CancelFunc
-	log       *slog.Logger
-	resolver  media.CollectionResolver
-	streamer  player.Streamer
-	mu        sync.Mutex
-	guilds    map[snowflake.ID]*guild
-	closing   bool
-	workers   sync.WaitGroup
-	searches  chan struct{}
-	voiceWake chan struct{}
+	localAdmin localAudioAdmin
+	store      player.Store
+	client     *bot.Client
+	ctx        context.Context
+	cancel     context.CancelFunc
+	log        *slog.Logger
+	resolver   media.CollectionResolver
+	streamer   player.Streamer
+	mu         sync.Mutex
+	guilds     map[snowflake.ID]*guild
+	closing    bool
+	workers    sync.WaitGroup
+	searches   chan struct{}
+	voiceWake  chan struct{}
 }
 
 func New(ctx context.Context, token string, appID snowflake.ID, log *slog.Logger) (*Bot, error) {
@@ -171,6 +172,9 @@ func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) e
 }
 
 func (b *Bot) Start(scope snowflake.ID) error {
+	if err := b.syncLocalAudioAdmin(b.ctx); err != nil {
+		return err
+	}
 	if err := b.SyncCommands(b.ctx, scope); err != nil {
 		return err
 	}

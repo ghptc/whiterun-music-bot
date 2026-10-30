@@ -168,3 +168,22 @@ A implementação comprova localmente o pipeline de arquivo até a fronteira Voi
 A fonte suporta WAV/FLAC administrados e duração fornecida pelo operador; não é um catálogo comercial, interface de upload ou fallback silencioso da playlist bloqueada. Não resolve o desafio YouTube, não substitui músicas existentes e não concede direitos musicais. A fixture foi gerada especificamente para não depender desses provedores.
 
 Conclusão local: implementação e procedimento preparados; nenhuma autorização de deploy ou de áudio real foi presumida. O incidente de produção permanece aberto até homologação efetiva, e eventual restauração da playlist original continua dependente de uma fonte autorizada e disponível.
+
+## 9. Interface administrativa para homologação manual
+
+A autorização posterior de deploy pediu acionamento pelo proprietário no Discord. A revisão complementar adiciona `/audio-check`, **sem opções de arquivo**, publicado somente na guild configurada. O harness com bot dedicado continua disponível, mas não é necessário para esse acionamento manual e não será executado pelo deploy.
+
+Configuração administrativa antes do startup:
+
+```text
+BARD_LOCAL_VALIDATION_GUILD_ID=404344088691867649
+BARD_LOCAL_VALIDATION_CHANNEL_ID=921489232374140978
+```
+
+Esse destino foi autorizado pelo usuário e verificado pela API Discord como Voice da guild indicada. O runtime inclui a fixture em `/opt/bard-validation/validation.flac`. Sem configuração de destino, a interface fica desabilitada. No startup, o bot consulta a aplicação/canal por REST, verifica guild e tipo de canal, resolve o proprietário real da aplicação (ou da equipe proprietária) e registra apenas esse comando administrativo na guild. Nenhuma dessas ações entra em Voice ou enfileira áudio.
+
+Uso manual: entrar no canal Voice autorizado e executar `/audio-check` com a conta proprietária da aplicação. A permissão padrão do comando exige administrador da guild; a autorização de execução também exige o ID do proprietário obtido do Discord, sem confiar em roles ou argumentos enviados pelo usuário. A resposta é efêmera. Se a conta proprietária não tiver permissão de ver o comando, a administração da guild deve conceder acesso ao comando exclusivamente a essa conta; isso não amplia a verificação no servidor.
+
+O comando recusa guild/canal divergentes, Voice já ocupada, faixa atual, fila pendente, resolução em andamento, estado bloqueado/halted, loop ou autoplay. Não limpa dados para tornar o teste possível. Uma invocação aceita conecta o mesmo bot e enfileira somente a fixture no GuildPlayer existente. Repetições são recusadas enquanto a sessão está anexada. Não há repetição automática da fixture ou comando de arquivo arbitrário. Depois da audição/EOF, `/leave` pode ser executado manualmente pelo usuário para encerrar a sessão de homologação; não é executado pelo deploy.
+
+Essa extensão muda o procedimento de preparação, não o estado da homologação: nenhum áudio real é considerado aprovado apenas pela implantação ou registro do comando. O SHA complementar e o estado operacional efetivo constam no relatório de deploy.

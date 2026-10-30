@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && useradd --create-home --uid 10001 bard
 COPY --from=deno /deno /usr/local/bin/deno
 COPY --from=build /out/bard /usr/local/bin/bard
+COPY internal/player/testdata/local-audio/validation.flac /opt/bard-validation/validation.flac
 # Docker DNS forwarding on some networks returns OPT-only answers to EDNS
 # queries. Disable EDNS for Go; retain normal DNS servers and IPv4/IPv6 dialing.
 ENV GODEBUG="netedns0=0" \

@@ -102,6 +102,10 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 		return
 	}
 	id := *e.GuildID()
+	if data.CommandName() == "audio-check" {
+		reply(b.adminAudioCheck(e))
+		return
+	}
 	// Count recognized, acknowledged guild commands once per interaction.
 	if metrics, ok := b.store.(interface {
 		RecordCatalogCommand(context.Context, string, string, string, time.Time) error

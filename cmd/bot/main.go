@@ -102,6 +102,16 @@ func run(log *slog.Logger) error {
 	if err != nil {
 		return err
 	}
+	if rawGuild, rawChannel := os.Getenv("BARD_LOCAL_VALIDATION_GUILD_ID"), os.Getenv("BARD_LOCAL_VALIDATION_CHANNEL_ID"); rawGuild != "" || rawChannel != "" {
+		localGuild, ge := snowflake.Parse(rawGuild)
+		localChannel, ce := snowflake.Parse(rawChannel)
+		if ge != nil || ce != nil {
+			return fmt.Errorf("invalid local validation destination")
+		}
+		if err := b.ConfigureLocalValidation(localGuild, localChannel); err != nil {
+			return err
+		}
+	}
 	b.ConfigureSpotify(configuredSpotify(log))
 	policy := media.DefaultMatchPolicy()
 	if raw := os.Getenv("SPOTIFY_MATCH_POLICY"); raw != "" {
