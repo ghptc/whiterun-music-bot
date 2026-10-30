@@ -115,6 +115,13 @@ func (b *Bot) ConfigureMatchPolicy(policy media.MatchPolicy) error {
 func (b *Bot) ConfigureSpotify(s *media.Spotify) { b.resolver.Spotify = s }
 
 func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) error {
+	if track.RequestedSource == "local" {
+		// Operator-only local descriptors bypass every provider/metadata path.
+		if metadata, ok := voice.(interface{ SetPlaybackTrack(media.Track) }); ok {
+			metadata.SetPlaybackTrack(track)
+		}
+		return b.streamer.Play(ctx, track, voice)
+	}
 	parent := ctx
 	ctx, cancel := context.WithTimeout(ctx, 45*time.Second)
 	defer cancel()

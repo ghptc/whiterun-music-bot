@@ -1,0 +1,10 @@
+{
+  "duration_seconds": 30,
+  "format": "flac",
+  "codec": "flac",
+  "sample_rate": 48000,
+  "channels": 2,
+  "bytes": 1558460,
+  "sha256": "0dc3540d8f2c19d09f30fabadbec072259e4f8378b378e2018a8e0691950f3f3",
+  "generator": "FFmpeg n9.0.2, original mathematical synthetic tone"
+}

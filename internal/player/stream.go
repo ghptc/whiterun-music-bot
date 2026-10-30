@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"strings"
 	"sync"
@@ -16,15 +17,46 @@ import (
 )
 
 type Streamer struct {
-	YTDLP, FFmpeg                     string
+	YTDLP, FFmpeg string
+	// LocalAudioDir is an absolute, operator-controlled, read-only audio root.
+	LocalAudioDir                     string
 	ResolveTimeout, FirstAudioTimeout time.Duration
 	IdleTimeout, DrainTimeout         time.Duration
 }
 
-// Play pipes yt-dlp into FFmpeg, then sends paced Opus packets. There are no
-// audio files, signed stream URLs in queue state, or shell commands.
+// Play feeds the existing FFmpeg/Opus pipeline from a provider or confined local
+// descriptor. Sources share pacing, pause, watchdogs, cancellation and cleanup.
 func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err error) {
 	started := time.Now()
+	local := t.RequestedSource == "local"
+	sentFrames := int64(0)
+	var firstLocalFrame time.Duration
+	if local {
+		if t.Timing == nil {
+			t.Timing = media.NewTiming(slog.Default())
+		}
+		id := t.URL
+		if !media.ValidLocalAudioID(id) {
+			id = "invalid"
+		}
+		t.Timing = t.Timing.Child("source", "local", "local_audio_id", id, "local_correlation_id", fmt.Sprintf("local/%d", started.UnixNano()))
+		defer func() {
+			event := "local_audio_completed"
+			if err != nil {
+				event = "local_audio_failed"
+			}
+			t.Timing.Event(event, started, "duration_ms", t.Duration.Milliseconds(), "progress_ms", (t.ResumeOffset + time.Duration(sentFrames)*20*time.Millisecond).Milliseconds(), "first_frame_ms", firstLocalFrame.Milliseconds(), "category", failureCategory(err), "audio_frames", sentFrames)
+		}()
+		if t.Duration <= 0 || t.Live {
+			return &StreamError{"local_audio_descriptor", errors.New("local audio requires a finite positive duration")}
+		}
+	}
+	sourceEvent := func(name string, start time.Time, attrs ...any) {
+		if local && strings.HasPrefix(name, "yt_dlp_") {
+			return
+		}
+		t.Timing.Event(name, start, attrs...)
+	}
 	if t.ResumeOffset < 0 || (t.Live && t.ResumeOffset > 0) {
 		return &StreamError{"resume_unsupported", errors.New("saved progress cannot be sought in this source; position retained for explicit skip")}
 	}
@@ -69,6 +101,19 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	defer output.Close()
 	yt := media.Command(ctx, s.YTDLP, append(media.BaseArgs(), "--print-to-file", "before_dl:"+streamResolvedMarker+" %(id)s", "/dev/stderr", "-f", "bestaudio/best", "-o", "-", "--", t.URL)...)
 
+	if local {
+		file, format, openErr := openLocalAudio(s.LocalAudioDir, t.URL)
+		if openErr != nil {
+			return openErr
+		}
+		defer file.Close()
+		// A format-forced, protocol-confined producer replaces yt-dlp. It only
+		// remuxes the held descriptor; decoding/Opus stays in the existing decoder.
+		yt = media.Command(ctx, s.FFmpeg, "-hide_banner", "-loglevel", "error", "-nostdin", "-protocol_whitelist", "pipe", "-f", format, "-i", "pipe:0", "-map", "0:a:0", "-c:a", "copy", "-f", "matroska", "pipe:1")
+		yt.Stdin = file
+		t.Timing.Event("local_audio_opened", started, "duration_ms", t.Duration.Milliseconds(), "progress_ms", t.ResumeOffset.Milliseconds(), "format", format, "first_frame_ms", 0)
+	}
+
 	// A successful producer can exit while its buffered bytes are still being
 	// paced downstream. Do not apply Command's short post-exit I/O drain limit.
 	// Track cancellation kills FFmpeg too, unblocking the pipe writer.
@@ -80,7 +125,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	sourceReady := make(chan struct{})
 	yt.Stdout = &firstWrite{writer: output, first: func() {
 		close(sourceReady)
-		t.Timing.Event("yt_dlp_first_byte", streamStart)
+		sourceEvent("yt_dlp_first_byte", streamStart)
 		markResolved()
 	}, written: func() { t.Timing.Event("ffmpeg_first_input", streamStart) }}
 
@@ -92,6 +137,9 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 		ffArgs = append(ffArgs[:7], append([]string{"-ss", fmt.Sprintf("%.3f", t.ResumeOffset.Seconds())}, ffArgs[7:]...)...)
 		t.Timing.Event("playback_resume_started", started, "confirmed_ms", t.ResumeOffset.Milliseconds(), "seek", "decode_and_discard")
 	}
+	if local {
+		ffArgs = append([]string{"-protocol_whitelist", "pipe", "-format_whitelist", "matroska,webm"}, ffArgs...)
+	}
 	ff := media.Command(ctx, s.FFmpeg, ffArgs...)
 	ff.Stdin = input
 	ffErr := &media.LimitedBuffer{Limit: 512, Tail: true}
@@ -102,8 +150,11 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	}
 	defer audio.Close()
 	t.Timing.Event("stream_resolve_start", streamStart)
-	t.Timing.Event("yt_dlp_start", streamStart, "purpose", "playback", "category", "stream", "started_at", streamStart.UTC(), "candidates", 1, "video_id", t.VideoID)
+	sourceEvent("yt_dlp_start", streamStart, "purpose", "playback", "category", "stream", "started_at", streamStart.UTC(), "candidates", 1, "video_id", t.VideoID)
 	if err = yt.Start(); err != nil {
+		if local {
+			return &StreamError{"local_audio_source_start", errors.New("local audio producer could not start")}
+		}
 		return &StreamError{"yt_dlp_start", fmt.Errorf("start yt-dlp: %w", err)}
 	}
 	ytDone := make(chan error, 1)
@@ -111,7 +162,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	go func() {
 		waitErr := yt.Wait()
 		ytFinished.Store(true)
-		t.Timing.Event("yt_dlp_complete", streamStart, "purpose", "playback", "candidates", 1, "error", waitErr, "cancel_reason", context.Cause(ctx))
+		sourceEvent("yt_dlp_complete", streamStart, "purpose", "playback", "candidates", 1, "error", waitErr, "cancel_reason", context.Cause(ctx))
 		ytDone <- waitErr
 		output.Close()
 	}()
@@ -153,7 +204,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 				return parent.Err()
 			}
 			if earlyErr != nil && exitCode(yt) > 0 {
-				return &StreamError{sourceFailure(ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), earlyErr, sourceFailure(ytErr.Data))}
+				return &StreamError{producerFailure(local, ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), earlyErr, producerFailure(local, ytErr.Data))}
 			}
 			if cause := context.Cause(ctx); cause != nil {
 				return cause
@@ -215,7 +266,6 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	}()
 	speaking := false
 	firstFrame := true
-	sentFrames := int64(0)
 	next := time.Now()
 	readErr := oggPackets(&firstRead{reader: audio, first: func() { t.Timing.Event("ffmpeg_first_output", streamStart) }}, func(packet []byte) error {
 		if firstFrame {
@@ -260,6 +310,10 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 		sentFrames++
 		if firstFrame {
 			t.Timing.Event("first_audio_frame", started)
+			if local {
+				firstLocalFrame = time.Since(started)
+				t.Timing.Event("local_audio_first_frame", started, "duration_ms", t.Duration.Milliseconds(), "progress_ms", (t.ResumeOffset + 20*time.Millisecond).Milliseconds(), "first_frame_ms", firstLocalFrame.Milliseconds())
+			}
 			firstFrame = false
 		}
 		next = next.Add(20 * time.Millisecond)
@@ -307,7 +361,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	}
 
 	ytReaped = true
-	if !streamTiming.resolved {
+	if !local && !streamTiming.resolved {
 		t.Timing.Event("stream_resolve_incomplete", streamStart, "error", ytWait)
 	}
 	if parent.Err() != nil {
@@ -324,7 +378,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	// A positive producer exit is the root cause when decoding its empty output
 	// also fails. Killed processes are cleanup consequences, not source diagnoses.
 	if ytWait != nil && exitCode(yt) > 0 {
-		failures = append([]error{&StreamError{sourceFailure(ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), ytWait, sourceFailure(ytErr.Data))}}, failures...)
+		failures = append([]error{&StreamError{producerFailure(local, ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), ytWait, producerFailure(local, ytErr.Data))}}, failures...)
 	}
 	if ffWait != nil && exitCode(ff) > 0 {
 		failures = append(failures, &StreamError{"ffmpeg_exit", fmt.Errorf("exit_code=%d: %w: %s", exitCode(ff), ffWait, media.SafeDiagnostic(ffErr.Data))})
@@ -337,7 +391,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	}
 	ytTail, ffTail := "", ""
 	if len(failures) > 0 {
-		ytTail, ffTail = sourceFailure(ytErr.Data), media.SafeDiagnostic(ffErr.Data)
+		ytTail, ffTail = producerFailure(local, ytErr.Data), media.SafeDiagnostic(ffErr.Data)
 	}
 	t.Timing.Event("audio_source_exit", streamStart, "video_id", t.VideoID, "yt_exit_code", exitCode(yt), "ffmpeg_exit_code", exitCode(ff), "category", failureCategory(errors.Join(failures...)), "yt_stderr_tail", ytTail, "ffmpeg_stderr_tail", ffTail)
 
@@ -483,4 +537,11 @@ func sourceFailure(stderr []byte) string {
 	default:
 		return "yt_dlp_exit"
 	}
+}
+
+func producerFailure(local bool, diagnostic []byte) string {
+	if local {
+		return "local_audio_source"
+	}
+	return sourceFailure(diagnostic)
 }

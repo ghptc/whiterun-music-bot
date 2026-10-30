@@ -1,0 +1,5 @@
+--- FAIL: TestREL024HealthDoesNotWaitForDeadlockedWorker (0.00s)
+    rel024_test.go:30: recovered lock still unhealthy
+FAIL
+FAIL	whiterun/internal/player	0.027s
+FAIL

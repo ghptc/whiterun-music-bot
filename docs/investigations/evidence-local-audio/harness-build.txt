@@ -1,0 +1,47 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from local-audio-validation.Dockerfile
+#1 transferring dockerfile: 859B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/whiterun-music-bot-bard:local-audio-test-env
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/whiterun-music-bot-bard:local-audio-validated
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 103B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 238B done
+#5 DONE 0.0s
+
+#6 [stage-1 1/3] FROM docker.io/library/whiterun-music-bot-bard:local-audio-validated@sha256:520d4d5e5222c3186c73d1c434462e5ae25c556fa575cdd148a36a2905005b3c
+#6 resolve docker.io/library/whiterun-music-bot-bard:local-audio-validated@sha256:520d4d5e5222c3186c73d1c434462e5ae25c556fa575cdd148a36a2905005b3c 0.0s done
+#6 DONE 0.0s
+
+#7 [validation-build 1/2] FROM docker.io/library/whiterun-music-bot-bard:local-audio-test-env@sha256:467a37d5f28ee7f8bce1d454bcd120bf5215a9475acd64e6ec91d69812ca5c0c
+#7 resolve docker.io/library/whiterun-music-bot-bard:local-audio-test-env@sha256:467a37d5f28ee7f8bce1d454bcd120bf5215a9475acd64e6ec91d69812ca5c0c 0.0s done
+#7 DONE 0.1s
+
+#8 [validation-build 2/2] RUN CGO_ENABLED=0 go test -c -o /out/local-audio-validation ./internal/discord
+#8 DONE 7.9s
+
+#9 [stage-1 2/3] COPY --from=validation-build /out/local-audio-validation /usr/local/bin/local-audio-validation
+#9 DONE 0.0s
+
+#10 [stage-1 3/3] COPY --chown=bard:bard internal/player/testdata/local-audio/validation.flac /opt/bard-validation/validation.flac
+#10 DONE 0.0s
+
+#11 exporting to image
+#11 exporting layers
+#11 exporting layers 0.2s done
+#11 exporting manifest sha256:2b82a56d2ef184e469df01342e8bd7285179cad939857a9ed1fd9c914b30a70e done
+#11 exporting config sha256:f6180cef51aff08c32b6588aaa03d424c0ac0dc8da235eea1482823833b4afbe done
+#11 exporting attestation manifest sha256:56a7b21e0a370075f61c2f4b5e4c1883668e0e30f5af927f904d0eadbcf7aa47 done
+#11 exporting manifest list sha256:750bfb08804c3ad3c62f4f260f4a04fd2a6d95aae20ad571838a6fd4998346e5 done
+#11 naming to docker.io/library/whiterun-music-bot-bard:local-audio-live-validation done
+#11 unpacking to docker.io/library/whiterun-music-bot-bard:local-audio-live-validation 0.1s done
+#11 DONE 0.3s

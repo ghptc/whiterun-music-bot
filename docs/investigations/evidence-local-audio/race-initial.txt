@@ -1,0 +1,10 @@
+ok  	whiterun/internal/media	3.833s
+--- FAIL: TestREL024HealthDoesNotWaitForDeadlockedWorker (0.00s)
+    rel024_test.go:30: recovered lock still unhealthy
+2026/10/30 03:52:24 INFO Spotify public page fallback stage=spotify_metadata source=public_webpage api_status=404
+2026/10/30 03:52:24 INFO Spotify metadata diagnostic stage=spotify_public_complete resolved=2 total=2
+2026/10/30 03:52:24 INFO Spotify metadata resolved stage=spotify_metadata source=public_webpage tracks=2
+FAIL
+FAIL	whiterun/internal/player	105.077s
+ok  	whiterun/internal/discord	39.610s
+FAIL

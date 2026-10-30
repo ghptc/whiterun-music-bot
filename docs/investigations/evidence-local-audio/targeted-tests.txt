@@ -1,0 +1,66 @@
+=== RUN   TestLocalAudioFullPipelineEOF
+    local_test.go:113: completed: duration_ms=30000 progress_ms=30020 first_frame_ms=69 frames=1506 elapsed=30.171092004s
+--- PASS: TestLocalAudioFullPipelineEOF (30.17s)
+=== RUN   TestLocalAudioPathSecurity
+=== RUN   TestLocalAudioPathSecurity/missing.flac
+=== RUN   TestLocalAudioPathSecurity/invalid.flac
+=== RUN   TestLocalAudioPathSecurity/wrong.wav
+=== RUN   TestLocalAudioPathSecurity/unsupported.mp3
+=== RUN   TestLocalAudioPathSecurity/denied.flac
+=== RUN   TestLocalAudioPathSecurity/outside.flac
+=== RUN   TestLocalAudioPathSecurity/inside.flac
+=== RUN   TestLocalAudioPathSecurity/fifo.flac
+=== RUN   TestLocalAudioPathSecurity/../validation.flac
+=== RUN   TestLocalAudioPathSecurity//etc/passwd
+=== RUN   TestLocalAudioPathSecurity/a;id.flac
+=== RUN   TestLocalAudioPathSecurity/$(id).flac
+=== RUN   TestLocalAudioPathSecurity/sub/valid.flac
+--- PASS: TestLocalAudioPathSecurity (0.00s)
+    --- PASS: TestLocalAudioPathSecurity/missing.flac (0.00s)
+    --- PASS: TestLocalAudioPathSecurity/invalid.flac (0.00s)
+    --- PASS: TestLocalAudioPathSecurity/wrong.wav (0.00s)
+    --- PASS: TestLocalAudioPathSecurity/unsupported.mp3 (0.00s)
+    --- PASS: TestLocalAudioPathSecurity/denied.flac (0.00s)
+    --- PASS: TestLocalAudioPathSecurity/outside.flac (0.00s)
+    --- PASS: TestLocalAudioPathSecurity/inside.flac (0.00s)
+    --- PASS: TestLocalAudioPathSecurity/fifo.flac (0.00s)
+    --- PASS: TestLocalAudioPathSecurity/../validation.flac (0.00s)
+    --- PASS: TestLocalAudioPathSecurity//etc/passwd (0.00s)
+    --- PASS: TestLocalAudioPathSecurity/a;id.flac (0.00s)
+    --- PASS: TestLocalAudioPathSecurity/$(id).flac (0.00s)
+    --- PASS: TestLocalAudioPathSecurity/sub/valid.flac (0.00s)
+=== RUN   TestLocalAudioGuildControls
+--- PASS: TestLocalAudioGuildControls (0.40s)
+=== RUN   TestLocalAudioCancellationRemovalAndProcessCleanup
+=== RUN   TestLocalAudioCancellationRemovalAndProcessCleanup/cancel
+=== RUN   TestLocalAudioCancellationRemovalAndProcessCleanup/remove
+=== RUN   TestLocalAudioCancellationRemovalAndProcessCleanup/resume
+--- PASS: TestLocalAudioCancellationRemovalAndProcessCleanup (1.36s)
+    --- PASS: TestLocalAudioCancellationRemovalAndProcessCleanup/cancel (0.04s)
+    --- PASS: TestLocalAudioCancellationRemovalAndProcessCleanup/remove (0.66s)
+    --- PASS: TestLocalAudioCancellationRemovalAndProcessCleanup/resume (0.66s)
+=== RUN   TestLocalAudioUnexpectedFFmpegExit
+--- PASS: TestLocalAudioUnexpectedFFmpegExit (0.02s)
+=== RUN   TestLocalAudioWAV
+--- PASS: TestLocalAudioWAV (0.24s)
+=== RUN   TestLocalAudioCorruptAndMissingTerminal
+=== RUN   TestLocalAudioCorruptAndMissingTerminal/missing.flac
+=== RUN   TestLocalAudioCorruptAndMissingTerminal/corrupt.flac
+--- PASS: TestLocalAudioCorruptAndMissingTerminal (0.02s)
+    --- PASS: TestLocalAudioCorruptAndMissingTerminal/missing.flac (0.00s)
+    --- PASS: TestLocalAudioCorruptAndMissingTerminal/corrupt.flac (0.02s)
+PASS
+ok  	whiterun/internal/player	32.230s
+=== RUN   TestLocalTrackDescriptor
+--- PASS: TestLocalTrackDescriptor (0.00s)
+PASS
+ok  	whiterun/internal/media	0.005s
+=== RUN   TestLocalAudioDiscordLive
+    local_audio_live_test.go:23: explicit real Voice authorization required
+--- SKIP: TestLocalAudioDiscordLive (0.00s)
+=== RUN   TestLocalAudioBypassesProviders
+--- PASS: TestLocalAudioBypassesProviders (0.42s)
+=== RUN   TestLocalAudioSlashControls
+--- PASS: TestLocalAudioSlashControls (0.45s)
+PASS
+ok  	whiterun/internal/discord	0.894s
