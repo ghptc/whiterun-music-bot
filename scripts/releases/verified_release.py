@@ -52,7 +52,7 @@ def command(argv, **kwargs):
 
 class GitHub:
     def get(self, path):
-        return json.loads(command(['gh', 'api', 'repos/' + REPO + '/' + path]))
+        return json.loads(command(['gh', 'api', 'repos/' + REPO + ('/' + path if path else '')]))
 
     def pages(self, path, key):
         rows = []

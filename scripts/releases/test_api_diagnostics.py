@@ -26,3 +26,8 @@ class APIDiagnosticsTests(unittest.TestCase):
         with patch.object(v.subprocess, 'run', return_value=subprocess.CompletedProcess([], 2, b'', b'network secret')):
             with self.assertRaisesRegex(v.Denied, 'exit=2 http=unknown category=api_or_transport'):
                 v.GitHub().get('branches/main')
+
+    def test_repository_metadata_has_no_trailing_slash(self):
+        with patch.object(v.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, b'{"id":99}', b'')) as run:
+            self.assertEqual(v.GitHub().get(''), {'id': 99})
+            self.assertEqual(run.call_args.args[0], ['gh', 'api', 'repos/ghptc/whiterun-music-bot'])
