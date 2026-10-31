@@ -1,0 +1,23 @@
+ok  	whiterun/cmd/bot	3.127s
+?   	whiterun/cmd/profile	[no test files]
+ok  	whiterun/cmd/qa-memory	2.050s
+?   	whiterun/cmd/qa-soak	[no test files]
+ok  	whiterun/internal/discord	39.162s
+ok  	whiterun/internal/logstore	6.921s
+ok  	whiterun/internal/media	15.502s
+ok  	whiterun/internal/perfgate	1.010s
+ok  	whiterun/internal/player	102.180s
+ok  	whiterun/internal/qasoak	1.103s
+PASS
+PASS
+PASS
+--- FAIL: TestQualitySQLiteRollback (0.32s)
+    --- FAIL: TestQualitySQLiteRollback/tracks/INSERT (0.05s)
+        quality_failure_test.go:43: injected write failure ignored
+    --- FAIL: TestQualitySQLiteRollback/tracks/UPDATE (0.05s)
+        quality_failure_test.go:43: injected write failure ignored
+FAIL
+FAIL	whiterun/internal/storage	17.685s
+?   	whiterun/scripts/fix025-resolve	[no test files]
+?   	whiterun/scripts/probe-spotify-recovery	[no test files]
+FAIL

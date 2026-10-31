@@ -397,7 +397,11 @@ func (p *GuildPlayer) run() {
 			p.finishProviderLocked(err, providerPermit)
 		}
 		played := p.startedSequence == sequence
-		networkRetry := !expectedCancel && err != nil && !(t.ResumeOffset > 0 && !played && category == "ffmpeg_exit") && ((played && (category == "ffmpeg_exit" || category == "yt_dlp_exit" || category == "source_http_403")) || category == "source_network" || category == "audio_stall" || category == "audio_eof" || errors.Is(err, context.DeadlineExceeded))
+		// Clean producer/decoder EOF before the advertised duration is a terminal
+		// source failure, not evidence of a transient network interruption. Retrying
+		// it from its exhausted offset cannot make progress and starves the next
+		// ready entry. Keep the stream error; advance through normal failure handling.
+		networkRetry := !expectedCancel && err != nil && !(t.ResumeOffset > 0 && !played && category == "ffmpeg_exit") && ((played && (category == "ffmpeg_exit" || category == "yt_dlp_exit" || category == "source_http_403")) || category == "source_network" || category == "audio_stall" || errors.Is(err, context.DeadlineExceeded))
 		if networkRetry {
 			retryTrack := copyTrack(*p.current)
 			retryTrack.ResumeOffset = p.confirmedOffset

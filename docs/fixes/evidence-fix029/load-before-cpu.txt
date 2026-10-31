@@ -1,0 +1,24 @@
+File: discord.test
+Build ID: 3c56ca10e3856f7ebb3be843cb1011e595225a7d
+Type: cpu
+Time: 2026-10-31 14:38:36 -03
+Duration: 46.45s, Total samples = 54.46s (117.25%)
+Showing nodes accounting for 0.91s, 1.67% of 54.46s total
+Dropped 1325 nodes (cum <= 0.27s)
+Showing top 15 nodes out of 336
+      flat  flat%   sum%        cum   cum%
+     0.03s 0.055% 0.055%     39.57s 72.66%  database/sql.withLock
+         0     0% 0.055%     33.12s 60.82%  whiterun/internal/player.(*GuildPlayer).persistLocked
+     0.03s 0.055%  0.11%     32.82s 60.26%  whiterun/internal/storage.(*DB).SaveGuild
+         0     0%  0.11%     30.06s 55.20%  database/sql.(*DB).execDC
+     0.03s 0.055%  0.17%     29.93s 54.96%  database/sql.(*DB).execDC.func2
+     0.02s 0.037%   0.2%     29.74s 54.61%  database/sql.ctxDriverExec
+         0     0%   0.2%     29.72s 54.57%  modernc.org/sqlite.(*conn).ExecContext
+     0.01s 0.018%  0.22%     29.72s 54.57%  modernc.org/sqlite.(*conn).exec
+     0.02s 0.037%  0.26%     29.54s 54.24%  modernc.org/sqlite.(*stmt).exec
+     0.01s 0.018%  0.28%     27.68s 50.83%  database/sql.(*Tx).ExecContext
+     0.01s 0.018%  0.29%     23.63s 43.39%  modernc.org/sqlite/lib.Xsqlite3_step
+     0.03s 0.055%  0.35%     23.51s 43.17%  modernc.org/sqlite/lib._sqlite3Step
+     0.69s  1.27%  1.62%     21.55s 39.57%  modernc.org/sqlite/lib._sqlite3VdbeExec
+         0     0%  1.62%     19.04s 34.96%  whiterun/internal/player.(*GuildPlayer).run
+     0.03s 0.055%  1.67%     15.17s 27.86%  modernc.org/sqlite.(*stmt).exec.func2

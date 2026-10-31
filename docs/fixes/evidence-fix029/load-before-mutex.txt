@@ -1,0 +1,23 @@
+File: discord.test
+Build ID: 3c56ca10e3856f7ebb3be843cb1011e595225a7d
+Type: delay
+Time: 2026-10-31 14:39:23 -03
+Showing nodes accounting for 116.03s, 99.93% of 116.11s total
+Dropped 582 nodes (cum <= 0.58s)
+Showing top 15 nodes out of 21
+      flat  flat%   sum%        cum   cum%
+   116.03s 99.93% 99.93%    116.03s 99.93%  sync.(*Mutex).Unlock
+         0     0% 99.93%     44.74s 38.53%  whiterun/internal/player.(*GuildPlayer).run
+         0     0% 99.93%     44.74s 38.53%  whiterun/internal/player.New.gowrap1
+         0     0% 99.93%     41.86s 36.05%  whiterun/internal/discord.(*Bot).commandAt
+         0     0% 99.93%     41.86s 36.05%  whiterun/internal/discord.TestInstantPlaybackGate.func1.2
+         0     0% 99.93%     41.86s 36.05%  whiterun/internal/player.(*GuildPlayer).BeginCollection
+         0     0% 99.93%     41.85s 36.05%  whiterun/internal/discord.TestInstantPlaybackGate.func1.gowrap1
+         0     0% 99.93%     28.93s 24.92%  whiterun/internal/player.(*CollectionJob).run
+         0     0% 99.93%     28.93s 24.92%  whiterun/internal/player.(*GuildPlayer).BeginCollection.func1
+         0     0% 99.93%     28.89s 24.88%  whiterun/internal/player.(*CollectionJob).commit
+         0     0% 99.93%      5.04s  4.34%  sync.(*Once).Do (inline)
+         0     0% 99.93%      5.04s  4.34%  sync.(*Once).doSlow
+         0     0% 99.93%      5.03s  4.33%  whiterun/internal/discord.(*Bot).play
+         0     0% 99.93%      5.03s  4.33%  whiterun/internal/player.callPlay
+         0     0% 99.93%      5.03s  4.33%  whiterun/internal/player.Streamer.Play

@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -141,6 +142,19 @@ func (s *DB) SaveGuild(ctx context.Context, id string, state player.DurableState
 	if state.Current != nil {
 		tracks = append(tracks, *state.Current)
 	}
+	// Bound statement size and amortize SQL compilation across occurrences.
+	// Keep every original UPSERT (including triggers) in the same transaction.
+	const trackBatch = 128
+	args := make([]any, 0, 2*trackBatch)
+	flushTracks := func() error {
+		if len(args) == 0 {
+			return nil
+		}
+		values := strings.TrimSuffix(strings.Repeat("(?,?),", len(args)/2), ",")
+		_, err := tx.ExecContext(ctx, "INSERT INTO tracks(identity,metadata) VALUES"+values+" ON CONFLICT(identity) DO UPDATE SET metadata=excluded.metadata", args...)
+		args = args[:0]
+		return err
+	}
 	for _, t := range tracks {
 		// Progress belongs to the guild checkpoint, not catalog identity.
 		t.ResumeOffset = 0
@@ -149,9 +163,15 @@ func (s *DB) SaveGuild(ctx context.Context, id string, state player.DurableState
 			return err
 		}
 		key := fmt.Sprintf("%x", sha256.Sum256(b))
-		if _, err = tx.ExecContext(ctx, "INSERT INTO tracks(identity,metadata) VALUES(?,?) ON CONFLICT(identity) DO UPDATE SET metadata=excluded.metadata", key, string(b)); err != nil {
-			return err
+		args = append(args, key, string(b))
+		if len(args) == 2*trackBatch {
+			if err := flushTracks(); err != nil {
+				return err
+			}
 		}
+	}
+	if err := flushTracks(); err != nil {
+		return err
 	}
 	return tx.Commit()
 }

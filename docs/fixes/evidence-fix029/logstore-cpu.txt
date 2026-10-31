@@ -1,0 +1,19 @@
+File: fix029-logstore-profile.test
+Build ID: 0cebb300d40adeaeb825f2db7a3efe838a9797d1
+Type: cpu
+Time: 2026-10-31 14:43:03 -03
+Duration: 11.99s, Total samples = 14.09s (117.54%)
+Showing nodes accounting for 0.01s, 0.071% of 14.09s total
+Dropped 554 nodes (cum <= 0.07s)
+Showing top 10 nodes out of 201
+      flat  flat%   sum%        cum   cum%
+         0     0%     0%      8.34s 59.19%  whiterun/internal/logstore.(*Store).run
+         0     0%     0%      8.33s 59.12%  whiterun/internal/logstore.(*Store).run.func1
+         0     0%     0%      8.33s 59.12%  whiterun/internal/logstore.(*Store).write
+         0     0%     0%      7.89s 56.00%  database/sql.(*DB).retry
+     0.01s 0.071% 0.071%      6.60s 46.84%  modernc.org/sqlite.(*stmt).exec
+         0     0% 0.071%      6.48s 45.99%  database/sql.(*Stmt).ExecContext
+         0     0% 0.071%      6.48s 45.99%  database/sql.(*Stmt).ExecContext.func1
+         0     0% 0.071%      6.48s 45.99%  database/sql.resultFromStatement
+         0     0% 0.071%      6.46s 45.85%  database/sql.ctxDriverStmtExec
+         0     0% 0.071%      6.46s 45.85%  modernc.org/sqlite.(*stmt).ExecContext
