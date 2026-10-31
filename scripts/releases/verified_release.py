@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 import subprocess
 import tempfile
+import time
 import zipfile
 
 REPO = 'ghptc/whiterun-music-bot'
@@ -126,11 +127,17 @@ def ci_evidence(api, sha, run_id=None):
     verified_main(api, sha)
     runs = api.pages('actions/workflows/release-ci.yml/runs?event=push&head_sha=' + sha, 'workflow_runs')
     require(runs, 'no protected-main CI for exact SHA')
+    runs = [r for r in runs if r.get('head_branch') == 'main' and r.get('head_sha') == sha]
+    require(runs, 'no protected-main CI for exact SHA')
     latest = max(runs, key=lambda r: int(r['id']))
     require(run_id is None or int(run_id) == latest['id'], 'stale CI run')
     run = workflow_run(api, latest['id'], CI, sha, {'push'})
     jobs = api.pages(f"actions/runs/{run['id']}/attempts/{run['run_attempt']}/jobs", 'jobs')
     records = api.pages(f'commits/{sha}/check-runs?filter=all', 'check_runs')
+    # Same-SHA tag runs must not replace evidence from the selected main CI.
+    records = [c for c in records if c['name'] not in CHECKS
+               or not c.get('details_url')
+               or c['details_url'].startswith(f"https://github.com/{REPO}/actions/runs/{run['id']}/job/")]
     proof = []
     for name in CHECKS:
         matches = [j for j in jobs if j['name'] == name]
@@ -235,11 +242,51 @@ def production_approval(api, run_id, release_id, rollback_id, expected_current, 
             'production environment has not approved this run')
 
 
+def wait_required_checks(api, sha, timeout=900, interval=10, clock=time.monotonic, sleep=time.sleep):
+    require(0 <= timeout <= 900 and 0 < interval <= 30, 'invalid check wait bounds')
+    deadline = clock() + timeout
+    while True:
+        require(verified_main(api, sha) == sha, 'only current protected main may publish')
+        rules = api.get('rules/branches/main')
+        required = {(c['context'], c.get('integration_id')) for r in rules
+                    if r['type'] == 'required_status_checks'
+                    for c in r['parameters']['required_status_checks']}
+        records = api.pages(f'commits/{sha}/check-runs?filter=all', 'check_runs')
+        runs = api.pages('actions/workflows/release-ci.yml/runs?event=push&head_sha=' + sha, 'workflow_runs')
+        runs = [r for r in runs if r.get('head_branch') == 'main' and r.get('head_sha') == sha]
+        pending = not runs
+        if runs:
+            ci = workflow_run(api, max(runs, key=lambda r: int(r['id']))['id'], CI, sha, {'push'}, completed=False)
+            if ci['status'] == 'completed':
+                require(ci.get('conclusion') == 'success', 'terminal main CI failure')
+            else:
+                require(ci['status'] in ('queued', 'in_progress', 'waiting', 'pending', 'requested'), 'unknown CI state')
+                pending = True
+        for name, app in required:
+            candidates = [c for c in records if c['name'] == name and c.get('app', {}).get('id') == app]
+            if not candidates:
+                pending = True
+                continue
+            check = max(candidates, key=lambda c: c['id'])
+            require(check.get('head_sha') == sha, 'wrong check SHA')
+            if check['status'] == 'completed':
+                require(check.get('conclusion') == 'success', 'terminal required check: ' + name)
+            else:
+                require(check['status'] in ('queued', 'in_progress', 'waiting', 'pending', 'requested'), 'unknown check state')
+                pending = True
+        if not pending:
+            return
+        require(clock() < deadline, 'required checks timed out')
+        sleep(min(interval, max(0, deadline - clock())))
+
+
 def publish(args):
     require(os.environ.get('GITHUB_ACTIONS') == 'true' and os.environ.get('GITHUB_REF') == 'refs/heads/main', 'GitHub protected-main build required')
     require(os.environ.get('GITHUB_SHA') == args.sha, 'workflow/source SHA mismatch')
     api = GitHub()
     require(verified_main(api, args.sha) == args.sha, 'only current protected main may publish')
+    if args.phase == 'check':
+        wait_required_checks(api, args.sha)
     proof = ci_evidence(api, args.sha, args.ci_run)
     verified_checkout(args.source, args.sha)
     if args.phase == 'check':
