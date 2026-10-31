@@ -1,0 +1,116 @@
+{
+  "date": "2026-10-31",
+  "remote_main": "4598f4904b4f8b2ff5f03d5cec12133c8c82c357",
+  "original_local_head": "62a44ef2a7559318931af18eeabc1c21debb1f0f",
+  "pending_commits": 11,
+  "opt026_github_runs": 0,
+  "yt027_github_runs": 0,
+  "original_ruleset_unchanged": true,
+  "ruleset": {
+    "id": 26275718,
+    "name": "REL-028 verified releases",
+    "enforcement": "active",
+    "conditions": {
+      "ref_name": {
+        "exclude": [],
+        "include": [
+          "refs/heads/main"
+        ]
+      }
+    },
+    "rules": [
+      {
+        "type": "required_status_checks",
+        "parameters": {
+          "strict_required_status_checks_policy": true,
+          "do_not_enforce_on_create": false,
+          "required_status_checks": [
+            {
+              "context": "release-unit",
+              "integration_id": 15368
+            },
+            {
+              "context": "release-race",
+              "integration_id": 15368
+            },
+            {
+              "context": "release-contracts",
+              "integration_id": 15368
+            },
+            {
+              "context": "release-security",
+              "integration_id": 15368
+            },
+            {
+              "context": "release-docker",
+              "integration_id": 15368
+            },
+            {
+              "context": "release-ci",
+              "integration_id": 15368
+            },
+            {
+              "context": "deterministic-ttfa",
+              "integration_id": 15368
+            }
+          ]
+        }
+      },
+      {
+        "type": "pull_request",
+        "parameters": {
+          "required_approving_review_count": 1,
+          "dismiss_stale_reviews_on_push": true,
+          "required_reviewers": [],
+          "require_code_owner_review": false,
+          "require_last_push_approval": true,
+          "required_review_thread_resolution": true,
+          "require_extra_approval_for_unattributed_changes": true,
+          "allowed_merge_methods": [
+            "merge",
+            "squash",
+            "rebase"
+          ]
+        }
+      },
+      {
+        "type": "deletion"
+      },
+      {
+        "type": "non_fast_forward"
+      }
+    ],
+    "bypass_actors": []
+  },
+  "production_environment": {
+    "name": "production",
+    "can_admins_bypass": false,
+    "deployment_branch_policy": {
+      "protected_branches": true,
+      "custom_branch_policies": false
+    }
+  },
+  "production_reviewer": "ghptc",
+  "production": {
+    "revision": "d6ddec304c64c6a1170fda9e118061a0ead8814d",
+    "image_id": "sha256:cfb1a0bffc7d59f04945feb0029d4530e66f16c3df3d1b647e37d3e0c7a62bbd",
+    "running": true,
+    "restart_count": 0,
+    "classification": "legacy-unverified"
+  },
+  "production_mutations": false,
+  "final_local_validation": {
+    "go_test": 0,
+    "go_vet": 0,
+    "race": 0,
+    "docker": 0,
+    "govulncheck": 0,
+    "module_verification": 0,
+    "release_policy": 0,
+    "contracts": 0,
+    "sqlite_contracts": 0,
+    "actionlint": 0
+  },
+  "performance_gate_required": true,
+  "release_ready": false
+}

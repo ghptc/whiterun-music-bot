@@ -23,6 +23,9 @@ func discoverSpotify(ctx context.Context, t Track, p MatchPolicy, query string, 
 			reason = m.Reason
 		} else if err != nil {
 			reason = "infrastructure_or_context"
+			if category := ExtractionCategory(err); category != "" {
+				reason = category
+			}
 		}
 		timing.Event("spotify_resolution", started, "spotify_track_id", t.SpotifyID, "search_attempts", attempts, "verification_attempts", verified, "reason", reason, "selected_video_id", chosen.ID)
 	}()
@@ -33,7 +36,9 @@ func discoverSpotify(ctx context.Context, t Track, p MatchPolicy, query string, 
 			return
 		}
 		attempts++
+		searchStarted := time.Now()
 		entries, e := search(target, purpose)
+		timing.Event("candidate_search_completed", searchStarted, "spotify_track_id", t.SpotifyID, "strategy", purpose, "candidates", len(entries), "success", e == nil)
 		if e != nil {
 			failures = append(failures, e)
 			return
@@ -58,10 +63,17 @@ func discoverSpotify(ctx context.Context, t Track, p MatchPolicy, query string, 
 			return v.c, v.err
 		}
 		verified++
+		verificationStarted := time.Now()
+		timing.Event("metadata_recovery_attempted", verificationStarted, "spotify_track_id", t.SpotifyID, "video_id", c.ID, "strategy", "full_recording_metadata")
 		full, e := verify(c)
+		decision := CompareSpotify(t, full, p)
 		if e == nil && full.ID != c.ID {
 			e = errors.New("YouTube returned a different video ID")
 		}
+		if e != nil {
+			decision = MatchDecision{Reason: "infrastructure_or_context"}
+		}
+		timing.Event("candidate_verification_completed", verificationStarted, "spotify_track_id", t.SpotifyID, "video_id", c.ID, "strategy", "full_recording_metadata", "reason", decision.Reason, "result", decision.Status, "success", e == nil)
 		cache[c.ID] = verification{full, e}
 		return full, e
 	}
@@ -80,10 +92,18 @@ func discoverSpotify(ctx context.Context, t Track, p MatchPolicy, query string, 
 			return Candidate{}, ctx.Err()
 		}
 		lookup(q.target, q.purpose, q.music)
+		for _, failure := range failures {
+			if ProviderUnavailable(failure) {
+				return Candidate{}, failure
+			}
+		}
 		if len(pools) == 0 {
 			continue
 		}
 		chosen, err = selectSpotifyPolicy(ctx, t, p, deduplicateCandidates(pools...), check)
+		if ProviderUnavailable(err) {
+			return Candidate{}, err
+		}
 		if err == nil {
 			return chosen, nil
 		}

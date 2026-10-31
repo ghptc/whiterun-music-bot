@@ -1,0 +1,6 @@
+=== RUN   TestREL024FrozenRealFFmpegIsKilledAndReaped
+    rel024_test.go:177: real FFmpeg SIGSTOP: detection/cleanup=998.331736ms; pid reaped; error=audio_stall: no audio progress within idle deadline
+        audio stream: read |0: file already closed
+--- PASS: TestREL024FrozenRealFFmpegIsKilledAndReaped (1.00s)
+PASS
+ok  	whiterun/internal/player	1.002s

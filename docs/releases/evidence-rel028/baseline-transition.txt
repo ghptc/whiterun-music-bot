@@ -1,0 +1,6 @@
+=== RUN   TestInstantPlaybackTransitionGate
+    instant_playback_gate_test.go:617: ready EOF transition stalled
+--- FAIL: TestInstantPlaybackTransitionGate (8.10s)
+FAIL
+FAIL	whiterun/internal/discord	8.100s
+FAIL

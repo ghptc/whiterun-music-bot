@@ -1,0 +1,100 @@
+name: Release CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release-ci-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  unit:
+    name: release-unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+      - name: Local FFmpeg runtime
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - run: go vet ./...
+      - run: go test ./... -count=1 -timeout=8m
+      - run: python3 -B -m unittest discover -s scripts/releases -p 'test_*.py' -v
+  race:
+    name: release-race
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+      - name: Local FFmpeg runtime
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - run: go test -race ./internal/media ./internal/player ./internal/discord ./internal/storage -count=1 -timeout=8m
+  contracts:
+    name: release-contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+      - name: Local FFmpeg runtime
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Identity, provider recovery, FIX-025 and REL-024
+        run: go test ./internal/media ./internal/player ./internal/discord -run 'TestOPT026|TestProvider|TestFIX025|TestREL024' -count=1 -v -timeout=8m
+      - name: Real SQLite integrity, quota and alert regressions
+        run: go test ./internal/storage ./internal/logstore ./internal/discord -run 'TestDB022|TestRetention|Test.*Quota|TestFIX025RealCrash' -count=1 -v -timeout=5m
+  security:
+    name: release-security
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+      - name: Local FFmpeg runtime
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - run: go mod verify
+      - run: go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
+      - run: govulncheck ./...
+  docker:
+    name: release-docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Build only; feature artifacts cannot be published or deployed
+        run: docker build --tag bard-ci:${{ github.sha }} .
+  gate:
+    name: release-ci
+    if: always()
+    needs: [unit, race, contracts, security, docker]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every mandatory job must have succeeded
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PYTHON'
+          import json, os
+          results = json.loads(os.environ['RESULTS'])
+          assert len(results) == 5
+          assert all(job['result'] == 'success' for job in results.values()), results
+          PYTHON

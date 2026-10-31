@@ -8,6 +8,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"net/url"
+	"strings"
+	"sync"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -18,15 +21,38 @@ import (
 //go:embed migrations/*.sql
 var migrations embed.FS
 
-type DB struct{ db *sql.DB }
+type DB struct {
+	db        *sql.DB
+	alertMu   sync.Mutex
+	physical  *physicalQuota
+	closeOnce sync.Once
+	closeErr  error
+}
 
-func Open(path string) (*DB, error) {
+func Open(path string) (*DB, error) { return OpenWithPhysicalQuota(path, 0) }
+
+func OpenWithPhysicalQuota(path string, limit int64) (*DB, error) {
+	quota, err := openPhysicalQuota(path, limit)
+	if err != nil {
+		return nil, err
+	}
+	success := false
+	defer func() {
+		if !success {
+			quota.close()
+		}
+	}()
+	uri := url.URL{Scheme: "file", Path: quota.path}
+	params := url.Values{"vfs": {quota.name}, "_pragma": {"foreign_keys(ON)", "busy_timeout(3000)", "temp_store(MEMORY)", "mmap_size(0)", "synchronous(FULL)"}}
+	uri.RawQuery = params.Encode()
+	path = uri.String()
+
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		return nil, err
 	}
 	db.SetMaxOpenConns(1)
-	s := &DB{db: db}
+	s := &DB{db: db, physical: quota}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	for _, q := range []string{"PRAGMA foreign_keys=ON", "PRAGMA busy_timeout=3000", "PRAGMA journal_mode=WAL"} {
@@ -39,9 +65,13 @@ func Open(path string) (*DB, error) {
 		db.Close()
 		return nil, err
 	}
+	success = true
 	return s, nil
 }
-func (s *DB) Close() error { return s.db.Close() }
+func (s *DB) Close() error {
+	s.closeOnce.Do(func() { s.closeErr = s.db.Close(); s.physical.close() })
+	return s.closeErr
+}
 func (s *DB) migrate(ctx context.Context) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -84,6 +114,23 @@ func (s *DB) migrate(ctx context.Context) error {
 	return tx.Commit()
 }
 func (s *DB) SaveGuild(ctx context.Context, id string, state player.DurableState) error {
+	return s.saveGuild(ctx, id, state, state.Queue, nil)
+}
+
+// SavePlaybackCheckpoint checkpoints an already-persisted queue at selection/start.
+// The player serializes queue writes before this call; only current metadata
+// changed. The checkpoint, history and optional new play event commit together.
+func (s *DB) SavePlaybackCheckpoint(ctx context.Context, id string, state player.DurableState, record *media.Track) error {
+	return s.saveGuild(ctx, id, state, nil, record)
+}
+
+// SaveResolvedGuild persists a resolution owner's metadata delta with the full
+// queue snapshot. Other positions were saved when they were reserved/mutated.
+func (s *DB) SaveResolvedGuild(ctx context.Context, id string, state player.DurableState, changed []media.Track) error {
+	return s.saveGuild(ctx, id, state, changed, nil)
+}
+
+func (s *DB) saveGuild(ctx context.Context, id string, state player.DurableState, changed []media.Track, record *media.Track) error {
 	data, err := json.Marshal(state)
 	if err != nil {
 		return err
@@ -108,17 +155,47 @@ func (s *DB) SaveGuild(ctx context.Context, id string, state player.DurableState
 			return err
 		}
 	}
-	tracks := append([]media.Track(nil), state.Queue...)
+	tracks := append([]media.Track(nil), changed...)
 	if state.Current != nil {
 		tracks = append(tracks, *state.Current)
 	}
+	// Bound statement size and amortize SQL compilation across occurrences.
+	// Keep every original UPSERT (including triggers) in the same transaction.
+	const trackBatch = 128
+	args := make([]any, 0, 2*trackBatch)
+	flushTracks := func() error {
+		if len(args) == 0 {
+			return nil
+		}
+		values := strings.TrimSuffix(strings.Repeat("(?,?),", len(args)/2), ",")
+		_, err := tx.ExecContext(ctx, "INSERT INTO tracks(identity,metadata) VALUES"+values+" ON CONFLICT(identity) DO UPDATE SET metadata=excluded.metadata", args...)
+		args = args[:0]
+		return err
+	}
 	for _, t := range tracks {
+		// Progress belongs to the guild checkpoint, not catalog identity.
+		t.ResumeOffset = 0
 		b, err := json.Marshal(t)
 		if err != nil {
 			return err
 		}
 		key := fmt.Sprintf("%x", sha256.Sum256(b))
-		if _, err = tx.ExecContext(ctx, "INSERT INTO tracks(identity,metadata) VALUES(?,?) ON CONFLICT(identity) DO UPDATE SET metadata=excluded.metadata", key, string(b)); err != nil {
+		args = append(args, key, string(b))
+		if len(args) == 2*trackBatch {
+			if err := flushTracks(); err != nil {
+				return err
+			}
+		}
+	}
+	if err := flushTracks(); err != nil {
+		return err
+	}
+	if record != nil {
+		b, err := json.Marshal(*record)
+		if err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, "INSERT INTO playback_events(guild_id,started_at,metadata) VALUES(?,?,?)", id, time.Now().UnixNano(), string(b)); err != nil {
 			return err
 		}
 	}

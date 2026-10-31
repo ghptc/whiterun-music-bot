@@ -20,6 +20,13 @@ import (
 
 func main() { os.Exit(mainExit()) }
 func mainExit() int {
+	if len(os.Args) > 1 && os.Args[1] == "healthcheck" {
+		if err := healthcheck(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return 1
+		}
+		return 0
+	}
 	console := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	if len(os.Args) > 1 && os.Args[1] == "logs" {
 		if err := logsCommand(os.Args[2:], os.Stdout, os.Stderr); err != nil {
@@ -50,6 +57,12 @@ func configuredSpotify(log *slog.Logger) *media.Spotify {
 }
 
 func run(log *slog.Logger) error {
+	var shutdownTimer *time.Timer
+	defer func() {
+		if shutdownTimer != nil {
+			shutdownTimer.Stop()
+		}
+	}()
 	if len(os.Args) > 1 && os.Args[1] == "spotify-diagnose" {
 		return diagnoseSpotify(log, os.Args[2:])
 	}
@@ -89,6 +102,19 @@ func run(log *slog.Logger) error {
 	if err != nil {
 		return err
 	}
+	if rawGuild, rawChannel := os.Getenv("BARD_LOCAL_VALIDATION_GUILD_ID"), os.Getenv("BARD_LOCAL_VALIDATION_CHANNEL_ID"); rawGuild != "" || rawChannel != "" {
+		localGuild, ge := snowflake.Parse(rawGuild)
+		localChannel, ce := snowflake.Parse(rawChannel)
+		if ge != nil || ce != nil {
+			return fmt.Errorf("invalid local validation destination")
+		}
+		if err := b.ConfigureLocalValidation(localGuild, localChannel); err != nil {
+			return err
+		}
+	}
+	if err := configureYouTubeEfficiency(b); err != nil {
+		return err
+	}
 	b.ConfigureSpotify(configuredSpotify(log))
 	policy := media.DefaultMatchPolicy()
 	if raw := os.Getenv("SPOTIFY_MATCH_POLICY"); raw != "" {
@@ -114,7 +140,25 @@ func run(log *slog.Logger) error {
 	if err := b.Start(guild); err != nil {
 		return fmt.Errorf("Discord startup: %w", err)
 	}
+	go monitorRuntime(ctx, slog.New(slog.NewJSONHandler(os.Stdout, nil)), func(probe context.Context) runtimeHealth {
+		h := runtimeHealth{CheckedAt: time.Now(), ProcessAlive: true, Runtime: b.Health()}
+		h.SQLiteAccessible = db.CheckHealth(probe) == nil
+		h.SessionRecoveryAvailable = h.SQLiteAccessible
+		for _, ph := range h.Runtime.Players {
+			if ph.RecoveryExhausted {
+				h.SessionRecoveryAvailable = false
+			}
+		}
+		return h
+	}, func() { os.Exit(1) }, path+".supervision.json")
 	<-ctx.Done()
+	// A dependency ignoring cancellation must not hold SIGTERM forever. The
+	// SQLite WAL and last committed queue remain recoverable after forced exit.
+	shutdownTimer = time.AfterFunc(25*time.Second, func() {
+		slog.New(slog.NewJSONHandler(os.Stderr, nil)).Error("process_supervision_triggered", "component", "shutdown", "cause", "grace_deadline_exceeded")
+		os.Exit(1)
+	})
+	log.Info("container_shutdown_requested", "reason", "signal_or_runtime_cancellation")
 	log.Info("shutting down")
 	return nil
 }

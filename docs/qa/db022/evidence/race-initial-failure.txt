@@ -1,0 +1,16 @@
+ok  	whiterun/cmd/bot	1.049s
+?   	whiterun/cmd/profile	[no test files]
+ok  	whiterun/cmd/qa-memory	1.420s
+?   	whiterun/cmd/qa-soak	[no test files]
+ok  	whiterun/internal/discord	33.129s
+ok  	whiterun/internal/logstore	6.246s
+ok  	whiterun/internal/media	2.407s
+ok  	whiterun/internal/perfgate	1.009s
+ok  	whiterun/internal/player	61.433s
+ok  	whiterun/internal/qasoak	1.060s
+--- FAIL: TestDB022OfflinePlaylistResolver (0.45s)
+    db022_test.go:261: Spotify forbidden during SQLite reconstruction
+FAIL
+FAIL	whiterun/internal/storage	6.768s
+?   	whiterun/scripts/probe-spotify-recovery	[no test files]
+FAIL

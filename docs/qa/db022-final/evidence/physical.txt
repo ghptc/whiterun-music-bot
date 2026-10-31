@@ -1,0 +1,25 @@
+=== RUN   TestDB022PhysicalCrashWithPendingWAL
+    db022_crash_test.go:111: SIGKILL retained WAL=16512 bytes
+--- PASS: TestDB022PhysicalCrashWithPendingWAL (0.03s)
+=== RUN   TestDB022PhysicalQuotaWALRecoveryAndConcurrentWrites
+    physical_test.go:133: limit=1048576 peak_files=512000 restart_usage={Files:266240 Reserved:331776 Limit:1048576 Blocked:false Peak:266240}; queue=10 integrity=ok
+--- PASS: TestDB022PhysicalQuotaWALRecoveryAndConcurrentWrites (0.06s)
+=== RUN   TestDB022PhysicalQuotaRejectsAtomicOversizedBatch
+    physical_test.go:168: oversized batch rolled back; files=249856 limit=524288 critical persisted
+--- PASS: TestDB022PhysicalQuotaRejectsAtomicOversizedBatch (0.05s)
+=== RUN   TestDB022PhysicalConcurrentWriterHelper
+    physical_test.go:174: subprocess only
+--- SKIP: TestDB022PhysicalConcurrentWriterHelper (0.00s)
+=== RUN   TestDB022PhysicalQuotaAcrossProcesses
+PASS
+PASS
+PASS
+    physical_test.go:243: three real writer processes; limit=2097152 final=851968 queue=10
+--- PASS: TestDB022PhysicalQuotaAcrossProcesses (0.09s)
+PASS
+ok  	whiterun/internal/storage	0.232s
+=== RUN   TestDB022PhysicalQuotaDiscordHTTP
+    physical_alerts_test.go:147: physical thresholds: warning POST=1; critical failure=1; retry=1; stable nonce=physical-1-100; restart read successful
+--- PASS: TestDB022PhysicalQuotaDiscordHTTP (0.04s)
+PASS
+ok  	whiterun/internal/discord	0.038s

@@ -1,0 +1,4 @@
+=== RUN   TestLocalAudioDiscordLive
+    local_audio_live_test.go:23: explicit real Voice authorization required
+--- SKIP: TestLocalAudioDiscordLive (0.00s)
+PASS

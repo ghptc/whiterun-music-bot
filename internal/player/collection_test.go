@@ -2,7 +2,6 @@ package player
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -533,7 +532,7 @@ func TestFirstCollectionPositionUnavailableAdvances(t *testing.T) {
 	var attempts atomic.Int32
 	j := begin(t, p, context.Background(), numberedTracks(1, 3), func(_ context.Context, t media.Track, _ bool) (media.Track, error) {
 		if t.Title == "1" && attempts.Add(1) == 1 {
-			return media.Track{}, errors.New("Sign in to confirm you're not a bot")
+			return media.Track{}, &media.ExtractionError{Category: "youtube_video_unavailable"}
 		}
 		return matched(t), nil
 	})

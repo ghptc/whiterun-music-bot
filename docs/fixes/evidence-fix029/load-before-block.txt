@@ -1,0 +1,23 @@
+File: discord.test
+Build ID: 3c56ca10e3856f7ebb3be843cb1011e595225a7d
+Type: delay
+Time: 2026-10-31 14:39:23 -03
+Showing nodes accounting for 2330.45s, 94.62% of 2462.85s total
+Dropped 135 nodes (cum <= 12.31s)
+Showing top 15 nodes out of 76
+      flat  flat%   sum%        cum   cum%
+  2086.91s 84.74% 84.74%   2086.91s 84.74%  runtime.selectgo
+         0     0% 84.74%    550.98s 22.37%  whiterun/internal/player.(*CollectionJob).resolve
+         0     0% 84.74%    544.57s 22.11%  whiterun/internal/player.(*CollectionJob).run.func2
+         0     0% 84.74%    523.78s 21.27%  whiterun/internal/media.CollectionResolver.MatchSpotify
+         0     0% 84.74%    523.51s 21.26%  whiterun/internal/media.CollectionResolver.MatchSpotify-fm
+         0     0% 84.74%    523.51s 21.26%  whiterun/internal/player.safeMatch
+         0     0% 84.74%    428.12s 17.38%  whiterun/internal/media.(*MatchLimiter).acquire
+         0     0% 84.74%    359.67s 14.60%  whiterun/internal/player.newDiagnostics.func1
+         0     0% 84.74%    352.98s 14.33%  whiterun/internal/discord.(*Bot).setupAnnouncements.func1
+         0     0% 84.74%    314.17s 12.76%  whiterun/internal/player.(*GuildPlayer).run
+         0     0% 84.74%    314.17s 12.76%  whiterun/internal/player.New.gowrap1
+         0     0% 84.74%    254.63s 10.34%  whiterun/internal/player.(*CollectionJob).run
+         0     0% 84.74%    254.63s 10.34%  whiterun/internal/player.(*GuildPlayer).BeginCollection.func1
+   243.55s  9.89% 94.62%    243.55s  9.89%  runtime.chanrecv1
+         0     0% 94.62%    172.85s  7.02%  database/sql.(*DB).retry

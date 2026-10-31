@@ -3,30 +3,34 @@ package player
 import (
 	"context"
 	"errors"
+	"sync/atomic"
 	"testing"
+	"time"
 	"whiterun/internal/media"
 )
 
-func TestStartedAttemptFailureIsInterrupted(t *testing.T) {
-	p, _ := newTestPlayer(t, func(ctx context.Context, _ media.Track, v Voice) error {
+func TestStartedAttemptStallRetainsConfirmedPosition(t *testing.T) {
+	var calls atomic.Int32
+	p, _ := newTestPlayer(t, func(ctx context.Context, tr media.Track, v Voice) error {
 		if err := v.WriteFrame(ctx, []byte{1}); err != nil {
 			return err
 		}
-		return &StreamError{"audio_stall", errors.New("injected after first frame")}
+		if calls.Add(1) == 1 {
+			return &StreamError{"audio_stall", errors.New("injected after first frame")}
+		}
+		<-ctx.Done()
+		return ctx.Err()
 	})
-	starts := make(chan PlaybackEvent, 1)
-	failures := make(chan PlaybackEvent, 1)
-	p.SetOnStart(func(e PlaybackEvent) { starts <- e })
-	p.SetOnSkip(func(e PlaybackEvent) { failures <- e })
+	var failures atomic.Int32
+	p.SetOnSkip(func(PlaybackEvent) { failures.Add(1) })
 	tr := media.Track{SpotifyID: "spotify-original", Title: "Little Bad Girl", Position: 8, Total: 123}
 	if err := p.EnqueueMany([]media.Track{tr}, p.Ticket()); err != nil {
 		t.Fatal(err)
 	}
-	await(t, func() bool { return len(starts) == 1 && len(failures) == 1 })
-	started := <-starts
-	failed := <-failures
-	if started.State != Playing || failed.State != Failed || failed.FailureStage != "playing" || failed.Sequence != started.Sequence || failed.Track.SpotifyID != tr.SpotifyID || failed.Track.Position != 8 {
-		t.Fatal(started, failed)
+	await(t, func() bool { return calls.Load() == 2 && p.State().CurrentStarted })
+	state := p.State()
+	if failures.Load() != 0 || state.Current == nil || state.Current.SpotifyID != tr.SpotifyID || state.Current.Position != 8 || state.Current.ResumeOffset != 20*time.Millisecond {
+		t.Fatal(state)
 	}
 }
 

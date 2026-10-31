@@ -1,0 +1,253 @@
+release-security	Run govulncheck ./...	﻿2026-10-31T16:19:13.4985878Z ##[group]Run govulncheck ./...
+release-security	Run govulncheck ./...	2026-10-31T16:19:13.4986088Z ^[[36;1mgovulncheck ./...^[[0m
+release-security	Run govulncheck ./...	2026-10-31T16:19:13.5011467Z shell: /usr/bin/bash -e {0}
+release-security	Run govulncheck ./...	2026-10-31T16:19:13.5011625Z ##[endgroup]
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8426168Z === Symbol Results ===
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8426470Z 
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8426601Z Vulnerability #1: GO-2026-6809
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8427053Z     Distrust compromised intermediate certificates in crypto/x509
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8427518Z   More info: https://pkg.go.dev/vuln/GO-2026-6809
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8427819Z   Standard library
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8428056Z     Found in: crypto/x509@go1.27
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8428337Z     Fixed in: crypto/x509@go1.27.3
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8428592Z     Example traces found:
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8453821Z ##[error]      #1: internal/discord/voice_gateway.go:69:45: discord.incidentGateway.Open calls websocket.Dialer.DialContext, which eventually calls x509.Certificate.Verify
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8460422Z 
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8460575Z Vulnerability #2: GO-2026-6617
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8460983Z     HTTP/2 server crash due to HPACK encoder race in net/http
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8461491Z   More info: https://pkg.go.dev/vuln/GO-2026-6617
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8461759Z   Standard library
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8462034Z     Found in: net/http/internal/http2@go1.27
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8462339Z     Fixed in: net/http/internal/http2@go1.27.2
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8462620Z     Example traces found:
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8463602Z ##[error]      #1: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.NetHTTPClientConn.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8465077Z ##[error]      #2: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.NetHTTPClientConn.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8466595Z ##[error]      #3: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.NetHTTPClientConn.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8468673Z ##[error]      #4: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.NetHTTPClientConn.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8469900Z ##[error]      #5: internal/player/ogg.go:55:12: player.oggPackets calls http2.Server.GracefulShutdown
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8470973Z ##[error]      #6: internal/player/ogg.go:55:12: player.oggPackets calls http2.Server.GracefulShutdown
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8472329Z ##[error]      #7: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.AddConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8473679Z ##[error]      #8: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.AddConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8475119Z ##[error]      #9: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.CloseIdleConnections
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8476582Z ##[error]      #10: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.CloseIdleConnections
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8478019Z ##[error]      #11: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.NewClientConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8479354Z ##[error]      #12: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.NewClientConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8480805Z ##[error]      #13: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.Transport.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8482502Z ##[error]      #14: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.Transport.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8483917Z ##[error]      #15: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.bufferedWriterTimeoutWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8485569Z ##[error]      #16: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.bufferedWriterTimeoutWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8486800Z ##[error]      #17: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.chunkWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8488082Z ##[error]      #18: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.chunkWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8489353Z ##[error]      #19: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.gzipReader.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8490468Z ##[error]      #20: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.gzipReader.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8491828Z ##[error]      #21: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http2.gzipReader.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8493159Z ##[error]      #22: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http2.gzipReader.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8494436Z ##[error]      #23: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.stickyErrWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8495638Z ##[error]      #24: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.stickyErrWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8496829Z ##[error]      #25: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.transportResponseBody.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8498043Z ##[error]      #26: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.transportResponseBody.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8499453Z ##[error]      #27: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http2.transportResponseBody.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8501095Z ##[error]      #28: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http2.transportResponseBody.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8501991Z 
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8502095Z Vulnerability #3: GO-2026-6613
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8502490Z     HTTP/1 server connection desynchronization after 2xx CONNECT response in
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8502887Z     net/http
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8503135Z   More info: https://pkg.go.dev/vuln/GO-2026-6613
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8503412Z   Standard library
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8503644Z     Found in: net/http@go1.27
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8503896Z     Fixed in: net/http@go1.27.2
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8504144Z     Example traces found:
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8505135Z ##[error]      #1: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.transportResponseBody.Close, which eventually calls http.CanonicalHeaderKey
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8506657Z ##[error]      #2: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http.Client.CloseIdleConnections
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8507830Z ##[error]      #3: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8508941Z ##[error]      #4: internal/discord/rest_limiter.go:216:31: discord.managedRESTLimiter.Unlock calls http.Header.Get
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8510097Z ##[error]      #5: internal/media/spotify_public.go:100:16: media.Spotify.spotifyPublicPage calls http.Header.Set
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8511661Z ##[error]      #6: internal/discord/catalog_alerts.go:101:31: discord.CatalogDiscordNotifier.Send calls rest.channelImpl.CreateMessage, which eventually calls http.NewRequest
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8512994Z ##[error]      #7: internal/media/spotify_public.go:93:40: media.Spotify.spotifyPublicPage calls http.NewRequestWithContext
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8514407Z ##[error]      #8: internal/discord/voice_gateway.go:69:45: discord.incidentGateway.Open calls websocket.Dialer.DialContext, which calls http.ProxyFromEnvironment
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8515868Z ##[error]      #9: internal/discord/voice_gateway.go:69:45: discord.incidentGateway.Open calls websocket.Dialer.DialContext, which calls http.ReadResponse
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8517449Z ##[error]      #10: internal/discord/voice_gateway.go:69:45: discord.incidentGateway.Open calls websocket.Dialer.DialContext, which calls http.Request.AddCookie
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8518633Z ##[error]      #11: internal/media/spotify.go:56:18: media.Spotify.accessToken calls http.Request.SetBasicAuth
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8519944Z ##[error]      #12: internal/discord/voice_gateway.go:69:45: discord.incidentGateway.Open calls websocket.Dialer.DialContext, which calls http.Request.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8521536Z ##[error]      #13: internal/discord/voice_gateway.go:69:45: discord.incidentGateway.Open calls websocket.Dialer.DialContext, which calls http.Response.Cookies
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8522856Z ##[error]      #14: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http.Server.Shutdown
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8523951Z ##[error]      #15: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http.body.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8525135Z ##[error]      #16: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http.body.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8526297Z ##[error]      #17: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http.bodyEOFSignal.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8527547Z ##[error]      #18: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http.bodyEOFSignal.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8528763Z ##[error]      #19: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http.bodyLocked.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8529923Z ##[error]      #20: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http.bufioFlushWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8531368Z ##[error]      #21: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http.cancelTimerBody.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8532636Z ##[error]      #22: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http.cancelTimerBody.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8533809Z ##[error]      #23: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http.gzipReader.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8535040Z ##[error]      #24: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http.gzipReader.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8536232Z ##[error]      #25: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http.persistConn.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8537426Z ##[error]      #26: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http.persistConnWriter.ReadFrom
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8539024Z ##[error]      #27: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.transportResponseBody.Close, which eventually calls http.persistConnWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8540725Z ##[error]      #28: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.transportResponseBody.Close, which eventually calls http.readTrackingBody.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8542287Z ##[error]      #29: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http.readTrackingBody.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8543668Z ##[error]      #30: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http.readWriteCloserBody.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8544940Z ##[error]      #31: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http.response.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8546069Z ##[error]      #32: internal/qasoak/run.go:524:30: qasoak.Run calls http.transportReadFromServerError.Error
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8546708Z 
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8546807Z Vulnerability #4: GO-2026-6611
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8547202Z     Excessive CPU consumption from repeated initial window changes in net/http
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8547722Z   More info: https://pkg.go.dev/vuln/GO-2026-6611
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8548006Z   Standard library
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8548255Z     Found in: net/http/internal/http2@go1.27
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8548563Z     Fixed in: net/http/internal/http2@go1.27.2
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8548840Z     Example traces found:
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8549596Z ##[error]      #1: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.NetHTTPClientConn.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8550949Z ##[error]      #2: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.NetHTTPClientConn.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8552549Z ##[error]      #3: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.NetHTTPClientConn.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8554103Z ##[error]      #4: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.NetHTTPClientConn.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8555282Z ##[error]      #5: internal/player/ogg.go:55:12: player.oggPackets calls http2.Server.GracefulShutdown
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8556256Z ##[error]      #6: internal/player/ogg.go:55:12: player.oggPackets calls http2.Server.GracefulShutdown
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8557412Z ##[error]      #7: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.AddConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8558660Z ##[error]      #8: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.AddConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8559994Z ##[error]      #9: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.CloseIdleConnections
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8561585Z ##[error]      #10: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.CloseIdleConnections
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8562924Z ##[error]      #11: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.NewClientConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8564243Z ##[error]      #12: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.NewClientConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8565647Z ##[error]      #13: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.Transport.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8567108Z ##[error]      #14: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.Transport.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8568472Z ##[error]      #15: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.bufferedWriterTimeoutWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8569773Z ##[error]      #16: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.bufferedWriterTimeoutWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8570973Z ##[error]      #17: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.chunkWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8572217Z ##[error]      #18: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.chunkWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8573316Z ##[error]      #19: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.gzipReader.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8574402Z ##[error]      #20: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.gzipReader.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8575636Z ##[error]      #21: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http2.gzipReader.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8577003Z ##[error]      #22: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http2.gzipReader.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8578401Z ##[error]      #23: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.stickyErrWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8579605Z ##[error]      #24: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.stickyErrWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8580825Z ##[error]      #25: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.transportResponseBody.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8582184Z ##[error]      #26: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.transportResponseBody.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8583546Z ##[error]      #27: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http2.transportResponseBody.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8585006Z ##[error]      #28: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http2.transportResponseBody.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8585789Z 
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8585893Z Vulnerability #5: GO-2026-6610
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8586270Z     HTTP/2 transport accepts malformed framing-related headers in net/http
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8586659Z   More info: https://pkg.go.dev/vuln/GO-2026-6610
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8586935Z   Standard library
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8587185Z     Found in: net/http/internal/http2@go1.27
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8587503Z     Fixed in: net/http/internal/http2@go1.27.2
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8587789Z     Example traces found:
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8588503Z ##[error]      #1: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.AddConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8589799Z ##[error]      #2: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.AddConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8591239Z ##[error]      #3: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.NewClientConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8592714Z ##[error]      #4: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.NewClientConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8594116Z ##[error]      #5: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.Transport.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8595564Z ##[error]      #6: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.Transport.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8596332Z 
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8596430Z Vulnerability #6: GO-2026-6608
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8596770Z     Memory limit bypass when parsing MIME headers in net/textproto,
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8597087Z     mime/multipart
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8597330Z   More info: https://pkg.go.dev/vuln/GO-2026-6608
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8597590Z   Standard library
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8597813Z     Found in: net/textproto@go1.27
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8598077Z     Fixed in: net/textproto@go1.27.2
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8598328Z     Example traces found:
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8599350Z ##[error]      #1: internal/discord/voice_gateway.go:69:45: discord.incidentGateway.Open calls websocket.Dialer.DialContext, which eventually calls textproto.Reader.ReadMIMEHeader
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8600189Z 
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8600275Z Vulnerability #7: GO-2026-6607
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8600607Z     Reject malformed ECH outer extension references in crypto/tls
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8600959Z   More info: https://pkg.go.dev/vuln/GO-2026-6607
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8601216Z   Standard library
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8601524Z     Found in: crypto/tls@go1.27
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8601766Z     Fixed in: crypto/tls@go1.27.2
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8602009Z     Example traces found:
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8602911Z ##[error]      #1: internal/discord/voice_gateway.go:69:45: discord.incidentGateway.Open calls websocket.Dialer.DialContext, which eventually calls tls.Conn.HandshakeContext
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8604275Z ##[error]      #2: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls tls.Conn.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8605602Z ##[error]      #3: internal/discord/voice_gateway.go:144:24: discord.incidentGateway.CloseWithCode calls websocket.Conn.WriteControl, which calls tls.Conn.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8607041Z ##[error]      #4: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls tls.Dialer.DialContext
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8607804Z 
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8607898Z Vulnerability #8: GO-2026-6605
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8608255Z     HTTP/1 client connection desynchronization after CONNECT rejection in
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8608569Z     net/http
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8608803Z   More info: https://pkg.go.dev/vuln/GO-2026-6605
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8609061Z   Standard library
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8609279Z     Found in: net/http@go1.27
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8609520Z     Fixed in: net/http@go1.27.2
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8609765Z     Example traces found:
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8610550Z ##[error]      #1: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http.Client.CloseIdleConnections
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8611793Z ##[error]      #2: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8612422Z 
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8612516Z Vulnerability #9: GO-2026-6603
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8612858Z     HTTP/2 server memory exhaustion due to Trailer headers in net/http
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8613215Z   More info: https://pkg.go.dev/vuln/GO-2026-6603
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8613513Z   Standard library
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8613761Z     Found in: net/http/internal/http2@go1.27
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8614187Z     Fixed in: net/http/internal/http2@go1.27.2
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8614467Z     Example traces found:
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8615218Z ##[error]      #1: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.NetHTTPClientConn.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8616576Z ##[error]      #2: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.NetHTTPClientConn.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8618063Z ##[error]      #3: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.NetHTTPClientConn.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8619625Z ##[error]      #4: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.NetHTTPClientConn.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8620826Z ##[error]      #5: internal/player/ogg.go:55:12: player.oggPackets calls http2.Server.GracefulShutdown
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8621991Z ##[error]      #6: internal/player/ogg.go:55:12: player.oggPackets calls http2.Server.GracefulShutdown
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8623198Z ##[error]      #7: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.AddConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8624496Z ##[error]      #8: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.AddConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8625869Z ##[error]      #9: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.CloseIdleConnections
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8627285Z ##[error]      #10: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.CloseIdleConnections
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8628658Z ##[error]      #11: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.NewClientConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8629988Z ##[error]      #12: internal/discord/bot.go:261:16: discord.Bot.Close calls bot.Client.Close, which eventually calls http2.Transport.NewClientConn
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8631510Z ##[error]      #13: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.Transport.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8633087Z ##[error]      #14: internal/media/spotify_public.go:111:24: media.Spotify.spotifyPublicPage calls http.Client.Do, which eventually calls http2.Transport.RoundTrip
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8634452Z ##[error]      #15: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.bufferedWriterTimeoutWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8635742Z ##[error]      #16: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.bufferedWriterTimeoutWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8636952Z ##[error]      #17: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.chunkWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8638101Z ##[error]      #18: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.chunkWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8639206Z ##[error]      #19: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.gzipReader.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8640298Z ##[error]      #20: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.gzipReader.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8641632Z ##[error]      #21: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http2.gzipReader.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8642938Z ##[error]      #22: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http2.gzipReader.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8644167Z ##[error]      #23: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.stickyErrWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8645349Z ##[error]      #24: internal/qasoak/source.go:49:18: qasoak.Source calls io.Copy, which eventually calls http2.stickyErrWriter.Write
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8646656Z ##[error]      #25: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.transportResponseBody.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8647855Z ##[error]      #26: internal/discord/voice_gateway.go:71:22: discord.incidentGateway.Open calls http2.transportResponseBody.Close
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8649185Z ##[error]      #27: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http2.transportResponseBody.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8650595Z ##[error]      #28: internal/media/spotify_public.go:127:25: media.Spotify.spotifyPublicPage calls io.ReadAll, which calls http2.transportResponseBody.Read
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8651514Z 
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8651698Z Your code is affected by 9 vulnerabilities from the Go standard library.
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8652107Z This scan also found 3 vulnerabilities in packages you import and 4
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8652539Z vulnerabilities in modules you require, but your code doesn't appear to call
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8652893Z these vulnerabilities.
+release-security	Run govulncheck ./...	2026-10-31T16:19:22.8653122Z Use '-show verbose' for more details.
+release-security	Run govulncheck ./...	2026-10-31T16:19:23.0148234Z ##[error]Process completed with exit code 3.
+release-ci	Every mandatory job must have succeeded	﻿2026-10-31T16:21:56.7443881Z ##[group]Run python3 - <<'PYTHON'
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.7444595Z ^[[36;1mpython3 - <<'PYTHON'^[[0m
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.7445154Z ^[[36;1mimport json, os^[[0m
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.7445909Z ^[[36;1mresults = json.loads(os.environ['RESULTS'])^[[0m
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.7446588Z ^[[36;1massert len(results) == 5^[[0m
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.7447361Z ^[[36;1massert all(job['result'] == 'success' for job in results.values()), results^[[0m
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.7448151Z ^[[36;1mPYTHON^[[0m
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.7961229Z shell: /usr/bin/bash -e {0}
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.7962690Z env:
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.7964694Z   RESULTS: {
+release-ci	Every mandatory job must have succeeded	  "unit": {
+release-ci	Every mandatory job must have succeeded	    "result": "success",
+release-ci	Every mandatory job must have succeeded	    "outputs": {}
+release-ci	Every mandatory job must have succeeded	  },
+release-ci	Every mandatory job must have succeeded	  "race": {
+release-ci	Every mandatory job must have succeeded	    "result": "success",
+release-ci	Every mandatory job must have succeeded	    "outputs": {}
+release-ci	Every mandatory job must have succeeded	  },
+release-ci	Every mandatory job must have succeeded	  "contracts": {
+release-ci	Every mandatory job must have succeeded	    "result": "success",
+release-ci	Every mandatory job must have succeeded	    "outputs": {}
+release-ci	Every mandatory job must have succeeded	  },
+release-ci	Every mandatory job must have succeeded	  "security": {
+release-ci	Every mandatory job must have succeeded	    "result": "failure",
+release-ci	Every mandatory job must have succeeded	    "outputs": {}
+release-ci	Every mandatory job must have succeeded	  },
+release-ci	Every mandatory job must have succeeded	  "docker": {
+release-ci	Every mandatory job must have succeeded	    "result": "success",
+release-ci	Every mandatory job must have succeeded	    "outputs": {}
+release-ci	Every mandatory job must have succeeded	  }
+release-ci	Every mandatory job must have succeeded	}
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.7966702Z ##[endgroup]
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.9194899Z Traceback (most recent call last):
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.9195906Z   File "<stdin>", line 4, in <module>
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.9197513Z AssertionError: {'unit': {'result': 'success', 'outputs': {}}, 'race': {'result': 'success', 'outputs': {}}, 'contracts': {'result': 'success', 'outputs': {}}, 'security': {'result': 'failure', 'outputs': {}}, 'docker': {'result': 'success', 'outputs': {}}}
+release-ci	Every mandatory job must have succeeded	2026-10-31T16:21:56.9355297Z ##[error]Process completed with exit code 1.

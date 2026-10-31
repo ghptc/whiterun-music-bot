@@ -19,7 +19,7 @@ import (
 
 func TestRootsHelpCompleteStaticAndWithinLimits(t *testing.T) {
 	embed := helpEmbed()
-	if embed.Title != "The Bard · Help" {
+	if embed.Title != "Help" {
 		t.Fatalf("help title: %q", embed.Title)
 	}
 	text := ""

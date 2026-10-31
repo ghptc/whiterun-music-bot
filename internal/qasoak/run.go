@@ -77,6 +77,8 @@ func (j *journal) write(v any) {
 }
 
 type guildRun struct {
+	suspended                                      int
+	voiceFaults                                    map[string]bool
 	mu                                             sync.Mutex
 	id                                             string
 	p                                              *player.GuildPlayer
@@ -124,6 +126,14 @@ func (v *voice) WriteFrame(ctx context.Context, _ []byte) error {
 	}
 	return nil
 }
+
+// The offline fixture recreates its transport, not a real Discord session.
+func (v *voice) Recover(ctx context.Context) (player.Voice, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	return &voice{v.g}, nil
+}
 func (*voice) Speaking(context.Context, bool) error { return nil }
 func (*voice) Close(context.Context)                {}
 func (g *guildRun) observe(name string, d time.Duration) {
@@ -150,7 +160,7 @@ func (g *guildRun) validateAccounting() error {
 	if terminals != g.selected {
 		return errors.New("selected attempt lacks terminal outcome")
 	}
-	if g.accepted != g.selected+len(g.expected) {
+	if g.accepted != g.selected-g.suspended+len(g.expected) {
 		return errors.New("unaccounted logical track")
 	}
 	return nil
@@ -265,7 +275,7 @@ func Run(parent context.Context, c Config) (result error) {
 	var workers sync.WaitGroup
 	for index := 0; index < c.Guilds; index++ {
 		id := fmt.Sprint(index + 1)
-		g := &guildRun{id: id, terminal: map[string]int{}, metrics: map[string]*histogram{}, done: make(chan struct{}, c.Playlist)}
+		g := &guildRun{id: id, voiceFaults: map[string]bool{}, terminal: map[string]int{}, metrics: map[string]*histogram{}, done: make(chan struct{}, c.Playlist)}
 		g.p = player.New(context.Background(), log, func(playCtx context.Context, tr media.Track, v player.Voice) error {
 			at := time.Now()
 			inner, stop := context.WithCancel(playCtx)
@@ -278,6 +288,13 @@ func Run(parent context.Context, c Config) (result error) {
 				a.fault = "cancel"
 			}
 			g.mu.Lock()
+			if a.fault == "transport" {
+				if g.voiceFaults[tr.SpotifyID] {
+					a.fault = ""
+				} else {
+					g.voiceFaults[tr.SpotifyID] = true
+				}
+			}
 			g.active = a
 			if len(g.expected) == 0 || g.expected[0].SpotifyID != tr.SpotifyID || g.expected[0].VideoID != tr.VideoID {
 				g.fail(fmt.Errorf("guild %s unexpected selection %s", id, tr.SpotifyID))
@@ -306,6 +323,12 @@ func Run(parent context.Context, c Config) (result error) {
 				}
 			}
 			g.mu.Lock()
+			suspended := player.IsVoiceFailure(playErr) && playCtx.Err() == nil
+			if suspended {
+				status = "suspended"
+				g.suspended++
+				g.expected = append([]media.Track{tr}, g.expected...)
+			}
 			g.terminal[status]++
 			g.frames += int(a.frames.Load())
 			g.lastEnd = time.Now()
@@ -315,7 +338,9 @@ func Run(parent context.Context, c Config) (result error) {
 				message = playErr.Error()
 			}
 			events.write(map[string]any{"event": "terminal", "at": time.Now().UTC(), "guild": id, "identity": tr.SpotifyID, "status": status, "frames": a.frames.Load(), "error": message})
-			g.done <- struct{}{}
+			if !suspended {
+				g.done <- struct{}{}
+			}
 			return playErr
 		})
 		groups = append(groups, g) // own cleanup even if recovery setup fails

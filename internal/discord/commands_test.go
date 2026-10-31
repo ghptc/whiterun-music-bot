@@ -61,6 +61,8 @@ type dummyConn struct {
 	closed bool
 }
 
+func (c *dummyConn) Gateway() voice.Gateway { return readyVoiceGateway{} }
+
 func (c *dummyConn) Close(context.Context) { c.closed = true }
 func interaction(t *testing.T, name string, guild bool) *events.ApplicationCommandInteractionCreate {
 	t.Helper()

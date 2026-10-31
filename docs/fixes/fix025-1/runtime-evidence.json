@@ -1,0 +1,39 @@
+{
+  "running_binary_sha256": "75f5687463873c7c2c8744a7a9c53bd28658ea00b7c46e66d9ab2f6f673529d4",
+  "running_binary_markers": {
+    "The track and queue are preserved while the Bard reconnects.": true,
+    "queue and confirmed playback progress are preserved.": false,
+    "watchdog_recovery_triggered": false,
+    "playback_checkpoint_delayed": false,
+    "local_readiness_confirmed": false
+  },
+  "vcs_revision": "not embedded in running binary; exact commit unknown",
+  "container": {
+    "started_at": "2026-10-23T10:33:42.983671976Z",
+    "finished_at": "2026-10-23T02:54:07.546059039Z",
+    "restart_count": 0,
+    "oom_killed": false,
+    "health": "healthy",
+    "historical_docker_oom_die_restart_start_stop_events_returned": 0
+  },
+  "state_copy_includes_wal": true,
+  "state_copy_limit": "main and WAL copied sequentially while process alive; not an atomic historical snapshot",
+  "guilds": [
+    {
+      "guild_id": "404344088691867649",
+      "state_sha256": "cd952f2e7789a310cf5ed9b98f54e3170aeec7bc3ee5819e88ab2f855b3a605f",
+      "current_present": false,
+      "queue_count": 0,
+      "history_count": 100,
+      "resume_offset_present_in_state": false
+    },
+    {
+      "guild_id": "698256401922785340",
+      "state_sha256": "b2a3ef2dfa23e79a9cc6ab53182200b7444e7f50442f62a23b954a87bfd12f32",
+      "current_present": false,
+      "queue_count": 0,
+      "history_count": 36,
+      "resume_offset_present_in_state": false
+    }
+  ]
+}

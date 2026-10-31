@@ -74,6 +74,9 @@ func (p *GuildPlayer) mutationLocked(action string, fields ...any) {
 	p.diagnosticLocked(slog.LevelInfo, "queue_mutation", append([]any{"action", action, "queue_size", len(p.queue)}, fields...)...)
 }
 func (p *GuildPlayer) schedulerReasonLocked() (string, string) {
+	return p.schedulerReasonAllowProviderLocked(false)
+}
+func (p *GuildPlayer) schedulerReasonAllowProviderLocked(probe bool) (string, string) {
 	switch {
 	case p.ctx.Err() != nil:
 		return "canceled", "none"
@@ -81,7 +84,7 @@ func (p *GuildPlayer) schedulerReasonLocked() (string, string) {
 		return "voice_detached", "voice_attach"
 	case p.voiceBlocked:
 		return "voice_suspended", "voice_recovery"
-	case p.providerBlocked:
+	case p.providerBlocked && !probe:
 		return "provider_blocked", "provider_recovery"
 	case p.halted:
 		return "halted", "resume"
@@ -123,8 +126,8 @@ func (p *GuildPlayer) schedulerEventLocked(level slog.Level, event, reason, expe
 	p.diagnosticLocked(level, event, fields...)
 }
 
-// One timer per wait, one warning per unchanged blocking condition. It observes
-// only: it never cancels, retries or advances playback.
+// Recheck a missed notification without consuming or reordering queue entries.
+// Idle and intentionally suspended states produce no periodic diagnostic noise.
 func (p *GuildPlayer) schedulerWait() bool {
 	started := time.Now()
 	timer := time.NewTimer(schedulerStallAfter)
@@ -165,6 +168,12 @@ func (p *GuildPlayer) schedulerWait() bool {
 				}
 				if reason == "ready" {
 					p.schedulerEventLocked(slog.LevelWarn, "scheduler_stall_detected", "notification_missing", "scheduler_notification", time.Since(started))
+					p.diagnosticLocked(slog.LevelInfo, "recovery_completed", "component", "scheduler", "cause", "notification_missing", "duration_ms", time.Since(started).Milliseconds(), "incident_id", p.sessionID+"/scheduler")
+					waiting = false
+				}
+				if reason == "next_position_pending" || reason == "resolution_in_progress" {
+					p.signal("watchdog_resolver_wakeup")
+					timer.Reset(schedulerStallAfter)
 				}
 				p.mu.Unlock()
 			}

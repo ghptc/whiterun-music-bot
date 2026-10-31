@@ -300,3 +300,24 @@ func spotifyPublicEndpoint(path string) string {
 		return "public_page"
 	}
 }
+
+// PublicPlaylist imports accessible public metadata without OAuth credentials.
+// It retains the same completeness checks as the API fallback.
+func (s *Spotify) PublicPlaylist(ctx context.Context, id string) (Collection, error) {
+	if !spotifyID.MatchString(id) {
+		return Collection{}, ErrSpotifyURL
+	}
+	c, err := s.publicPlaylist(ctx, id)
+	if err != nil {
+		return Collection{}, err
+	}
+	for i := range c.Tracks {
+		if c.Tracks[i].Position == 0 {
+			c.Tracks[i].Position = i + 1
+		}
+		if c.Tracks[i].Total == 0 {
+			c.Tracks[i].Total = len(c.Tracks) + c.Skipped
+		}
+	}
+	return c, nil
+}

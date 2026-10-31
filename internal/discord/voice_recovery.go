@@ -3,6 +3,7 @@ package discord
 import (
 	"context"
 	"errors"
+	"sync/atomic"
 	"time"
 
 	"github.com/disgoorg/disgo/gateway"
@@ -21,7 +22,13 @@ func (v recoveringTransport) Recover(ctx context.Context) (player.Voice, error) 
 }
 
 func (b *Bot) playbackTransport(id snowflake.ID, g *guild, conn voice.Conn) player.Voice {
-	return recoveringTransport{transport: transport{conn: conn}, recover: func(ctx context.Context) (player.Voice, error) {
+	if c, ok := conn.(*voiceConn); ok {
+		c.joinMu.Lock()
+		c.lifecycleFields = g.player.VoiceLifecycleFields
+		c.joinMu.Unlock()
+	}
+	brokenUDP := new(atomic.Bool)
+	return recoveringTransport{transport: transport{conn: conn, brokenUDP: brokenUDP}, recover: func(ctx context.Context) (player.Voice, error) {
 		// Never wait for orchestration while a leave/shutdown is waiting for the
 		// scheduler. Cancellation remains observable while acquiring this lock.
 		if err := lockVoice(ctx, g); err != nil {
@@ -36,9 +43,40 @@ func (b *Bot) playbackTransport(id snowflake.ID, g *guild, conn voice.Conn) play
 			return nil, errors.New("main gateway unavailable")
 		}
 		channel := g.channel
+		// Never rejoin after removal/move or when the membership cache is unknown.
+		state, known := b.client.Caches.VoiceState(id, b.client.ID())
+		if !known || state.ChannelID == nil || *state.ChannelID != channel {
+			g.mu.Unlock()
+			return nil, errors.New("voice membership not authorized; explicit summon required")
+		}
+		if !brokenUDP.Load() && g.conn != nil && g.conn.Gateway().Status() == voice.StatusReady {
+			candidate := g.conn
+			g.mu.Unlock()
+			if err := confirmVoiceReady(ctx, candidate); err == nil {
+				if err := lockVoice(ctx, g); err != nil {
+					return nil, err
+				}
+				state, known := b.client.Caches.VoiceState(id, b.client.ID())
+				authorized := g.conn == candidate && g.channel == channel && known && state.ChannelID != nil && *state.ChannelID == channel
+				g.mu.Unlock()
+				if !authorized {
+					return nil, errors.New("voice membership changed during readiness recovery")
+				}
+				b.log.Info("voice_session_state_changed", "guild_id", id, "state", "preserved", "reason", "local_readiness_confirmed")
+				return b.playbackTransport(id, g, candidate), nil
+			}
+			if err := lockVoice(ctx, g); err != nil {
+				return nil, err
+			}
+			if g.conn != candidate || g.channel != channel {
+				g.mu.Unlock()
+				return nil, context.Canceled
+			}
+		}
 		if g.conn != nil {
+			b.log.Warn("voice_session_state_changed", "guild_id", id, "state", "recreating", "udp_failed", brokenUDP.Load(), "reason", "transport_not_reusable")
 			cleanup, cancel := context.WithTimeout(ctx, 3*time.Second)
-			g.conn.Close(cleanup)
+			g.conn.Close(player.VoiceCloseContext(cleanup, "recovery_transport_not_reusable"))
 			cancel()
 		}
 		// Close removes the old manager entry. CreateConn now constructs a new
@@ -52,7 +90,7 @@ func (b *Bot) playbackTransport(id snowflake.ID, g *guild, conn voice.Conn) play
 		}
 		if err != nil || ctx.Err() != nil {
 			cleanup, stop := context.WithTimeout(context.Background(), 3*time.Second)
-			candidate.Close(cleanup)
+			candidate.Close(player.VoiceCloseContext(cleanup, "recovery_candidate_failed"))
 			stop()
 		}
 		if lockErr := lockVoice(ctx, g); lockErr != nil {

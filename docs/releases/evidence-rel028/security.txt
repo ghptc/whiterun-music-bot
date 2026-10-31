@@ -1,0 +1,17 @@
+=== Symbol Results ===
+
+Vulnerability #1: GO-2026-6860
+    Avoid quadratic complexity when coalescing text nodes in html in
+    golang.org/x/net
+  More info: https://pkg.go.dev/vuln/GO-2026-6860
+  Module: golang.org/x/net
+    Found in: golang.org/x/net@v0.56.0
+    Fixed in: golang.org/x/net@v0.62.0
+    Example traces found:
+      #1: internal/media/spotify_embed.go:21:24: media.scriptData calls html.Parse
+
+Your code is affected by 1 vulnerability from 1 module.
+This scan also found 1 vulnerability in packages you import and 11
+vulnerabilities in modules you require, but your code doesn't appear to call
+these vulnerabilities.
+Use '-show verbose' for more details.

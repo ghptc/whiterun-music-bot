@@ -74,7 +74,7 @@ func Test123UnavailablePlaybackAttemptsTerminate(t *testing.T) {
 	var attempts atomic.Int32
 	p, _ := newTestPlayer(t, func(context.Context, media.Track, Voice) error {
 		attempts.Add(1)
-		return &StreamError{"youtube_auth_challenge", fmt.Errorf("authentication required")}
+		return &StreamError{"source_gone", fmt.Errorf("video unavailable")}
 	})
 	if err := p.EnqueueMany(numberedTracks(1, 123), p.Ticket()); err != nil {
 		t.Fatal(err)

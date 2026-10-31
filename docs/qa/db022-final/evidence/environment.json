@@ -1,0 +1,12 @@
+{
+  "timestamp_utc": "2026-10-21T22:33:47.852957+00:00",
+  "system": "Linux-7.2.11-arch1-1-x86_64-with-glibc2.44",
+  "go": "go version go1.27.3-X:nodwarf5 linux/amd64",
+  "disk": "Filesystem     Type 1K-blocks      Used Available Use% Mounted on\n/dev/nvme0n1p2 ext4 959269968 505931576 404536396  56% /",
+  "modules": "modernc.org/sqlite v1.39.1\nmodernc.org/libc v1.66.10",
+  "tempdir": "/home/gabriel/Projects/whiterun-music-bot/.qa-disk",
+  "cpu": "AMD Ryzen 7 9800X3D 8-Core Processor",
+  "samples_per_operation": 100,
+  "os_cache": "not dropped; may remain warm",
+  "sqlite_cache": "warm and cold_sqlite via PRAGMA shrink_memory; no application metadata cache"
+}

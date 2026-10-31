@@ -1,0 +1,24 @@
+=== RUN   TestDB022HomologationPlaylistLive
+2026/10/21 19:28:57 INFO Spotify metadata diagnostic stage=spotify_public_page_complete rendered=30 total=123
+2026/10/21 19:28:58 INFO Spotify metadata diagnostic stage=spotify_embed_complete embedded=100 total=123
+2026/10/21 19:28:58 INFO Spotify metadata diagnostic stage=spotify_anonymous_bootstrap_start
+2026/10/21 19:28:58 INFO Spotify metadata diagnostic stage=spotify_anonymous_bootstrap_complete expires_in_seconds=524
+2026/10/21 19:28:58 INFO Spotify metadata diagnostic stage=spotify_spclient_page_start offset=0 page_size=50
+2026/10/21 19:28:58 INFO Spotify metadata diagnostic stage=spotify_spclient_response offset=0 status=200 retry=0 reason=none
+2026/10/21 19:28:58 INFO Spotify metadata diagnostic stage=spotify_spclient_page_complete offset=0 entries=50
+2026/10/21 19:28:58 INFO Spotify metadata diagnostic stage=spotify_spclient_page_start offset=50 page_size=50
+2026/10/21 19:28:58 INFO Spotify metadata diagnostic stage=spotify_spclient_response offset=50 status=200 retry=0 reason=none
+2026/10/21 19:28:58 INFO Spotify metadata diagnostic stage=spotify_spclient_page_complete offset=50 entries=50
+2026/10/21 19:28:58 INFO Spotify metadata diagnostic stage=spotify_spclient_page_start offset=100 page_size=50
+2026/10/21 19:28:59 INFO Spotify metadata diagnostic stage=spotify_spclient_response offset=100 status=200 retry=0 reason=none
+2026/10/21 19:28:59 INFO Spotify metadata diagnostic stage=spotify_spclient_page_complete offset=100 entries=23
+2026/10/21 19:28:59 INFO Spotify metadata diagnostic stage=spotify_tail_enrichment_start missing=23
+2026/10/21 19:29:01 INFO Spotify metadata diagnostic stage=spotify_tail_enrichment_complete resolved=23
+2026/10/21 19:29:01 INFO Spotify metadata diagnostic stage=spotify_spclient_page_start offset=0 page_size=50
+2026/10/21 19:29:01 INFO Spotify metadata diagnostic stage=spotify_spclient_response offset=0 status=200 retry=0 reason=none
+2026/10/21 19:29:01 INFO Spotify metadata diagnostic stage=spotify_spclient_page_complete offset=0 entries=50
+2026/10/21 19:29:01 INFO Spotify metadata diagnostic stage=spotify_public_complete resolved=123 total=123
+    db022_test.go:347: persisted=123 reconstructed=123 Spotify_cache_hit_calls=0
+--- PASS: TestDB022HomologationPlaylistLive (4.57s)
+PASS
+ok  	whiterun/internal/storage	4.571s

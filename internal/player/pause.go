@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"sync"
+	"time"
 )
 
 // Each track owns a gate. Closing the resume channel wakes all waiters;
@@ -66,7 +67,11 @@ func waitPlayback(ctx context.Context) (bool, error) {
 func (p *GuildPlayer) SetPaused(paused bool) (bool, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if !paused && p.voiceBlocked && len(p.queue) > 0 {
+	if p.voiceBlocked && len(p.queue) > 0 {
+		p.recoveryPaused = paused
+		if paused {
+			return true, nil
+		}
 		if p.voiceAttempts >= 5 {
 			p.voiceAttempts = 0
 		}
@@ -74,9 +79,32 @@ func (p *GuildPlayer) SetPaused(paused bool) (bool, error) {
 		return true, nil
 	}
 	if !paused && p.providerBlocked {
+		if p.providerGlobal && p.admission != nil {
+			// A healthy stream paused by its owner is independent of pending
+			// provider recovery; resuming it must not renew the global budget.
+			if p.current != nil && p.pause != nil && p.pause.paused() {
+				changed := p.pause.set(false)
+				p.wakeCollectionsLocked()
+				p.diagnosticLocked(slog.LevelInfo, "playback_pause_changed", "paused", false, "expected_event", "resume_or_cancel")
+				return changed, nil
+			}
+			if p.admission.Snapshot().Exhausted {
+				return false, errors.New("YouTube recovery budget is exhausted globally; operator rearm is required after access is restored.")
+			}
+			p.signal("provider_recovery_requested")
+			return true, nil
+		}
 		reason := p.providerReason
-		p.providerBlocked = false
-		p.providerReason = ""
+		if p.providerProbe {
+			return true, nil
+		}
+		if len(p.queue) == 0 && len(p.jobs) == 0 {
+			p.resetProviderLocked()
+			p.signal("provider_retry_new_request")
+			return true, nil
+		}
+		p.providerRetries = 0
+		p.providerRetryAt = time.Now()
 		close(p.providerChanged)
 		p.providerChanged = make(chan struct{})
 		p.failures = 0
@@ -86,6 +114,8 @@ func (p *GuildPlayer) SetPaused(paused bool) (bool, error) {
 	}
 	if !paused && p.halted {
 		p.halted = false
+		p.networkAttempts = 0
+		p.retryAt = time.Time{}
 		p.failures = 0
 		p.signal("resume")
 		return true, nil
@@ -95,6 +125,7 @@ func (p *GuildPlayer) SetPaused(paused bool) (bool, error) {
 	}
 	changed := p.pause.set(paused)
 	if changed {
+		p.wakeCollectionsLocked()
 		p.diagnosticLocked(slog.LevelInfo, "playback_pause_changed", "paused", paused, "expected_event", "resume_or_cancel")
 	}
 	return changed, nil
@@ -102,11 +133,16 @@ func (p *GuildPlayer) SetPaused(paused bool) (bool, error) {
 
 // A stopped or detached session must not carry a provider latch into a fresh one.
 func (p *GuildPlayer) resetProviderLocked() {
-	if !p.providerBlocked {
+	if !p.providerBlocked && p.providerIncident == "" {
 		return
 	}
 	p.providerBlocked = false
+	p.providerGlobal = false
 	p.providerReason = ""
+	p.providerIncident = ""
+	p.providerNotice = false
+	p.providerProbe = false
+	p.providerRetries = 0
 	close(p.providerChanged)
 	p.providerChanged = make(chan struct{})
 }

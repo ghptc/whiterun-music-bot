@@ -1,0 +1,39 @@
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	﻿2026-10-31T16:29:32.3064759Z ##[group]Run python3 scripts/instant_playback_gate.py --run --output gate-artifacts/deterministic.json
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:29:32.3065182Z ^[[36;1mpython3 scripts/instant_playback_gate.py --run --output gate-artifacts/deterministic.json^[[0m
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:29:32.3090103Z shell: /usr/bin/bash -e {0}
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:29:32.3090260Z ##[endgroup]
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8903703Z TestInstantPlaybackTransitionGate
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8904152Z whiterun/internal/discord
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8905118Z missing scenario: ('ready-transition', 'ready')
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8905407Z go test exited 1
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8912253Z spotify-single/cold: PASS n=100 p50=42.336 p95=57.145 p99=61.436 max=62.637 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8912725Z spotify-single/warm: PASS n=100 p50=31.843 p95=33.820 p99=49.886 max=51.858 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8913003Z youtube-single/cold: PASS n=100 p50=35.866 p95=37.764 p99=48.647 max=49.480 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8913283Z youtube-single/warm: PASS n=100 p50=31.795 p95=36.008 p99=50.434 max=103.549 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8913625Z spotify-album/cold: PASS n=100 p50=45.904 p95=61.250 p99=74.351 max=91.880 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8913894Z spotify-album/warm: PASS n=100 p50=37.890 p95=40.012 p99=57.702 max=73.350 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8914164Z playlist-10/cold: PASS n=100 p50=47.080 p95=49.681 p99=60.394 max=60.596 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8914424Z playlist-10/warm: PASS n=100 p50=33.745 p95=35.150 p99=45.242 max=59.756 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8914689Z playlist-50/cold: PASS n=100 p50=61.342 p95=64.981 p99=72.769 max=76.231 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8914937Z playlist-50/warm: PASS n=100 p50=38.722 p95=41.022 p99=41.617 max=42.042 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8915206Z playlist-123/cold: PASS n=100 p50=92.998 p95=99.555 p99=128.449 max=132.036 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8915473Z playlist-123/warm: PASS n=100 p50=46.893 p95=48.801 p99=50.003 max=50.071 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8915744Z playlist-302/cold: PASS n=100 p50=166.145 p95=178.226 p99=189.134 max=201.539 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8916010Z playlist-302/warm: PASS n=100 p50=66.567 p95=70.018 p99=71.240 max=71.525 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8916280Z playlist-500/cold: PASS n=100 p50=248.596 p95=263.945 p99=279.009 max=308.721 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8916544Z playlist-500/warm: PASS n=100 p50=87.181 p95=93.958 p99=99.436 max=110.130 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8916808Z youtube-force/cold: PASS n=100 p50=36.007 p95=38.102 p99=38.273 max=41.883 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8917069Z youtube-force/warm: PASS n=100 p50=32.490 p95=35.129 p99=41.855 max=59.086 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8917628Z voice-disconnected/cold: PASS n=100 p50=39.168 p95=41.316 p99=41.922 max=41.959 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8917918Z voice-disconnected/warm: PASS n=100 p50=30.536 p95=32.564 p99=33.978 max=34.196 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8918193Z after-restart/cold: PASS n=100 p50=39.920 p95=44.178 p99=56.257 max=68.873 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8918462Z after-restart/warm: PASS n=100 p50=31.330 p95=32.544 p99=61.754 max=65.908 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8918719Z after-shuffle/cold: PASS n=100 p50=62.912 p95=67.068 p99=75.994 max=76.610 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8918981Z after-shuffle/warm: PASS n=100 p50=41.606 p95=44.471 p99=48.889 max=55.314 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8919262Z progressive-active/cold: PASS n=100 p50=249.220 p95=261.601 p99=295.354 max=295.987 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8919566Z progressive-active/warm: PASS n=100 p50=86.416 p95=94.081 p99=97.306 max=111.804 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8919856Z load-2-guilds/warm: PASS n=200 p50=124.499 p95=138.384 p99=163.322 max=180.355 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8920132Z load-5-guilds/warm: PASS n=500 p50=259.031 p95=373.779 p99=393.627 max=431.846 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8920408Z load-10-guilds/warm: PASS n=1000 p50=449.865 p95=787.279 p99=839.393 max=894.027 ms
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.8920658Z DETERMINISTIC: FAIL; Discord release approved=False
+deterministic-ttfa	Enforce TTFA, transition, load and playlist scaling budgets	2026-10-31T16:38:28.9012275Z ##[error]Process completed with exit code 1.

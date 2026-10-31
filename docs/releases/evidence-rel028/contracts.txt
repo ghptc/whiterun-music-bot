@@ -1,0 +1,249 @@
+=== RUN   TestFIX025ExactRemixerCredit
+--- PASS: TestFIX025ExactRemixerCredit (0.00s)
+=== RUN   TestOPT026AdmissionRateAndConcurrency
+--- PASS: TestOPT026AdmissionRateAndConcurrency (0.00s)
+=== RUN   TestOPT026OneGlobalTrialAndFiniteBudget
+--- PASS: TestOPT026OneGlobalTrialAndFiniteBudget (0.00s)
+=== RUN   TestOPT026RecoveryRequiresNewMediaEvidence
+--- PASS: TestOPT026RecoveryRequiresNewMediaEvidence (0.00s)
+=== RUN   TestOPT026LocalFailuresNeverOpenGlobalBreaker
+--- PASS: TestOPT026LocalFailuresNeverOpenGlobalBreaker (0.00s)
+=== RUN   TestOPT026BlockedAdmissionWakesRateWaiters
+--- PASS: TestOPT026BlockedAdmissionWakesRateWaiters (0.00s)
+=== RUN   TestOPT026Measurement
+    opt026_measurement_test.go:38: MEASUREMENT {"cold_p50_ms":32.13,"cold_p95_ms":32.8,"scenario":"cold_warm","search":25,"tracks":25,"verification":25,"warm_p50_ms":0.022,"warm_p95_ms":0.031}
+    opt026_measurement_test.go:68: MEASUREMENT {"scenario":"five_concurrent","verification":1}
+    opt026_measurement_test.go:78: MEASUREMENT {"scenario":"expired_sequential","verification":1}
+    opt026_measurement_test.go:86: MEASUREMENT {"positions":123,"scenario":"123_cold_positions","search":123,"verification":123}
+--- PASS: TestOPT026Measurement (5.04s)
+=== RUN   TestOPT026FiveSharedProofConsumersAndRenewal
+--- PASS: TestOPT026FiveSharedProofConsumersAndRenewal (0.04s)
+=== RUN   TestOPT026SharedProofCancellation
+=== RUN   TestOPT026SharedProofCancellation/false
+=== RUN   TestOPT026SharedProofCancellation/true
+--- PASS: TestOPT026SharedProofCancellation (0.01s)
+    --- PASS: TestOPT026SharedProofCancellation/false (0.01s)
+    --- PASS: TestOPT026SharedProofCancellation/true (0.00s)
+=== RUN   TestOPT026ProofFailureAndContextIsolation
+--- PASS: TestOPT026ProofFailureAndContextIsolation (0.06s)
+=== RUN   TestOPT026NamedIdentityCorpus
+    opt026_test.go:301: identity corpus positives=14 negatives=31 false_positives=0
+--- PASS: TestOPT026NamedIdentityCorpus (0.00s)
+=== RUN   TestOPT026UnavailableAndAgeRestrictedProofsPreserved
+--- PASS: TestOPT026UnavailableAndAgeRestrictedProofsPreserved (0.00s)
+=== RUN   TestOPT026ProofCoversExpectedPlayback
+--- PASS: TestOPT026ProofCoversExpectedPlayback (0.04s)
+=== RUN   TestOPT026123WarmAndReopen
+    opt026_warm_test.go:27: MEASUREMENT {"media_processes_not_executed":123,"metadata_processes":246,"playback_identity_extra_processes":0,"scenario":"123_distinct_cold","search_processes":123,"verification_processes":123}
+    opt026_warm_test.go:37: MEASUREMENT {"additional_metadata_processes":0,"scenario":"123_ram_warm"}
+    opt026_warm_test.go:48: MEASUREMENT {"additional_metadata_processes":0,"scenario":"123_mapping_fresh_ram_empty"}
+    opt026_warm_test.go:66: MEASUREMENT {"additional_searches":0,"additional_verifications":123,"scenario":"123_mapping_stale_ram_empty"}
+--- PASS: TestOPT026123WarmAndReopen (5.34s)
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_auth_requiredSign_in_to_confirm_your_age
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_bot_challengeSign_in_to_confirm_you’re_not_a_bot
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_auth_requiredAuthentication_required
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_rate_limitedHTTP_Error_429:_Too_Many_Requests
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_network_timeoutConnection_timed_out
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_video_unavailableVideo_unavailable
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_extractor_failureERROR:_Unable_to_extract_player_response
+--- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics (0.01s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_auth_requiredSign_in_to_confirm_your_age (0.00s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_bot_challengeSign_in_to_confirm_you’re_not_a_bot (0.00s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_auth_requiredAuthentication_required (0.00s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_rate_limitedHTTP_Error_429:_Too_Many_Requests (0.00s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_network_timeoutConnection_timed_out (0.00s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_video_unavailableVideo_unavailable (0.00s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_extractor_failureERROR:_Unable_to_extract_player_response (0.00s)
+=== RUN   TestProviderChallengeStopsDiscoveryAtFirstFailure
+--- PASS: TestProviderChallengeStopsDiscoveryAtFirstFailure (0.00s)
+PASS
+ok  	whiterun/internal/media	10.557s
+=== RUN   TestFIX0251ThreeHoursWithoutVoluntaryLeave
+--- PASS: TestFIX0251ThreeHoursWithoutVoluntaryLeave (0.00s)
+=== RUN   TestFIX0251CloseOriginPreservesCancellation
+--- PASS: TestFIX0251CloseOriginPreservesCancellation (0.00s)
+=== RUN   TestFIX0251ResolverFailurePreservesActiveVoice
+=== RUN   TestFIX0251ResolverFailurePreservesActiveVoice/spotify_unavailable
+=== RUN   TestFIX0251ResolverFailurePreservesActiveVoice/resolution_timeout
+--- PASS: TestFIX0251ResolverFailurePreservesActiveVoice (0.00s)
+    --- PASS: TestFIX0251ResolverFailurePreservesActiveVoice/spotify_unavailable (0.00s)
+    --- PASS: TestFIX0251ResolverFailurePreservesActiveVoice/resolution_timeout (0.00s)
+=== RUN   TestFIX0251EOFRacesVoiceWatchdogWithoutDoubleAdvance
+--- PASS: TestFIX0251EOFRacesVoiceWatchdogWithoutDoubleAdvance (0.00s)
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/10
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/25
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/49
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/50
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/75
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/99
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/10
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/25
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/49
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/50
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/75
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/99
+--- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/10 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/25 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/49 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/50 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/75 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/99 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/10 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/25 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/49 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/50 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/75 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/99 (0.00s)
+=== RUN   TestFIX025CrashCheckpointRequiresAttachment
+--- PASS: TestFIX025CrashCheckpointRequiresAttachment (0.00s)
+=== RUN   TestFIX025FailedResumePreservesPosition
+--- PASS: TestFIX025FailedResumePreservesPosition (0.00s)
+=== RUN   TestFIX025PauseDuringRecovery
+--- PASS: TestFIX025PauseDuringRecovery (0.00s)
+=== RUN   TestFIX025AccurateSeekWithRealFFmpeg
+--- PASS: TestFIX025AccurateSeekWithRealFFmpeg (0.41s)
+=== RUN   TestFIX025SingleFrameCannotResetIncidentBudget
+--- PASS: TestFIX025SingleFrameCannotResetIncidentBudget (0.00s)
+=== RUN   TestFIX025BusyCheckpointCannotBlockAudioForCommandTimeout
+--- PASS: TestFIX025BusyCheckpointCannotBlockAudioForCommandTimeout (0.20s)
+=== RUN   TestREL024LostNotificationRecoversWithoutQueueMutation
+--- PASS: TestREL024LostNotificationRecoversWithoutQueueMutation (0.00s)
+=== RUN   TestOPT026GlobalTwoGuildRecovery
+    opt026_test.go:114: global recovery: initial=1 trials=3 guilds=2 positions_preserved=246 notices=2
+--- PASS: TestOPT026GlobalTwoGuildRecovery (0.00s)
+=== RUN   TestOPT026Horizon123AndDistantPlaylist
+    opt026_test.go:176: prefetch before first EOF: first123=3 distant123=0; pause/resume/skip/stop preserved order
+--- PASS: TestOPT026Horizon123AndDistantPlaylist (0.00s)
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates/short
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates/long
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates/unknown
+--- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates (0.00s)
+    --- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates/short (0.00s)
+    --- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates/long (0.00s)
+    --- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates/unknown (0.00s)
+=== RUN   TestOPT026HealthyAndLocalAudioIgnoreOtherGuildOutage
+2026/10/31 12:34:33 INFO playback_start source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=4759 request_elapsed_ns=4759 elapsed_ms=0.004 request_elapsed_ms=0.004
+2026/10/31 12:34:33 INFO local_audio_opened source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=32672 request_elapsed_ns=32652 elapsed_ms=0.032 request_elapsed_ms=0.032 duration_ms=100 progress_ms=0 format=wav first_frame_ms=0
+2026/10/31 12:34:33 INFO stream_resolve_start source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=5410 request_elapsed_ns=41289 elapsed_ms=0.005 request_elapsed_ms=0.041
+2026/10/31 12:34:33 INFO ffmpeg_first_input source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=20853933 request_elapsed_ns=20889872 elapsed_ms=20.854 request_elapsed_ms=20.889
+2026/10/31 12:34:33 INFO ffmpeg_start source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=87940 request_elapsed_ns=20973924 elapsed_ms=0.088 request_elapsed_ms=20.973 purpose=audio_decode category=ffmpeg started_at=2026-10-31T15:34:33.640Z candidates=1
+2026/10/31 12:34:33 INFO audio_source_start source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=20952232 request_elapsed_ns=20988111 elapsed_ms=20.952 request_elapsed_ms=20.988 video_id="" live=false yt_pid=1510114 ffmpeg_pid=1510119
+2026/10/31 12:34:33 INFO stream_process_started source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=20955919 request_elapsed_ns=20991798 elapsed_ms=20.955 request_elapsed_ms=20.991 pid=1510114
+2026/10/31 12:34:33 INFO ffmpeg_first_output source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=39854507 request_elapsed_ns=39890446 elapsed_ms=39.854 request_elapsed_ms=39.89
+2026/10/31 12:34:33 INFO first_ogg_packet source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=39868414 request_elapsed_ns=39904293 elapsed_ms=39.868 request_elapsed_ms=39.904
+2026/10/31 12:34:33 INFO first_opus_packet source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=40028642 request_elapsed_ns=40064601 elapsed_ms=40.028 request_elapsed_ms=40.064
+2026/10/31 12:34:33 INFO first_opus_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=40042850 request_elapsed_ns=40078729 elapsed_ms=40.042 request_elapsed_ms=40.078
+2026/10/31 12:34:33 INFO first_voice_frame_attempt source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=40049462 request_elapsed_ns=40085341 elapsed_ms=40.049 request_elapsed_ms=40.085
+2026/10/31 12:34:33 INFO first_audio_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=40087536 request_elapsed_ns=40087516 elapsed_ms=40.087 request_elapsed_ms=40.087
+2026/10/31 12:34:33 INFO local_audio_first_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=40088938 request_elapsed_ns=40088918 elapsed_ms=40.088 request_elapsed_ms=40.088 duration_ms=100 progress_ms=20 first_frame_ms=40
+2026/10/31 12:34:33 INFO ffmpeg_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=120250645 request_elapsed_ns=141136609 elapsed_ms=120.25 request_elapsed_ms=141.136 exit_code=0 error=<nil>
+2026/10/31 12:34:33 INFO audio_source_exit source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=141120007 request_elapsed_ns=141155886 elapsed_ms=141.12 request_elapsed_ms=141.155 video_id="" yt_exit_code=0 ffmpeg_exit_code=0 category=eof yt_stderr_tail="" ffmpeg_stderr_tail=""
+2026/10/31 12:34:33 INFO playback_context_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=241715216 request_elapsed_ns=241715226 elapsed_ms=241.715 request_elapsed_ms=241.715 cause=<nil> parent_error=<nil>
+2026/10/31 12:34:33 INFO playback_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=241737509 request_elapsed_ns=241737489 elapsed_ms=241.737 request_elapsed_ms=241.737 error=<nil>
+2026/10/31 12:34:33 INFO local_audio_completed source=local local_audio_id=audio.wav local_correlation_id=local/1793460873619798920 elapsed_ns=241739964 request_elapsed_ns=241739944 elapsed_ms=241.74 request_elapsed_ms=241.739 duration_ms=100 progress_ms=120 first_frame_ms=40 category=eof audio_frames=6
+--- PASS: TestOPT026HealthyAndLocalAudioIgnoreOtherGuildOutage (0.25s)
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/10
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/49
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/50
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/75
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/99
+--- PASS: TestOPT026GlobalProgressRecoveryPolicy (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/10 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/49 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/50 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/75 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/99 (0.00s)
+=== RUN   TestOPT026PauseDuringGlobalBackoffRechecksHorizon
+--- PASS: TestOPT026PauseDuringGlobalBackoffRechecksHorizon (0.00s)
+=== RUN   TestProviderBackoffPreserves123PositionsAndRecoversWithoutLeave
+--- PASS: TestProviderBackoffPreserves123PositionsAndRecoversWithoutLeave (0.00s)
+=== RUN   TestProviderPlaybackConfirmedProgressPolicy
+=== RUN   TestProviderPlaybackConfirmedProgressPolicy/10
+=== RUN   TestProviderPlaybackConfirmedProgressPolicy/49
+=== RUN   TestProviderPlaybackConfirmedProgressPolicy/50
+=== RUN   TestProviderPlaybackConfirmedProgressPolicy/75
+=== RUN   TestProviderPlaybackConfirmedProgressPolicy/99
+--- PASS: TestProviderPlaybackConfirmedProgressPolicy (0.00s)
+    --- PASS: TestProviderPlaybackConfirmedProgressPolicy/10 (0.00s)
+    --- PASS: TestProviderPlaybackConfirmedProgressPolicy/49 (0.00s)
+    --- PASS: TestProviderPlaybackConfirmedProgressPolicy/50 (0.00s)
+    --- PASS: TestProviderPlaybackConfirmedProgressPolicy/75 (0.00s)
+    --- PASS: TestProviderPlaybackConfirmedProgressPolicy/99 (0.00s)
+=== RUN   TestProviderTrialAdmissionSerializesConcurrentCollections
+--- PASS: TestProviderTrialAdmissionSerializesConcurrentCollections (0.00s)
+=== RUN   TestProviderBackgroundFailureKeepsCurrentAudioAndPendingQueue
+--- PASS: TestProviderBackgroundFailureKeepsCurrentAudioAndPendingQueue (0.00s)
+=== RUN   TestProviderPreparationFailureCanResumeAnEmptyQueue
+--- PASS: TestProviderPreparationFailureCanResumeAnEmptyQueue (0.00s)
+=== RUN   TestProviderOneFrameDoesNotResetRetryBudget
+--- PASS: TestProviderOneFrameDoesNotResetRetryBudget (0.00s)
+=== RUN   TestProviderFailurePersistsSavedCheckpointWithoutConsumingQueue
+--- PASS: TestProviderFailurePersistsSavedCheckpointWithoutConsumingQueue (0.00s)
+=== RUN   TestProviderStopCancelsActiveTrialAndAllowsFreshCollection
+--- PASS: TestProviderStopCancelsActiveTrialAndAllowsFreshCollection (0.00s)
+=== RUN   TestProviderStreamCategoriesUseTheSameRecoveryCircuit
+--- PASS: TestProviderStreamCategoriesUseTheSameRecoveryCircuit (0.00s)
+=== RUN   TestProviderLateCanceledResolutionCannotConsumePositionAfterRecovery
+--- PASS: TestProviderLateCanceledResolutionCannotConsumePositionAfterRecovery (0.00s)
+=== RUN   TestProviderCollectionRepliesWhileRecoveryBudgetIsExhausted
+--- PASS: TestProviderCollectionRepliesWhileRecoveryBudgetIsExhausted (0.00s)
+=== RUN   TestREL024HealthDoesNotWaitForDeadlockedWorker
+--- PASS: TestREL024HealthDoesNotWaitForDeadlockedWorker (0.00s)
+=== RUN   TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget
+=== RUN   TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/permanent
+    rel024_test.go:82: calls=3 notifications=0 positions=123/123; recovered=false
+=== RUN   TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/transient
+    rel024_test.go:82: calls=3 notifications=0 positions=123/123; recovered=true
+--- PASS: TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget (0.00s)
+    --- PASS: TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/permanent (0.00s)
+    --- PASS: TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/transient (0.00s)
+=== RUN   TestREL024NetworkRecoveryWithRealFFmpeg
+    rel024_test.go:137: real extractor exits=2; FFmpeg frames delivered; recovery=3.759960943s; positions=123/123
+--- PASS: TestREL024NetworkRecoveryWithRealFFmpeg (3.77s)
+=== RUN   TestREL024FrozenRealFFmpegIsKilledAndReaped
+    rel024_test.go:182: real FFmpeg SIGSTOP: detection/cleanup=998.962968ms; pid reaped; error=audio_stall: no audio progress within idle deadline
+        audio stream: read |0: file already closed
+--- PASS: TestREL024FrozenRealFFmpegIsKilledAndReaped (1.00s)
+=== RUN   TestProviderChallengeRetainsPipelineWithoutRetryLoop
+--- PASS: TestProviderChallengeRetainsPipelineWithoutRetryLoop (0.29s)
+PASS
+ok  	whiterun/internal/player	5.921s
+=== RUN   TestFIX0251ThreeHoursMainGatewayOutagesPreserveVoice
+--- PASS: TestFIX0251ThreeHoursMainGatewayOutagesPreserveVoice (0.00s)
+=== RUN   TestFIX0251VoiceOutageGraceAndRecoveryDoesNotLeave
+--- PASS: TestFIX0251VoiceOutageGraceAndRecoveryDoesNotLeave (0.00s)
+=== RUN   TestFIX0251CloseLogsOriginExactlyOnce
+--- PASS: TestFIX0251CloseLogsOriginExactlyOnce (0.00s)
+=== RUN   TestFIX0251LocalLeaveEchoIsNotReportedAsRemoteDisconnect
+--- PASS: TestFIX0251LocalLeaveEchoIsNotReportedAsRemoteDisconnect (0.00s)
+=== RUN   TestFIX025RealVoiceSoak
+    fix025_soak_test.go:37: requires explicitly authorized test channel and live credentials
+--- SKIP: TestFIX025RealVoiceSoak (0.00s)
+=== RUN   TestFIX025MainGatewayReconnectDoesNotSuspendHealthyVoice
+--- PASS: TestFIX025MainGatewayReconnectDoesNotSuspendHealthyVoice (0.00s)
+=== RUN   TestFIX025BrokenUDPRecreatesSessionButRemovalCannotRejoin
+--- PASS: TestFIX025BrokenUDPRecreatesSessionButRemovalCannotRejoin (0.00s)
+=== RUN   TestFIX025ResumeDoesNotDuplicateAnnouncement
+--- PASS: TestFIX025ResumeDoesNotDuplicateAnnouncement (0.00s)
+=== RUN   TestFIX025LateLeaveEchoCannotCloseNewJoin
+--- PASS: TestFIX025LateLeaveEchoCannotCloseNewJoin (0.00s)
+=== RUN   TestFIX025InvalidGatewayClosesUDPWithoutLeavingGuild
+--- PASS: TestFIX025InvalidGatewayClosesUDPWithoutLeavingGuild (0.00s)
+=== RUN   TestOPT026FullFlowSQLiteAndMedia
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"cold_sqlite","spotify_metadata_calls":1,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":1,"verification":1}}
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"warm_sqlite_and_ram","spotify_metadata_calls":0,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":0,"verification":0}}
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"reopened_sqlite_empty_ram","spotify_metadata_calls":0,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":0,"verification":0}}
+--- PASS: TestOPT026FullFlowSQLiteAndMedia (1.06s)
+=== RUN   TestOPT026SharedProcessAdmissionWiring
+--- PASS: TestOPT026SharedProcessAdmissionWiring (0.00s)
+=== RUN   TestREL024CardsPreserveMetadataWithoutBrandPrefix
+--- PASS: TestREL024CardsPreserveMetadataWithoutBrandPrefix (0.00s)
+=== RUN   TestProviderIncidentAnnouncementHasNoTrackFailureLabel
+--- PASS: TestProviderIncidentAnnouncementHasNoTrackFailureLabel (0.00s)
+PASS
+ok  	whiterun/internal/discord	1.060s

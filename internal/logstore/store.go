@@ -156,7 +156,11 @@ func Open(opt Options) (_ *Store, err error) {
 			return nil, err
 		}
 	}
-	s.batchLimit = min(opt.Batch, max(1, int(s.mainLimit/(64*pageSize))))
+	// Index-growth reserve is 8 pages per row. Bound it to 1/4 of the
+	// main-file budget, in addition to the existing payload bound (3/16).
+	// Tiny records should not force a checkpoint every handful of messages.
+	// Large records still flush at the unchanged byte limit in run.
+	s.batchLimit = min(opt.Batch, max(1, int(s.mainLimit/(32*pageSize))))
 	s.recordLimit = min(maxRecordBytes, int(s.mainLimit/16))
 	var rows uint64
 	if err = db.QueryRowContext(ctx, "SELECT count(*) FROM logs").Scan(&rows); err != nil {

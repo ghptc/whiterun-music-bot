@@ -1,0 +1,8 @@
+=== RUN   TestOPT026123WarmAndReopen
+    opt026_warm_test.go:27: MEASUREMENT {"media_processes_not_executed":123,"metadata_processes":246,"playback_identity_extra_processes":0,"scenario":"123_distinct_cold","search_processes":123,"verification_processes":123}
+    opt026_warm_test.go:37: MEASUREMENT {"additional_metadata_processes":0,"scenario":"123_ram_warm"}
+    opt026_warm_test.go:48: MEASUREMENT {"additional_metadata_processes":0,"scenario":"123_mapping_fresh_ram_empty"}
+    opt026_warm_test.go:66: MEASUREMENT {"additional_searches":0,"additional_verifications":123,"scenario":"123_mapping_stale_ram_empty"}
+--- PASS: TestOPT026123WarmAndReopen (5.50s)
+PASS
+ok  	whiterun/internal/media	5.508s

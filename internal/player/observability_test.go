@@ -212,7 +212,7 @@ func TestPauseAndProviderDoNotReportStall(t *testing.T) {
 	})
 }
 
-func TestStallObserverDoesNotAdvanceWithoutNotification(t *testing.T) {
+func TestREL024LostNotificationRecoversWithoutQueueMutation(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		h := &eventCapture{}
 		started := make(chan struct{}, 1)
@@ -235,20 +235,14 @@ func TestStallObserverDoesNotAdvanceWithoutNotification(t *testing.T) {
 		synctest.Wait()
 		select {
 		case <-started:
-			t.Fatal("diagnostic timer advanced playback")
 		default:
+			t.Fatal("watchdog did not recover lost notification")
 		}
 		if !h.find("scheduler_stall_detected", "wait_reason", "notification_missing") {
 			t.Fatal("missing notification diagnosis")
 		}
-		p.mu.Lock()
-		p.signal("resolution_commit")
-		p.mu.Unlock()
-		synctest.Wait()
-		select {
-		case <-started:
-		default:
-			t.Fatal("explicit notification did not advance")
+		if p.State().Current == nil {
+			t.Fatal("recovery lost current track")
 		}
 	})
 }

@@ -25,22 +25,24 @@ import (
 // The stock gateway reconnects with context.Background even on heartbeat loss,
 // which can outlive Close and reuse the invalid DAVE session.
 type incidentGateway struct {
-	mu           sync.Mutex
-	writeMu      sync.Mutex
-	conn         *websocket.Conn
-	status       voice.Status
-	ssrc         uint32
-	seq          int
-	nonce        int64
-	awaitingACK  bool
-	sent, ack    time.Time
-	cancel       context.CancelFunc
-	closed       bool
-	log          *slog.Logger
-	dave         godave.Session
-	event        voice.EventHandlerFunc
-	closeHandler voice.CloseHandlerFunc
-	dialer       *websocket.Dialer
+	mu              sync.Mutex
+	writeMu         sync.Mutex
+	conn            *websocket.Conn
+	status          voice.Status
+	ssrc            uint32
+	seq             int
+	nonce           int64
+	awaitingACK     bool
+	sent, ack       time.Time
+	cancel          context.CancelFunc
+	closed          bool
+	log             *slog.Logger
+	dave            godave.Session
+	event           voice.EventHandlerFunc
+	closeHandler    voice.CloseHandlerFunc
+	dialer          *websocket.Dialer
+	lifecycleFields func() []any
+	incidentID      string
 }
 
 func incidentGatewayFactory(log *slog.Logger) voice.GatewayCreateFunc {
@@ -61,6 +63,7 @@ func (g *incidentGateway) Open(ctx context.Context, state voice.State) error {
 		g.mu.Unlock()
 		return errors.New("voice session already opened or closed")
 	}
+	g.incidentID = fmt.Sprintf("voice/%s/%d", state.GuildID, time.Now().UnixNano())
 	g.status = voice.StatusConnecting
 	g.mu.Unlock()
 	conn, response, err := g.dialer.DialContext(ctx, fmt.Sprintf("wss://%s?v=%d", state.Endpoint, voice.GatewayVersion), nil)
@@ -96,7 +99,18 @@ func (g *incidentGateway) Open(ctx context.Context, state voice.State) error {
 		unexpected := !g.closed
 		g.mu.Unlock()
 		if unexpected {
-			g.log.Warn("voice_session_lost", "guild_id", state.GuildID, "error", err, "action", "fresh session required")
+			code := 0
+			if remote, ok := err.(*websocket.CloseError); ok {
+				code = remote.Code
+			}
+			fields := []any{"incident_id", g.incidentID, "guild_id", state.GuildID, "channel_id", state.ChannelID, "component", "voice_gateway", "origin", "listen", "reason", "websocket_or_protocol_failure", "close_code", code, "error", err, "previous_state", fmt.Sprint(g.Status()), "next_state", "invalid", "action", "fresh session required"}
+			if g.lifecycleFields != nil {
+				fields = append(fields, g.lifecycleFields()...)
+			}
+			g.log.Warn("voice_gateway_closed", fields...)
+			if code == 4006 || code == 4009 {
+				g.log.Warn("voice_session_invalidated", fields...)
+			}
 			g.Close()
 			// Conn's handler may synchronously close the gateway again.
 			if g.closeHandler != nil {
@@ -196,7 +210,7 @@ func (g *incidentGateway) heartbeat(ctx context.Context, conn *websocket.Conn, i
 		g.awaitingACK = true
 		data := voice.GatewayMessageDataHeartbeat{T: g.nonce, SeqAck: g.seq}
 		g.mu.Unlock()
-		if err := g.Send(ctx, voice.OpcodeHeartbeat, data); err != nil {
+		if err := g.send(ctx, voice.OpcodeHeartbeat, data); err != nil {
 			_ = conn.Close()
 			return
 		}

@@ -1,0 +1,42 @@
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.60s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.60s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.60s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+=== RUN   TestConcurrentWritesBatchAndFinalFlush
+--- PASS: TestConcurrentWritesBatchAndFinalFlush (0.59s)
+PASS
+ok  	whiterun/internal/logstore	12.842s

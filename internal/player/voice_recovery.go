@@ -3,12 +3,13 @@ package player
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/rand/v2"
 	"time"
 )
 
-// RecoverableVoice creates a fresh, fully negotiated transport. It must never
-// return a connection with an invalidated encryption session.
+// RecoverableVoice preserves a proven usable transport or negotiates a fresh
+// one. It must never return an invalidated encryption session.
 type RecoverableVoice interface {
 	Recover(context.Context) (Voice, error)
 }
@@ -60,6 +61,7 @@ func (p *GuildPlayer) suspendVoiceLocked() {
 		p.voiceBlocked = true
 		if !p.voiceIncident {
 			p.voiceIncident = true
+			p.voiceIncidentID = fmt.Sprintf("%s/voice/%d", p.sessionID, p.sequence)
 			p.voiceAttempts = 0
 			p.voiceNotice = false
 		}
@@ -81,11 +83,14 @@ func (p *GuildPlayer) recoverVoice() {
 	v := p.voice
 	notice := !p.voiceNotice
 	p.voiceNotice = true
+	incident := p.voiceIncidentID
+	started := time.Now()
 	fn := p.onSkip
 	p.mu.Unlock()
 	defer cancel()
+	p.log.Warn("voice_recovery_started", append(p.VoiceLifecycleFields(), "incident_id", incident, "component", "voice", "origin", "scheduler", "reason", "transport_unavailable", "previous_state", "suspended", "next_state", "recovering")...)
 	if notice && fn != nil {
-		fn(PlaybackEvent{FailureStage: "voice", SkippedReason: "Discord Voice interrupted. The track and queue are preserved while the Bard reconnects.", State: Suspended})
+		fn(PlaybackEvent{IncidentID: incident, FailureStage: "voice", SkippedReason: "Discord Voice interrupted. The Bard is recovering audio; the queue and confirmed playback progress are preserved.", State: Suspended})
 	}
 	for {
 		p.mu.Lock()
@@ -107,6 +112,7 @@ func (p *GuildPlayer) recoverVoice() {
 		}
 		var replacement Voice
 		var err error
+		p.log.Info("recovery_attempted", "incident_id", incident, "component", "voice", "attempt", attempt+1, "duration_ms", time.Since(started).Milliseconds())
 		attemptCtx, stop := context.WithTimeout(ctx, 15*time.Second)
 		if r, ok := v.(RecoverableVoice); ok {
 			replacement, err = r.Recover(attemptCtx)
@@ -124,16 +130,16 @@ func (p *GuildPlayer) recoverVoice() {
 			p.voiceBlocked = false
 			p.voiceRecoveryCancel = nil
 			p.signal("voice_recovered")
-			p.log.Info("voice_circuit_closed", "guild_id", p.guildID, "attempt", attempt+1)
+			p.log.Info("voice_recovery_completed", "incident_id", incident, "component", "voice", "origin", "scheduler", "reason", "transport_confirmed", "previous_state", "recovering", "next_state", "attached", "confirmed_ms", p.confirmedOffset.Milliseconds(), "guild_id", p.guildID, "attempt", attempt+1, "duration_ms", time.Since(started).Milliseconds())
 			p.mu.Unlock()
 			// The actual first frame supplies the single relevant recovery update.
 			return
 		}
-		p.log.Warn("voice_recovery_failed", "guild_id", p.guildID, "attempt", attempt+1, "error", err)
+		p.log.Warn("voice_recovery_failed", "incident_id", incident, "component", "voice", "origin", "scheduler", "reason", "attempt_failed", "previous_state", "recovering", "next_state", "suspended", "guild_id", p.guildID, "attempt", attempt+1, "error", err)
 		exhausted := p.voiceAttempts >= 5
 		p.mu.Unlock()
 		if exhausted {
-			p.log.Error("voice_recovery_exhausted", "guild_id", p.guildID, "action", "queue preserved; no further automatic streaming")
+			p.log.Error("recovery_failed", "incident_id", incident, "component", "voice", "duration_ms", time.Since(started).Milliseconds(), "guild_id", p.guildID, "action", "queue preserved; no further automatic streaming")
 			return
 		}
 	}

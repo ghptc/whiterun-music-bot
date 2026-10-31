@@ -1,0 +1,2 @@
+=== RUN   TestREL024ProcessFixture
+REL024_READY positions=123/123 voice=detached

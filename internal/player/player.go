@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math/rand/v2"
 	"sync"
 	"time"
 
@@ -22,6 +23,23 @@ type PlayFunc func(context.Context, media.Track, Voice) error
 const MaxQueueTracks = 1000
 
 type GuildPlayer struct {
+	admission              *media.ProviderAdmission
+	providerGlobal         bool
+	providerLastNotice     string
+	prefetchHorizon        time.Duration
+	networkIncident        string
+	retryingPersistence    bool
+	persistenceWorkers     sync.WaitGroup
+	networkRecoveryStarted time.Time
+	networkAttempts        int
+	retryAt                time.Time
+	canceledAt             time.Time
+	progress               playbackProgress
+	recoveryPaused         bool
+	checkpointOffset       time.Duration
+	checkpointDelayed      bool
+	confirmedOffset        time.Duration
+
 	diagnostics         *diagnostics
 	queueVersion        uint64
 	lastSignal          string
@@ -60,10 +78,18 @@ type GuildPlayer struct {
 	failures            int
 	voiceBlocked        bool
 	voiceIncident       bool
+	voiceIncidentID     string
 	voiceAttempts       int
 	voiceNotice         bool
 	voiceEpoch          uint64
 	voiceRecoveryCancel context.CancelFunc
+	playbackProviderID  string
+	providerProbe       bool
+	providerRetries     int
+	providerRetryAt     time.Time
+	providerIncident    string
+	providerGeneration  uint64
+	providerNotice      bool
 	providerBlocked     bool
 	providerReason      string
 	providerChanged     chan struct{}
@@ -89,12 +115,7 @@ func (p *GuildPlayer) signal(reasons ...string) {
 	// Wake the owners of that window as well as playback; neither consumer can
 	// substitute for the other. Notifications coalesce and never run resolver work
 	// under this lock.
-	for _, job := range p.jobs {
-		select {
-		case job.wake <- struct{}{}:
-		default:
-		}
-	}
+	p.wakeCollectionsLocked()
 
 	select {
 	case p.wake <- struct{}{}:
@@ -162,6 +183,9 @@ func (p *GuildPlayer) Stop() {
 	p.queue = nil
 	p.loop = "off"
 	p.halted, p.failures = false, 0
+	p.networkAttempts = 0
+	p.recoveryPaused = false
+	p.retryAt = time.Time{}
 	p.generation++
 	p.mutationLocked("generation_changed")
 	p.cancelTrackLocked("stop")
@@ -173,8 +197,12 @@ func (p *GuildPlayer) Stop() {
 // Leave detaches first, so in-flight searches cannot resurrect playback.
 // Discord orchestration serializes Leave and Attach for each guild.
 func (p *GuildPlayer) Leave(ctx context.Context) {
+	fields := append(p.VoiceLifecycleFields(), "component", "player", "origin", VoiceCloseOrigin(ctx), "reason", "detach_requested", "previous_state", "attached", "next_state", "detached")
 	p.mu.Lock()
 	v := p.voice
+	if v != nil {
+		p.log.Info("voice_disconnect_requested", fields...)
+	}
 	p.voice = nil
 	p.cancelJobsLocked()
 	p.cancelVoiceRecoveryLocked()
@@ -182,6 +210,9 @@ func (p *GuildPlayer) Leave(ctx context.Context) {
 	p.queue = nil
 	p.loop = "off"
 	p.halted, p.failures = false, 0
+	p.networkAttempts = 0
+	p.recoveryPaused = false
+	p.retryAt = time.Time{}
 	p.generation++
 	p.mutationLocked("generation_changed")
 	p.cancelTrackLocked("leave")
@@ -205,9 +236,13 @@ func (p *GuildPlayer) Close(ctx context.Context) {
 	p.store = nil
 	p.mu.Unlock()
 	p.cancel()
+	if VoiceCloseOrigin(ctx) == "unattributed_close" {
+		ctx = VoiceCloseContext(ctx, "player_shutdown")
+	}
 	p.Leave(ctx)
 	<-p.done
 	p.jobWorkers.Wait()
+	p.persistenceWorkers.Wait()
 	p.diagnostics.stopOnce.Do(func() { close(p.diagnostics.stop) })
 	select {
 	case <-p.diagnostics.done:
@@ -228,11 +263,40 @@ func (p *GuildPlayer) run() {
 			p.recoverVoice()
 			continue
 		}
-		if reason, _ := p.schedulerReasonLocked(); reason != "ready" {
+		providerPermit := ""
+		headLocal := len(p.queue) > 0 && p.queue[0].RequestedSource == "local"
+		if p.providerBlocked && !headLocal && len(p.queue) > 0 && !p.queue[0].Pending && p.voice != nil && !p.halted {
+			p.mu.Unlock()
+			permit, err := p.waitProvider(p.ctx, nil)
+			if err != nil {
+				return
+			}
+			p.mu.Lock()
+			providerPermit = permit
+		}
+		reason, _ := p.schedulerReasonAllowProviderLocked(providerPermit != "" || headLocal)
+		if reason != "ready" {
+			if providerPermit != "" {
+				p.finishProviderLocked(context.Canceled, providerPermit)
+			}
 			p.mu.Unlock()
 			if !p.schedulerWait() {
 				return
 			}
+			continue
+		}
+		if delay := time.Until(p.retryAt); delay > 0 {
+			if providerPermit != "" {
+				p.finishProviderLocked(context.Canceled, providerPermit)
+			}
+			p.mu.Unlock()
+			timer := time.NewTimer(delay)
+			select {
+			case <-p.ctx.Done():
+			case <-p.wake:
+			case <-timer.C:
+			}
+			timer.Stop()
 			continue
 		}
 		entry := p.queue[0]
@@ -260,21 +324,36 @@ func (p *GuildPlayer) run() {
 		p.trackDone = done
 		p.trackCancel = cancel
 		p.current = &t
+		p.playbackProviderID = providerPermit
+		p.progress.at.Store(time.Now().UnixNano())
 		p.pause = &pauseGate{}
-		ctx = context.WithValue(ctx, pauseKey{}, p.pause)
+		p.pause.set(p.recoveryPaused)
+		p.recoveryPaused = false
+		p.checkpointOffset = t.ResumeOffset
+		p.confirmedOffset = t.ResumeOffset
+		ctx = media.WithProviderPermit(context.WithValue(ctx, pauseKey{}, p.pause), providerPermit)
 		v := p.voice
-		p.persistLocked()
+		// A fresh, unstarted head is already durable in the ready queue. Commit
+		// its transfer to Current with the first confirmed frame/history event,
+		// rather than writing the same full snapshot twice before any progress.
+		// Resume offsets, dirty state and legacy stores keep their checkpoint.
+		_, commitsStart := p.store.(PlaybackCheckpointStore)
+		if !commitsStart || p.persistenceError != "" || t.ResumeOffset != 0 {
+			p.persistPlaybackLocked(nil)
+		}
 		p.mu.Unlock()
 		started := time.Now()
 		attemptLog := p.log.With(attemptFields...)
 		attemptLog.Info("next_track_selected", "sequence", sequence, "collection_id", entry.jobID, "position", t.Position, "spotify_id", t.SpotifyID, "title", t.Title, "video_id", t.VideoID)
 		attemptLog.Info("track_playback_start", "sequence", sequence, "position", t.Position, "video_id", t.VideoID)
-		err := callPlay(p.play, ctx, t, &startVoice{Voice: v, start: func() { p.announceStart(ctx, t, sequence) }, metadata: func(resolved media.Track) {
+		err := callPlay(p.play, ctx, t, &startVoice{Voice: v, progress: func() { p.confirmFrame(ctx, sequence) }, start: func() { p.announceStart(ctx, t, sequence) }, metadata: func(resolved media.Track) {
 			p.mu.Lock()
 			defer p.mu.Unlock()
 			if ctx.Err() == nil && p.current != nil && p.sequence == sequence && p.startedSequence != sequence {
 				final := copyTrack(resolved)
+				final.ResumeOffset = p.current.ResumeOffset
 				p.current = &final
+				p.progress.at.Store(time.Now().UnixNano())
 			}
 		}})
 		category := failureCategory(err)
@@ -287,6 +366,9 @@ func (p *GuildPlayer) run() {
 		expectedCancel := ctx.Err() != nil
 		cancel()
 		p.mu.Lock()
+		if category == "audio_stall" {
+			p.diagnosticLocked(slog.LevelWarn, "playback_stall_detected", "component", "stream", "incident_id", fmt.Sprintf("%s/%d", p.sessionID, sequence), "duration_ms", time.Since(started).Milliseconds(), "result", "local_cancellation")
+		}
 		transportFailure := (isVoiceFailure(err) || isVoiceFailure(context.Cause(ctx))) && p.current != nil && p.ctx.Err() == nil
 		expectedCancel = expectedCancel || p.current == nil || p.ctx.Err() != nil
 		if transportFailure {
@@ -294,11 +376,76 @@ func (p *GuildPlayer) run() {
 			// The selected entry was released from resolver ownership. Preserve final
 			// metadata as a ready entry; no rematching or fidelity downgrade.
 			retained := copyTrack(*p.current)
-			p.queue = append([]queueEntry{{Track: retained}}, p.queue...)
-			p.mutationLocked("voice_track_retained")
+			retained.ResumeOffset = p.confirmedOffset
+			p.logInterruptedLocked(retained, "voice")
+			p.recoveryPaused = p.pause.paused()
+			if !advanceInterrupted(retained) {
+				p.queue = append([]queueEntry{{Track: retained}}, p.queue...)
+				p.mutationLocked("voice_track_retained")
+			} else {
+				p.mutationLocked("voice_track_completed", "confirmed_ms", retained.ResumeOffset.Milliseconds())
+			}
 			expectedCancel = true
 		}
+		providerFailure := !expectedCancel && isProviderFailure(err) && p.current != nil
+		if providerFailure {
+			retained := copyTrack(*p.current)
+			retained.ResumeOffset = p.confirmedOffset
+			if !advanceInterrupted(retained) {
+				p.queue = append([]queueEntry{{Track: retained}}, p.queue...)
+			}
+			p.recoveryPaused = p.pause.paused()
+			p.observeProviderLocked(err)
+			p.blockProviderLocked(providerFailureCategory(err))
+			p.mutationLocked("provider_track_retained")
+			expectedCancel = true
+		}
+		if providerPermit != "" {
+			p.finishProviderLocked(err, providerPermit)
+		}
 		played := p.startedSequence == sequence
+		// Clean producer/decoder EOF before the advertised duration is a terminal
+		// source failure, not evidence of a transient network interruption. Retrying
+		// it from its exhausted offset cannot make progress and starves the next
+		// ready entry. Keep the stream error; advance through normal failure handling.
+		networkRetry := !expectedCancel && err != nil && !(t.ResumeOffset > 0 && !played && category == "ffmpeg_exit") && ((played && (category == "ffmpeg_exit" || category == "yt_dlp_exit" || category == "source_http_403")) || category == "source_network" || category == "audio_stall" || errors.Is(err, context.DeadlineExceeded))
+		if networkRetry {
+			retryTrack := copyTrack(*p.current)
+			retryTrack.ResumeOffset = p.confirmedOffset
+			p.recoveryPaused = p.pause.paused()
+			if !advanceInterrupted(retryTrack) {
+				p.queue = append([]queueEntry{{Track: retryTrack}}, p.queue...)
+			}
+			if p.networkAttempts == 0 {
+				p.networkRecoveryStarted = time.Now()
+				p.networkIncident = fmt.Sprintf("%s/network/%d", p.sessionID, p.sequence)
+				p.diagnosticLocked(slog.LevelWarn, "recovery_started", "component", "media", "incident_id", p.networkIncident, "cause", category)
+			}
+			p.logInterruptedLocked(retryTrack, "media")
+			p.networkAttempts++
+			p.mutationLocked("network_track_retained")
+			if p.networkAttempts <= 2 {
+				delay := time.Second * time.Duration(1<<(p.networkAttempts-1))
+				p.retryAt = time.Now().Add(delay + time.Duration(rand.Int64N(int64(delay/4)+1)))
+				p.diagnosticLocked(slog.LevelWarn, "recovery_attempted", "component", "media", "incident_id", p.networkIncident, "cause", category, "attempt", p.networkAttempts)
+			} else {
+				p.halted = true
+				p.diagnosticLocked(slog.LevelError, "recovery_failed", "component", "media", "incident_id", p.networkIncident, "cause", category, "attempt", p.networkAttempts, "result", "queue_preserved")
+			}
+			expectedCancel = true
+		} else if !expectedCancel && err == nil {
+			p.completeRecoveryLocked()
+		}
+		// A failed resume must never consume the saved logical position or
+		// silently restart from zero. Explicit skip/resume can resolve it.
+		if err != nil && !expectedCancel && p.current != nil && t.ResumeOffset > 0 {
+			saved := copyTrack(*p.current)
+			saved.ResumeOffset = p.confirmedOffset
+			p.queue = append([]queueEntry{{Track: saved}}, p.queue...)
+			p.halted = true
+			p.diagnosticLocked(slog.LevelWarn, "playback_resume_failed", "position", t.Position, "confirmed_ms", p.current.ResumeOffset.Milliseconds(), "category", category, "result", "queue_preserved")
+			expectedCancel = true
+		}
 		terminal := Finished
 		if transportFailure {
 			terminal = Suspended
@@ -313,6 +460,7 @@ func (p *GuildPlayer) run() {
 			if p.current != nil {
 				repeatedTrack = *p.current
 			}
+			repeatedTrack.ResumeOffset = 0
 			repeated := queueEntry{Track: copyTrack(repeatedTrack)}
 			if p.loop == "track" {
 				p.queue = append([]queueEntry{repeated}, p.queue...)
@@ -345,6 +493,9 @@ func (p *GuildPlayer) run() {
 		}
 		close(done)
 		p.mu.Unlock()
+		if providerFailure {
+			p.announceProvider()
+		}
 		if err != nil && !expectedCancel {
 			stage := "starting"
 			if played {
@@ -356,21 +507,31 @@ func (p *GuildPlayer) run() {
 }
 
 func (p *GuildPlayer) blockProviderLocked(reason string) {
+	shared := p.admission.Snapshot()
+	if shared.Blocked {
+		if p.providerIncident != shared.Incident {
+			p.providerGeneration++
+			p.providerNotice = false
+		}
+		p.providerGlobal = true
+		p.providerIncident = shared.Incident
+		p.providerRetries = shared.Attempts
+	}
 	if p.providerBlocked {
 		return
 	}
 	p.providerBlocked = true
+	if p.providerIncident == "" {
+		p.providerGeneration++
+		p.providerIncident = fmt.Sprintf("%s/provider/%d", p.sessionID, p.providerGeneration)
+		p.providerRetries = 0
+		p.providerNotice = false
+	}
+	p.providerRetryAt = time.Now().Add(providerBackoff(p.providerRetries))
 	p.providerReason = reason
-	p.log.Error("provider_playback_blocked", "provider", "youtube", "category", reason, "action", "queue retained; use resume to retry the same position")
+	p.signal("provider_blocked")
+	p.log.Error("provider_playback_blocked", "provider", "youtube", "category", reason, "incident_id", p.providerIncident, "action", "queue retained; bounded backoff then resume")
 	for _, job := range p.jobs {
-		if job.blockedPosition < 0 {
-			for _, entry := range p.queue {
-				if entry.jobID == job.progress.ID && entry.Pending {
-					job.blockedPosition = entry.position
-					break
-				}
-			}
-		}
 		for _, cancel := range job.searches {
 			if cancel != nil {
 				cancel()
@@ -379,28 +540,11 @@ func (p *GuildPlayer) blockProviderLocked(reason string) {
 	}
 }
 
-func (p *GuildPlayer) waitProvider(ctx context.Context) error {
-	for {
-		p.mu.Lock()
-		blocked, changed := p.providerBlocked, p.providerChanged
-		p.mu.Unlock()
-		if !blocked {
-			return nil
-		}
+func (p *GuildPlayer) wakeCollectionsLocked() {
+	for _, job := range p.jobs {
 		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-changed:
+		case job.wake <- struct{}{}:
+		default:
 		}
 	}
-}
-
-func (p *GuildPlayer) blockProviderAt(job *CollectionJob, position int, category string) {
-	p.mu.Lock()
-	if job != nil && job.blockedPosition < 0 {
-		job.blockedPosition = position
-	}
-	p.blockProviderLocked(category)
-	p.signal("provider_blocked")
-	p.mu.Unlock()
 }

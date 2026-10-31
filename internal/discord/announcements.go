@@ -53,7 +53,7 @@ func (b *Bot) setupAnnouncements(id snowflake.ID, g *guild) {
 	}()
 }
 func playbackText(event player.PlaybackEvent) string {
-	if event.FailureStage == "voice" {
+	if event.FailureStage == "voice" || event.FailureStage == "provider" {
 		return event.SkippedReason
 	}
 	label := "Now playing"
@@ -70,6 +70,11 @@ func playbackText(event player.PlaybackEvent) string {
 
 func (b *Bot) bindAnnouncements(g *guild) {
 	send := func(event player.PlaybackEvent) {
+		// Same logical occurrence already has a Now Playing card. Resume is
+		// recorded in correlated logs without sending a duplicate card.
+		if event.Resumed {
+			return
+		}
 		g.announcementMu.Lock()
 		item := announcement{snowflake.ID(g.announcementChannel.Load()), g.announcementEpoch.Load(), event, time.Now()}
 		g.announcementMu.Unlock()

@@ -1,0 +1,3 @@
+bard-opt026:validation
+sha256:045af4700739273724204eb1477dbed000267770eff5fac70508ad3ee56cb08c
+Local validation only; not deployed.

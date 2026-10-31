@@ -176,6 +176,11 @@ func (m *marathonSession) checkPersisted(s player.State, stage string) {
 	if err != nil {
 		m.t.Fatal(err)
 	}
+	// Confirmed audio progress is independent of the metadata snapshot.
+	// Its own crash/checkpoint tests verify the saved offset.
+	if saved.Current != nil {
+		saved.Current.ResumeOffset = want.Current.ResumeOffset
+	}
 	// Timing is intentionally absent from the durable contract.
 	a, _ := json.Marshal(want)
 	b, _ := json.Marshal(saved)

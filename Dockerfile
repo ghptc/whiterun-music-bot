@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM golang:1.27-bookworm AS test-env
+FROM golang:1.27.3-bookworm AS test-env
 # Process acceptance tests execute real FFmpeg; runtime-stage packages are not
 # available here. Verify the encoder by producing Opus, not just finding a binary.
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
@@ -15,20 +15,23 @@ COPY cmd ./cmd
 COPY internal ./internal
 
 FROM test-env AS build
-RUN go vet ./... && go test ./... && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/bard ./cmd/bot && sha256sum /out/bard
+# The physical-quota VFS deliberately rejects overlay filesystems. BuildKit
+# gives disposable SQLite databases and executable fault fixtures real tmpfs.
+RUN --mount=type=tmpfs,target=/tmp go vet ./... && go test ./... && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/bard ./cmd/bot && sha256sum /out/bard
 
 FROM denoland/deno:bin-2.5.6 AS deno
 
 FROM debian:bookworm-slim AS runtime
-ARG YTDLP_VERSION=2026.08.19
+ARG YTDLP_VERSION=2026.10.26
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates ffmpeg python3 python3-venv \
     && python3 -m venv /opt/yt-dlp \
-    && /opt/yt-dlp/bin/pip install --no-cache-dir "yt-dlp[default]==${YTDLP_VERSION}" \
+    && /opt/yt-dlp/bin/pip install --no-cache-dir "yt-dlp[default]==${YTDLP_VERSION}" "websockets==17.3" \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --uid 10001 bard
 COPY --from=deno /deno /usr/local/bin/deno
 COPY --from=build /out/bard /usr/local/bin/bard
+COPY internal/player/testdata/local-audio/validation.flac /opt/bard-validation/validation.flac
 # Docker DNS forwarding on some networks returns OPT-only answers to EDNS
 # queries. Disable EDNS for Go; retain normal DNS servers and IPv4/IPv6 dialing.
 ENV GODEBUG="netedns0=0" \

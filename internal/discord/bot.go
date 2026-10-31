@@ -21,6 +21,7 @@ import (
 	"github.com/thomas-vilte/dave-go/session"
 	"whiterun/internal/media"
 	"whiterun/internal/player"
+	"whiterun/internal/storage"
 )
 
 type guild struct {
@@ -41,32 +42,49 @@ type guild struct {
 	announcements       chan announcement
 }
 type Bot struct {
-	store     player.Store
-	client    *bot.Client
-	ctx       context.Context
-	cancel    context.CancelFunc
-	log       *slog.Logger
-	resolver  media.CollectionResolver
-	streamer  player.Streamer
-	mu        sync.Mutex
-	guilds    map[snowflake.ID]*guild
-	closing   bool
-	workers   sync.WaitGroup
-	searches  chan struct{}
-	voiceWake chan struct{}
+	youtubeAdmission *media.ProviderAdmission
+	playbackHorizon  time.Duration
+	localAdmin       localAudioAdmin
+	store            player.Store
+	client           *bot.Client
+	ctx              context.Context
+	cancel           context.CancelFunc
+	log              *slog.Logger
+	resolver         media.CollectionResolver
+	streamer         player.Streamer
+	mu               sync.Mutex
+	guilds           map[snowflake.ID]*guild
+	closing          bool
+	workers          sync.WaitGroup
+	searches         chan struct{}
+	voiceWake        chan struct{}
 }
 
 func New(ctx context.Context, token string, appID snowflake.ID, log *slog.Logger) (*Bot, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	b := &Bot{ctx: ctx, cancel: cancel, log: log, resolver: media.CollectionResolver{YouTube: media.Resolver{Binary: "yt-dlp", Cache: &media.SearchCache{}}, Log: log, Limiter: media.NewMatchLimiter()}, streamer: player.Streamer{YTDLP: "yt-dlp", FFmpeg: "ffmpeg"}, guilds: make(map[snowflake.ID]*guild), searches: make(chan struct{}, 4), voiceWake: make(chan struct{}, 1)}
+	if err := b.ConfigureYouTubeEfficiency(media.DefaultProviderAdmissionConfig(), media.VerificationPrefetchHorizon); err != nil {
+		cancel()
+		return nil, err
+	}
 	limiter := newManagedRESTLimiter(log.With("name", "rest_rate_limiter"))
 	c, err := disgo.New(token, bot.WithLogger(log),
 		bot.WithRestClientConfigOpts(rest.WithRateLimiter(limiter)),
 		bot.WithGatewayConfigOpts(gateway.WithIntents(gateway.IntentGuilds, gateway.IntentGuildVoiceStates)),
 		bot.WithCacheConfigOpts(cache.WithCaches(cache.FlagGuilds, cache.FlagVoiceStates, cache.FlagMembers)),
 		bot.WithVoiceManagerConfigOpts(voice.WithConnCreateFunc(func(guildID, userID snowflake.ID, update voice.StateUpdateFunc, remove func(), opts ...voice.ConnConfigOpt) voice.Conn {
-			opts = append(opts, voice.WithConnGatewayCreateFunc(incidentGatewayFactory(log)))
-			return newVoiceConn(guildID, userID, update, remove, opts...)
+			var c *voiceConn
+			opts = append(opts, voice.WithConnGatewayCreateFunc(func(session godave.Session, event voice.EventHandlerFunc, _ voice.CloseHandlerFunc, gatewayOpts ...voice.GatewayConfigOpt) voice.Gateway {
+				// disgo's default close callback sends a guild leave immediately.
+				// The sole player recovery owner decides when to leave/rejoin;
+				// gateway loss only closes the compromised local UDP transport.
+				gw := incidentGatewayFactory(log)(session, event, func(voice.Gateway, error, bool) { c.gatewayLost() }, gatewayOpts...).(*incidentGateway)
+				gw.lifecycleFields = func() []any { return c.voiceFields() }
+				return gw
+			}))
+			c = newVoiceConn(guildID, userID, update, remove, opts...).(*voiceConn)
+			c.log = log.With("guild_id", guildID)
+			return c
 		})),
 		bot.WithEventListenerFunc(b.handle),
 		bot.WithEventListenerFunc(b.voiceStateChanged),
@@ -104,6 +122,16 @@ func (b *Bot) ConfigureMatchPolicy(policy media.MatchPolicy) error {
 func (b *Bot) ConfigureSpotify(s *media.Spotify) { b.resolver.Spotify = s }
 
 func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) error {
+	if track.RequestedSource == "local" {
+		// Operator-only local descriptors bypass every provider/metadata path.
+		if metadata, ok := voice.(interface{ SetPlaybackTrack(media.Track) }); ok {
+			metadata.SetPlaybackTrack(track)
+		}
+		return b.streamer.Play(ctx, track, voice)
+	}
+	parent := ctx
+	ctx, cancel := context.WithTimeout(ctx, 45*time.Second)
+	defer cancel()
 	if track.ForcedYouTube {
 		direct, ok, err := media.YouTubeURL(track.URL)
 		if err != nil || !ok || direct != "https://www.youtube.com/watch?v="+track.VideoID || track.RequestedSource != "youtube" {
@@ -119,12 +147,14 @@ func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) e
 				return err
 			}
 		}
-		if err := b.resolver.YouTube.VerifySpotify(ctx, track); err != nil {
-			if ctx.Err() == nil {
+		verified, err := b.resolver.YouTube.VerifiedSpotify(ctx, track)
+		if err != nil {
+			if ctx.Err() == nil && !player.IsTransientFailure(err) {
 				b.resolver.YouTube.InvalidateSpotify(ctx, track)
 			}
 			return err
 		}
+		track = verified
 	}
 
 	if track.VerifyBeforePlay {
@@ -134,19 +164,25 @@ func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) e
 		}
 		verified.Position, verified.Total, verified.Timing = track.Position, track.Total, track.Timing
 		verified.RequestedBy = track.RequestedBy
+		verified.ResumeOffset = track.ResumeOffset
 		track = verified
 	}
 	if metadata, ok := voice.(interface{ SetPlaybackTrack(media.Track) }); ok {
 		metadata.SetPlaybackTrack(track)
 	}
+	cancel()
+	ctx = parent
 	err := b.streamer.Play(ctx, track, voice)
-	if err != nil && ctx.Err() == nil && !player.IsVoiceFailure(err) {
+	if err != nil && ctx.Err() == nil && !player.IsVoiceFailure(err) && !player.IsTransientFailure(err) {
 		b.resolver.YouTube.InvalidateSpotify(ctx, track)
 	}
 	return err
 }
 
 func (b *Bot) Start(scope snowflake.ID) error {
+	if err := b.syncLocalAudioAdmin(b.ctx); err != nil {
+		return err
+	}
 	if err := b.SyncCommands(b.ctx, scope); err != nil {
 		return err
 	}
@@ -157,6 +193,10 @@ func (b *Bot) Start(scope snowflake.ID) error {
 	}
 	b.workers.Add(1)
 	go b.watchVoice()
+	if db, ok := b.store.(*storage.DB); ok {
+		b.workers.Add(1)
+		go b.watchCatalogAlerts(db)
+	}
 	b.log.Info("The Bard is connected", "application_id", b.client.ApplicationID, "command_guild", scope)
 	return nil
 }
@@ -169,6 +209,10 @@ func (b *Bot) getGuild(id snowflake.ID) *guild {
 	g := b.guilds[id]
 	if g == nil {
 		g = &guild{player: player.New(b.ctx, b.log.With("guild_id", id), b.play)}
+		if err := g.player.ConfigureYouTube(b.youtubeAdmission, b.playbackHorizon); err != nil {
+			g.player.Close(context.Background())
+			return nil
+		}
 		if b.store != nil {
 			if err := g.player.ConfigureStore(b.store, id.String()); err != nil {
 				b.log.Error("durable_state_load_failed", "guild_id", id, "error", err)
@@ -205,9 +249,9 @@ func (b *Bot) Close(ctx context.Context) {
 			g.mu.Lock()
 			defer g.mu.Unlock()
 			g.emptySince = time.Time{}
-			g.player.Close(ctx)
+			g.player.Close(player.VoiceCloseContext(ctx, "bot_shutdown"))
 			if g.conn != nil {
-				g.conn.Close(ctx)
+				g.conn.Close(player.VoiceCloseContext(ctx, "bot_shutdown"))
 			}
 			g.conn = nil
 			g.channel = 0
@@ -243,9 +287,14 @@ func (b *Bot) watchVoice() {
 			if g.conn != nil {
 				state, ok := b.client.Caches.VoiceState(id, b.client.ID())
 				mainReady := b.client.Gateway.Status() == gateway.StatusReady
-				voiceReady := mainReady && ok && state.ChannelID != nil && *state.ChannelID == g.channel && g.conn.Gateway().Status() == voice.StatusReady
+				voiceReady := g.conn.Gateway().Status() == voice.StatusReady
 				sameChannel := ok && state.ChannelID != nil && *state.ChannelID == g.channel
 				if b.checkVoiceHealth(id, g, time.Now(), mainReady, voiceReady, ok, sameChannel) {
+					// Healthy membership caches still permit the normal empty-channel
+					// cleanup when an invalid transport has no queued audio to recover.
+					if mainReady && ok && sameChannel {
+						b.checkEmpty(id, g, time.Now())
+					}
 					g.mu.Unlock()
 					continue
 				}
@@ -256,17 +305,27 @@ func (b *Bot) watchVoice() {
 	}
 }
 
-type transport struct{ conn voice.Conn }
+type transport struct {
+	conn      voice.Conn
+	brokenUDP *atomic.Bool
+}
 
 // Retain the DAVE session to hold audio during encryption handshakes.
 type voiceConn struct {
 	voice.Conn
-	dave      *session.Session
-	closeOnce sync.Once
+	dave                     *session.Session
+	closeOnce                sync.Once
+	joinMu                   sync.Mutex
+	opening, joined, closing bool
+	joinChannel              snowflake.ID
+	log                      *slog.Logger
+	lifecycleFields          func() []any
+	correlationID            string
+	guildID, userID          snowflake.ID
 }
 
 func newVoiceConn(guildID, userID snowflake.ID, update voice.StateUpdateFunc, remove func(), opts ...voice.ConnConfigOpt) voice.Conn {
-	c := &voiceConn{}
+	c := &voiceConn{guildID: guildID, userID: userID, correlationID: fmt.Sprintf("voice/%s/%d", guildID, time.Now().UnixNano())}
 	opts = append(opts, voice.WithConnDaveSessionCreateFunc(func(log *slog.Logger, id godave.UserID, callbacks godave.Callbacks) godave.Session {
 		c.dave = session.New(id, callbacks, session.WithLogger(log))
 		return c.dave
@@ -276,6 +335,14 @@ func newVoiceConn(guildID, userID snowflake.ID, update voice.StateUpdateFunc, re
 }
 func (c *voiceConn) Close(ctx context.Context) {
 	c.closeOnce.Do(func() {
+		c.joinMu.Lock()
+		c.closing = true
+		channel := c.joinChannel
+		c.joinMu.Unlock()
+		if c.log != nil {
+			fields := append(c.voiceFields(), "component", "voice_conn", "origin", player.VoiceCloseOrigin(ctx), "reason", "connection_close", "channel_id", channel, "previous_state", fmt.Sprint(c.Gateway().Status()), "next_state", "closed")
+			c.log.Info("voice_disconnect_initiated", fields...)
+		}
 		c.Conn.Close(ctx)
 		if c.dave != nil {
 			_ = c.dave.Close()
@@ -288,6 +355,7 @@ func (v transport) WriteFrame(ctx context.Context, frame []byte) error {
 	}
 	if c, ok := v.conn.(*voiceConn); ok {
 		if err := waitVoiceReady(ctx, c.dave, 60*time.Second); err != nil {
+			media.TimingFrom(ctx).Event("dave_session_error", time.Now(), "reason", "encryption_not_ready", "canceled", ctx.Err() != nil)
 			return err
 		}
 	}
@@ -295,9 +363,19 @@ func (v transport) WriteFrame(ctx context.Context, frame []byte) error {
 		return ctx.Err()
 	}
 	if err := v.conn.UDP().SetWriteDeadline(time.Now().Add(3 * time.Second)); err != nil {
+		if v.brokenUDP != nil {
+			v.brokenUDP.Store(true)
+		}
+		media.TimingFrom(ctx).Event("voice_udp_error", time.Now(), "operation", "write_deadline")
 		return err
 	}
 	_, err := v.conn.UDP().Write(frame)
+	if err != nil {
+		if v.brokenUDP != nil {
+			v.brokenUDP.Store(true)
+		}
+		media.TimingFrom(ctx).Event("voice_udp_error", time.Now(), "operation", "write")
+	}
 	if err == nil {
 		media.TimingFrom(ctx).FirstDiscordSend()
 	}
@@ -356,5 +434,27 @@ func waitVoiceReady(ctx context.Context, ready voiceReadiness, timeout time.Dura
 	if err != nil {
 		return fmt.Errorf("DAVE readiness: %w", err)
 	}
+	return nil
+}
+
+// ConfigureYouTubeEfficiency is startup-only. All guilds, metadata and streaming
+// share this admission owner; cache hits and local audio bypass external starts.
+func (b *Bot) ConfigureYouTubeEfficiency(c media.ProviderAdmissionConfig, horizon time.Duration) error {
+	if horizon <= 0 || horizon > media.VerificationPrefetchHorizon {
+		return errors.New("YouTube prefetch horizon must be positive and at most eight minutes")
+	}
+	admission, err := media.NewProviderAdmission(c)
+	if err != nil {
+		return err
+	}
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if len(b.guilds) > 0 {
+		return errors.New("configure YouTube efficiency before creating guild players")
+	}
+	b.youtubeAdmission = admission
+	b.playbackHorizon = horizon
+	b.resolver.YouTube.Admission = admission
+	b.streamer.Admission = admission
 	return nil
 }

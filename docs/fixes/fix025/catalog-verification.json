@@ -1,0 +1,67 @@
+{
+  "guild_states_unchanged": true,
+  "tables": {
+    "tracks": {
+      "before": 1018,
+      "after": 1018
+    },
+    "mappings": {
+      "before": 215,
+      "after": 218
+    },
+    "music_catalog": {
+      "before": 549,
+      "after": 549
+    },
+    "playback_events": {
+      "before": 159,
+      "after": 159
+    },
+    "history": {
+      "before": 129,
+      "after": 129
+    }
+  },
+  "confirmed_mappings": [
+    {
+      "id": "9Go1GQZcK1U",
+      "title": "Pursuit Of Happiness (Extended Steve Aoki Remix)",
+      "track": "Pursuit Of Happiness (Extended Steve Aoki Remix)",
+      "artists": [
+        "Kid Cudi",
+        "MGMT",
+        "Ratatat"
+      ],
+      "duration": 374,
+      "bard_checked_at": "2026-10-23T20:23:24.101750473Z"
+    },
+    {
+      "id": "TDyG4YNUXcI",
+      "title": "Heads Will Roll (A-Trak Remix)",
+      "track": "Heads Will Roll (A-Trak Remix)",
+      "artists": [
+        "Yeah Yeah Yeahs"
+      ],
+      "duration": 384,
+      "bard_checked_at": "2026-10-23T20:23:31.460093629Z"
+    },
+    {
+      "id": "7qtIwDi90N4",
+      "title": "Beelzeboss (The Final Showdown)",
+      "track": "Beelzeboss (The Final Showdown)",
+      "artists": [
+        "Tenacious D"
+      ],
+      "duration": 336,
+      "bard_checked_at": "2026-10-23T20:23:44.151989181Z"
+    }
+  ],
+  "files_bytes_including_WAL": {
+    "bard.db": 2023424,
+    "bard.db-wal": 86552,
+    "bard.db.quota": 8192,
+    "bard-logs.db": 8806400,
+    "bard-logs.db-wal": 0
+  },
+  "read_method": "SQLite mode=ro on the live database, including WAL; copying only the main db misses recent transactions"
+}

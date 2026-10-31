@@ -1,0 +1,36 @@
+FIX-025 validation — 2026-10-23T20:48:32.280460+00:00
+Scope: isolated export of the staged Git index at /tmp/fix025-staged.
+Pre-existing local modifications were excluded from this export and preserved in the original worktree.
+No production deployment. Live soak explicitly deferred by user; no 3-hour availability claim.
+
+Full suite
+go test ./... -count=1 -timeout 180s
+exit_code=0
+ok  	whiterun/cmd/bot	0.056s
+?   	whiterun/cmd/profile	[no test files]
+ok  	whiterun/cmd/qa-memory	0.035s
+?   	whiterun/cmd/qa-soak	[no test files]
+ok  	whiterun/internal/discord	9.075s
+ok  	whiterun/internal/logstore	0.542s
+ok  	whiterun/internal/media	0.314s
+ok  	whiterun/internal/perfgate	0.001s
+ok  	whiterun/internal/player	32.726s
+ok  	whiterun/internal/qasoak	0.007s
+ok  	whiterun/internal/storage	4.644s
+?   	whiterun/scripts/fix025-resolve	[no test files]
+?   	whiterun/scripts/probe-spotify-recovery	[no test files]
+
+Static analysis
+go vet ./...
+exit_code=0
+(no diagnostics)
+
+Race detector
+go test -race ./internal/player ./internal/discord ./internal/media ./internal/storage -count=1 -timeout 300s
+exit_code=0
+ok  	whiterun/internal/player	68.269s
+ok  	whiterun/internal/discord	34.355s
+ok  	whiterun/internal/media	2.338s
+ok  	whiterun/internal/storage	16.994s
+
+Directed cases include both Voice and media failures at 10/25/49/50/75/99 percent, 123 duplicate occurrences, real FFmpeg seek, preserved failed seek, bounded busy-SQLite checkpoints, real abrupt subprocess exits with WAL recovery below/above 50 percent, late leave echoes, invalid sessions, UDP/DAVE cleanup, pause/skip/stop, guild isolation and duplicate prevention.

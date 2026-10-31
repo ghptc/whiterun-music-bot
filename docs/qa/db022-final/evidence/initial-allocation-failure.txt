@@ -1,0 +1,7 @@
+=== RUN   TestDB022PhysicalQuotaRejectsAtomicOversizedBatch
+QUOTA INVARIANT path=/home/gabriel/Projects/whiterun-music-bot/.qa-disk/TestDB022PhysicalQuotaRejectsAtomicOversizedBatch3501381929/001/batch.db-wal end=477952 before={Files:524288 Reserved:1069056 Limit:524288 Blocked:false Peak:524288} current={Files:524288 Reserved:1069056 Limit:524288 Blocked:false Peak:524288} actual={Files:528384 Reserved:1077248 Limit:524288 Blocked:false Peak:524288} grows=false base=4096
+    physical_test.go:159: {528384 1077248 524288 false 528384} <nil>
+--- FAIL: TestDB022PhysicalQuotaRejectsAtomicOversizedBatch (0.03s)
+FAIL
+FAIL	whiterun/internal/storage	0.030s
+FAIL

@@ -7,8 +7,8 @@ import (
 	"whiterun/internal/media"
 )
 
-// DurableState contains metadata only. Current restarts from the beginning after
-// explicit voice attachment; unresolved Spotify entries are matched on playback.
+// DurableState contains metadata and confirmed audio checkpoints. Restoration
+// requires explicit voice attachment; no automatic channel rejoin.
 const persistenceTimeout = 3 * time.Second
 
 type DurableState struct {
@@ -22,6 +22,16 @@ type DurableState struct {
 type PlaybackRecorder interface {
 	RecordPlayback(context.Context, string, media.Track) error
 }
+
+// PlaybackCheckpointStore combines a current-track checkpoint with its play event.
+// Queue metadata must already have been saved by this player's mutation owner.
+type PlaybackCheckpointStore interface {
+	SavePlaybackCheckpoint(context.Context, string, DurableState, *media.Track) error
+}
+
+type ResolvedGuildStore interface {
+	SaveResolvedGuild(context.Context, string, DurableState, []media.Track) error
+}
 type Store interface {
 	SaveGuild(context.Context, string, DurableState) error
 	LoadGuild(context.Context, string) (DurableState, error)
@@ -33,13 +43,15 @@ func (p *GuildPlayer) ConfigureStore(store Store, guildID string) error {
 	if p.voice != nil || p.current != nil || len(p.queue) > 0 {
 		return errors.New("configure persistence before attaching voice")
 	}
-	state, err := store.LoadGuild(p.ctx, guildID)
+	ctx, cancel := context.WithTimeout(p.ctx, persistenceTimeout)
+	defer cancel()
+	state, err := store.LoadGuild(ctx, guildID)
 	if err != nil {
 		return err
 	}
 	p.loop, p.autoplay = state.Loop, state.Autoplay
 	tracks := state.Queue
-	if state.Current != nil {
+	if state.Current != nil && !advanceInterrupted(*state.Current) {
 		tracks = append([]media.Track{*state.Current}, tracks...)
 	}
 	if len(tracks) > MaxQueueTracks+1 {
@@ -49,18 +61,20 @@ func (p *GuildPlayer) ConfigureStore(store Store, guildID string) error {
 		p.queue = append(p.queue, queueEntry{Track: copyTrack(t)})
 	}
 	p.store, p.guildID = store, guildID
-	if state.CurrentStarted && state.Current != nil && len(state.History) > 0 {
+	if state.CurrentStarted && state.Current != nil && state.Current.ResumeOffset == 0 && !advanceInterrupted(*state.Current) && len(state.History) > 0 {
 		state.History = state.History[:len(state.History)-1]
 	}
 	for _, t := range state.History {
 		p.history = append(p.history, copyTrack(t))
 	}
+	p.diagnosticLocked(0, "state_restored", "component", "player", "positions", len(p.queue), "automatic_playback", false)
 	return nil
 }
 func (p *GuildPlayer) durableLocked() DurableState {
 	s := DurableState{Loop: p.loop, Autoplay: p.autoplay, CurrentStarted: p.current != nil && p.startedSequence == p.sequence}
 	if p.current != nil {
 		t := copyTrack(*p.current)
+		t.ResumeOffset = p.confirmedOffset
 		t.Timing = nil
 		s.Current = &t
 	}
@@ -82,10 +96,77 @@ func (p *GuildPlayer) persistLocked() {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), persistenceTimeout)
 	defer cancel()
-	if err := p.store.SaveGuild(ctx, p.guildID, p.durableLocked()); err != nil {
+	p.persistenceResultLocked(p.store.SaveGuild(ctx, p.guildID, p.durableLocked()))
+}
+
+// Only selection/progress/start changed: queue metadata was already committed
+// by its mutation owner. A dirty prior mutation must take the full repair path.
+// Return whether the optional play event was handled by the same transaction.
+func (p *GuildPlayer) persistPlaybackLocked(record *media.Track) bool {
+	store, ok := p.store.(PlaybackCheckpointStore)
+	if !ok || p.persistenceError != "" || p.ctx.Err() != nil {
+		p.persistLocked()
+		return false
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), persistenceTimeout)
+	defer cancel()
+	p.persistenceResultLocked(store.SavePlaybackCheckpoint(ctx, p.guildID, p.durableLocked(), record))
+	return true
+}
+
+func (p *GuildPlayer) persistenceResultLocked(err error) {
+	if err != nil {
 		p.persistenceError = "Latest queue changes could not be saved; recovery may be incomplete."
 		p.log.Error("durable_state_write_failed", "guild_id", p.guildID, "error", err)
+		if !p.retryingPersistence {
+			p.retryingPersistence = true
+			p.persistenceWorkers.Add(1)
+			go p.retryPersistence()
+		}
 	} else {
 		p.persistenceError = ""
+	}
+}
+
+// Resolution owns the changed positions, so unchanged queue metadata need not
+// be rewritten. A prior failed mutation still requires a full snapshot repair.
+func (p *GuildPlayer) persistResolvedLocked(changed []media.Track) {
+	store, ok := p.store.(ResolvedGuildStore)
+	if !ok || p.persistenceError != "" || p.ctx.Err() != nil {
+		p.persistLocked()
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), persistenceTimeout)
+	defer cancel()
+	p.persistenceResultLocked(store.SaveResolvedGuild(ctx, p.guildID, p.durableLocked(), changed))
+}
+
+// Retry only a dirty checkpoint, not a command. Persist the latest state under
+// the same lock as queue mutations, with a finite budget and cancellation.
+func (p *GuildPlayer) retryPersistence() {
+	defer p.persistenceWorkers.Done()
+	defer func() { p.mu.Lock(); p.retryingPersistence = false; p.mu.Unlock() }()
+	for attempt := 0; attempt < 3; attempt++ {
+		timer := time.NewTimer(time.Second * time.Duration(1<<attempt))
+		select {
+		case <-p.ctx.Done():
+			timer.Stop()
+			return
+		case <-timer.C:
+		}
+		p.mu.Lock()
+		if p.ctx.Err() != nil || p.store == nil || p.persistenceError == "" {
+			p.mu.Unlock()
+			return
+		}
+		p.persistLocked()
+		ok := p.persistenceError == ""
+		if ok {
+			p.diagnosticLocked(0, "recovery_completed", "component", "checkpoint", "incident_id", p.sessionID+"/checkpoint", "attempt", attempt+1)
+		}
+		p.mu.Unlock()
+		if ok {
+			return
+		}
 	}
 }

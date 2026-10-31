@@ -1,0 +1,14 @@
+{
+  "tag": "bard-yt027:2026.10.26-candidate-isolated",
+  "id": "sha256:09f093ea1ac8f4a5f4edc8b8b2463bd035e97030090d3ec0469be7e164f6a3b2",
+  "baseline_tag": "whiterun-music-bot-bard:opt026-d6ddec304c64",
+  "baseline_id": "sha256:cfb1a0bffc7d59f04945feb0029d4530e66f16c3df3d1b647e37d3e0c7a62bbd",
+  "source_base": "d6ddec304c64c6a1170fda9e118061a0ead8814d",
+  "source_changes": [
+    "Dockerfile",
+    ".env.example",
+    "compose.yaml"
+  ],
+  "local_only": true,
+  "live_youtube_extractions": 0
+}

@@ -1,0 +1,7 @@
+=== RUN   TestOPT026FullFlowSQLiteAndMedia
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"cold_sqlite","spotify_metadata_calls":1,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":1,"verification":1}}
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"warm_sqlite_and_ram","spotify_metadata_calls":0,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":0,"verification":0}}
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"reopened_sqlite_empty_ram","spotify_metadata_calls":0,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":0,"verification":0}}
+--- PASS: TestOPT026FullFlowSQLiteAndMedia (1.18s)
+PASS
+ok  	whiterun/internal/discord	2.185s

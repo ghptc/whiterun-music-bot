@@ -1,0 +1,30 @@
+ok  	whiterun/internal/media	9.354s
+2026/10/30 22:02:25 INFO playback_start source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=13116 request_elapsed_ns=12624 elapsed_ms=0.013 request_elapsed_ms=0.012
+2026/10/30 22:02:25 INFO local_audio_opened source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=67791 request_elapsed_ns=67289 elapsed_ms=0.067 request_elapsed_ms=0.067 duration_ms=100 progress_ms=0 format=wav first_frame_ms=0
+2026/10/30 22:02:25 INFO stream_resolve_start source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=6923 request_elapsed_ns=88680 elapsed_ms=0.007 request_elapsed_ms=0.088
+2026/10/30 22:02:25 INFO ffmpeg_first_input source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=18957632 request_elapsed_ns=19039589 elapsed_ms=18.957 request_elapsed_ms=19.039
+2026/10/30 22:02:25 INFO ffmpeg_start source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=122055 request_elapsed_ns=19195820 elapsed_ms=0.122 request_elapsed_ms=19.195 purpose=audio_decode category=ffmpeg started_at=2026-10-31T01:02:25.226Z candidates=1
+2026/10/30 22:02:25 INFO audio_source_start source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=19141616 request_elapsed_ns=19223403 elapsed_ms=19.141 request_elapsed_ms=19.223 video_id="" live=false yt_pid=1009493 ffmpeg_pid=1009496
+2026/10/30 22:02:25 INFO stream_process_started source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=19155994 request_elapsed_ns=19237771 elapsed_ms=19.156 request_elapsed_ms=19.237 pid=1009493
+2026/10/30 22:02:25 INFO ffmpeg_first_output source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=37287325 request_elapsed_ns=37369343 elapsed_ms=37.287 request_elapsed_ms=37.369
+2026/10/30 22:02:25 INFO first_ogg_packet source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=37321952 request_elapsed_ns=37403759 elapsed_ms=37.322 request_elapsed_ms=37.403
+2026/10/30 22:02:25 INFO first_opus_packet source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=37446842 request_elapsed_ns=37528599 elapsed_ms=37.446 request_elapsed_ms=37.528
+2026/10/30 22:02:25 INFO first_opus_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=37457342 request_elapsed_ns=37539150 elapsed_ms=37.457 request_elapsed_ms=37.539
+2026/10/30 22:02:25 INFO first_voice_frame_attempt source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=37483843 request_elapsed_ns=37565751 elapsed_ms=37.484 request_elapsed_ms=37.565
+2026/10/30 22:02:25 INFO first_audio_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=37592814 request_elapsed_ns=37592322 elapsed_ms=37.592 request_elapsed_ms=37.592
+2026/10/30 22:02:25 INFO local_audio_first_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=37603645 request_elapsed_ns=37603133 elapsed_ms=37.603 request_elapsed_ms=37.603 duration_ms=100 progress_ms=20 first_frame_ms=37
+2026/10/30 22:02:25 INFO ffmpeg_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=119586850 request_elapsed_ns=138660675 elapsed_ms=119.587 request_elapsed_ms=138.66 exit_code=0 error=<nil>
+2026/10/30 22:02:25 INFO audio_source_exit source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=138612924 request_elapsed_ns=138694761 elapsed_ms=138.613 request_elapsed_ms=138.694 video_id="" yt_exit_code=0 ffmpeg_exit_code=0 category=eof yt_stderr_tail="" ffmpeg_stderr_tail=""
+2026/10/30 22:02:25 INFO playback_context_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=239316154 request_elapsed_ns=239315813 elapsed_ms=239.316 request_elapsed_ms=239.315 cause=<nil> parent_error=<nil>
+2026/10/30 22:02:25 INFO playback_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=239351282 request_elapsed_ns=239350790 elapsed_ms=239.351 request_elapsed_ms=239.35 error=<nil>
+2026/10/30 22:02:25 INFO local_audio_completed source=local local_audio_id=audio.wav local_correlation_id=local/1793408545207101687 elapsed_ns=239388494 request_elapsed_ns=239388182 elapsed_ms=239.388 request_elapsed_ms=239.388 duration_ms=100 progress_ms=120 first_frame_ms=37 category=eof audio_frames=6
+--- FAIL: TestREL024HealthDoesNotWaitForDeadlockedWorker (0.00s)
+    rel024_test.go:30: recovered lock still unhealthy
+2026/10/30 22:02:31 INFO Spotify public page fallback stage=spotify_metadata source=public_webpage api_status=404
+2026/10/30 22:02:31 INFO Spotify metadata diagnostic stage=spotify_public_complete resolved=2 total=2
+2026/10/30 22:02:31 INFO Spotify metadata resolved stage=spotify_metadata source=public_webpage tracks=2
+FAIL
+FAIL	whiterun/internal/player	105.661s
+ok  	whiterun/internal/discord	40.322s
+ok  	whiterun/internal/storage	19.656s
+FAIL

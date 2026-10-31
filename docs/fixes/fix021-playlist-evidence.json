@@ -1,0 +1,1819 @@
+{
+  "playlist_id": "37i9dQZF1DZ06evO1sJmec",
+  "captured_at": "2026-10-21T01:36:11.943375+00:00",
+  "environment": "whiterun-music-bot:fix020; yt-dlp 2026.08.19; three workers; fresh discovery; no persisted mappings/search cache; no Discord/audio/SQLite volume",
+  "before": {
+    "resolved": 31,
+    "refused": 19,
+    "insufficient_metadata": 18,
+    "no_acceptable_candidate": 1,
+    "mean_ms": 6979.66,
+    "median_ms": 6551.5,
+    "p95_ms": 15947
+  },
+  "after": {
+    "resolved": 40,
+    "refused": 10,
+    "insufficient_metadata": 10,
+    "no_acceptable_candidate": 0,
+    "mean_ms": 9149.36,
+    "median_ms": 4911.0,
+    "p95_ms": 25165
+  },
+  "recovered_positions": [
+    1,
+    2,
+    5,
+    9,
+    14,
+    21,
+    25,
+    29,
+    37
+  ],
+  "identity_audit": "All 40 selections confirmed by metadata policy. Nine recovered selections independently checked for exact Metallica credits, verified artist channel, remaster 2021 and <=2s duration delta. No contradictory metadata found; acoustic equivalence and live Discord audio were not measured.",
+  "tracks": [
+    {
+      "position": 1,
+      "spotify_id": "6QAsrXPnMSXIbV0yEJHlEX",
+      "title": "Nothing Else Matters - Remastered 2021",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 8436
+      },
+      "after": {
+        "VideoID": "ozXZnwYTMbs",
+        "Error": "",
+        "ElapsedMS": 3960
+      },
+      "selected": {
+        "id": "ozXZnwYTMbs",
+        "title": "Nothing Else Matters (Remastered)",
+        "track": "Nothing Else Matters (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Metallica (Remastered Deluxe Box Set)",
+        "release_year": 2021,
+        "duration": 389,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 388.733,
+      "duration_delta_seconds": 0.2669999999999959,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      },
+      "before_verification_reasons": {
+        "recording_provenance_unknown": 1
+      },
+      "after_verification_reasons": {
+        "verified_artist_and_identity": 1
+      }
+    },
+    {
+      "position": 2,
+      "spotify_id": "5lqyqPU3JkpCbUbLmTVQPW",
+      "title": "The Unforgiven - Remastered 2021",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 8370
+      },
+      "after": {
+        "VideoID": "domjqjQ_WRI",
+        "Error": "",
+        "ElapsedMS": 3747
+      },
+      "selected": {
+        "id": "domjqjQ_WRI",
+        "title": "The Unforgiven (Remastered)",
+        "track": "The Unforgiven (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Metallica (Remastered Deluxe Box Set)",
+        "release_year": 2021,
+        "duration": 387,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 387.16,
+      "duration_delta_seconds": 0.160000000000025,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      },
+      "before_verification_reasons": {
+        "recording_provenance_unknown": 1
+      },
+      "after_verification_reasons": {
+        "verified_artist_and_identity": 1
+      }
+    },
+    {
+      "position": 3,
+      "spotify_id": "2R6UrJ8uWbSIiHWmvRQvN8",
+      "title": "Whiskey In The Jar",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "9PmfpsIh5w0",
+        "Error": "",
+        "ElapsedMS": 3676
+      },
+      "after": {
+        "VideoID": "9PmfpsIh5w0",
+        "Error": "",
+        "ElapsedMS": 2833
+      },
+      "selected": {
+        "id": "9PmfpsIh5w0",
+        "title": "Whiskey In The Jar",
+        "track": "Whiskey In The Jar",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Garage, Inc.",
+        "release_year": 1998,
+        "duration": 305,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 304.693,
+      "duration_delta_seconds": 0.30700000000001637,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "position": 4,
+      "spotify_id": "2MuWTIM3b0YEAskbeeFE1i",
+      "title": "Master Of Puppets",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "6xjJ2XIbGRk",
+        "Error": "",
+        "ElapsedMS": 6733
+      },
+      "after": {
+        "VideoID": "6xjJ2XIbGRk",
+        "Error": "",
+        "ElapsedMS": 7917
+      },
+      "selected": {
+        "id": "6xjJ2XIbGRk",
+        "title": "Metallica: Master of Puppets (Official Lyric Video)",
+        "track": "",
+        "artists": null,
+        "album": "",
+        "release_year": 0,
+        "duration": 517,
+        "channel": "Metallica",
+        "channel_id": "UCbulh9WdLtEXiooRcYK7SWw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 515.386,
+      "duration_delta_seconds": 1.6140000000000327,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 834
+      }
+    },
+    {
+      "position": 5,
+      "spotify_id": "3DwQ7AH3xGD9h65ezslm6q",
+      "title": "Enter Sandman - Remastered 2021",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 6786
+      },
+      "after": {
+        "VideoID": "XZuM4zFg-60",
+        "Error": "",
+        "ElapsedMS": 4293
+      },
+      "selected": {
+        "id": "XZuM4zFg-60",
+        "title": "Enter Sandman (Remastered)",
+        "track": "Enter Sandman (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Metallica (Remastered Deluxe Box Set)",
+        "release_year": 2021,
+        "duration": 332,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 331.56,
+      "duration_delta_seconds": 0.4399999999999977,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      },
+      "before_verification_reasons": {
+        "recording_provenance_unknown": 1
+      },
+      "after_verification_reasons": {
+        "verified_artist_and_identity": 1
+      }
+    },
+    {
+      "position": 6,
+      "spotify_id": "02xhLoVqpGmOqvolgrwM8w",
+      "title": "One",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "WM8bTdBs-cw",
+        "Error": "",
+        "ElapsedMS": 9565
+      },
+      "after": {
+        "VideoID": "WM8bTdBs-cw",
+        "Error": "",
+        "ElapsedMS": 9659
+      },
+      "selected": {
+        "id": "WM8bTdBs-cw",
+        "title": "Metallica: One (Official Music Video)",
+        "track": "",
+        "artists": null,
+        "album": "",
+        "release_year": 0,
+        "duration": 465,
+        "channel": "Metallica",
+        "channel_id": "UCbulh9WdLtEXiooRcYK7SWw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 446.145,
+      "duration_delta_seconds": 18.855000000000018,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 765
+      }
+    },
+    {
+      "position": 7,
+      "spotify_id": "2dXsILW8gzkosqleHAvl0v",
+      "title": "For Whom The Bell Tolls - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "B_HSa1dEL9s",
+        "Error": "",
+        "ElapsedMS": 4954
+      },
+      "after": {
+        "VideoID": "B_HSa1dEL9s",
+        "Error": "",
+        "ElapsedMS": 4871
+      },
+      "selected": {
+        "id": "B_HSa1dEL9s",
+        "title": "For Whom The Bell Tolls (Remastered)",
+        "track": "For Whom The Bell Tolls (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Ride The Lightning (Remastered)",
+        "release_year": 1984,
+        "duration": 310,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 309.973,
+      "duration_delta_seconds": 0.026999999999986812,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      }
+    },
+    {
+      "position": 8,
+      "spotify_id": "6FUwPb4mGlUDbx42uspXaZ",
+      "title": "Fuel",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "ttNSr4Ecdzo",
+        "Error": "",
+        "ElapsedMS": 3139
+      },
+      "after": {
+        "VideoID": "ttNSr4Ecdzo",
+        "Error": "",
+        "ElapsedMS": 3022
+      },
+      "selected": {
+        "id": "ttNSr4Ecdzo",
+        "title": "Fuel",
+        "track": "Fuel",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Reload",
+        "release_year": 1997,
+        "duration": 270,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 269.8,
+      "duration_delta_seconds": 0.19999999999998863,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      }
+    },
+    {
+      "position": 9,
+      "spotify_id": "5ltXoDLlI0rFZAmOXbAp5T",
+      "title": "Sad But True - Remastered 2021",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 7481
+      },
+      "after": {
+        "VideoID": "TpohVYomw2o",
+        "Error": "",
+        "ElapsedMS": 5352
+      },
+      "selected": {
+        "id": "TpohVYomw2o",
+        "title": "Sad But True (Remastered)",
+        "track": "Sad But True (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Metallica (Remastered Deluxe Box Set)",
+        "release_year": 2021,
+        "duration": 325,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 324.6,
+      "duration_delta_seconds": 0.39999999999997726,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      },
+      "before_verification_reasons": {
+        "recording_provenance_unknown": 1
+      },
+      "after_verification_reasons": {
+        "verified_artist_and_identity": 1
+      }
+    },
+    {
+      "position": 10,
+      "spotify_id": "28WmNsclKsrVmdv3tDmoYU",
+      "title": "Seek & Destroy - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "FLTchCiC0T0",
+        "Error": "",
+        "ElapsedMS": 4835
+      },
+      "after": {
+        "VideoID": "FLTchCiC0T0",
+        "Error": "",
+        "ElapsedMS": 5539
+      },
+      "selected": {
+        "id": "FLTchCiC0T0",
+        "title": "Seek & Destroy (Remastered)",
+        "track": "Seek & Destroy (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Kill 'Em All (Remastered)",
+        "release_year": 2016,
+        "duration": 415,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 414.72,
+      "duration_delta_seconds": 0.2799999999999727,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "position": 11,
+      "spotify_id": "1aXFBWnnPFRKUN7vuIA5h0",
+      "title": "Turn The Page",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "d_eH6wE5Kqo",
+        "Error": "",
+        "ElapsedMS": 3000
+      },
+      "after": {
+        "VideoID": "qPOTEs_yTJo",
+        "Error": "",
+        "ElapsedMS": 23605
+      },
+      "selected": {
+        "id": "qPOTEs_yTJo",
+        "title": "Metallica: Turn the Page (Official Music Video)",
+        "track": "",
+        "artists": null,
+        "album": "",
+        "release_year": 0,
+        "duration": 348,
+        "channel": "Metallica",
+        "channel_id": "UCbulh9WdLtEXiooRcYK7SWw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 366.466,
+      "duration_delta_seconds": 18.466000000000008,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 767
+      }
+    },
+    {
+      "position": 12,
+      "spotify_id": "6nswV1Lz3OZkaiCJfmVUOa",
+      "title": "The Unforgiven II",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "zjy5sq26hTc",
+        "Error": "",
+        "ElapsedMS": 2907
+      },
+      "after": {
+        "VideoID": "zjy5sq26hTc",
+        "Error": "",
+        "ElapsedMS": 3560
+      },
+      "selected": {
+        "id": "zjy5sq26hTc",
+        "title": "The Unforgiven II",
+        "track": "The Unforgiven II",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Reload",
+        "release_year": 1997,
+        "duration": 396,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 396.44,
+      "duration_delta_seconds": 0.4399999999999977,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "position": 13,
+      "spotify_id": "7866E49sLyI938dEqxi8a4",
+      "title": "Fade To Black - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "9HZ_tx8aWuA",
+        "Error": "",
+        "ElapsedMS": 3582
+      },
+      "after": {
+        "VideoID": "9HZ_tx8aWuA",
+        "Error": "",
+        "ElapsedMS": 4911
+      },
+      "selected": {
+        "id": "9HZ_tx8aWuA",
+        "title": "Fade To Black (Remastered)",
+        "track": "Fade To Black (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Ride The Lightning (Remastered)",
+        "release_year": 1984,
+        "duration": 417,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 417.226,
+      "duration_delta_seconds": 0.2259999999999991,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      }
+    },
+    {
+      "position": 14,
+      "spotify_id": "3quYoE7KgIIaqVXPd7MpX0",
+      "title": "Wherever I May Roam - Remastered 2021",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 6590
+      },
+      "after": {
+        "VideoID": "Z-cEyiM9adE",
+        "Error": "",
+        "ElapsedMS": 4911
+      },
+      "selected": {
+        "id": "Z-cEyiM9adE",
+        "title": "Wherever I May Roam (Remastered)",
+        "track": "Wherever I May Roam (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Metallica (Remastered Deluxe Box Set)",
+        "release_year": 2021,
+        "duration": 404,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 404.333,
+      "duration_delta_seconds": 0.33300000000002683,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      },
+      "before_verification_reasons": {
+        "recording_provenance_unknown": 1
+      },
+      "after_verification_reasons": {
+        "verified_artist_and_identity": 1
+      }
+    },
+    {
+      "position": 15,
+      "spotify_id": "13Uvqll8OQDjw3wDweIK9y",
+      "title": "The Day That Never Comes",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "RD83oy7ksUE",
+        "Error": "",
+        "ElapsedMS": 3427
+      },
+      "after": {
+        "VideoID": "RD83oy7ksUE",
+        "Error": "",
+        "ElapsedMS": 3196
+      },
+      "selected": {
+        "id": "RD83oy7ksUE",
+        "title": "The Day That Never Comes",
+        "track": "The Day That Never Comes",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Death Magnetic",
+        "release_year": 2008,
+        "duration": 476,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 476.266,
+      "duration_delta_seconds": 0.26600000000001955,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "position": 16,
+      "spotify_id": "1L8c08ueO8ag3vBQFXwbjc",
+      "title": "Until It Sleeps - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "U1S1AShYXLg",
+        "Error": "",
+        "ElapsedMS": 9130
+      },
+      "after": {
+        "VideoID": "U1S1AShYXLg",
+        "Error": "",
+        "ElapsedMS": 11672
+      },
+      "selected": {
+        "id": "U1S1AShYXLg",
+        "title": "Until It Sleeps (Remastered)",
+        "track": "Until It Sleeps (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Load (Remastered)",
+        "release_year": 2025,
+        "duration": 270,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 269.56,
+      "duration_delta_seconds": 0.4399999999999977,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "position": 17,
+      "spotify_id": "6RbC38oDCIXD8V2AOU1Tjr",
+      "title": "The Memory Remains",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "r-tKBorVGbg",
+        "Error": "",
+        "ElapsedMS": 3068
+      },
+      "after": {
+        "VideoID": "r-tKBorVGbg",
+        "Error": "",
+        "ElapsedMS": 3339
+      },
+      "selected": {
+        "id": "r-tKBorVGbg",
+        "title": "The Memory Remains",
+        "track": "The Memory Remains",
+        "artists": [
+          "Metallica",
+          "Marianne Faithfull"
+        ],
+        "album": "Reload",
+        "release_year": 1997,
+        "duration": 279,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 279.173,
+      "duration_delta_seconds": 0.17300000000000182,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      }
+    },
+    {
+      "position": 18,
+      "spotify_id": "4CLRLdxUDPNeO1xCW0U2zC",
+      "title": "Creeping Death - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "X8OeBZQn3_w",
+        "Error": "",
+        "ElapsedMS": 3734
+      },
+      "after": {
+        "VideoID": "X8OeBZQn3_w",
+        "Error": "",
+        "ElapsedMS": 4750
+      },
+      "selected": {
+        "id": "X8OeBZQn3_w",
+        "title": "Creeping Death (Remastered)",
+        "track": "Creeping Death (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Ride The Lightning (Remastered)",
+        "release_year": 1984,
+        "duration": 396,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 395.706,
+      "duration_delta_seconds": 0.2939999999999827,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "position": 19,
+      "spotify_id": "6UB9mShVLbMm0W4e6vud4C",
+      "title": "Battery",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 13896
+      },
+      "after": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 17753
+      },
+      "before_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "primary_artist_mismatch": 1,
+        "recording_provenance_unknown": 3
+      },
+      "after_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "primary_artist_mismatch": 1,
+        "recording_provenance_unknown": 3
+      }
+    },
+    {
+      "position": 20,
+      "spotify_id": "1odk70HBNbdk4wU0Ja9JR7",
+      "title": "Blackened",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_REJECTED: no_acceptable_candidate)",
+        "ElapsedMS": 8219
+      },
+      "after": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 15354
+      },
+      "before_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "primary_artist_mismatch": 1
+      },
+      "after_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "primary_artist_mismatch": 1,
+        "recording_provenance_unknown": 2
+      }
+    },
+    {
+      "position": 21,
+      "spotify_id": "3zbLtkeCoU5LutGs8728c6",
+      "title": "Don't Tread on Me - Remastered 2021",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 6250
+      },
+      "after": {
+        "VideoID": "gGJdWNnC80s",
+        "Error": "",
+        "ElapsedMS": 4913
+      },
+      "selected": {
+        "id": "gGJdWNnC80s",
+        "title": "Don't Tread on Me (Remastered)",
+        "track": "Don't Tread on Me (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Metallica (Remastered Deluxe Box Set)",
+        "release_year": 2021,
+        "duration": 240,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 240.16,
+      "duration_delta_seconds": 0.1599999999999966,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      },
+      "before_verification_reasons": {
+        "recording_provenance_unknown": 1
+      },
+      "after_verification_reasons": {
+        "verified_artist_and_identity": 1
+      }
+    },
+    {
+      "position": 22,
+      "spotify_id": "4d50VgYqfw1Rd0knRRL3qv",
+      "title": "Ride The Lightning - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "DVOImtJY7po",
+        "Error": "",
+        "ElapsedMS": 9949
+      },
+      "after": {
+        "VideoID": "DVOImtJY7po",
+        "Error": "",
+        "ElapsedMS": 13109
+      },
+      "selected": {
+        "id": "DVOImtJY7po",
+        "title": "Ride The Lightning (Remastered)",
+        "track": "Ride The Lightning (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Ride The Lightning (Remastered)",
+        "release_year": 1984,
+        "duration": 397,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 396.986,
+      "duration_delta_seconds": 0.014000000000010004,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      }
+    },
+    {
+      "position": 23,
+      "spotify_id": "4TktvZTsMoFukiim1otMtr",
+      "title": "Welcome Home (Sanitarium)",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 15947
+      },
+      "after": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 21996
+      },
+      "before_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "primary_artist_mismatch": 3,
+        "recording_provenance_unknown": 3
+      },
+      "after_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "primary_artist_mismatch": 3,
+        "recording_provenance_unknown": 3
+      }
+    },
+    {
+      "position": 24,
+      "spotify_id": "6qgYe6noMKsElSoPg9yS91",
+      "title": "Harvester of Sorrow",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 17232
+      },
+      "after": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 22705
+      },
+      "before_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "primary_artist_mismatch": 4,
+        "recording_provenance_unknown": 3
+      },
+      "after_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "primary_artist_mismatch": 4,
+        "recording_provenance_unknown": 3
+      }
+    },
+    {
+      "position": 25,
+      "spotify_id": "6c5Ft6sEfLjVxL2wkgxBtv",
+      "title": "Holier Than Thou - Remastered 2021",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 7289
+      },
+      "after": {
+        "VideoID": "Jk8magGDcKE",
+        "Error": "",
+        "ElapsedMS": 4695
+      },
+      "selected": {
+        "id": "Jk8magGDcKE",
+        "title": "Holier Than Thou (Remastered)",
+        "track": "Holier Than Thou (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Metallica (Remastered Deluxe Box Set)",
+        "release_year": 2021,
+        "duration": 228,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 227.573,
+      "duration_delta_seconds": 0.4269999999999925,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      },
+      "before_verification_reasons": {
+        "recording_provenance_unknown": 2
+      },
+      "after_verification_reasons": {
+        "verified_artist_and_identity": 1
+      }
+    },
+    {
+      "position": 26,
+      "spotify_id": "0qbV4e18lWrTTxlswVoLbI",
+      "title": "The Unforgiven III",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "VD4PYP7WUCA",
+        "Error": "",
+        "ElapsedMS": 2664
+      },
+      "after": {
+        "VideoID": "VD4PYP7WUCA",
+        "Error": "",
+        "ElapsedMS": 3277
+      },
+      "selected": {
+        "id": "VD4PYP7WUCA",
+        "title": "The Unforgiven III",
+        "track": "The Unforgiven III",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Death Magnetic",
+        "release_year": 2008,
+        "duration": 467,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 466.586,
+      "duration_delta_seconds": 0.41399999999998727,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "position": 27,
+      "spotify_id": "0QV3swr7L8MZr72lL2izV1",
+      "title": "Hardwired",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "THO9ycDW8tA",
+        "Error": "",
+        "ElapsedMS": 3377
+      },
+      "after": {
+        "VideoID": "THO9ycDW8tA",
+        "Error": "",
+        "ElapsedMS": 3580
+      },
+      "selected": {
+        "id": "THO9ycDW8tA",
+        "title": "Hardwired",
+        "track": "Hardwired",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Hardwired…To Self-Destruct (Deluxe)",
+        "release_year": 2016,
+        "duration": 191,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 189.347,
+      "duration_delta_seconds": 1.6529999999999916,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 834
+      }
+    },
+    {
+      "position": 28,
+      "spotify_id": "4a47TNOfJ9vbpbmU31wpgT",
+      "title": "...And Justice for All",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 10369
+      },
+      "after": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 11359
+      },
+      "before_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "recording_provenance_unknown": 2
+      },
+      "after_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "recording_provenance_unknown": 1
+      }
+    },
+    {
+      "position": 29,
+      "spotify_id": "3bxHy4sUXEWjI9kXG1DH5K",
+      "title": "Of Wolf and Man - Remastered 2021",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 6891
+      },
+      "after": {
+        "VideoID": "vh9uz3GS7so",
+        "Error": "",
+        "ElapsedMS": 4638
+      },
+      "selected": {
+        "id": "vh9uz3GS7so",
+        "title": "Of Wolf and Man (Remastered)",
+        "track": "Of Wolf and Man (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Metallica (Remastered Deluxe Box Set)",
+        "release_year": 2021,
+        "duration": 257,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 256.573,
+      "duration_delta_seconds": 0.4270000000000209,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      },
+      "before_verification_reasons": {
+        "recording_provenance_unknown": 1
+      },
+      "after_verification_reasons": {
+        "verified_artist_and_identity": 1
+      }
+    },
+    {
+      "position": 30,
+      "spotify_id": "38fIaph07Kd8ZIN6l17ZJs",
+      "title": "Whiplash - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "beWvPkYHaic",
+        "Error": "",
+        "ElapsedMS": 4852
+      },
+      "after": {
+        "VideoID": "beWvPkYHaic",
+        "Error": "",
+        "ElapsedMS": 4924
+      },
+      "selected": {
+        "id": "beWvPkYHaic",
+        "title": "Whiplash (Remastered)",
+        "track": "Whiplash (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Kill 'Em All (Remastered)",
+        "release_year": 2016,
+        "duration": 249,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 248.546,
+      "duration_delta_seconds": 0.45400000000000773,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "position": 31,
+      "spotify_id": "0t7LcUic4qolMCysPrKeAd",
+      "title": "Die, Die My Darling",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "0o4yv6Cm_ag",
+        "Error": "",
+        "ElapsedMS": 2768
+      },
+      "after": {
+        "VideoID": "0o4yv6Cm_ag",
+        "Error": "",
+        "ElapsedMS": 3390
+      },
+      "selected": {
+        "id": "0o4yv6Cm_ag",
+        "title": "Die, Die My Darling",
+        "track": "Die, Die My Darling",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Garage, Inc.",
+        "release_year": 1998,
+        "duration": 149,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 146.56,
+      "duration_delta_seconds": 2.4399999999999977,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 831
+      }
+    },
+    {
+      "position": 32,
+      "spotify_id": "0nB11Yb0wGnGcoQ26cyoc4",
+      "title": "Hero of the Day - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "kfhkKU3X7X0",
+        "Error": "",
+        "ElapsedMS": 7662
+      },
+      "after": {
+        "VideoID": "kfhkKU3X7X0",
+        "Error": "",
+        "ElapsedMS": 7779
+      },
+      "selected": {
+        "id": "kfhkKU3X7X0",
+        "title": "Hero of the Day (Remastered)",
+        "track": "Hero of the Day (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Load (Remastered)",
+        "release_year": 2025,
+        "duration": 262,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 261.706,
+      "duration_delta_seconds": 0.2939999999999827,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "position": 33,
+      "spotify_id": "46tSt69Xw10Ej8Rn7wJmFt",
+      "title": "I Disappear",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "5AXdCgoyUXs",
+        "Error": "",
+        "ElapsedMS": 3168
+      },
+      "after": {
+        "VideoID": "5AXdCgoyUXs",
+        "Error": "",
+        "ElapsedMS": 3333
+      },
+      "selected": {
+        "id": "5AXdCgoyUXs",
+        "title": "I Disappear",
+        "track": "I Disappear",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "I Disappear",
+        "release_year": 2000,
+        "duration": 266,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 266.24,
+      "duration_delta_seconds": 0.2400000000000091,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      }
+    },
+    {
+      "position": 34,
+      "spotify_id": "5RrnDgjoFxDINI5aFQPZXt",
+      "title": "The Four Horsemen - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "-zKOhVSERS8",
+        "Error": "",
+        "ElapsedMS": 3707
+      },
+      "after": {
+        "VideoID": "-zKOhVSERS8",
+        "Error": "",
+        "ElapsedMS": 4606
+      },
+      "selected": {
+        "id": "-zKOhVSERS8",
+        "title": "The Four Horsemen (Remastered)",
+        "track": "The Four Horsemen (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Kill 'Em All (Remastered)",
+        "release_year": 2016,
+        "duration": 433,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 432.546,
+      "duration_delta_seconds": 0.45400000000000773,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "position": 35,
+      "spotify_id": "5JAnXx5BBES4FEf4d4t4CC",
+      "title": "St. Anger",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "80xgvSCwjAY",
+        "Error": "",
+        "ElapsedMS": 3150
+      },
+      "after": {
+        "VideoID": "80xgvSCwjAY",
+        "Error": "",
+        "ElapsedMS": 3890
+      },
+      "selected": {
+        "id": "80xgvSCwjAY",
+        "title": "St. Anger",
+        "track": "St. Anger",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "St. Anger",
+        "release_year": 2003,
+        "duration": 441,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 441.132,
+      "duration_delta_seconds": 0.132000000000005,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      }
+    },
+    {
+      "position": 36,
+      "spotify_id": "2pFg7eERlKmCcdI3FlEuAc",
+      "title": "Mama Said - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "KVMTMoLsweI",
+        "Error": "",
+        "ElapsedMS": 6642
+      },
+      "after": {
+        "VideoID": "KVMTMoLsweI",
+        "Error": "",
+        "ElapsedMS": 7775
+      },
+      "selected": {
+        "id": "KVMTMoLsweI",
+        "title": "Mama Said (Remastered)",
+        "track": "Mama Said (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Load (Remastered)",
+        "release_year": 2025,
+        "duration": 320,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 319.6,
+      "duration_delta_seconds": 0.39999999999997726,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "position": 37,
+      "spotify_id": "5pPYLYTIBVJAz7iZRPufqw",
+      "title": "Through the Never - Remastered 2021",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 6513
+      },
+      "after": {
+        "VideoID": "6rwQ26VxGyo",
+        "Error": "",
+        "ElapsedMS": 4298
+      },
+      "selected": {
+        "id": "6rwQ26VxGyo",
+        "title": "Through the Never (Remastered)",
+        "track": "Through the Never (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Metallica (Remastered Deluxe Box Set)",
+        "release_year": 2021,
+        "duration": 245,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 244.533,
+      "duration_delta_seconds": 0.46700000000001296,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      },
+      "before_verification_reasons": {
+        "recording_provenance_unknown": 1
+      },
+      "after_verification_reasons": {
+        "verified_artist_and_identity": 1
+      }
+    },
+    {
+      "position": 38,
+      "spotify_id": "6ckozbGmOusAnLT2LEbERy",
+      "title": "Fight Fire With Fire - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "8zSODUOoE8w",
+        "Error": "",
+        "ElapsedMS": 4097
+      },
+      "after": {
+        "VideoID": "8zSODUOoE8w",
+        "Error": "",
+        "ElapsedMS": 4698
+      },
+      "selected": {
+        "id": "8zSODUOoE8w",
+        "title": "Fight Fire With Fire (Remastered)",
+        "track": "Fight Fire With Fire (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Ride The Lightning (Remastered)",
+        "release_year": 1984,
+        "duration": 285,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 284.506,
+      "duration_delta_seconds": 0.4940000000000282,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "position": 39,
+      "spotify_id": "6eXWc7irALyENtbAD2TTOT",
+      "title": "Lux Æterna",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "ZlnfVNrBTUc",
+        "Error": "",
+        "ElapsedMS": 2356
+      },
+      "after": {
+        "VideoID": "ZlnfVNrBTUc",
+        "Error": "",
+        "ElapsedMS": 3482
+      },
+      "selected": {
+        "id": "ZlnfVNrBTUc",
+        "title": "Lux Æterna",
+        "track": "Lux Æterna",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "72 Seasons",
+        "release_year": 2022,
+        "duration": 202,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 201.76,
+      "duration_delta_seconds": 0.2400000000000091,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      }
+    },
+    {
+      "position": 40,
+      "spotify_id": "0Qc9Bd7qzA8Vx3aSIf1t8B",
+      "title": "King Nothing - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "mlbjlKkS3lA",
+        "Error": "",
+        "ElapsedMS": 7117
+      },
+      "after": {
+        "VideoID": "mlbjlKkS3lA",
+        "Error": "",
+        "ElapsedMS": 7578
+      },
+      "selected": {
+        "id": "mlbjlKkS3lA",
+        "title": "King Nothing (Remastered)",
+        "track": "King Nothing (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Load (Remastered)",
+        "release_year": 2025,
+        "duration": 328,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 328.132,
+      "duration_delta_seconds": 0.132000000000005,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      }
+    },
+    {
+      "position": 41,
+      "spotify_id": "3JjZq20Kv6UphyyirAaY9A",
+      "title": "Moth Into Flame",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "BtRyz1qGI8c",
+        "Error": "",
+        "ElapsedMS": 2619
+      },
+      "after": {
+        "VideoID": "BtRyz1qGI8c",
+        "Error": "",
+        "ElapsedMS": 3384
+      },
+      "selected": {
+        "id": "BtRyz1qGI8c",
+        "title": "Moth Into Flame",
+        "track": "Moth Into Flame",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Hardwired…To Self-Destruct (Deluxe)",
+        "release_year": 2016,
+        "duration": 351,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 350.644,
+      "duration_delta_seconds": 0.35599999999999454,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 839
+      }
+    },
+    {
+      "position": 42,
+      "spotify_id": "4tPHBRIPsB55nssjvKDbjj",
+      "title": "Disposable Heroes",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 13239
+      },
+      "after": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 16818
+      },
+      "before_verification_reasons": {
+        "version_or_semantic_mismatch": 1,
+        "primary_artist_mismatch": 1,
+        "recording_provenance_unknown": 4
+      },
+      "after_verification_reasons": {
+        "version_or_semantic_mismatch": 1,
+        "primary_artist_mismatch": 1,
+        "recording_provenance_unknown": 4
+      }
+    },
+    {
+      "position": 43,
+      "spotify_id": "3e7wv9TChjWrnXHrk5NyBU",
+      "title": "All Nightmare Long",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "kKKxPofBQfU",
+        "Error": "",
+        "ElapsedMS": 2572
+      },
+      "after": {
+        "VideoID": "kKKxPofBQfU",
+        "Error": "",
+        "ElapsedMS": 2887
+      },
+      "selected": {
+        "id": "kKKxPofBQfU",
+        "title": "All Nightmare Long",
+        "track": "All Nightmare Long",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Death Magnetic",
+        "release_year": 2008,
+        "duration": 477,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 477.026,
+      "duration_delta_seconds": 0.02600000000001046,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      }
+    },
+    {
+      "position": 44,
+      "spotify_id": "4oNXsQxJS726q1CALwlIzc",
+      "title": "Eye of the Beholder",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 15397
+      },
+      "after": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 25165
+      },
+      "before_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "primary_artist_mismatch": 3,
+        "recording_provenance_unknown": 4
+      },
+      "after_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "primary_artist_mismatch": 3,
+        "recording_provenance_unknown": 4
+      }
+    },
+    {
+      "position": 45,
+      "spotify_id": "2UIuYNBg8r5pkoG2MjdLZT",
+      "title": "No Leaf Clover - Live",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "fg6pNJX83uw",
+        "Error": "",
+        "ElapsedMS": 2497
+      },
+      "after": {
+        "VideoID": "fg6pNJX83uw",
+        "Error": "",
+        "ElapsedMS": 3565
+      },
+      "selected": {
+        "id": "fg6pNJX83uw",
+        "title": "No Leaf Clover (Live)",
+        "track": "No Leaf Clover (Live)",
+        "artists": [
+          "Metallica",
+          "San Francisco Symphony"
+        ],
+        "album": "S & M2",
+        "release_year": 2019,
+        "duration": 330,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 343.2,
+      "duration_delta_seconds": 13.199999999999989,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 788
+      }
+    },
+    {
+      "position": 46,
+      "spotify_id": "2HD5BWFthrNf2uFyEhi53d",
+      "title": "Orion",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 10652
+      },
+      "after": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 13486
+      },
+      "before_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "recording_provenance_unknown": 2
+      },
+      "after_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "recording_provenance_unknown": 2
+      }
+    },
+    {
+      "position": 47,
+      "spotify_id": "6RqEJvpEzzlwj8g0wKG1ln",
+      "title": "Motorbreath - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "crhU92GKnBk",
+        "Error": "",
+        "ElapsedMS": 4141
+      },
+      "after": {
+        "VideoID": "crhU92GKnBk",
+        "Error": "",
+        "ElapsedMS": 5117
+      },
+      "selected": {
+        "id": "crhU92GKnBk",
+        "title": "Motorbreath (Remastered)",
+        "track": "Motorbreath (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Kill 'Em All (Remastered)",
+        "release_year": 2016,
+        "duration": 188,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 187.84,
+      "duration_delta_seconds": 0.1599999999999966,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      }
+    },
+    {
+      "position": 48,
+      "spotify_id": "4hvo7eCLfhs7dFr0mpk3zi",
+      "title": "The Shortest Straw",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 17164
+      },
+      "after": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 16341
+      },
+      "before_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "recording_provenance_unknown": 3
+      },
+      "after_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "recording_provenance_unknown": 3
+      }
+    },
+    {
+      "position": 49,
+      "spotify_id": "3J8jTThxk8GtxyoupHtyrb",
+      "title": "Trapped Under Ice - Remastered",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "bhH5M_HH2k4",
+        "Error": "",
+        "ElapsedMS": 13670
+      },
+      "after": {
+        "VideoID": "bhH5M_HH2k4",
+        "Error": "",
+        "ElapsedMS": 41149
+      },
+      "selected": {
+        "id": "bhH5M_HH2k4",
+        "title": "Trapped Under Ice (Remastered)",
+        "track": "Trapped Under Ice (Remastered)",
+        "artists": [
+          "Metallica"
+        ],
+        "album": "Ride The Lightning (Remastered)",
+        "release_year": 1984,
+        "duration": 244,
+        "channel": "Metallica",
+        "channel_id": "UCGexNm_Kw4rdQjLxmpb2EKw",
+        "channel_is_verified": true
+      },
+      "source_duration_seconds": 244.066,
+      "duration_delta_seconds": 0.0660000000000025,
+      "decision": {
+        "Status": "MATCH_CONFIRMED",
+        "Reason": "verified_artist_and_identity",
+        "Score": 840
+      }
+    },
+    {
+      "position": 50,
+      "spotify_id": "6XN00D9ejjEt1cW1sY44Gu",
+      "title": "Leper Messiah",
+      "artist": "Metallica",
+      "before": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 13504
+      },
+      "after": {
+        "VideoID": "",
+        "Error": "Could not find a matching YouTube recording for this Spotify track. (MATCH_UNCERTAIN: insufficient_metadata)",
+        "ElapsedMS": 39287
+      },
+      "before_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "primary_artist_mismatch": 1,
+        "recording_provenance_unknown": 4
+      },
+      "after_verification_reasons": {
+        "version_or_semantic_mismatch": 2,
+        "recording_provenance_unknown": 5
+      }
+    }
+  ]
+}

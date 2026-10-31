@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os/exec"
 	"strings"
 	"sync"
@@ -19,14 +20,18 @@ type StreamError struct {
 	Err      error
 }
 
-func (e *StreamError) Error() string { return e.Category + ": " + e.Err.Error() }
-func (e *StreamError) Unwrap() error { return e.Err }
+func (e *StreamError) Error() string            { return e.Category + ": " + e.Err.Error() }
+func (e *StreamError) Unwrap() error            { return e.Err }
+func (e *StreamError) ProviderCategory() string { return e.Category }
 func failureCategory(err error) string {
 	if err == nil {
 		return "eof"
 	}
 	if isVoiceFailure(err) {
 		return "voice_transport"
+	}
+	if category := media.ExtractionCategory(err); category != "" {
+		return category
 	}
 	var stream *StreamError
 	if errors.As(err, &stream) {
@@ -46,8 +51,11 @@ func providerFailureCategory(err error) string {
 	if err == nil {
 		return ""
 	}
+	if media.ProviderUnavailable(err) {
+		return media.ExtractionCategory(err)
+	}
 	category := failureCategory(err)
-	if category == "youtube_auth_challenge" || category == "youtube_rate_limited" || category == "youtube_provider_blocked" {
+	if category == "youtube_age_restricted" || category == "youtube_network_timeout" || category == "youtube_extractor_failure" || category == "youtube_bot_challenge" || category == "youtube_auth_required" || category == "youtube_auth_challenge" || category == "youtube_rate_limited" || category == "youtube_provider_blocked" {
 		return category
 	}
 	text := strings.ToLower(err.Error())
@@ -107,6 +115,8 @@ const (
 // PlaybackEvent is a copied snapshot. Start events follow the first successful
 // voice frame; skip events carry SkippedReason and never announce a start.
 type PlaybackEvent struct {
+	Resumed       bool
+	IncidentID    string
 	StartedAt     time.Time
 	State         AttemptState
 	FailureStage  string
@@ -117,6 +127,7 @@ type PlaybackEvent struct {
 	Sequence      uint64
 }
 type startVoice struct {
+	progress func()
 	Voice
 	once     sync.Once
 	start    func()
@@ -126,6 +137,9 @@ type startVoice struct {
 func (v *startVoice) WriteFrame(ctx context.Context, frame []byte) error {
 	if err := v.Voice.WriteFrame(ctx, frame); err != nil {
 		return err
+	}
+	if v.progress != nil && !(len(frame) == 3 && frame[0] == 0xf8 && frame[1] == 0xff && frame[2] == 0xfe) {
+		v.progress()
 	}
 	v.once.Do(v.start)
 	return nil
@@ -143,18 +157,31 @@ func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequ
 		return
 	}
 	track = copyTrack(*p.current)
+	resumed := track.ResumeOffset > 0
+	incident := p.voiceIncidentID
+	if p.networkAttempts > 0 {
+		incident = p.networkIncident
+	}
+	if incident == "" && resumed {
+		incident = fmt.Sprintf("%s/resume/%d", p.sessionID, sequence)
+	}
+	if resumed {
+		p.diagnosticLocked(slog.LevelInfo, "playback_resume_completed", "incident_id", incident, "position", track.Position, "confirmed_ms", track.ResumeOffset.Milliseconds())
+	}
+	if p.networkAttempts > 0 {
+		p.diagnosticLocked(0, "recovery_completed", "component", "media", "incident_id", p.networkIncident, "attempt", p.networkAttempts+1, "duration_ms", time.Since(p.networkRecoveryStarted).Milliseconds())
+	}
 	p.startedSequence = sequence
 	if p.voiceIncident {
-		p.voiceIncident = false
-		p.voiceAttempts = 0
-		p.voiceNotice = false
 		p.log.Info("voice_audio_resumed", "guild_id", p.guildID, "sequence", sequence)
 	}
-	p.history = append(p.history, copyTrack(track))
+	if !resumed {
+		p.history = append(p.history, copyTrack(track))
+	}
 	if len(p.history) > 100 {
 		p.history = append([]media.Track(nil), p.history[len(p.history)-100:]...)
 	}
-	event := PlaybackEvent{StartedAt: startedAt, Track: copyTrack(track), Sequence: sequence, State: Playing}
+	event := PlaybackEvent{Resumed: resumed, IncidentID: incident, StartedAt: startedAt, Track: copyTrack(track), Sequence: sequence, State: Playing}
 	if len(p.queue) > 0 {
 		next := copyTrack(p.queue[0].Track)
 		event.Next = &next
@@ -165,8 +192,12 @@ func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequ
 		transitionMS = time.Since(p.lastTransition).Milliseconds()
 	}
 	fn := p.onStart
-	p.persistLocked()
-	if recorder, ok := p.store.(PlaybackRecorder); ok && p.ctx.Err() == nil {
+	var record *media.Track
+	if !resumed {
+		record = &track
+	}
+	combined := p.persistPlaybackLocked(record)
+	if recorder, ok := p.store.(PlaybackRecorder); ok && !combined && p.ctx.Err() == nil && !resumed {
 		save, cancel := context.WithTimeout(context.Background(), persistenceTimeout)
 		if err := recorder.RecordPlayback(save, p.guildID, track); err != nil {
 			p.persistenceError = "Playback history could not be saved."
@@ -250,4 +281,21 @@ func (v *startVoice) SetPlaybackTrack(t media.Track) {
 	if v.metadata != nil {
 		v.metadata(t)
 	}
+}
+
+// IsTransientFailure distinguishes transport/timeout failures from evidence that
+// a verified recording is wrong or unavailable. Keep persistent mappings intact.
+func IsTransientFailure(err error) bool {
+	if isProviderFailure(err) || media.ExtractionCategory(err) == "youtube_metadata_unavailable" {
+		return true
+	}
+	if errors.Is(err, context.DeadlineExceeded) {
+		return true
+	}
+	switch failureCategory(err) {
+	case "source_network", "audio_stall", "ffmpeg_start", "yt_dlp_start":
+		return true
+	}
+	var network interface{ Timeout() bool }
+	return errors.As(err, &network)
 }

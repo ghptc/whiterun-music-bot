@@ -1,0 +1,22 @@
+{
+  "go-test": {
+    "exit_code": 0,
+    "wall_seconds": 63.662
+  },
+  "vet": {
+    "exit_code": 0,
+    "wall_seconds": 0.22
+  },
+  "race": {
+    "exit_code": 0,
+    "wall_seconds": 103.703
+  },
+  "docker": {
+    "exit_code": 0,
+    "wall_seconds": 84.842
+  },
+  "gate": {
+    "exit_code": 0,
+    "wall_seconds": 221.777
+  }
+}

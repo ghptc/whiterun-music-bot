@@ -1,0 +1,13 @@
+ok  	whiterun/cmd/bot	(cached)
+?   	whiterun/cmd/profile	[no test files]
+ok  	whiterun/cmd/qa-memory	(cached)
+?   	whiterun/cmd/qa-soak	[no test files]
+ok  	whiterun/internal/discord	8.706s
+ok  	whiterun/internal/logstore	(cached)
+ok  	whiterun/internal/media	(cached)
+ok  	whiterun/internal/perfgate	(cached)
+ok  	whiterun/internal/player	32.243s
+ok  	whiterun/internal/qasoak	(cached)
+ok  	whiterun/internal/storage	(cached)
+?   	whiterun/scripts/fix025-resolve	[no test files]
+?   	whiterun/scripts/probe-spotify-recovery	[no test files]

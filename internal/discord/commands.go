@@ -101,11 +101,34 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 		reply("Use one of the Bard's slash commands.")
 		return
 	}
+	id := *e.GuildID()
+	if data.CommandName() == "audio-check" {
+		reply(b.adminAudioCheck(e))
+		return
+	}
+	// Count recognized, acknowledged guild commands once per interaction.
+	if metrics, ok := b.store.(interface {
+		RecordCatalogCommand(context.Context, string, string, string, time.Time) error
+	}); ok {
+		valid := false
+		for _, command := range commands() {
+			if command.CommandName() == data.CommandName() {
+				valid = true
+				break
+			}
+		}
+		if valid && e.Channel().MessageChannel != nil {
+			if err := metrics.RecordCatalogCommand(b.ctx, e.ID().String(), id.String(), e.Channel().ID().String(), started); err != nil {
+				b.log.Warn("catalog_activity_write_failed", "error", err)
+			}
+		}
+	}
+
 	if data.CommandName() == "help" {
 		b.replyHelp(e)
 		return
 	}
-	id := *e.GuildID()
+
 	if data.CommandName() == "history" {
 		limit := 10
 		if value, present := data.OptInt("limit"); present {
@@ -166,7 +189,7 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 			cancel()
 			if err != nil {
 				cleanup, c := context.WithTimeout(context.Background(), 3*time.Second)
-				conn.Close(cleanup)
+				conn.Close(player.VoiceCloseContext(cleanup, "command_join_or_attach_failed"))
 				c()
 				g.mu.Unlock()
 				b.log.Warn("voice join failed", "guild_id", id, "error", err)
@@ -175,7 +198,7 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 			}
 			if err := g.player.Attach(b.playbackTransport(id, g, conn)); err != nil {
 				cleanup, c := context.WithTimeout(context.Background(), 3*time.Second)
-				conn.Close(cleanup)
+				conn.Close(player.VoiceCloseContext(cleanup, "command_join_or_attach_failed"))
 				c()
 				g.mu.Unlock()
 				reply(err.Error())
@@ -226,6 +249,11 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 		g.mu.Unlock()
 		reply("The Bard answers your summons.")
 	case "play":
+		if g.player.State().ProviderBlocked {
+			g.mu.Unlock()
+			reply("YouTube requests are temporarily suspended. The existing queue is preserved. Use /resume to retry.")
+			return
+		}
 		ticket := g.player.Ticket()
 		searchCtx := g.searchCtx
 		g.mu.Unlock()
@@ -251,7 +279,17 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 		timing.Event("play_preparation_complete", started, "success", err == nil, "progressive", progressive)
 		if err != nil {
 			b.log.Warn("media resolution failed", "guild_id", id, "stage", resolutionStage(err), "error", err)
-			if searchCtx.Err() != nil {
+			if media.ProviderUnavailable(err) {
+				g.announcementMu.Lock()
+				if g.announcementChannel.Load() == 0 {
+					if channel := e.Channel(); channel.MessageChannel != nil {
+						g.announcementChannel.Store(uint64(channel.ID()))
+					}
+				}
+				g.announcementMu.Unlock()
+				g.player.SuspendProvider(err)
+				reply("Request could not be queued. The existing queue is preserved; use /queue to see its status.")
+			} else if searchCtx.Err() != nil {
 				reply("Playback changed while searching. Ask the Bard again.")
 			} else if message := spotifyErrorText(err); message != "" {
 				reply(message)
@@ -301,7 +339,7 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 			first = <-job.First
 			err = first.Err
 		}
-		if err == nil {
+		if err == nil && !first.Suspended && !first.Deferred {
 			timing.Event("play_first_track_resolved", started)
 		}
 		releaseSearch()
@@ -309,7 +347,13 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 			reply(err.Error())
 			return
 		}
-		if progressive {
+		if first.Deferred {
+			reply("Playlist queued. Tracks will be prepared closer to playback. Use /queue to see its status.")
+			return
+		}
+		if first.Suspended {
+			reply("Playlist queued. Use /queue to see its status.")
+		} else if progressive {
 			message := "Queued: " + trackTitle(first.Track)
 			if remaining := first.Total - first.Position; remaining > 0 {
 				message += fmt.Sprintf(". Resolving the remaining %d tracks… Use /queue for progress.", remaining)
@@ -340,7 +384,7 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 			reply("Playback is already paused.")
 		} else if changed {
 			if providerBlocked {
-				reply("YouTube recovery requested. Retrying the same track.")
+				reply("YouTube recovery requested.")
 			} else {
 				reply("Playback resumed.")
 			}
@@ -383,7 +427,7 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 		reply("Playback stopped. The queue is clear.")
 	case "leave":
 		ctx, cancel := context.WithTimeout(b.ctx, 5*time.Second)
-		g.leave(ctx, b.ctx)
+		g.leave(player.VoiceCloseContext(ctx, "command_leave"), b.ctx)
 		cancel()
 		g.mu.Unlock()
 		reply("The Bard takes his leave.")

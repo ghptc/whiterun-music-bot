@@ -1,0 +1,75 @@
+=== RUN   TestOPT026FiveSharedProofConsumersAndRenewal
+--- PASS: TestOPT026FiveSharedProofConsumersAndRenewal (0.05s)
+=== RUN   TestOPT026NamedIdentityCorpus
+    opt026_test.go:301: identity corpus positives=14 negatives=31 false_positives=0
+--- PASS: TestOPT026NamedIdentityCorpus (0.00s)
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_auth_requiredSign_in_to_confirm_your_age
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_bot_challengeSign_in_to_confirm_you’re_not_a_bot
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_auth_requiredAuthentication_required
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_rate_limitedHTTP_Error_429:_Too_Many_Requests
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_network_timeoutConnection_timed_out
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_video_unavailableVideo_unavailable
+=== RUN   TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_extractor_failureERROR:_Unable_to_extract_player_response
+--- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics (0.01s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_auth_requiredSign_in_to_confirm_your_age (0.00s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_bot_challengeSign_in_to_confirm_you’re_not_a_bot (0.00s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_auth_requiredAuthentication_required (0.00s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_rate_limitedHTTP_Error_429:_Too_Many_Requests (0.00s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_network_timeoutConnection_timed_out (0.00s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_video_unavailableVideo_unavailable (0.00s)
+    --- PASS: TestProviderExtractionCategoriesAndSafeDiagnostics/youtube_extractor_failureERROR:_Unable_to_extract_player_response (0.00s)
+=== RUN   TestProviderChallengeStopsDiscoveryAtFirstFailure
+--- PASS: TestProviderChallengeStopsDiscoveryAtFirstFailure (0.00s)
+PASS
+ok  	whiterun/internal/media	0.059s
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/10
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/25
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/49
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/50
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/75
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/99
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/10
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/25
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/49
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/50
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/75
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/99
+--- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/10 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/25 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/49 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/50 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/75 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/99 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/10 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/25 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/49 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/50 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/75 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/99 (0.00s)
+=== RUN   TestOPT026GlobalTwoGuildRecovery
+    opt026_test.go:114: global recovery: initial=1 trials=3 guilds=2 positions_preserved=246 notices=2
+--- PASS: TestOPT026GlobalTwoGuildRecovery (0.00s)
+=== RUN   TestOPT026Horizon123AndDistantPlaylist
+    opt026_test.go:176: prefetch before first EOF: first123=3 distant123=0; pause/resume/skip/stop preserved order
+--- PASS: TestOPT026Horizon123AndDistantPlaylist (0.00s)
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/10
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/49
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/50
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/75
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/99
+--- PASS: TestOPT026GlobalProgressRecoveryPolicy (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/10 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/49 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/50 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/75 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/99 (0.00s)
+PASS
+ok  	whiterun/internal/player	0.005s
+=== RUN   TestOPT026RenewedProofSurvivesSQLiteReopen
+--- PASS: TestOPT026RenewedProofSurvivesSQLiteReopen (0.01s)
+PASS
+ok  	whiterun/internal/storage	0.007s

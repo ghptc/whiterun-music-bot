@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        YTDLP_VERSION: ${YTDLP_VERSION:-2026.08.19}
+        YTDLP_VERSION: ${YTDLP_VERSION:-2026.10.26}
     environment:
       DISCORD_TOKEN: ${DISCORD_TOKEN:?Set DISCORD_TOKEN in .env}
       DISCORD_APPLICATION_ID: ${DISCORD_APPLICATION_ID:?Set DISCORD_APPLICATION_ID in .env}
@@ -16,11 +16,27 @@ services:
       BARD_LOG_DB_PATH: /home/bard/data/bard-logs.db
       BARD_LOG_DB_MAX_BYTES: ${BARD_LOG_DB_MAX_BYTES:-524288000}
       SPOTIFY_MATCH_POLICY: ${SPOTIFY_MATCH_POLICY:-}
+      YOUTUBE_MAX_CONCURRENT: ${YOUTUBE_MAX_CONCURRENT:-4}
+      YOUTUBE_ADMISSION_INTERVAL: ${YOUTUBE_ADMISSION_INTERVAL:-250ms}
+      YOUTUBE_PREFETCH_HORIZON: ${YOUTUBE_PREFETCH_HORIZON:-8m}
     volumes:
       - bard-data:/home/bard/data
     init: true
     restart: unless-stopped
     stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "bard", "healthcheck"]
+      interval: 10s
+      timeout: 3s
+      start_period: 45s
+      retries: 3
+    mem_limit: ${BARD_MEMORY_LIMIT:-768m}
+    cpus: ${BARD_CPU_LIMIT:-1.0}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     read_only: true
     tmpfs:
       - /tmp:rw,nosuid,size=128m,mode=1777

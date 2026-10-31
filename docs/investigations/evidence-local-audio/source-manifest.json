@@ -1,0 +1,18 @@
+{
+  "base_commit": "c05a4fca149c0ddc9ace72b09bf38733d0c77fec",
+  "snapshot": "HEAD plus only the listed local audio files; unrelated workspace edits excluded",
+  "files": {
+    "internal/media/local.go": "b798444ac89ed49da770795ec89f5d0b3be928c040cf5f799e2797f99b5f33ca",
+    "internal/media/local_test.go": "dca7b21c81ad4b2409ef5f30ddd123ab3135d67d9d4acc3d72b2fcb404648a6d",
+    "internal/player/local.go": "e7c4a1cd1725a2396da426ce4054320df845a6f7204a2c6eccd8771a1ffa7068",
+    "internal/player/local_test.go": "b8d818003f5b6bf779b76610a68c5c6677a22281402d6eddc31f141620f1a62e",
+    "internal/player/stream.go": "c6b86303477bfea84a1110da6b91ee790af17797dc35085320621b78140f1209",
+    "internal/discord/bot.go": "9a279f0e85bd3f95fee647f7102aa0fe97189f987bac865203c438d978c7ac1a",
+    "internal/discord/local_audio.go": "f09044f6c0734022f476a8b57fa79c9fc58aa2fbe3518fbbd20be8dca77621ac",
+    "internal/discord/local_audio_test.go": "ccda749531ee23b80edbaed9817e0897bedf75dcd636b63f789f6b62da92b5a3",
+    "internal/discord/local_audio_live_test.go": "053164fa69c77c3ab6ce3ec08d6015cf633ab12e8bd629a877681d922238e0ae",
+    "internal/player/testdata/local-audio/validation.flac": "0dc3540d8f2c19d09f30fabadbec072259e4f8378b378e2018a8e0691950f3f3",
+    "internal/player/testdata/local-audio/README.md": "9c6688bdf9854e98b6c9d800b9da17f3fa520b5679b951bfe0882e8adccfac52",
+    "docker/local-audio-validation.Dockerfile": "78fcba805d291a84cb21141926d56f609276b8b1ecf62202bfc38e5df0846767"
+  }
+}

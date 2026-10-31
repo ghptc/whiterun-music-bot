@@ -1,0 +1,5 @@
+=== RUN   TestOPT026NamedIdentityCorpus
+    opt026_identity_test.go:83: identity corpus positives=14 negatives=31 false_positives=0
+--- PASS: TestOPT026NamedIdentityCorpus (0.00s)
+PASS
+ok  	whiterun/internal/media	0.006s

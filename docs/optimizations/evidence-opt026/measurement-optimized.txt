@@ -1,0 +1,8 @@
+=== RUN   TestOPT026Measurement
+    opt026_measurement_test.go:38: MEASUREMENT {"cold_p50_ms":31.861,"cold_p95_ms":32.33,"scenario":"cold_warm","search":25,"tracks":25,"verification":25,"warm_p50_ms":0.017,"warm_p95_ms":0.024}
+    opt026_measurement_test.go:68: MEASUREMENT {"scenario":"five_concurrent","verification":1}
+    opt026_measurement_test.go:78: MEASUREMENT {"scenario":"expired_sequential","verification":1}
+    opt026_measurement_test.go:86: MEASUREMENT {"positions":123,"scenario":"123_cold_positions","search":123,"verification":123}
+--- PASS: TestOPT026Measurement (4.74s)
+PASS
+ok  	whiterun/internal/media	4.737s

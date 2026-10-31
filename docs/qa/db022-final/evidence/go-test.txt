@@ -1,0 +1,12 @@
+ok  	whiterun/cmd/bot	0.030s
+?   	whiterun/cmd/profile	[no test files]
+ok  	whiterun/cmd/qa-memory	0.060s
+?   	whiterun/cmd/qa-soak	[no test files]
+ok  	whiterun/internal/discord	11.306s
+ok  	whiterun/internal/logstore	6.469s
+ok  	whiterun/internal/media	0.428s
+ok  	whiterun/internal/perfgate	0.002s
+ok  	whiterun/internal/player	27.201s
+ok  	whiterun/internal/qasoak	0.024s
+ok  	whiterun/internal/storage	2.324s
+?   	whiterun/scripts/probe-spotify-recovery	[no test files]

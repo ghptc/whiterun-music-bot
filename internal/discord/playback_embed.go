@@ -14,7 +14,7 @@ import (
 
 func nowContainer(state player.State) d.ContainerComponent {
 	if state.Current == nil {
-		return musicContainer("The Bard · Now Playing", d.TextDisplayComponent{Content: "Nothing playing."})
+		return musicContainer("Now Playing", d.TextDisplayComponent{Content: "Nothing playing."})
 	}
 	detail := "Playing"
 	if state.Paused {
@@ -41,7 +41,7 @@ func nowContainer(state player.State) d.ContainerComponent {
 			body = append(body, d.TextDisplayComponent{Content: "-# Up next: " + next})
 		}
 	}
-	return musicContainer("The Bard · Now Playing", body...)
+	return musicContainer("Now Playing", body...)
 }
 func playbackMessage(event player.PlaybackEvent) d.MessageCreate {
 	if event.SkippedReason != "" {

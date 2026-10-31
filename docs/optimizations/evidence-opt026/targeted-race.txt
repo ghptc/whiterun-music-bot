@@ -1,0 +1,105 @@
+=== RUN   TestOPT026AdmissionRateAndConcurrency
+--- PASS: TestOPT026AdmissionRateAndConcurrency (0.00s)
+=== RUN   TestOPT026OneGlobalTrialAndFiniteBudget
+--- PASS: TestOPT026OneGlobalTrialAndFiniteBudget (0.00s)
+=== RUN   TestOPT026RecoveryRequiresNewMediaEvidence
+--- PASS: TestOPT026RecoveryRequiresNewMediaEvidence (0.00s)
+=== RUN   TestOPT026LocalFailuresNeverOpenGlobalBreaker
+--- PASS: TestOPT026LocalFailuresNeverOpenGlobalBreaker (0.00s)
+=== RUN   TestOPT026BlockedAdmissionWakesRateWaiters
+--- PASS: TestOPT026BlockedAdmissionWakesRateWaiters (0.00s)
+=== RUN   TestOPT026Measurement
+    opt026_measurement_test.go:38: MEASUREMENT {"cold_p50_ms":35.255,"cold_p95_ms":40.602,"scenario":"cold_warm","search":25,"tracks":25,"verification":25,"warm_p50_ms":0.109,"warm_p95_ms":0.191}
+    opt026_measurement_test.go:68: MEASUREMENT {"scenario":"five_concurrent","verification":1}
+    opt026_measurement_test.go:78: MEASUREMENT {"scenario":"expired_sequential","verification":1}
+    opt026_measurement_test.go:86: MEASUREMENT {"positions":123,"scenario":"123_cold_positions","search":123,"verification":123}
+--- PASS: TestOPT026Measurement (5.25s)
+=== RUN   TestOPT026FiveSharedProofConsumersAndRenewal
+--- PASS: TestOPT026FiveSharedProofConsumersAndRenewal (0.05s)
+=== RUN   TestOPT026SharedProofCancellation
+=== RUN   TestOPT026SharedProofCancellation/false
+=== RUN   TestOPT026SharedProofCancellation/true
+--- PASS: TestOPT026SharedProofCancellation (0.01s)
+    --- PASS: TestOPT026SharedProofCancellation/false (0.01s)
+    --- PASS: TestOPT026SharedProofCancellation/true (0.00s)
+=== RUN   TestOPT026ProofFailureAndContextIsolation
+--- PASS: TestOPT026ProofFailureAndContextIsolation (0.06s)
+=== RUN   TestOPT026NamedIdentityCorpus
+    opt026_test.go:301: identity corpus positives=14 negatives=31 false_positives=0
+--- PASS: TestOPT026NamedIdentityCorpus (0.02s)
+=== RUN   TestOPT026UnavailableAndAgeRestrictedProofsPreserved
+--- PASS: TestOPT026UnavailableAndAgeRestrictedProofsPreserved (0.00s)
+=== RUN   TestOPT026ProofCoversExpectedPlayback
+--- PASS: TestOPT026ProofCoversExpectedPlayback (0.05s)
+=== RUN   TestOPT026123WarmAndReopen
+    opt026_warm_test.go:27: MEASUREMENT {"media_processes_not_executed":123,"metadata_processes":246,"playback_identity_extra_processes":0,"scenario":"123_distinct_cold","search_processes":123,"verification_processes":123}
+    opt026_warm_test.go:37: MEASUREMENT {"additional_metadata_processes":0,"scenario":"123_ram_warm"}
+    opt026_warm_test.go:48: MEASUREMENT {"additional_metadata_processes":0,"scenario":"123_mapping_fresh_ram_empty"}
+    opt026_warm_test.go:66: MEASUREMENT {"additional_searches":0,"additional_verifications":123,"scenario":"123_mapping_stale_ram_empty"}
+--- PASS: TestOPT026123WarmAndReopen (6.10s)
+PASS
+ok  	whiterun/internal/media	12.551s
+=== RUN   TestOPT026GlobalTwoGuildRecovery
+    opt026_test.go:114: global recovery: initial=1 trials=3 guilds=2 positions_preserved=246 notices=2
+--- PASS: TestOPT026GlobalTwoGuildRecovery (0.00s)
+=== RUN   TestOPT026Horizon123AndDistantPlaylist
+    opt026_test.go:176: prefetch before first EOF: first123=3 distant123=0; pause/resume/skip/stop preserved order
+--- PASS: TestOPT026Horizon123AndDistantPlaylist (0.01s)
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates/short
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates/long
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates/unknown
+--- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates (0.01s)
+    --- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates/short (0.00s)
+    --- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates/long (0.01s)
+    --- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates/unknown (0.00s)
+=== RUN   TestOPT026HealthyAndLocalAudioIgnoreOtherGuildOutage
+2026/10/30 22:05:26 INFO playback_start source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=16442 request_elapsed_ns=15971 elapsed_ms=0.016 request_elapsed_ms=0.016
+2026/10/30 22:05:26 INFO local_audio_opened source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=100744 request_elapsed_ns=100253 elapsed_ms=0.1 request_elapsed_ms=0.1 duration_ms=100 progress_ms=0 format=wav first_frame_ms=0
+2026/10/30 22:05:26 INFO stream_resolve_start source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=45097 request_elapsed_ns=162893 elapsed_ms=0.045 request_elapsed_ms=0.162
+2026/10/30 22:05:26 INFO ffmpeg_first_input source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=21940177 request_elapsed_ns=22058193 elapsed_ms=21.94 request_elapsed_ms=22.058
+2026/10/30 22:05:26 INFO ffmpeg_start source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=148886 request_elapsed_ns=22273136 elapsed_ms=0.149 request_elapsed_ms=22.273 purpose=audio_decode category=ffmpeg started_at=2026-10-31T01:05:26.713Z candidates=1
+2026/10/30 22:05:26 INFO audio_source_start source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=22209655 request_elapsed_ns=22327451 elapsed_ms=22.209 request_elapsed_ms=22.327 video_id="" live=false yt_pid=1041836 ffmpeg_pid=1041844
+2026/10/30 22:05:26 INFO stream_process_started source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=22224533 request_elapsed_ns=22342319 elapsed_ms=22.224 request_elapsed_ms=22.342 pid=1041836
+2026/10/30 22:05:26 INFO ffmpeg_first_output source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=49579376 request_elapsed_ns=49697583 elapsed_ms=49.579 request_elapsed_ms=49.697
+2026/10/30 22:05:26 INFO first_ogg_packet source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=49627779 request_elapsed_ns=49745575 elapsed_ms=49.627 request_elapsed_ms=49.745
+2026/10/30 22:05:26 INFO first_opus_packet source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=49841009 request_elapsed_ns=49958965 elapsed_ms=49.841 request_elapsed_ms=49.959
+2026/10/30 22:05:26 INFO first_opus_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=49869583 request_elapsed_ns=49987410 elapsed_ms=49.869 request_elapsed_ms=49.987
+2026/10/30 22:05:26 INFO first_voice_frame_attempt source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=49894592 request_elapsed_ns=50012378 elapsed_ms=49.894 request_elapsed_ms=50.012
+2026/10/30 22:05:26 INFO first_audio_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=50023559 request_elapsed_ns=50023038 elapsed_ms=50.023 request_elapsed_ms=50.023
+2026/10/30 22:05:26 INFO local_audio_first_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=50031645 request_elapsed_ns=50031104 elapsed_ms=50.031 request_elapsed_ms=50.031 duration_ms=100 progress_ms=20 first_frame_ms=50
+2026/10/30 22:05:26 INFO ffmpeg_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=128266051 request_elapsed_ns=150390322 elapsed_ms=128.266 request_elapsed_ms=150.39 exit_code=0 error=<nil>
+2026/10/30 22:05:26 INFO audio_source_exit source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=150340817 request_elapsed_ns=150458673 elapsed_ms=150.341 request_elapsed_ms=150.458 video_id="" yt_exit_code=0 ffmpeg_exit_code=0 category=eof yt_stderr_tail="" ffmpeg_stderr_tail=""
+2026/10/30 22:05:26 INFO playback_context_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=251308293 request_elapsed_ns=251307992 elapsed_ms=251.308 request_elapsed_ms=251.308 cause=<nil> parent_error=<nil>
+2026/10/30 22:05:26 INFO playback_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=251360513 request_elapsed_ns=251360012 elapsed_ms=251.36 request_elapsed_ms=251.36 error=<nil>
+2026/10/30 22:05:26 INFO local_audio_completed source=local local_audio_id=audio.wav local_correlation_id=local/1793408726691163488 elapsed_ns=251379209 request_elapsed_ns=251378678 elapsed_ms=251.379 request_elapsed_ms=251.378 duration_ms=100 progress_ms=120 first_frame_ms=50 category=eof audio_frames=6
+--- PASS: TestOPT026HealthyAndLocalAudioIgnoreOtherGuildOutage (0.26s)
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/10
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/49
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/50
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/75
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/99
+--- PASS: TestOPT026GlobalProgressRecoveryPolicy (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/10 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/49 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/50 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/75 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/99 (0.00s)
+=== RUN   TestOPT026PauseDuringGlobalBackoffRechecksHorizon
+--- PASS: TestOPT026PauseDuringGlobalBackoffRechecksHorizon (0.00s)
+PASS
+ok  	whiterun/internal/player	1.294s
+=== RUN   TestOPT026FullFlowSQLiteAndMedia
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"cold_sqlite","spotify_metadata_calls":1,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":1,"verification":1}}
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"warm_sqlite_and_ram","spotify_metadata_calls":0,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":0,"verification":0}}
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"reopened_sqlite_empty_ram","spotify_metadata_calls":0,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":0,"verification":0}}
+--- PASS: TestOPT026FullFlowSQLiteAndMedia (1.18s)
+=== RUN   TestOPT026SharedProcessAdmissionWiring
+--- PASS: TestOPT026SharedProcessAdmissionWiring (0.00s)
+PASS
+ok  	whiterun/internal/discord	2.185s
+=== RUN   TestOPT026RenewedProofSurvivesSQLiteReopen
+--- PASS: TestOPT026RenewedProofSurvivesSQLiteReopen (0.07s)
+PASS
+ok  	whiterun/internal/storage	1.071s

@@ -1,0 +1,17 @@
+{
+  "python_package_changes": {
+    "yt-dlp": [
+      "2026.8.19",
+      "2026.10.26"
+    ],
+    "websockets": [
+      "17.3",
+      "17.4"
+    ]
+  },
+  "debian_package_changes": {},
+  "component_hashes_equal": true,
+  "python_same": true,
+  "os_same": true,
+  "architecture_same": true
+}
