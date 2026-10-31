@@ -34,7 +34,19 @@ def require(condition, reason):
 
 def command(argv, **kwargs):
     result = subprocess.run(argv, capture_output=True, timeout=180, **kwargs)
-    require(result.returncode == 0, 'external verification failed: ' + argv[0])
+    if result.returncode != 0:
+        if argv[:2] == ['gh', 'api']:
+            # Report only fixed endpoint/status fields; never raw stderr, headers,
+            # response bodies, tokens or command arguments from other operations.
+            stderr = result.stderr.decode(errors='replace') if isinstance(result.stderr, bytes) else (result.stderr or '')
+            match = re.search(r'HTTP (\d{3})', stderr)
+            status = match.group(1) if match else 'unknown'
+            category = {'401': 'authentication', '403': 'permission_or_rate_limit',
+                        '404': 'missing_or_inaccessible', '429': 'rate_limit'}.get(status, 'api_or_transport')
+            endpoint = argv[2].split('?', 1)[0]
+            safe = endpoint if re.fullmatch(r'[A-Za-z0-9_./-]+', endpoint) else '[redacted]'
+            raise Denied(f'GitHub API GET {safe}: exit={result.returncode} http={status} category={category}')
+        raise Denied('external verification failed: ' + argv[0])
     return result.stdout
 
 
