@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM golang:1.27-bookworm AS test-env
+FROM golang:1.27.3-bookworm AS test-env
 # Process acceptance tests execute real FFmpeg; runtime-stage packages are not
 # available here. Verify the encoder by producing Opus, not just finding a binary.
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \

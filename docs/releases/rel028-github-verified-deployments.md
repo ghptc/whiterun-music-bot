@@ -181,6 +181,18 @@ A local Docker image tagged `bard-rel028:ci-only` is explicitly ineligible for
 production. No claim is made that a real attested release or production rollback
 has already been executed.
 
+### First GitHub run: discrepancy caught and corrected
+
+The first PR run [`41218991532`](https://github.com/ghptc/whiterun-music-bot/actions/runs/41218991532)
+passed unit, race, contracts and Docker, but correctly failed security and the
+aggregate gate. `setup-go` selected the module's old minimum `go 1.27.0`, while
+the local toolchain was `go1.27.3-X:nodwarf5`. GitHub found nine reachable standard
+library vulnerabilities, requiring Go 1.27.2 or 1.27.3, including `GO-2026-6809`.
+This demonstrates why local green results cannot authorize a release. The
+module minimum and Docker builder are now explicitly `1.27.3`; no findings were
+ignored and no check was removed. See `github-first-security-failure.txt` and
+the subsequent exact-head GitHub run for verification of this correction.
+
 ## Migration and operation
 
 1. Review the complete pending stack through the feature PR, including YT-027.
