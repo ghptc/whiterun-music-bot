@@ -192,8 +192,12 @@ func (p *GuildPlayer) announceStart(ctx context.Context, track media.Track, sequ
 		transitionMS = time.Since(p.lastTransition).Milliseconds()
 	}
 	fn := p.onStart
-	p.persistLocked()
-	if recorder, ok := p.store.(PlaybackRecorder); ok && p.ctx.Err() == nil && !resumed {
+	var record *media.Track
+	if !resumed {
+		record = &track
+	}
+	combined := p.persistPlaybackLocked(record)
+	if recorder, ok := p.store.(PlaybackRecorder); ok && !combined && p.ctx.Err() == nil && !resumed {
 		save, cancel := context.WithTimeout(context.Background(), persistenceTimeout)
 		if err := recorder.RecordPlayback(save, p.guildID, track); err != nil {
 			p.persistenceError = "Playback history could not be saved."

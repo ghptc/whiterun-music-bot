@@ -1,0 +1,190 @@
+=== RUN   TestFIX025CrashCheckpointHelper
+    fix025_checkpoint_test.go:23: subprocess-only crash fixture
+--- SKIP: TestFIX025CrashCheckpointHelper (0.00s)
+=== RUN   TestFIX025RealCrashRestoresCommittedProgressOnce
+=== RUN   TestFIX025RealCrashRestoresCommittedProgressOnce/10
+=== RUN   TestFIX025RealCrashRestoresCommittedProgressOnce/60
+--- PASS: TestFIX025RealCrashRestoresCommittedProgressOnce (0.02s)
+    --- PASS: TestFIX025RealCrashRestoresCommittedProgressOnce/10 (0.01s)
+    --- PASS: TestFIX025RealCrashRestoresCommittedProgressOnce/60 (0.01s)
+=== RUN   TestFIX029SnapshotKeepsMetadataAndOccurrences
+--- PASS: TestFIX029SnapshotKeepsMetadataAndOccurrences (0.00s)
+=== RUN   TestFIX029LateTrackFailureRollsBackWholeSnapshot
+--- PASS: TestFIX029LateTrackFailureRollsBackWholeSnapshot (0.01s)
+=== RUN   TestFIX029PlaybackCheckpointAndEventCommitAtomically
+--- PASS: TestFIX029PlaybackCheckpointAndEventCommitAtomically (0.00s)
+=== RUN   TestOPT026RenewedProofSurvivesSQLiteReopen
+--- PASS: TestOPT026RenewedProofSurvivesSQLiteReopen (0.01s)
+=== RUN   TestQualitySQLiteRollback
+=== RUN   TestQualitySQLiteRollback/guilds/INSERT
+=== RUN   TestQualitySQLiteRollback/guilds/UPDATE
+=== RUN   TestQualitySQLiteRollback/history/INSERT
+=== RUN   TestQualitySQLiteRollback/history/DELETE
+=== RUN   TestQualitySQLiteRollback/tracks/INSERT
+=== RUN   TestQualitySQLiteRollback/tracks/UPDATE
+--- PASS: TestQualitySQLiteRollback (0.04s)
+    --- PASS: TestQualitySQLiteRollback/guilds/INSERT (0.01s)
+    --- PASS: TestQualitySQLiteRollback/guilds/UPDATE (0.01s)
+    --- PASS: TestQualitySQLiteRollback/history/INSERT (0.01s)
+    --- PASS: TestQualitySQLiteRollback/history/DELETE (0.00s)
+    --- PASS: TestQualitySQLiteRollback/tracks/INSERT (0.00s)
+    --- PASS: TestQualitySQLiteRollback/tracks/UPDATE (0.01s)
+=== RUN   TestREL024SQLiteBusyCheckpointRecoversWithoutNewCommand
+    rel024_health_test.go:75: real SQLITE_BUSY: checkpoint automatically recovered in 4.019942447s; positions=3/3
+--- PASS: TestREL024SQLiteBusyCheckpointRecoversWithoutNewCommand (4.02s)
+PASS
+ok  	whiterun/internal/storage	4.126s
+=== RUN   TestFIX0251ThreeHoursWithoutVoluntaryLeave
+--- PASS: TestFIX0251ThreeHoursWithoutVoluntaryLeave (0.00s)
+=== RUN   TestFIX0251CloseOriginPreservesCancellation
+--- PASS: TestFIX0251CloseOriginPreservesCancellation (0.00s)
+=== RUN   TestFIX0251ResolverFailurePreservesActiveVoice
+=== RUN   TestFIX0251ResolverFailurePreservesActiveVoice/spotify_unavailable
+=== RUN   TestFIX0251ResolverFailurePreservesActiveVoice/resolution_timeout
+--- PASS: TestFIX0251ResolverFailurePreservesActiveVoice (0.00s)
+    --- PASS: TestFIX0251ResolverFailurePreservesActiveVoice/spotify_unavailable (0.00s)
+    --- PASS: TestFIX0251ResolverFailurePreservesActiveVoice/resolution_timeout (0.00s)
+=== RUN   TestFIX0251EOFRacesVoiceWatchdogWithoutDoubleAdvance
+--- PASS: TestFIX0251EOFRacesVoiceWatchdogWithoutDoubleAdvance (0.00s)
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/10
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/25
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/49
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/50
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/75
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/99
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/10
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/25
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/49
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/50
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/75
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/99
+--- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences (0.02s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/10 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/25 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/49 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/50 (0.01s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/75 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/99 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/10 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/25 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/49 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/50 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/75 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/99 (0.00s)
+=== RUN   TestFIX025CrashCheckpointRequiresAttachment
+--- PASS: TestFIX025CrashCheckpointRequiresAttachment (0.00s)
+=== RUN   TestFIX025FailedResumePreservesPosition
+--- PASS: TestFIX025FailedResumePreservesPosition (0.00s)
+=== RUN   TestFIX025PauseDuringRecovery
+--- PASS: TestFIX025PauseDuringRecovery (0.00s)
+=== RUN   TestFIX025AccurateSeekWithRealFFmpeg
+--- PASS: TestFIX025AccurateSeekWithRealFFmpeg (0.41s)
+=== RUN   TestFIX025SingleFrameCannotResetIncidentBudget
+--- PASS: TestFIX025SingleFrameCannotResetIncidentBudget (0.00s)
+=== RUN   TestFIX025BusyCheckpointCannotBlockAudioForCommandTimeout
+--- PASS: TestFIX025BusyCheckpointCannotBlockAudioForCommandTimeout (0.20s)
+=== RUN   TestFIX029PrematureEOFAdvancesOnceWithoutVoiceLeave
+--- PASS: TestFIX029PrematureEOFAdvancesOnceWithoutVoiceLeave (0.00s)
+=== RUN   TestREL024LostNotificationRecoversWithoutQueueMutation
+--- PASS: TestREL024LostNotificationRecoversWithoutQueueMutation (0.00s)
+=== RUN   TestOPT026GlobalTwoGuildRecovery
+    opt026_test.go:114: global recovery: initial=1 trials=3 guilds=2 positions_preserved=246 notices=2
+--- PASS: TestOPT026GlobalTwoGuildRecovery (0.00s)
+=== RUN   TestOPT026Horizon123AndDistantPlaylist
+    opt026_test.go:176: prefetch before first EOF: first123=3 distant123=0; pause/resume/skip/stop preserved order
+--- PASS: TestOPT026Horizon123AndDistantPlaylist (0.00s)
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates/short
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates/long
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates/unknown
+--- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates (0.00s)
+    --- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates/short (0.00s)
+    --- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates/long (0.00s)
+    --- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates/unknown (0.00s)
+=== RUN   TestOPT026HealthyAndLocalAudioIgnoreOtherGuildOutage
+2026/10/31 15:29:34 INFO playback_start source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=4357 request_elapsed_ns=4357 elapsed_ms=0.004 request_elapsed_ms=0.004
+2026/10/31 15:29:34 INFO local_audio_opened source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=32217 request_elapsed_ns=32197 elapsed_ms=0.032 request_elapsed_ms=0.032 duration_ms=100 progress_ms=0 format=wav first_frame_ms=0
+2026/10/31 15:29:34 INFO stream_resolve_start source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=4307 request_elapsed_ns=39990 elapsed_ms=0.004 request_elapsed_ms=0.04
+2026/10/31 15:29:34 INFO ffmpeg_first_input source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=20321414 request_elapsed_ns=20357157 elapsed_ms=20.321 request_elapsed_ms=20.357
+2026/10/31 15:29:34 INFO ffmpeg_start source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=93876 request_elapsed_ns=20450372 elapsed_ms=0.093 request_elapsed_ms=20.45 purpose=audio_decode category=ffmpeg started_at=2026-10-31T18:29:34.781Z candidates=1
+2026/10/31 15:29:34 INFO audio_source_start source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=20428223 request_elapsed_ns=20463906 elapsed_ms=20.428 request_elapsed_ms=20.463 video_id="" live=false yt_pid=20231 ffmpeg_pid=20234
+2026/10/31 15:29:34 INFO stream_process_started source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=20430928 request_elapsed_ns=20466611 elapsed_ms=20.43 request_elapsed_ms=20.466 pid=20231
+2026/10/31 15:29:34 INFO ffmpeg_first_output source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=38502264 request_elapsed_ns=38537997 elapsed_ms=38.502 request_elapsed_ms=38.538
+2026/10/31 15:29:34 INFO first_ogg_packet source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=38512192 request_elapsed_ns=38547875 elapsed_ms=38.512 request_elapsed_ms=38.547
+2026/10/31 15:29:34 INFO first_opus_packet source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=38660985 request_elapsed_ns=38696698 elapsed_ms=38.661 request_elapsed_ms=38.696
+2026/10/31 15:29:34 INFO first_opus_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=38668168 request_elapsed_ns=38703851 elapsed_ms=38.668 request_elapsed_ms=38.703
+2026/10/31 15:29:34 INFO first_voice_frame_attempt source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=38674138 request_elapsed_ns=38709821 elapsed_ms=38.674 request_elapsed_ms=38.709
+2026/10/31 15:29:34 INFO first_audio_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=38712295 request_elapsed_ns=38712275 elapsed_ms=38.712 request_elapsed_ms=38.712
+2026/10/31 15:29:34 INFO local_audio_first_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=38713728 request_elapsed_ns=38713708 elapsed_ms=38.713 request_elapsed_ms=38.713 duration_ms=100 progress_ms=20 first_frame_ms=38
+2026/10/31 15:29:34 INFO ffmpeg_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=119390389 request_elapsed_ns=139746925 elapsed_ms=119.39 request_elapsed_ms=139.747 exit_code=0 error=<nil>
+2026/10/31 15:29:34 INFO audio_source_exit source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=139730827 request_elapsed_ns=139766510 elapsed_ms=139.73 request_elapsed_ms=139.766 video_id="" yt_exit_code=0 ffmpeg_exit_code=0 category=eof yt_stderr_tail="" ffmpeg_stderr_tail=""
+2026/10/31 15:29:35 INFO playback_context_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=240353603 request_elapsed_ns=240353684 elapsed_ms=240.353 request_elapsed_ms=240.353 cause=<nil> parent_error=<nil>
+2026/10/31 15:29:35 INFO playback_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=240374245 request_elapsed_ns=240374225 elapsed_ms=240.374 request_elapsed_ms=240.374 error=<nil>
+2026/10/31 15:29:35 INFO local_audio_completed source=local local_audio_id=audio.wav local_correlation_id=local/1793471374761399194 elapsed_ns=240376968 request_elapsed_ns=240376949 elapsed_ms=240.377 request_elapsed_ms=240.376 duration_ms=100 progress_ms=120 first_frame_ms=38 category=eof audio_frames=6
+--- PASS: TestOPT026HealthyAndLocalAudioIgnoreOtherGuildOutage (0.25s)
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/10
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/49
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/50
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/75
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/99
+--- PASS: TestOPT026GlobalProgressRecoveryPolicy (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/10 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/49 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/50 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/75 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/99 (0.00s)
+=== RUN   TestOPT026PauseDuringGlobalBackoffRechecksHorizon
+--- PASS: TestOPT026PauseDuringGlobalBackoffRechecksHorizon (0.00s)
+=== RUN   TestREL024HealthDoesNotWaitForDeadlockedWorker
+--- PASS: TestREL024HealthDoesNotWaitForDeadlockedWorker (0.00s)
+=== RUN   TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget
+=== RUN   TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/permanent
+    rel024_test.go:82: calls=3 notifications=0 positions=123/123; recovered=false
+=== RUN   TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/transient
+    rel024_test.go:82: calls=3 notifications=0 positions=123/123; recovered=true
+--- PASS: TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget (0.00s)
+    --- PASS: TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/permanent (0.00s)
+    --- PASS: TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/transient (0.00s)
+=== RUN   TestREL024NetworkRecoveryWithRealFFmpeg
+    rel024_test.go:137: real extractor exits=2; FFmpeg frames delivered; recovery=3.669161022s; positions=123/123
+--- PASS: TestREL024NetworkRecoveryWithRealFFmpeg (3.67s)
+=== RUN   TestREL024FrozenRealFFmpegIsKilledAndReaped
+    rel024_test.go:182: real FFmpeg SIGSTOP: detection/cleanup=998.418164ms; pid reaped; error=audio_stall: no audio progress within idle deadline
+        audio stream: read |0: file already closed
+--- PASS: TestREL024FrozenRealFFmpegIsKilledAndReaped (1.00s)
+PASS
+ok  	whiterun/internal/player	5.564s
+=== RUN   TestFIX0251ThreeHoursMainGatewayOutagesPreserveVoice
+--- PASS: TestFIX0251ThreeHoursMainGatewayOutagesPreserveVoice (0.00s)
+=== RUN   TestFIX0251VoiceOutageGraceAndRecoveryDoesNotLeave
+--- PASS: TestFIX0251VoiceOutageGraceAndRecoveryDoesNotLeave (0.00s)
+=== RUN   TestFIX0251CloseLogsOriginExactlyOnce
+--- PASS: TestFIX0251CloseLogsOriginExactlyOnce (0.00s)
+=== RUN   TestFIX0251LocalLeaveEchoIsNotReportedAsRemoteDisconnect
+--- PASS: TestFIX0251LocalLeaveEchoIsNotReportedAsRemoteDisconnect (0.00s)
+=== RUN   TestFIX025RealVoiceSoak
+    fix025_soak_test.go:37: requires explicitly authorized test channel and live credentials
+--- SKIP: TestFIX025RealVoiceSoak (0.00s)
+=== RUN   TestFIX025MainGatewayReconnectDoesNotSuspendHealthyVoice
+--- PASS: TestFIX025MainGatewayReconnectDoesNotSuspendHealthyVoice (0.00s)
+=== RUN   TestFIX025BrokenUDPRecreatesSessionButRemovalCannotRejoin
+--- PASS: TestFIX025BrokenUDPRecreatesSessionButRemovalCannotRejoin (0.00s)
+=== RUN   TestFIX025ResumeDoesNotDuplicateAnnouncement
+--- PASS: TestFIX025ResumeDoesNotDuplicateAnnouncement (0.00s)
+=== RUN   TestFIX025LateLeaveEchoCannotCloseNewJoin
+--- PASS: TestFIX025LateLeaveEchoCannotCloseNewJoin (0.00s)
+=== RUN   TestFIX025InvalidGatewayClosesUDPWithoutLeavingGuild
+--- PASS: TestFIX025InvalidGatewayClosesUDPWithoutLeavingGuild (0.00s)
+=== RUN   TestOPT026FullFlowSQLiteAndMedia
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"cold_sqlite","spotify_metadata_calls":1,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":1,"verification":1}}
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"warm_sqlite_and_ram","spotify_metadata_calls":0,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":0,"verification":0}}
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"reopened_sqlite_empty_ram","spotify_metadata_calls":0,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":0,"verification":0}}
+--- PASS: TestOPT026FullFlowSQLiteAndMedia (1.09s)
+=== RUN   TestOPT026SharedProcessAdmissionWiring
+--- PASS: TestOPT026SharedProcessAdmissionWiring (0.00s)
+=== RUN   TestREL024CardsPreserveMetadataWithoutBrandPrefix
+--- PASS: TestREL024CardsPreserveMetadataWithoutBrandPrefix (0.00s)
+PASS
+ok  	whiterun/internal/discord	1.093s

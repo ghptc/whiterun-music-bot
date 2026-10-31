@@ -114,6 +114,17 @@ func (s *DB) migrate(ctx context.Context) error {
 	return tx.Commit()
 }
 func (s *DB) SaveGuild(ctx context.Context, id string, state player.DurableState) error {
+	return s.saveGuild(ctx, id, state, false, nil)
+}
+
+// SavePlaybackCheckpoint checkpoints an already-persisted queue at selection/start.
+// The player serializes queue writes before this call; only current metadata
+// changed. The checkpoint, history and optional new play event commit together.
+func (s *DB) SavePlaybackCheckpoint(ctx context.Context, id string, state player.DurableState, record *media.Track) error {
+	return s.saveGuild(ctx, id, state, true, record)
+}
+
+func (s *DB) saveGuild(ctx context.Context, id string, state player.DurableState, checkpoint bool, record *media.Track) error {
 	data, err := json.Marshal(state)
 	if err != nil {
 		return err
@@ -138,7 +149,10 @@ func (s *DB) SaveGuild(ctx context.Context, id string, state player.DurableState
 			return err
 		}
 	}
-	tracks := append([]media.Track(nil), state.Queue...)
+	var tracks []media.Track
+	if !checkpoint {
+		tracks = append(tracks, state.Queue...)
+	}
 	if state.Current != nil {
 		tracks = append(tracks, *state.Current)
 	}
@@ -172,6 +186,15 @@ func (s *DB) SaveGuild(ctx context.Context, id string, state player.DurableState
 	}
 	if err := flushTracks(); err != nil {
 		return err
+	}
+	if record != nil {
+		b, err := json.Marshal(*record)
+		if err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, "INSERT INTO playback_events(guild_id,started_at,metadata) VALUES(?,?,?)", id, time.Now().UnixNano(), string(b)); err != nil {
+			return err
+		}
 	}
 	return tx.Commit()
 }

@@ -184,6 +184,64 @@ or real Discord audibility measurements.
 
 ## GitHub verification and remaining risks
 
+### First fix commit: GitHub timeout still blocked release
+
+Commit `e77be67da5f1a9119e0612ec95b986d78be17727` passed Release CI and
+Quality on both push and PR. Its unchanged performance workflow failed:
+[PR run 41228033355](https://github.com/ghptc/whiterun-music-bot/actions/runs/41228033355).
+It timed out after 600.027 seconds during `load-5-guilds/warm`; ten-guild and
+ready-transition scenarios therefore had not executed. No rerun was requested.
+The preceding local pass did not establish a GitHub pass.
+
+The new timeout has direct I/O evidence: goroutine `2308062` was in
+`libc.Xfsync → SQLite unixSync → quotaSync → RecordPlayback → announceStart`,
+while `2305472` waited for the same SQLite connection in
+`SaveGuild → persistLocked → announceStart`. The fixture owner was waiting in
+`GuildPlayer.Close` for the player's mutex. This is synchronous first-frame
+storage contention, not proof of a permanent lock cycle. SQL statement batching
+alone was insufficient on the CI storage device.
+
+The follow-up application correction uses an optional `PlaybackCheckpointStore`
+contract implemented by the same SQLite DB. Selection and first-frame handling
+checkpoint the already-durable queue without re-executing all its metadata
+UPSERTs. Current-track metadata is still saved. At first start, checkpoint,
+history and the original play event are committed in one transaction rather
+than a full queue save followed by a second synchronous event transaction.
+The actual playback event retains its original metadata and is omitted for a
+resume, preventing duplicate history events.
+
+Queue mutations still use the full original `SaveGuild` path, including every
+track INSERT/UPDATE trigger. The fast checkpoint requires the mutation owner's
+clean persistence state; a failed preceding mutation takes the full repair path.
+Stores without the optional capability retain the original behavior. The same
+existing bounded dirty-checkpoint recovery handles write failures; no retry
+layer, goroutine or scheduler was added. An atomic write error is not followed
+by an independent event retry, so an uncertain commit cannot duplicate a play
+event. As before, a failed play-event write is an audit limitation and is not
+claimed to have succeeded.
+
+`TestFIX029PlaybackCheckpointAndEventCommitAtomically` verifies persisted queue
+duplicates, lack of future-track rewrites, no event duplication on resume, and
+rollback of checkpoint/history if event insertion fails. FULL synchronization,
+physical quota, database files, healthchecks and CI remain unchanged.
+
+The measurements above describe `e77be67` locally. The follow-up checkpoint
+correction then passed the full sequential local validation: Go suite 63.662 s,
+vet 0.220 s, full race 103.703 s, Docker 84.842 s, and the exact unchanged gate
+221.777 s wall time. All 30 gate scenarios passed. Final p95 measurements:
+
+| Scenario | Checkpoint correction p95 (ms) |
+| --- | ---: |
+| ready transition | 24.713 |
+| ten guilds, warm | 210.451 |
+| 123 positions, cold / warm | 50.270 / 25.613 |
+| 500 positions, cold / warm | 131.731 / 39.935 |
+
+These final local logs, complete compressed test events and machine-readable
+status codes use the `checkpoint-` prefix in the evidence directory. The follow-up
+still requires exact-head GitHub validation; local results are not substituted
+for those checks.
+
 The fix must be pushed to the existing PR and all workflows observed on its exact
 HEAD: `Release CI`, `Quality`, and `Instant playback performance gate`, including
 all seven required checks. A local pass does not satisfy this requirement.

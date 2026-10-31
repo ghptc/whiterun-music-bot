@@ -22,6 +22,12 @@ type DurableState struct {
 type PlaybackRecorder interface {
 	RecordPlayback(context.Context, string, media.Track) error
 }
+
+// PlaybackCheckpointStore combines a current-track checkpoint with its play event.
+// Queue metadata must already have been saved by this player's mutation owner.
+type PlaybackCheckpointStore interface {
+	SavePlaybackCheckpoint(context.Context, string, DurableState, *media.Track) error
+}
 type Store interface {
 	SaveGuild(context.Context, string, DurableState) error
 	LoadGuild(context.Context, string) (DurableState, error)
@@ -86,7 +92,26 @@ func (p *GuildPlayer) persistLocked() {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), persistenceTimeout)
 	defer cancel()
-	if err := p.store.SaveGuild(ctx, p.guildID, p.durableLocked()); err != nil {
+	p.persistenceResultLocked(p.store.SaveGuild(ctx, p.guildID, p.durableLocked()))
+}
+
+// Only selection/progress/start changed: queue metadata was already committed
+// by its mutation owner. A dirty prior mutation must take the full repair path.
+// Return whether the optional play event was handled by the same transaction.
+func (p *GuildPlayer) persistPlaybackLocked(record *media.Track) bool {
+	store, ok := p.store.(PlaybackCheckpointStore)
+	if !ok || p.persistenceError != "" || p.ctx.Err() != nil {
+		p.persistLocked()
+		return false
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), persistenceTimeout)
+	defer cancel()
+	p.persistenceResultLocked(store.SavePlaybackCheckpoint(ctx, p.guildID, p.durableLocked(), record))
+	return true
+}
+
+func (p *GuildPlayer) persistenceResultLocked(err error) {
+	if err != nil {
 		p.persistenceError = "Latest queue changes could not be saved; recovery may be incomplete."
 		p.log.Error("durable_state_write_failed", "guild_id", p.guildID, "error", err)
 		if !p.retryingPersistence {

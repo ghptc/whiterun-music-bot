@@ -78,3 +78,49 @@ func TestFIX029LateTrackFailureRollsBackWholeSnapshot(t *testing.T) {
 		t.Fatalf("earlier batches escaped transaction rollback: %d %v", count, err)
 	}
 }
+
+func TestFIX029PlaybackCheckpointAndEventCommitAtomically(t *testing.T) {
+	db, err := Open(filepath.Join(t.TempDir(), "bard.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	ctx := context.Background()
+	first, future := media.Track{Title: "current"}, media.Track{Title: "future"}
+	state := player.DurableState{Queue: []media.Track{first, future, future}}
+	if err := db.SaveGuild(ctx, "1", state); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.db.Exec(`CREATE TRIGGER reject_future BEFORE UPDATE ON tracks WHEN instr(NEW.metadata,'future')>0 BEGIN SELECT RAISE(ABORT,'queue metadata rewritten'); END`); err != nil {
+		t.Fatal(err)
+	}
+	current := first
+	current.ResumeOffset = 20 * time.Millisecond
+	state.Current, state.CurrentStarted = &current, true
+	state.Queue, state.History = []media.Track{future, future}, []media.Track{first}
+	if err := db.SavePlaybackCheckpoint(ctx, "1", state, &first); err != nil {
+		t.Fatal(err)
+	}
+	current.ResumeOffset = 40 * time.Millisecond
+	if err := db.SavePlaybackCheckpoint(ctx, "1", state, nil); err != nil {
+		t.Fatal(err)
+	}
+	var count int
+	if err := db.db.QueryRow("SELECT count(*) FROM playback_events").Scan(&count); err != nil || count != 1 {
+		t.Fatalf("resumed checkpoint duplicated play event: %d %v", count, err)
+	}
+	if _, err := db.db.Exec(`CREATE TRIGGER reject_play BEFORE INSERT ON playback_events BEGIN SELECT RAISE(ABORT,'play event failure'); END`); err != nil {
+		t.Fatal(err)
+	}
+	current.ResumeOffset = 60 * time.Millisecond
+	if err := db.SavePlaybackCheckpoint(ctx, "1", state, &first); err == nil {
+		t.Fatal("event failure ignored")
+	}
+	loaded, err := db.LoadGuild(ctx, "1")
+	if err != nil || loaded.Current == nil || loaded.Current.ResumeOffset != 40*time.Millisecond || len(loaded.Queue) != 2 || len(loaded.History) != 1 {
+		t.Fatalf("checkpoint partially committed or lost queue: %+v %v", loaded, err)
+	}
+	if err := db.db.QueryRow("SELECT count(*) FROM playback_events").Scan(&count); err != nil || count != 1 {
+		t.Fatalf("failed transaction created an event: %d %v", count, err)
+	}
+}

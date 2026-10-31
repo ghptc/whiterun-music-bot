@@ -333,7 +333,7 @@ func (p *GuildPlayer) run() {
 		p.confirmedOffset = t.ResumeOffset
 		ctx = media.WithProviderPermit(context.WithValue(ctx, pauseKey{}, p.pause), providerPermit)
 		v := p.voice
-		p.persistLocked()
+		p.persistPlaybackLocked(nil)
 		p.mu.Unlock()
 		started := time.Now()
 		attemptLog := p.log.With(attemptFields...)
