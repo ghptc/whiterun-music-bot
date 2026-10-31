@@ -1,0 +1,29 @@
+name: Release API diagnostic
+on:
+  pull_request:
+    paths:
+      - scripts/releases/**
+      - .github/workflows/release-api-diagnostic.yml
+permissions:
+  contents: read
+  actions: read
+  checks: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Read-only reproduction of failed release verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: scripts/releases
+        run: |
+          python3 - <<'PY'
+          from verified_release import GitHub, ci_evidence, Denied
+          try:
+              ci_evidence(GitHub(), '35bd329e46094c63e59c7ffd3f88beb4d74b366b')
+          except Denied as error:
+              raise SystemExit(str(error))
+          PY
