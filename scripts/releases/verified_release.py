@@ -151,6 +151,11 @@ def image_reference(value):
     return value[len(prefix):]
 
 
+def verified_checkout(source, sha):
+    require(command(['git', '-C', source, 'rev-parse', 'HEAD']).decode().strip() == sha, 'checkout SHA mismatch')
+    require(not command(['git', '-C', source, 'status', '--porcelain', '--untracked-files=all']).strip(), 'dirty checkout')
+
+
 def attest(subject, sha, run_id, attempt):
     raw = command(['gh', 'attestation', 'verify', subject, '--repo', REPO,
                    '--signer-workflow', REPO + '/' + RELEASE, '--signer-digest', sha,
@@ -220,8 +225,7 @@ def publish(args):
     api = GitHub()
     require(verified_main(api, args.sha) == args.sha, 'only current protected main may publish')
     proof = ci_evidence(api, args.sha, args.ci_run)
-    require(command(['git', '-C', args.source, 'rev-parse', 'HEAD']).decode().strip() == args.sha, 'checkout SHA mismatch')
-    require(not command(['git', '-C', args.source, 'status', '--porcelain', '--untracked-files=all']).strip(), 'dirty build source')
+    verified_checkout(args.source, args.sha)
     if args.phase == 'check':
         print(json.dumps(proof))
         return

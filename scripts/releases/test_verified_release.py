@@ -200,6 +200,14 @@ class ReleaseTests(unittest.TestCase):
             with patch.dict('os.environ', env, clear=True), self.assertRaises(v.Denied):
                 v.publish(args)
 
+    def test_exact_clean_checkout_required(self):
+        for output in [[b'c'*40, b''], [A.encode(), b' M scripts/releases/verified_release.py'],
+                       [A.encode(), b'?? untracked-build-input']]:
+            with self.subTest(output=output), patch.object(v, 'command', side_effect=output), self.assertRaises(v.Denied):
+                v.verified_checkout('.', A)
+        with patch.object(v, 'command', side_effect=[A.encode(), b'']):
+            v.verified_checkout('.', A)
+
 
 if __name__ == '__main__':
     unittest.main()

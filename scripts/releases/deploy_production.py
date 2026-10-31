@@ -9,7 +9,7 @@ import subprocess
 import sys
 
 from verified_release import (Denied, GitHub, command, image_reference,
-                              production_approval, release_manifest, require)
+                              production_approval, release_manifest, require, verified_checkout)
 
 
 def authorize(api, release_id, rollback_id, expected_current, allow_legacy, run_id, workflow_sha,
@@ -38,6 +38,7 @@ def main():
                 'deployment only from approved GitHub main workflow')
         release, rollback = authorize(GitHub(), args.release_run, args.rollback_run, args.expected_current,
                                       args.allow_legacy_current, int(os.environ['GITHUB_RUN_ID']), os.environ['GITHUB_SHA'])
+        verified_checkout('.', os.environ['GITHUB_SHA'])
         # Labels are checked only AFTER cryptographic image/manifest verification.
         for artifact in [release, rollback]:
             command(['docker', 'pull', artifact['image']])

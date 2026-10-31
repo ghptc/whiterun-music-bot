@@ -153,7 +153,7 @@ is not proof of internal failure or restored YouTube playback.
 Local validation is evidence for review, **not GitHub release authorization**.
 Recorded logs are in `evidence-rel028/`.
 
-- Release verifier: 11 test methods, including 27 negative release cases, passed.
+- Release verifier: 12 test methods, including 27 negative release cases, passed.
   Cases reject feature branches, unmerged commits, unprotected/bypassable main,
   failed/pending/cancelled/skipped CI, wrong SHA/check source, spoofed check names,
   self-hosted runners, missing/expired manifest, tampered metadata, wrong digest,
@@ -162,6 +162,8 @@ Recorded logs are in `evidence-rel028/`.
   latest-failure rejection, signed wrong digest, missing attestations, exact
   attestation run binding, explicit legacy migration, verified rollback, fresh
   approval, and proof that denied authorization never reaches remote apply.
+  Build and deployment checkouts must be clean and at the exact workflow SHA;
+  modified tracked inputs and untracked inputs are both rejected.
 - Full Go suite, vet, affected-package race detector, identity/recovery contracts,
   SQLite/quota contracts and Docker build passed before the security correction.
 - The initial required security scan detected reachable `GO-2026-6860` in
