@@ -272,7 +272,8 @@ func (j *CollectionJob) commit(results []collectionResolution) bool {
 	p := j.player
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	defer p.persistLocked()
+	var changed []media.Track
+	defer func() { p.persistResolvedLocked(changed) }()
 	if p.providerBlocked {
 		return true
 	}
@@ -293,6 +294,7 @@ func (j *CollectionJob) commit(results []collectionResolution) bool {
 			} else {
 				p.queue[i].Track = copyTrack(r.track)
 				p.queue[i].Pending = false
+				changed = append(changed, p.queue[i].Track)
 			}
 			p.queueVersion++
 			p.diagnosticLocked(slog.LevelInfo, "resolution_position_commit", "collection_id", j.progress.ID, "position", entry.Track.Position, "queue_position", i+1, "spotify_id", entry.SpotifyID, "video_id", r.track.VideoID, "playback_eligible", r.err == nil && !r.skipped, "scheduler_notified", true)

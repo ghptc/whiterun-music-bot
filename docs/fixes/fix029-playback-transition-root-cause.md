@@ -242,6 +242,54 @@ status codes use the `checkpoint-` prefix in the evidence directory. The follow-
 still requires exact-head GitHub validation; local results are not substituted
 for those checks.
 
+### Identical trees, incomplete CI margin
+
+Commit `810e5fa0aebaa53049aea4499e79b4d13c573f6f` passed Release CI and Quality
+in both events. Its [push performance run 41230576150](https://github.com/ghptc/whiterun-music-bot/actions/runs/41230576150)
+passed all scenarios in 469.894 seconds. Its
+[PR performance run 41230580227](https://github.com/ghptc/whiterun-music-bot/actions/runs/41230580227)
+timed out at 600.011 seconds before finishing five guilds. This was **not** an
+all-green HEAD, and neither run was retried.
+
+The PR checked out synthetic merge `926b394de9f98c518126c1fc32d98637842036ae`;
+GitHub's Git API confirmed both revisions have the identical tree
+`61ad7f3a22dc497fb1f393347bd08f869c16879d`. Both hosts had four logical CPUs;
+the artifacts identify an EPYC 9V45 for push and EPYC 7763 for PR. That records
+environment differences, not proof that CPU model alone caused the timeout.
+The application needed more margin on the unchanged runners.
+
+The next correction removes remaining repeated work in the same persistence
+path. A resolution owner now supplies only the changed track metadata to the
+existing SQLite transaction, together with the **complete** guild/queue/history
+snapshot and current metadata. Unchanged positions were durably stored at
+reservation or their last mutation. Dirty prior writes and stores without this
+optional capability still use full `SaveGuild` repair. Canceled or stale results
+retain their original checks and cannot resurrect queue entries. This replaces
+500 metadata UPSERTs with one when one position resolves, without discarding any
+queue position or duplicate occurrence.
+
+`SaveCatalogBatch` also groups the same existing source-metadata UPSERTs in
+128-row statements. It retains the exact metadata whitelist, artwork merge,
+per-row triggers, quota accounting and single transaction. It does not skip
+identity validation or alter provider access. New tests verify untouched duplicate
+positions and rollback/quota restoration after invalid metadata at position 500.
+
+These are further application corrections justified by the failed runs; no
+runner, timing budget, sample count, assertion, evaluator or required check was
+changed. Sequential local validation passed: Go suite 64.518 s, vet 0.178 s,
+full race 105.102 s, Docker 82.719 s, and the original full gate 188.233 s wall
+time. All 30 scenarios passed with their unchanged sample counts and budgets.
+
+| Scenario | Metadata-delta correction p95 (ms) |
+| --- | ---: |
+| ready transition | 24.753 |
+| ten guilds, warm | 180.066 |
+| 123 positions, cold / warm | 41.987 / 24.574 |
+| 500 positions, cold / warm | 105.295 / 41.497 |
+
+Complete local evidence uses the `sparse-` prefix. Exact-head GitHub results
+remain required before calling the fix complete.
+
 The fix must be pushed to the existing PR and all workflows observed on its exact
 HEAD: `Release CI`, `Quality`, and `Instant playback performance gate`, including
 all seven required checks. A local pass does not satisfy this requirement.

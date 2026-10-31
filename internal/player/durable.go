@@ -28,6 +28,10 @@ type PlaybackRecorder interface {
 type PlaybackCheckpointStore interface {
 	SavePlaybackCheckpoint(context.Context, string, DurableState, *media.Track) error
 }
+
+type ResolvedGuildStore interface {
+	SaveResolvedGuild(context.Context, string, DurableState, []media.Track) error
+}
 type Store interface {
 	SaveGuild(context.Context, string, DurableState) error
 	LoadGuild(context.Context, string) (DurableState, error)
@@ -122,6 +126,19 @@ func (p *GuildPlayer) persistenceResultLocked(err error) {
 	} else {
 		p.persistenceError = ""
 	}
+}
+
+// Resolution owns the changed positions, so unchanged queue metadata need not
+// be rewritten. A prior failed mutation still requires a full snapshot repair.
+func (p *GuildPlayer) persistResolvedLocked(changed []media.Track) {
+	store, ok := p.store.(ResolvedGuildStore)
+	if !ok || p.persistenceError != "" || p.ctx.Err() != nil {
+		p.persistLocked()
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), persistenceTimeout)
+	defer cancel()
+	p.persistenceResultLocked(store.SaveResolvedGuild(ctx, p.guildID, p.durableLocked(), changed))
 }
 
 // Retry only a dirty checkpoint, not a command. Persist the latest state under

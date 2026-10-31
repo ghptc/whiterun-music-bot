@@ -114,17 +114,23 @@ func (s *DB) migrate(ctx context.Context) error {
 	return tx.Commit()
 }
 func (s *DB) SaveGuild(ctx context.Context, id string, state player.DurableState) error {
-	return s.saveGuild(ctx, id, state, false, nil)
+	return s.saveGuild(ctx, id, state, state.Queue, nil)
 }
 
 // SavePlaybackCheckpoint checkpoints an already-persisted queue at selection/start.
 // The player serializes queue writes before this call; only current metadata
 // changed. The checkpoint, history and optional new play event commit together.
 func (s *DB) SavePlaybackCheckpoint(ctx context.Context, id string, state player.DurableState, record *media.Track) error {
-	return s.saveGuild(ctx, id, state, true, record)
+	return s.saveGuild(ctx, id, state, nil, record)
 }
 
-func (s *DB) saveGuild(ctx context.Context, id string, state player.DurableState, checkpoint bool, record *media.Track) error {
+// SaveResolvedGuild persists a resolution owner's metadata delta with the full
+// queue snapshot. Other positions were saved when they were reserved/mutated.
+func (s *DB) SaveResolvedGuild(ctx context.Context, id string, state player.DurableState, changed []media.Track) error {
+	return s.saveGuild(ctx, id, state, changed, nil)
+}
+
+func (s *DB) saveGuild(ctx context.Context, id string, state player.DurableState, changed []media.Track, record *media.Track) error {
 	data, err := json.Marshal(state)
 	if err != nil {
 		return err
@@ -149,10 +155,7 @@ func (s *DB) saveGuild(ctx context.Context, id string, state player.DurableState
 			return err
 		}
 	}
-	var tracks []media.Track
-	if !checkpoint {
-		tracks = append(tracks, state.Queue...)
-	}
+	tracks := append([]media.Track(nil), changed...)
 	if state.Current != nil {
 		tracks = append(tracks, *state.Current)
 	}

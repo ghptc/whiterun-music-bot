@@ -1,0 +1,274 @@
+=== RUN   TestCatalogReuseAcrossRestartGuildsAndMappingEvidence
+--- PASS: TestCatalogReuseAcrossRestartGuildsAndMappingEvidence (0.01s)
+=== RUN   TestCatalogConcurrentUpsertExpiryConstraintsAndArtworkRefresh
+--- PASS: TestCatalogConcurrentUpsertExpiryConstraintsAndArtworkRefresh (0.01s)
+=== RUN   TestCatalogCacheFailuresFallbackToProviderAndResolver
+--- PASS: TestCatalogCacheFailuresFallbackToProviderAndResolver (0.00s)
+=== RUN   TestPERF018PendingMetadataCannotOverwriteCatalog
+--- PASS: TestPERF018PendingMetadataCannotOverwriteCatalog (0.00s)
+=== RUN   TestDB022QueryPlans
+    db022_benchmark_test.go:87: track [SEARCH music_catalog USING INDEX sqlite_autoindex_music_catalog_1 (spotify_id=?)]
+    db022_benchmark_test.go:87: playlist [SEARCH catalog_playlists USING INDEX sqlite_autoindex_catalog_playlists_1 (spotify_id=?)]
+    db022_benchmark_test.go:87: position [SEARCH catalog_positions USING INDEX sqlite_autoindex_catalog_positions_2 (playlist_id=? AND position=?)]
+    db022_benchmark_test.go:87: ordered [SEARCH catalog_positions USING INDEX sqlite_autoindex_catalog_positions_1 (playlist_id=?)]
+    db022_benchmark_test.go:87: artist_title [SEARCH music_catalog USING INDEX catalog_artist_title (<expr>=? AND <expr>=?)]
+--- PASS: TestDB022QueryPlans (0.01s)
+=== RUN   TestDB022CrashBeforeCommitHelper
+    db022_crash_test.go:17: subprocess only
+--- SKIP: TestDB022CrashBeforeCommitHelper (0.00s)
+=== RUN   TestDB022ProcessDeathDuringImport
+--- PASS: TestDB022ProcessDeathDuringImport (0.02s)
+=== RUN   TestDB022PhysicalCrashWithPendingWAL
+    db022_crash_test.go:111: SIGKILL retained WAL=16512 bytes
+--- PASS: TestDB022PhysicalCrashWithPendingWAL (0.02s)
+=== RUN   TestDB022SchemaUpgradeAndDisposableColumnMigrations
+--- PASS: TestDB022SchemaUpgradeAndDisposableColumnMigrations (0.01s)
+=== RUN   TestDB022PlaylistCRUDRestartAtomicityAndConcurrency
+--- PASS: TestDB022PlaylistCRUDRestartAtomicityAndConcurrency (0.08s)
+=== RUN   TestDB022OfflinePlaylistResolver
+    db022_test.go:290: persisted=123 reconstructed=123 Spotify_cache_hit_calls=0
+--- PASS: TestDB022OfflinePlaylistResolver (0.02s)
+=== RUN   TestDB022HomologationPlaylistLive
+    db022_test.go:336: DB022_SPOTIFY_LIVE=1 imports public homologation playlist
+--- SKIP: TestDB022HomologationPlaylistLive (0.00s)
+=== RUN   TestDB022LogicalQuotaAtomicConcurrentAndWALLimitation
+    db022_test.go:401: logical quota enforced: used=479 limit=479; physical WAL=160712: logical payload quota alone is insufficient; VFS physical cap applies separately
+--- PASS: TestDB022LogicalQuotaAtomicConcurrentAndWALLimitation (0.00s)
+=== RUN   TestDB022AlertWindowTiesPendingAndTransactionalRearm
+--- PASS: TestDB022AlertWindowTiesPendingAndTransactionalRearm (0.01s)
+=== RUN   TestDB022ResolverPropagatesDurableImportFailure
+--- PASS: TestDB022ResolverPropagatesDurableImportFailure (0.00s)
+=== RUN   TestDB022QuotaLastSlotAcrossConnections
+--- PASS: TestDB022QuotaLastSlotAcrossConnections (0.00s)
+=== RUN   TestFIX025CrashCheckpointHelper
+    fix025_checkpoint_test.go:23: subprocess-only crash fixture
+--- SKIP: TestFIX025CrashCheckpointHelper (0.00s)
+=== RUN   TestFIX025RealCrashRestoresCommittedProgressOnce
+=== RUN   TestFIX025RealCrashRestoresCommittedProgressOnce/10
+=== RUN   TestFIX025RealCrashRestoresCommittedProgressOnce/60
+--- PASS: TestFIX025RealCrashRestoresCommittedProgressOnce (0.01s)
+    --- PASS: TestFIX025RealCrashRestoresCommittedProgressOnce/10 (0.01s)
+    --- PASS: TestFIX025RealCrashRestoresCommittedProgressOnce/60 (0.01s)
+=== RUN   TestFIX029SnapshotKeepsMetadataAndOccurrences
+--- PASS: TestFIX029SnapshotKeepsMetadataAndOccurrences (0.00s)
+=== RUN   TestFIX029LateTrackFailureRollsBackWholeSnapshot
+--- PASS: TestFIX029LateTrackFailureRollsBackWholeSnapshot (0.01s)
+=== RUN   TestFIX029PlaybackCheckpointAndEventCommitAtomically
+--- PASS: TestFIX029PlaybackCheckpointAndEventCommitAtomically (0.00s)
+=== RUN   TestFIX029ResolutionDeltaPreservesUntouchedOccurrences
+--- PASS: TestFIX029ResolutionDeltaPreservesUntouchedOccurrences (0.00s)
+=== RUN   TestFIX029LateCatalogBatchFailurePreservesQuotaAndMetadata
+--- PASS: TestFIX029LateCatalogBatchFailurePreservesQuotaAndMetadata (0.01s)
+=== RUN   TestOPT026RenewedProofSurvivesSQLiteReopen
+--- PASS: TestOPT026RenewedProofSurvivesSQLiteReopen (0.00s)
+=== RUN   TestCatalogBatchAtomicAndPreservesArtwork
+--- PASS: TestCatalogBatchAtomicAndPreservesArtwork (0.00s)
+=== RUN   TestDB022PhysicalQuotaWALRecoveryAndConcurrentWrites
+    physical_test.go:136: limit=1048576 peak_files=512000 restart_usage={Files:262144 Reserved:327680 Limit:1048576 Blocked:false Peak:262144}; queue=10 integrity=ok
+--- PASS: TestDB022PhysicalQuotaWALRecoveryAndConcurrentWrites (0.01s)
+=== RUN   TestDB022PhysicalQuotaRejectsAtomicOversizedBatch
+    physical_test.go:192: oversized batch rolled back; files=249856 limit=524288 critical persisted
+--- PASS: TestDB022PhysicalQuotaRejectsAtomicOversizedBatch (0.02s)
+=== RUN   TestDB022PhysicalConcurrentWriterHelper
+    physical_test.go:198: subprocess only
+--- SKIP: TestDB022PhysicalConcurrentWriterHelper (0.00s)
+=== RUN   TestDB022PhysicalQuotaAcrossProcesses
+PASS
+PASS
+PASS
+    physical_test.go:268: three real writer processes; limit=2097152 final=847872 queue=10
+--- PASS: TestDB022PhysicalQuotaAcrossProcesses (0.03s)
+=== RUN   TestDB022PhysicalQuotaTornControlRecord
+    physical_test.go:318: torn newest quota record recovered; configured cap and 10 positions preserved
+--- PASS: TestDB022PhysicalQuotaTornControlRecord (0.00s)
+=== RUN   TestQualitySQLiteRollback
+=== RUN   TestQualitySQLiteRollback/guilds/INSERT
+=== RUN   TestQualitySQLiteRollback/guilds/UPDATE
+=== RUN   TestQualitySQLiteRollback/history/INSERT
+=== RUN   TestQualitySQLiteRollback/history/DELETE
+=== RUN   TestQualitySQLiteRollback/tracks/INSERT
+=== RUN   TestQualitySQLiteRollback/tracks/UPDATE
+--- PASS: TestQualitySQLiteRollback (0.02s)
+    --- PASS: TestQualitySQLiteRollback/guilds/INSERT (0.00s)
+    --- PASS: TestQualitySQLiteRollback/guilds/UPDATE (0.00s)
+    --- PASS: TestQualitySQLiteRollback/history/INSERT (0.00s)
+    --- PASS: TestQualitySQLiteRollback/history/DELETE (0.00s)
+    --- PASS: TestQualitySQLiteRollback/tracks/INSERT (0.00s)
+    --- PASS: TestQualitySQLiteRollback/tracks/UPDATE (0.00s)
+=== RUN   TestREL024SQLiteBusyCheckpointRecoversWithoutNewCommand
+    rel024_health_test.go:75: real SQLITE_BUSY: checkpoint automatically recovered in 3.810436539s; positions=3/3
+--- PASS: TestREL024SQLiteBusyCheckpointRecoversWithoutNewCommand (3.81s)
+PASS
+ok  	whiterun/internal/storage	4.131s
+=== RUN   TestPERF018Deferred500ControlsAndPersistence
+=== RUN   TestPERF018Deferred500ControlsAndPersistence/shuffle
+=== RUN   TestPERF018Deferred500ControlsAndPersistence/stop
+=== RUN   TestPERF018Deferred500ControlsAndPersistence/cancel
+=== RUN   TestPERF018Deferred500ControlsAndPersistence/restart
+--- PASS: TestPERF018Deferred500ControlsAndPersistence (0.00s)
+    --- PASS: TestPERF018Deferred500ControlsAndPersistence/shuffle (0.00s)
+    --- PASS: TestPERF018Deferred500ControlsAndPersistence/stop (0.00s)
+    --- PASS: TestPERF018Deferred500ControlsAndPersistence/cancel (0.00s)
+    --- PASS: TestPERF018Deferred500ControlsAndPersistence/restart (0.00s)
+=== RUN   TestPERF018DeferredMetadataTimeout
+--- PASS: TestPERF018DeferredMetadataTimeout (0.00s)
+=== RUN   TestFIX0251ThreeHoursWithoutVoluntaryLeave
+--- PASS: TestFIX0251ThreeHoursWithoutVoluntaryLeave (0.00s)
+=== RUN   TestFIX0251CloseOriginPreservesCancellation
+--- PASS: TestFIX0251CloseOriginPreservesCancellation (0.00s)
+=== RUN   TestFIX0251ResolverFailurePreservesActiveVoice
+=== RUN   TestFIX0251ResolverFailurePreservesActiveVoice/spotify_unavailable
+=== RUN   TestFIX0251ResolverFailurePreservesActiveVoice/resolution_timeout
+--- PASS: TestFIX0251ResolverFailurePreservesActiveVoice (0.00s)
+    --- PASS: TestFIX0251ResolverFailurePreservesActiveVoice/spotify_unavailable (0.00s)
+    --- PASS: TestFIX0251ResolverFailurePreservesActiveVoice/resolution_timeout (0.00s)
+=== RUN   TestFIX0251EOFRacesVoiceWatchdogWithoutDoubleAdvance
+--- PASS: TestFIX0251EOFRacesVoiceWatchdogWithoutDoubleAdvance (0.00s)
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/10
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/25
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/49
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/50
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/75
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/voice/99
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/10
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/25
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/49
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/50
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/75
+=== RUN   TestFIX025ConfirmedProgressPolicy123Occurrences/media/99
+--- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/10 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/25 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/49 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/50 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/75 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/voice/99 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/10 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/25 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/49 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/50 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/75 (0.00s)
+    --- PASS: TestFIX025ConfirmedProgressPolicy123Occurrences/media/99 (0.00s)
+=== RUN   TestFIX025CrashCheckpointRequiresAttachment
+--- PASS: TestFIX025CrashCheckpointRequiresAttachment (0.00s)
+=== RUN   TestFIX025FailedResumePreservesPosition
+--- PASS: TestFIX025FailedResumePreservesPosition (0.00s)
+=== RUN   TestFIX025PauseDuringRecovery
+--- PASS: TestFIX025PauseDuringRecovery (0.00s)
+=== RUN   TestFIX025AccurateSeekWithRealFFmpeg
+--- PASS: TestFIX025AccurateSeekWithRealFFmpeg (0.40s)
+=== RUN   TestFIX025SingleFrameCannotResetIncidentBudget
+--- PASS: TestFIX025SingleFrameCannotResetIncidentBudget (0.00s)
+=== RUN   TestFIX025BusyCheckpointCannotBlockAudioForCommandTimeout
+--- PASS: TestFIX025BusyCheckpointCannotBlockAudioForCommandTimeout (0.20s)
+=== RUN   TestFIX029PrematureEOFAdvancesOnceWithoutVoiceLeave
+--- PASS: TestFIX029PrematureEOFAdvancesOnceWithoutVoiceLeave (0.00s)
+=== RUN   TestREL024LostNotificationRecoversWithoutQueueMutation
+--- PASS: TestREL024LostNotificationRecoversWithoutQueueMutation (0.00s)
+=== RUN   TestOPT026GlobalTwoGuildRecovery
+    opt026_test.go:114: global recovery: initial=1 trials=3 guilds=2 positions_preserved=246 notices=2
+--- PASS: TestOPT026GlobalTwoGuildRecovery (0.00s)
+=== RUN   TestOPT026Horizon123AndDistantPlaylist
+    opt026_test.go:176: prefetch before first EOF: first123=3 distant123=0; pause/resume/skip/stop preserved order
+--- PASS: TestOPT026Horizon123AndDistantPlaylist (0.00s)
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates/short
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates/long
+=== RUN   TestOPT026HorizonShortLongUnknownAndDuplicates/unknown
+--- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates (0.00s)
+    --- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates/short (0.00s)
+    --- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates/long (0.00s)
+    --- PASS: TestOPT026HorizonShortLongUnknownAndDuplicates/unknown (0.00s)
+=== RUN   TestOPT026HealthyAndLocalAudioIgnoreOtherGuildOutage
+2026/10/31 16:03:40 INFO playback_start source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=3556 request_elapsed_ns=3556 elapsed_ms=0.003 request_elapsed_ms=0.003
+2026/10/31 16:03:40 INFO local_audio_opened source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=27101 request_elapsed_ns=27081 elapsed_ms=0.027 request_elapsed_ms=0.027 duration_ms=100 progress_ms=0 format=wav first_frame_ms=0
+2026/10/31 16:03:40 INFO stream_resolve_start source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=3987 request_elapsed_ns=33924 elapsed_ms=0.004 request_elapsed_ms=0.033
+2026/10/31 16:03:40 INFO ffmpeg_first_input source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=18220623 request_elapsed_ns=18250621 elapsed_ms=18.22 request_elapsed_ms=18.25
+2026/10/31 16:03:40 INFO ffmpeg_start source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=84069 request_elapsed_ns=18335833 elapsed_ms=0.084 request_elapsed_ms=18.335 purpose=audio_decode category=ffmpeg started_at=2026-10-31T19:03:40.385Z candidates=1
+2026/10/31 16:03:40 INFO audio_source_start source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=18318439 request_elapsed_ns=18348376 elapsed_ms=18.318 request_elapsed_ms=18.348 video_id="" live=false yt_pid=148829 ffmpeg_pid=148832
+2026/10/31 16:03:40 INFO stream_process_started source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=18320974 request_elapsed_ns=18350911 elapsed_ms=18.321 request_elapsed_ms=18.35 pid=148829
+2026/10/31 16:03:40 INFO ffmpeg_first_output source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=36223133 request_elapsed_ns=36253080 elapsed_ms=36.223 request_elapsed_ms=36.253
+2026/10/31 16:03:40 INFO first_ogg_packet source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=36233683 request_elapsed_ns=36263620 elapsed_ms=36.233 request_elapsed_ms=36.263
+2026/10/31 16:03:40 INFO first_opus_packet source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=36381985 request_elapsed_ns=36411952 elapsed_ms=36.382 request_elapsed_ms=36.412
+2026/10/31 16:03:40 INFO first_opus_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=36389088 request_elapsed_ns=36419025 elapsed_ms=36.389 request_elapsed_ms=36.419
+2026/10/31 16:03:40 INFO first_voice_frame_attempt source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=36394960 request_elapsed_ns=36424897 elapsed_ms=36.395 request_elapsed_ms=36.424
+2026/10/31 16:03:40 INFO first_audio_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=36426860 request_elapsed_ns=36426830 elapsed_ms=36.426 request_elapsed_ms=36.426
+2026/10/31 16:03:40 INFO local_audio_first_frame source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=36427992 request_elapsed_ns=36427962 elapsed_ms=36.428 request_elapsed_ms=36.428 duration_ms=100 progress_ms=20 first_frame_ms=36
+2026/10/31 16:03:40 INFO ffmpeg_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=119185965 request_elapsed_ns=137437708 elapsed_ms=119.186 request_elapsed_ms=137.437 exit_code=0 error=<nil>
+2026/10/31 16:03:40 INFO audio_source_exit source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=137421818 request_elapsed_ns=137451755 elapsed_ms=137.421 request_elapsed_ms=137.451 video_id="" yt_exit_code=0 ffmpeg_exit_code=0 category=eof yt_stderr_tail="" ffmpeg_stderr_tail=""
+2026/10/31 16:03:40 INFO playback_context_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=238025031 request_elapsed_ns=238025021 elapsed_ms=238.025 request_elapsed_ms=238.025 cause=<nil> parent_error=<nil>
+2026/10/31 16:03:40 INFO playback_complete source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=238041131 request_elapsed_ns=238041101 elapsed_ms=238.041 request_elapsed_ms=238.041 error=<nil>
+2026/10/31 16:03:40 INFO local_audio_completed source=local local_audio_id=audio.wav local_correlation_id=local/1793473420367649279 elapsed_ns=238043566 request_elapsed_ns=238043536 elapsed_ms=238.043 request_elapsed_ms=238.043 duration_ms=100 progress_ms=120 first_frame_ms=36 category=eof audio_frames=6
+--- PASS: TestOPT026HealthyAndLocalAudioIgnoreOtherGuildOutage (0.24s)
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/10
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/49
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/50
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/75
+=== RUN   TestOPT026GlobalProgressRecoveryPolicy/99
+--- PASS: TestOPT026GlobalProgressRecoveryPolicy (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/10 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/49 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/50 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/75 (0.00s)
+    --- PASS: TestOPT026GlobalProgressRecoveryPolicy/99 (0.00s)
+=== RUN   TestOPT026PauseDuringGlobalBackoffRechecksHorizon
+--- PASS: TestOPT026PauseDuringGlobalBackoffRechecksHorizon (0.00s)
+=== RUN   TestREL024HealthDoesNotWaitForDeadlockedWorker
+--- PASS: TestREL024HealthDoesNotWaitForDeadlockedWorker (0.00s)
+=== RUN   TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget
+=== RUN   TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/permanent
+    rel024_test.go:82: calls=3 notifications=0 positions=123/123; recovered=false
+=== RUN   TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/transient
+    rel024_test.go:82: calls=3 notifications=0 positions=123/123; recovered=true
+--- PASS: TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget (0.00s)
+    --- PASS: TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/permanent (0.00s)
+    --- PASS: TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget/transient (0.00s)
+=== RUN   TestREL024NetworkRecoveryWithRealFFmpeg
+    rel024_test.go:137: real extractor exits=2; FFmpeg frames delivered; recovery=3.327073931s; positions=123/123
+--- PASS: TestREL024NetworkRecoveryWithRealFFmpeg (3.34s)
+=== RUN   TestREL024FrozenRealFFmpegIsKilledAndReaped
+    rel024_test.go:182: real FFmpeg SIGSTOP: detection/cleanup=998.857246ms; pid reaped; error=audio_stall: no audio progress within idle deadline
+        audio stream: read |0: file already closed
+--- PASS: TestREL024FrozenRealFFmpegIsKilledAndReaped (1.00s)
+PASS
+ok  	whiterun/internal/player	5.201s
+=== RUN   TestDB022CatalogAlertHTTPPipeline
+    db022_alerts_test.go:204: HTTP requests: warning=1 critical_failed=1 critical_retry=1 rearmed_warning=1; eligible channel=30; stable retry nonce=catalog-0-100
+--- PASS: TestDB022CatalogAlertHTTPPipeline (0.01s)
+=== RUN   TestFIX0251ThreeHoursMainGatewayOutagesPreserveVoice
+--- PASS: TestFIX0251ThreeHoursMainGatewayOutagesPreserveVoice (0.00s)
+=== RUN   TestFIX0251VoiceOutageGraceAndRecoveryDoesNotLeave
+--- PASS: TestFIX0251VoiceOutageGraceAndRecoveryDoesNotLeave (0.00s)
+=== RUN   TestFIX0251CloseLogsOriginExactlyOnce
+--- PASS: TestFIX0251CloseLogsOriginExactlyOnce (0.00s)
+=== RUN   TestFIX0251LocalLeaveEchoIsNotReportedAsRemoteDisconnect
+--- PASS: TestFIX0251LocalLeaveEchoIsNotReportedAsRemoteDisconnect (0.00s)
+=== RUN   TestFIX025RealVoiceSoak
+    fix025_soak_test.go:37: requires explicitly authorized test channel and live credentials
+--- SKIP: TestFIX025RealVoiceSoak (0.00s)
+=== RUN   TestFIX025MainGatewayReconnectDoesNotSuspendHealthyVoice
+--- PASS: TestFIX025MainGatewayReconnectDoesNotSuspendHealthyVoice (0.00s)
+=== RUN   TestFIX025BrokenUDPRecreatesSessionButRemovalCannotRejoin
+--- PASS: TestFIX025BrokenUDPRecreatesSessionButRemovalCannotRejoin (0.00s)
+=== RUN   TestFIX025ResumeDoesNotDuplicateAnnouncement
+--- PASS: TestFIX025ResumeDoesNotDuplicateAnnouncement (0.00s)
+=== RUN   TestFIX025LateLeaveEchoCannotCloseNewJoin
+--- PASS: TestFIX025LateLeaveEchoCannotCloseNewJoin (0.00s)
+=== RUN   TestFIX025InvalidGatewayClosesUDPWithoutLeavingGuild
+--- PASS: TestFIX025InvalidGatewayClosesUDPWithoutLeavingGuild (0.00s)
+=== RUN   TestOPT026FullFlowSQLiteAndMedia
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"cold_sqlite","spotify_metadata_calls":1,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":1,"verification":1}}
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"warm_sqlite_and_ram","spotify_metadata_calls":0,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":0,"verification":0}}
+    opt026_flow_test.go:116: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"reopened_sqlite_empty_ram","spotify_metadata_calls":0,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":0,"verification":0}}
+--- PASS: TestOPT026FullFlowSQLiteAndMedia (1.05s)
+=== RUN   TestOPT026SharedProcessAdmissionWiring
+--- PASS: TestOPT026SharedProcessAdmissionWiring (0.00s)
+=== RUN   TestDB022PhysicalQuotaDiscordHTTP
+    physical_alerts_test.go:176: physical thresholds: warning POST=1; critical failure=1; retry=1; stable nonce=physical-1-100; restart read successful; below85 rearmed; next warning=1
+--- PASS: TestDB022PhysicalQuotaDiscordHTTP (0.02s)
+=== RUN   TestREL024CardsPreserveMetadataWithoutBrandPrefix
+--- PASS: TestREL024CardsPreserveMetadataWithoutBrandPrefix (0.00s)
+PASS
+ok  	whiterun/internal/discord	1.085s
