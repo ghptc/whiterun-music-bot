@@ -3,6 +3,8 @@ package storage
 import (
 	"context"
 	"fmt"
+	"io"
+	"log/slog"
 	"path/filepath"
 	"testing"
 	"time"
@@ -184,5 +186,59 @@ func TestFIX029LateCatalogBatchFailurePreservesQuotaAndMetadata(t *testing.T) {
 	}
 	if err := db.db.QueryRow("SELECT monitoring FROM catalog_quota WHERE singleton=1").Scan(&monitoring); err != nil || monitoring != 1 {
 		t.Fatalf("quota monitoring changed: %d %v", monitoring, err)
+	}
+}
+
+func TestFIX029UnconfirmedSelectionRemainsDurableAndRestorable(t *testing.T) {
+	db, err := Open(filepath.Join(t.TempDir(), "bard.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	ctx := context.Background()
+	entered := make(chan struct{})
+	log := slog.New(slog.NewTextHandler(io.Discard, nil))
+	p := player.New(ctx, log, func(ctx context.Context, _ media.Track, _ player.Voice) error {
+		close(entered)
+		<-ctx.Done() // no frame was accepted before this simulated interruption
+		return ctx.Err()
+	})
+	defer p.Close(ctx)
+	if err := p.ConfigureStore(db, "1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Attach(voice{}); err != nil {
+		t.Fatal(err)
+	}
+	first := media.Track{Title: "duplicate", URL: "https://www.youtube.com/watch?v=AbCdEfGhijk"}
+	if err := p.EnqueueMany([]media.Track{first, first, {Title: "next"}}, p.Ticket()); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-entered:
+	case <-time.After(time.Second):
+		t.Fatal("selection did not enter playback")
+	}
+	saved, err := db.LoadGuild(ctx, "1")
+	if err != nil || saved.Current != nil || len(saved.Queue) != 3 || len(saved.History) != 0 {
+		t.Fatalf("unconfirmed selection consumed durable position: %+v %v", saved, err)
+	}
+	restoreCtx, cancel := context.WithCancel(ctx)
+	restored := player.New(restoreCtx, log, func(context.Context, media.Track, player.Voice) error {
+		t.Error("restoration started audio without Voice")
+		return nil
+	})
+	defer func() { cancel(); restored.Close(ctx) }()
+	if err := restored.ConfigureStore(db, "1"); err != nil {
+		t.Fatal(err)
+	}
+	state := restored.State()
+	if state.Current != nil || len(state.Queued) != 3 || len(restored.History()) != 0 {
+		t.Fatalf("restoration lost or duplicated an occurrence: %+v", state)
+	}
+	for i, track := range state.Queued {
+		if track.Position != i+1 || track.ResumeOffset != 0 || (i < 2 && track.URL != first.URL) {
+			t.Fatalf("restoration changed queue identity/order: %+v", state.Queued)
+		}
 	}
 }

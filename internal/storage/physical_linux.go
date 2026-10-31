@@ -58,6 +58,7 @@ type PhysicalUsage struct {
 type physicalQuota struct {
 	mu               sync.Mutex
 	path, name       string
+	fileNames        [6]string // immutable names only; file usage is never cached
 	lock, state      *os.File
 	saved            physicalState
 	vfs, cname, base uintptr
@@ -123,6 +124,9 @@ func openPhysicalQuota(path string, limit int64) (q *physicalQuota, err error) {
 		return nil, fmt.Errorf("physical quota requires ext4 or tmpfs with allocation blocks <=4096 bytes")
 	}
 	q = &physicalQuota{path: path, refs: 1}
+	for i, suffix := range [...]string{"", "-wal", "-shm", "-journal", ".quota", ".quota-lock"} {
+		q.fileNames[i] = path + suffix
+	}
 	controlExisted := false
 	for _, suffix := range []string{"", "-wal", "-shm", "-journal", ".quota", ".quota-lock"} {
 		if fi, e := os.Lstat(path + suffix); e == nil {
@@ -375,40 +379,56 @@ func rounded(n int64) int64 {
 	return (n + 4095) / 4096 * 4096
 }
 func (q *physicalQuota) usage(target string, end int64) (u PhysicalUsage, err error) {
-	sizes := map[string]int64{}
-	lengths := map[string]int64{}
-	for _, suffix := range []string{"", "-wal", "-shm", "-journal", ".quota", ".quota-lock"} {
-		p := q.path + suffix
+	u, _, err = q.projectedUsage(target, end)
+	return u, err
+}
+
+// Admission and current usage must use the same observation while the existing
+// quota lock is held. Do not stat every file twice before the same operation;
+// the post-operation observation remains fresh and all reservations are kept.
+func (q *physicalQuota) projectedUsage(target string, end int64) (u, current PhysicalUsage, err error) {
+	var main, wal, targetLength int64
+	for i, p := range q.fileNames {
 		fi, e := os.Stat(p)
 		if os.IsNotExist(e) {
 			continue
 		}
 		if e != nil {
-			return u, e
+			return u, current, e
 		}
 		n := rounded(fi.Size())
 		if st, ok := fi.Sys().(*syscall.Stat_t); ok {
 			n = max(n, st.Blocks*512)
 		}
-		sizes[p] = n
-		lengths[p] = rounded(fi.Size())
-	}
-	if target != "" {
-		sizes[target] += max(int64(0), rounded(end)-lengths[target])
-	}
-	for _, n := range sizes {
-		u.Files += n
+		current.Files += n
+		if i == 0 {
+			main = n
+		} else if i == 1 {
+			wal = n
+		}
+		if p == target {
+			targetLength = rounded(fi.Size())
+		}
 	}
 	// Reserve checkpoint space while WAL is retained by readers. At the start of
 	// each WAL cycle Base is the main file length. Admission reserves the worst
 	// main-file copy as well as the WAL. Checkpoint may spend that reservation;
 	// reads and overwrites do not need another reservation at capacity.
-	main, wal := sizes[q.path], sizes[q.path+"-wal"]
+	current.Reserved = current.Files + max(int64(0), q.saved.Base+wal-main) + physicalAllocationReserve
+	current.Peak, current.Limit, current.Blocked = q.peak, q.saved.Limit, q.saved.Exhausted
+	if target == "" {
+		return current, current, nil
+	}
+	u = current
+	growth := max(int64(0), rounded(end)-targetLength)
+	u.Files += growth
+	if target == q.fileNames[0] {
+		main += growth
+	} else if target == q.fileNames[1] {
+		wal += growth
+	}
 	u.Reserved = u.Files + max(int64(0), q.saved.Base+wal-main) + physicalAllocationReserve
-	u.Peak = q.peak
-	u.Limit = q.saved.Limit
-	u.Blocked = q.saved.Exhausted
-	return u, nil
+	return u, current, nil
 }
 func (q *physicalQuota) observe(u PhysicalUsage, denied bool) error {
 	changed := false
@@ -463,12 +483,7 @@ func (q *physicalQuota) guard(path string, end int64, walReset bool, fn func() i
 
 			}
 		}
-		u, e := q.usage(path, end)
-		if e != nil {
-			return e
-		}
-
-		current, e := q.usage("", 0)
+		u, current, e := q.projectedUsage(path, end)
 		if e != nil {
 			return e
 		}
@@ -559,7 +574,7 @@ func quotaWrite(tls *libc.TLS, file, buf uintptr, n int32, offset int64) int32 {
 	f := fileQuota(file)
 	m := (*sqlite.Tsqlite3_io_methods)(nativePointer(f.original))
 
-	return f.quota.guard(f.path, offset+int64(n), f.path == f.quota.path+"-wal" && offset == 0, func() int32 {
+	return f.quota.guard(f.path, offset+int64(n), f.path == f.quota.fileNames[1] && offset == 0, func() int32 {
 		if rc := allocateNative((*sqlite.TunixFile)(nativePointer(file)).Fh, offset, int64(n)); rc != sqlite.SQLITE_OK {
 			return rc
 		}

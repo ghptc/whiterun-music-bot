@@ -120,13 +120,36 @@ under its mutex, closes the queue once, and waits on `done`. The single writer
 drains that channel, flushes its final batch, closes resources and finally
 signals `done`. No lost completion signal or shutdown-order defect was found.
 
-Twenty profiled targeted iterations under race passed (13.018 seconds including
-startup/profiling); the final full race suite also exercises logstore. The profile
-attributes most writer CPU to SQLite writes. Additional race/SQLite and full-gate
-experiments can compete for CPU and disk; scheduling or I/O pressure is plausible
-for a fixed deadline, but the original timeout was **not reproduced or diagnosed
-conclusively**. No logstore code, timeout, batch limit or assertion was changed.
-Do not claim the historical logstore timeout is fixed.
+Twenty initial profiled targeted iterations under race passed (13.018 seconds
+including startup/profiling); that did not prove the timeout fixed. The problem
+recurred on commit `a592ba6` in Quality push run
+[`41233668004`](https://github.com/ghptc/whiterun-music-bot/actions/runs/41233668004):
+the same original test exceeded its three-second Close budget (3.26 seconds).
+The PR's Quality run passed, so the failed push was preserved rather than erased
+by a rerun.
+
+The source has a confirmed work amplifier: for a 4 MiB configured log DB,
+`mainLimit/(64*pageSize)` capped nominal 64-record batches at six tiny records,
+requiring 134 commits and checkpoint cycles for the 800-record burst. The
+original payload byte bound already handles large records separately. The cap
+now permits twelve tiny records: per-row index-growth reservation remains at
+most one quarter of the main budget, plus the unchanged triple-payload reserve
+(at most 3/16). Their sum is at most 7/16, below the existing 3/4 maintenance
+threshold. Main/WAL physical limits, retention rules, both checkpoints, write
+and Close deadlines and writer completion signaling are unchanged. At the
+production default 500 MiB, both formulas still honor the same configured
+64-record cap.
+
+Using the original production file in a Go overlay, twenty identical targeted
+race tests took 12.831 s; the corrected file took 11.645 s. Both passed locally.
+The new mixed small/8 KiB burst regression checks written/retained/removed
+accounting, no loss or overflow, and actual physical bytes at 1 MiB and 4 MiB.
+The entire existing logstore and operational-storage race suites passed.
+
+No evidence establishes a shutdown deadlock or identifies the particular delayed
+syscall in the original logstore timeout. The excessive transaction/checkpoint
+count is corrected; exact-head CI must verify that this resolves the observed
+deadline failure. Slow I/O is not relabeled as a successful flush.
 
 ## Validation and evidence
 
@@ -290,6 +313,63 @@ time. All 30 scenarios passed with their unchanged sample counts and budgets.
 Complete local evidence uses the `sparse-` prefix. Exact-head GitHub results
 remain required before calling the fix complete.
 
+### Commit an unstarted selection at the first confirmed frame
+
+Both performance runs for `a592ba6` still reached the 600-second global test
+deadline in ten-guild load. The PR began that scenario at 494.257 s and the push
+at 497.289 s. Smaller preceding scenarios improved, but this remained a release
+blocker. Neither failure was rerun. Quality's separate logstore failure is
+documented above.
+
+The final ownership correction removes a redundant zero-progress transaction.
+A fresh ready head is already durable: enqueue and resolution owners save before
+releasing the player mutex. Selecting that head in memory creates no confirmed
+audio progress. It can remain in the durable ready queue until the first accepted
+frame atomically records Current, progress, history and the play event. A crash
+before that frame restores the same exact queued occurrence, with its identity,
+order and duplicate positions intact. No position is durably consumed early.
+
+This applies only to zero-offset tracks, a clean persistence state, and stores
+with the atomic checkpoint capability. Resuming a nonzero checkpoint, repairing
+a prior failed mutation, and legacy stores retain their selection checkpoint.
+All explicit queue/control mutations continue to save normally. The new
+`TestFIX029UnconfirmedSelectionRemainsDurableAndRestorable` reads the durable
+state while playback is selected but no frame has been sent, then reconstructs
+a Voice-detached player and verifies every occurrence and its original URL.
+Existing real-process FIX-025 crash/progress tests are unchanged.
+
+Isolated measurements also identified independent allocation savings in the
+quota observation path. The ten-guild workload allocated 23.831 GB cumulatively
+in the metadata-delta version, 20.388 GB with quota-observation optimization,
+and 20.280 GB with first-frame ownership alone. These are cumulative allocations
+over 1,000 guild samples, not retained RAM. The final combination is validated
+together rather than assuming additive timing gains.
+
+The quota guard derives current/projected usage from one fresh six-file
+observation under the existing exclusive locks, then performs its unchanged
+fresh post-operation check. The original rounding, allocated-block accounting,
+WAL reservation, admission conditions, durable control state and 10 GiB limit
+are preserved. Only immutable file names are retained; file sizes and quota
+state are never cached across operations. This removes redundant file-stat
+calls, maps and pathname allocations, without weakening the quota policy.
+
+### Combined local acceptance
+
+The final combined source passed the unmodified complete commands sequentially:
+Go suite 64.185 s; vet 0.156 s; full race 100.947 s; Docker 82.934 s; original
+deterministic gate 172.888 s wall (172.587 s Go test). All 30 scenarios passed.
+Evaluator tests, module verification and govulncheck also passed. Evidence is
+recorded under `evidence-fix029/combined-*`; no production artifact was produced.
+
+| Scenario | Combined p95 (ms) |
+| --- | ---: |
+| playlist-123/cold | 40.011 |
+| playlist-123/warm | 22.560 |
+| playlist-500/cold | 90.744 |
+| playlist-500/warm | 33.586 |
+| load-10-guilds/warm | 140.003 |
+| ready-transition/ready | 25.854 |
+
 The fix must be pushed to the existing PR and all workflows observed on its exact
 HEAD: `Release CI`, `Quality`, and `Instant playback performance gate`, including
 all seven required checks. A local pass does not satisfy this requirement.
@@ -298,7 +378,8 @@ or production operation is authorized by successful tests.
 
 Remaining limits:
 
-- The historical logstore deadline failure remains unexplained.
+- The exact delayed syscall in the historical logstore timeout was not captured;
+  the observed batching amplifier is corrected and must pass unchanged CI.
 - Clean early EOF can be caused by bad source data or silent truncation. Without
   a transport/process failure there is no proof that retrying will recover it;
   the recording is explicitly failed and the next queue occurrence advances.

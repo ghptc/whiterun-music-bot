@@ -333,7 +333,14 @@ func (p *GuildPlayer) run() {
 		p.confirmedOffset = t.ResumeOffset
 		ctx = media.WithProviderPermit(context.WithValue(ctx, pauseKey{}, p.pause), providerPermit)
 		v := p.voice
-		p.persistPlaybackLocked(nil)
+		// A fresh, unstarted head is already durable in the ready queue. Commit
+		// its transfer to Current with the first confirmed frame/history event,
+		// rather than writing the same full snapshot twice before any progress.
+		// Resume offsets, dirty state and legacy stores keep their checkpoint.
+		_, commitsStart := p.store.(PlaybackCheckpointStore)
+		if !commitsStart || p.persistenceError != "" || t.ResumeOffset != 0 {
+			p.persistPlaybackLocked(nil)
+		}
 		p.mu.Unlock()
 		started := time.Now()
 		attemptLog := p.log.With(attemptFields...)

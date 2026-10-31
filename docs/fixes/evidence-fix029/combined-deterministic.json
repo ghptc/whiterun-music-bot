@@ -1,0 +1,1076 @@
+{
+  "kind": "deterministic",
+  "status": "PASS",
+  "release_approved": false,
+  "errors": [],
+  "scenarios": [
+    {
+      "scenario": {
+        "Name": "spotify-single",
+        "Kind": "track",
+        "Mode": "cold",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 21.567819,
+        "p95_ms": 22.727342,
+        "p99_ms": 23.1942,
+        "max_ms": 23.528434
+      },
+      "budget_ms": 5000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 1,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 305086400
+      },
+      "cpu_ms": 572.891,
+      "peak_sampled_heap_bytes": 3619280,
+      "peak_sampled_goroutines": 18
+    },
+    {
+      "scenario": {
+        "Name": "spotify-single",
+        "Kind": "track",
+        "Mode": "warm",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 18.928613,
+        "p95_ms": 19.292084,
+        "p99_ms": 19.351888,
+        "max_ms": 19.590752
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 1,
+        "max_matches": 1,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 303463480
+      },
+      "cpu_ms": 575.985,
+      "peak_sampled_heap_bytes": 3641272,
+      "peak_sampled_goroutines": 18
+    },
+    {
+      "scenario": {
+        "Name": "youtube-single",
+        "Kind": "youtube",
+        "Mode": "cold",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 19.786063,
+        "p95_ms": 20.196573,
+        "p99_ms": 20.416691,
+        "max_ms": 20.482737
+      },
+      "budget_ms": 5000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 0,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 214058976
+      },
+      "cpu_ms": 444.931,
+      "peak_sampled_heap_bytes": 3374624,
+      "peak_sampled_goroutines": 16
+    },
+    {
+      "scenario": {
+        "Name": "youtube-single",
+        "Kind": "youtube",
+        "Mode": "warm",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 18.914677,
+        "p95_ms": 19.866786,
+        "p99_ms": 20.636068,
+        "max_ms": 22.073119
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 0,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 215041520
+      },
+      "cpu_ms": 458.548,
+      "peak_sampled_heap_bytes": 2575704,
+      "peak_sampled_goroutines": 17
+    },
+    {
+      "scenario": {
+        "Name": "spotify-album",
+        "Kind": "album",
+        "Mode": "cold",
+        "Count": 16,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 22.473881,
+        "p95_ms": 22.876005,
+        "p99_ms": 23.024136,
+        "max_ms": 23.055977
+      },
+      "budget_ms": 5000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 398813680
+      },
+      "cpu_ms": 758.697,
+      "peak_sampled_heap_bytes": 3102248,
+      "peak_sampled_goroutines": 20
+    },
+    {
+      "scenario": {
+        "Name": "spotify-album",
+        "Kind": "album",
+        "Mode": "warm",
+        "Count": 16,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 20.286884,
+        "p95_ms": 20.751246,
+        "p99_ms": 20.890602,
+        "max_ms": 21.006722
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 416508120
+      },
+      "cpu_ms": 823.996,
+      "peak_sampled_heap_bytes": 3104496,
+      "peak_sampled_goroutines": 18
+    },
+    {
+      "scenario": {
+        "Name": "playlist-10",
+        "Kind": "playlist",
+        "Mode": "cold",
+        "Count": 10,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 23.833154,
+        "p95_ms": 24.389241,
+        "p99_ms": 24.523176,
+        "max_ms": 24.780534
+      },
+      "budget_ms": 5000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 415428080
+      },
+      "cpu_ms": 886.757,
+      "peak_sampled_heap_bytes": 3375224,
+      "peak_sampled_goroutines": 20
+    },
+    {
+      "scenario": {
+        "Name": "playlist-10",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 10,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 19.683678,
+        "p95_ms": 20.403205,
+        "p99_ms": 21.593818,
+        "max_ms": 22.777578
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 415302680
+      },
+      "cpu_ms": 898.237,
+      "peak_sampled_heap_bytes": 3090896,
+      "peak_sampled_goroutines": 21
+    },
+    {
+      "scenario": {
+        "Name": "playlist-50",
+        "Kind": "playlist",
+        "Mode": "cold",
+        "Count": 50,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 28.922236,
+        "p95_ms": 29.555529,
+        "p99_ms": 30.044739,
+        "max_ms": 30.222006
+      },
+      "budget_ms": 5000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 601516080
+      },
+      "cpu_ms": 1531.272,
+      "peak_sampled_heap_bytes": 3396720,
+      "peak_sampled_goroutines": 20
+    },
+    {
+      "scenario": {
+        "Name": "playlist-50",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 50,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 20.446968,
+        "p95_ms": 20.775533,
+        "p99_ms": 20.958801,
+        "max_ms": 21.121861
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 618147784
+      },
+      "cpu_ms": 1579.097,
+      "peak_sampled_heap_bytes": 3367144,
+      "peak_sampled_goroutines": 18
+    },
+    {
+      "scenario": {
+        "Name": "playlist-123",
+        "Kind": "playlist",
+        "Mode": "cold",
+        "Count": 123,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 38.728,
+        "p95_ms": 40.01137,
+        "p99_ms": 41.492554,
+        "max_ms": 42.952279
+      },
+      "budget_ms": 5000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 966485488
+      },
+      "cpu_ms": 2732.314,
+      "peak_sampled_heap_bytes": 3615120,
+      "peak_sampled_goroutines": 20
+    },
+    {
+      "scenario": {
+        "Name": "playlist-123",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 123,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 22.195251,
+        "p95_ms": 22.560054,
+        "p99_ms": 22.837612,
+        "max_ms": 22.84733
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 1002342032
+      },
+      "cpu_ms": 2770.93,
+      "peak_sampled_heap_bytes": 3587776,
+      "peak_sampled_goroutines": 18
+    },
+    {
+      "scenario": {
+        "Name": "playlist-302",
+        "Kind": "playlist",
+        "Mode": "cold",
+        "Count": 302,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 63.015388,
+        "p95_ms": 64.276816,
+        "p99_ms": 67.090884,
+        "max_ms": 68.862009
+      },
+      "budget_ms": 5000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 1,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 1934573056
+      },
+      "cpu_ms": 5748.209,
+      "peak_sampled_heap_bytes": 4281528,
+      "peak_sampled_goroutines": 18
+    },
+    {
+      "scenario": {
+        "Name": "playlist-302",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 302,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 26.457832,
+        "p95_ms": 26.998239,
+        "p99_ms": 28.753435,
+        "max_ms": 29.992539
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 2036882048
+      },
+      "cpu_ms": 5866.616,
+      "peak_sampled_heap_bytes": 4372248,
+      "peak_sampled_goroutines": 15
+    },
+    {
+      "scenario": {
+        "Name": "playlist-500",
+        "Kind": "playlist",
+        "Mode": "cold",
+        "Count": 500,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 89.68093,
+        "p95_ms": 90.744358,
+        "p99_ms": 91.964719,
+        "max_ms": 94.716122
+      },
+      "budget_ms": 5000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 2853757816
+      },
+      "cpu_ms": 9008.155,
+      "peak_sampled_heap_bytes": 4859088,
+      "peak_sampled_goroutines": 15
+    },
+    {
+      "scenario": {
+        "Name": "playlist-500",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 500,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 31.145618,
+        "p95_ms": 33.586458,
+        "p99_ms": 34.356905,
+        "max_ms": 45.555171
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 2993822808
+      },
+      "cpu_ms": 9196.88,
+      "peak_sampled_heap_bytes": 5872216,
+      "peak_sampled_goroutines": 15
+    },
+    {
+      "scenario": {
+        "Name": "youtube-force",
+        "Kind": "force",
+        "Mode": "cold",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 20.044057,
+        "p95_ms": 20.399197,
+        "p99_ms": 20.794176,
+        "max_ms": 21.600422
+      },
+      "budget_ms": 5000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 0,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 214407392
+      },
+      "cpu_ms": 470.868,
+      "peak_sampled_heap_bytes": 3206592,
+      "peak_sampled_goroutines": 16
+    },
+    {
+      "scenario": {
+        "Name": "youtube-force",
+        "Kind": "force",
+        "Mode": "warm",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 19.02383,
+        "p95_ms": 19.411702,
+        "p99_ms": 19.543246,
+        "max_ms": 19.730635
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 1,
+        "max_matches": 0,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 214907840
+      },
+      "cpu_ms": 464.262,
+      "peak_sampled_heap_bytes": 2855704,
+      "peak_sampled_goroutines": 16
+    },
+    {
+      "scenario": {
+        "Name": "voice-disconnected",
+        "Kind": "track",
+        "Mode": "cold",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": true,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 21.7577,
+        "p95_ms": 22.193865,
+        "p99_ms": 22.479865,
+        "max_ms": 22.515293
+      },
+      "budget_ms": 5000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 1,
+        "max_matches": 1,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 306905120
+      },
+      "cpu_ms": 611.19,
+      "peak_sampled_heap_bytes": 3397536,
+      "peak_sampled_goroutines": 16
+    },
+    {
+      "scenario": {
+        "Name": "voice-disconnected",
+        "Kind": "track",
+        "Mode": "warm",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": true,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 19.1253,
+        "p95_ms": 19.563641,
+        "p99_ms": 19.700986,
+        "max_ms": 19.724209
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 1,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 305971680
+      },
+      "cpu_ms": 612.176,
+      "peak_sampled_heap_bytes": 3679376,
+      "peak_sampled_goroutines": 18
+    },
+    {
+      "scenario": {
+        "Name": "after-restart",
+        "Kind": "track",
+        "Mode": "cold",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": true,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 21.942471,
+        "p95_ms": 22.913483,
+        "p99_ms": 24.510655,
+        "max_ms": 28.07501
+      },
+      "budget_ms": 5000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 1,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 337595504
+      },
+      "cpu_ms": 707.639,
+      "peak_sampled_heap_bytes": 3283320,
+      "peak_sampled_goroutines": 16
+    },
+    {
+      "scenario": {
+        "Name": "after-restart",
+        "Kind": "track",
+        "Mode": "warm",
+        "Count": 1,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": true,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 19.513102,
+        "p95_ms": 20.172846,
+        "p99_ms": 21.200035,
+        "max_ms": 21.25408
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 1,
+        "max_matches": 1,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 352227968
+      },
+      "cpu_ms": 726.753,
+      "peak_sampled_heap_bytes": 3542384,
+      "peak_sampled_goroutines": 16
+    },
+    {
+      "scenario": {
+        "Name": "after-shuffle",
+        "Kind": "playlist",
+        "Mode": "cold",
+        "Count": 50,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": true,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 30.065511,
+        "p95_ms": 30.853812,
+        "p99_ms": 31.585405,
+        "max_ms": 32.253666
+      },
+      "budget_ms": 5000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 662695504
+      },
+      "cpu_ms": 1707.246,
+      "peak_sampled_heap_bytes": 3529592,
+      "peak_sampled_goroutines": 19
+    },
+    {
+      "scenario": {
+        "Name": "after-shuffle",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 50,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": true,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 21.598035,
+        "p95_ms": 22.639311,
+        "p99_ms": 23.714212,
+        "max_ms": 23.945696
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 1,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 679387576
+      },
+      "cpu_ms": 1738.047,
+      "peak_sampled_heap_bytes": 3514416,
+      "peak_sampled_goroutines": 20
+    },
+    {
+      "scenario": {
+        "Name": "progressive-active",
+        "Kind": "playlist",
+        "Mode": "cold",
+        "Count": 500,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": true
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 90.892535,
+        "p95_ms": 92.412324,
+        "p99_ms": 93.486204,
+        "max_ms": 94.033145
+      },
+      "budget_ms": 5000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 1,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 2913678776
+      },
+      "cpu_ms": 9106.074,
+      "peak_sampled_heap_bytes": 4544040,
+      "peak_sampled_goroutines": 15
+    },
+    {
+      "scenario": {
+        "Name": "progressive-active",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 500,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": true
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 32.134581,
+        "p95_ms": 32.894469,
+        "p99_ms": 33.757096,
+        "max_ms": 34.994839
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 2,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 3053046936
+      },
+      "cpu_ms": 9272.52,
+      "peak_sampled_heap_bytes": 5192344,
+      "peak_sampled_goroutines": 14
+    },
+    {
+      "scenario": {
+        "Name": "load-2-guilds",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 500,
+        "Guilds": 2,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 200,
+        "p50_ms": 38.542429,
+        "p95_ms": 40.370299,
+        "p99_ms": 40.65203,
+        "max_ms": 41.313486
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 3,
+        "max_matches": 3,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 4500175888
+      },
+      "cpu_ms": 11117.423,
+      "peak_sampled_heap_bytes": 7424624,
+      "peak_sampled_goroutines": 28
+    },
+    {
+      "scenario": {
+        "Name": "load-5-guilds",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 500,
+        "Guilds": 5,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 500,
+        "p50_ms": 55.822948,
+        "p95_ms": 77.497616,
+        "p99_ms": 79.799901,
+        "max_ms": 83.599307
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 6,
+        "max_matches": 4,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 9289666472
+      },
+      "cpu_ms": 16710.771,
+      "peak_sampled_heap_bytes": 16649048,
+      "peak_sampled_goroutines": 60
+    },
+    {
+      "scenario": {
+        "Name": "load-10-guilds",
+        "Kind": "playlist",
+        "Mode": "warm",
+        "Count": 500,
+        "Guilds": 10,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": false,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 1000,
+        "p50_ms": 90.250936,
+        "p95_ms": 140.003397,
+        "p99_ms": 143.331793,
+        "max_ms": 148.112366
+      },
+      "budget_ms": 2000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": {
+        "max_processes": 11,
+        "max_matches": 4,
+        "goroutines_before": 3,
+        "goroutines_after": 3,
+        "allocated_bytes": 17171260768
+      },
+      "cpu_ms": 25484.434,
+      "peak_sampled_heap_bytes": 23850784,
+      "peak_sampled_goroutines": 102
+    },
+    {
+      "scenario": {
+        "Name": "ready-transition",
+        "Kind": "youtube",
+        "Mode": "ready",
+        "Count": 2,
+        "Guilds": 1,
+        "Disconnected": false,
+        "Restart": false,
+        "Shuffle": false,
+        "Transition": true,
+        "Progressive": false
+      },
+      "ttfa": {
+        "n": 100,
+        "p50_ms": 24.997501,
+        "p95_ms": 25.85381,
+        "p99_ms": 26.174769,
+        "max_ms": 27.091576
+      },
+      "budget_ms": 1000,
+      "environment": "deterministic-dispatch-real-ffmpeg-controlled-ytdlp-simulated-udp",
+      "status": "PASS",
+      "errors": [],
+      "resources": null,
+      "cpu_ms": null,
+      "peak_sampled_heap_bytes": null,
+      "peak_sampled_goroutines": null
+    }
+  ],
+  "playlist_10_to_500_p95_growth_ms": 13.183253,
+  "scaling_budget_ms": 250,
+  "configuration": {
+    "minimum_samples_per_scenario": 100,
+    "match_slots": 4,
+    "background_slots": 3,
+    "collection_workers": 3,
+    "logical_prefetch": 6,
+    "search_admission_slots": 4,
+    "search_admission_deadline_ms": 5000,
+    "source_go_sha256": "beb7a5b4969984846b4c2d79847877eee03a1e008b8698d080a2a3003dc281dd",
+    "quantiles": "nearest-rank",
+    "external_network": false
+  },
+  "host": {
+    "platform": "Linux-7.2.11-arch1-1-x86_64-with-glibc2.44",
+    "cpu": "AMD Ryzen 7 9800X3D 8-Core Processor",
+    "logical_cpus": 8,
+    "go": "go version go1.27.3-X:nodwarf5 linux/amd64",
+    "ffmpeg": "ffmpeg version n9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+    "monotonic_resolution_seconds": 1e-09,
+    "gomaxprocs": "Go default",
+    "revision": "a592ba603b4e2d550ba68d1eadec63d4f6cff298"
+  }
+}
