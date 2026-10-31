@@ -23,6 +23,10 @@ type PlayFunc func(context.Context, media.Track, Voice) error
 const MaxQueueTracks = 1000
 
 type GuildPlayer struct {
+	admission              *media.ProviderAdmission
+	providerGlobal         bool
+	providerLastNotice     string
+	prefetchHorizon        time.Duration
 	networkIncident        string
 	retryingPersistence    bool
 	persistenceWorkers     sync.WaitGroup
@@ -111,12 +115,7 @@ func (p *GuildPlayer) signal(reasons ...string) {
 	// Wake the owners of that window as well as playback; neither consumer can
 	// substitute for the other. Notifications coalesce and never run resolver work
 	// under this lock.
-	for _, job := range p.jobs {
-		select {
-		case job.wake <- struct{}{}:
-		default:
-		}
-	}
+	p.wakeCollectionsLocked()
 
 	select {
 	case p.wake <- struct{}{}:
@@ -265,7 +264,8 @@ func (p *GuildPlayer) run() {
 			continue
 		}
 		providerPermit := ""
-		if p.providerBlocked && len(p.queue) > 0 && !p.queue[0].Pending && p.voice != nil && !p.halted {
+		headLocal := len(p.queue) > 0 && p.queue[0].RequestedSource == "local"
+		if p.providerBlocked && !headLocal && len(p.queue) > 0 && !p.queue[0].Pending && p.voice != nil && !p.halted {
 			p.mu.Unlock()
 			permit, err := p.waitProvider(p.ctx, nil)
 			if err != nil {
@@ -274,7 +274,7 @@ func (p *GuildPlayer) run() {
 			p.mu.Lock()
 			providerPermit = permit
 		}
-		reason, _ := p.schedulerReasonAllowProviderLocked(providerPermit != "")
+		reason, _ := p.schedulerReasonAllowProviderLocked(providerPermit != "" || headLocal)
 		if reason != "ready" {
 			if providerPermit != "" {
 				p.finishProviderLocked(context.Canceled, providerPermit)
@@ -331,7 +331,7 @@ func (p *GuildPlayer) run() {
 		p.recoveryPaused = false
 		p.checkpointOffset = t.ResumeOffset
 		p.confirmedOffset = t.ResumeOffset
-		ctx = context.WithValue(ctx, pauseKey{}, p.pause)
+		ctx = media.WithProviderPermit(context.WithValue(ctx, pauseKey{}, p.pause), providerPermit)
 		v := p.voice
 		p.persistLocked()
 		p.mu.Unlock()
@@ -388,6 +388,7 @@ func (p *GuildPlayer) run() {
 				p.queue = append([]queueEntry{{Track: retained}}, p.queue...)
 			}
 			p.recoveryPaused = p.pause.paused()
+			p.observeProviderLocked(err)
 			p.blockProviderLocked(providerFailureCategory(err))
 			p.mutationLocked("provider_track_retained")
 			expectedCancel = true
@@ -495,6 +496,16 @@ func (p *GuildPlayer) run() {
 }
 
 func (p *GuildPlayer) blockProviderLocked(reason string) {
+	shared := p.admission.Snapshot()
+	if shared.Blocked {
+		if p.providerIncident != shared.Incident {
+			p.providerGeneration++
+			p.providerNotice = false
+		}
+		p.providerGlobal = true
+		p.providerIncident = shared.Incident
+		p.providerRetries = shared.Attempts
+	}
 	if p.providerBlocked {
 		return
 	}
@@ -514,6 +525,15 @@ func (p *GuildPlayer) blockProviderLocked(reason string) {
 			if cancel != nil {
 				cancel()
 			}
+		}
+	}
+}
+
+func (p *GuildPlayer) wakeCollectionsLocked() {
+	for _, job := range p.jobs {
+		select {
+		case job.wake <- struct{}{}:
+		default:
 		}
 	}
 }

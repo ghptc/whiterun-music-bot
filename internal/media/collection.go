@@ -236,6 +236,11 @@ func (r CollectionResolver) youtube(ctx context.Context, id string) (Collection,
 	// Ignore individual unavailable entries, but never suppress the diagnostics
 	// that distinguish a provider incident from a partial playlist.
 	args := append(metadataBaseArgs(), "--yes-playlist", "--flat-playlist", "--playlist-end", "501", "--skip-download", "--dump-single-json", "--ignore-errors", "--", target)
+	release, _, admissionErr := r.YouTube.Admission.Admit(ctx)
+	if admissionErr != nil {
+		return Collection{}, admissionErr
+	}
+	defer release()
 	cmd := Command(ctx, r.YouTube.Binary, args...)
 	out, stderr := &LimitedBuffer{Limit: 8 << 20}, &LimitedBuffer{Limit: 8192}
 	cmd.Stdout, cmd.Stderr = out, stderr
@@ -244,6 +249,7 @@ func (r CollectionResolver) youtube(ctx context.Context, id string) (Collection,
 		return Collection{}, ctx.Err()
 	}
 	if failure := ClassifyExtraction(stderr.Data, nil); failure != nil && ProviderUnavailable(failure) {
+		r.YouTube.Admission.Observe(failure)
 		return Collection{}, failure
 	}
 	if out.Truncated {

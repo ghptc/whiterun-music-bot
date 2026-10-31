@@ -17,6 +17,7 @@ import (
 )
 
 type Streamer struct {
+	Admission     *media.ProviderAdmission
 	YTDLP, FFmpeg string
 	// LocalAudioDir is an absolute, operator-controlled, read-only audio root.
 	LocalAudioDir                     string
@@ -59,6 +60,17 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	}
 	if t.ResumeOffset < 0 || (t.Live && t.ResumeOffset > 0) {
 		return &StreamError{"resume_unsupported", errors.New("saved progress cannot be sought in this source; position retained for explicit skip")}
+	}
+	releaseAdmission := func() {}
+	var admissionEpoch uint64
+	if !local {
+		var admissionErr error
+		releaseAdmission, admissionEpoch, admissionErr = s.Admission.Admit(parent)
+		if admissionErr != nil {
+			return admissionErr
+		}
+		defer releaseAdmission()
+		defer func() { s.Admission.Observe(err) }()
 	}
 	t.Timing.Event("playback_start", started)
 	defer func() { t.Timing.Event("playback_complete", started, "error", err) }()
@@ -308,6 +320,12 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 		}
 		activity.Store(time.Now().UnixNano())
 		sentFrames++
+		if sentFrames == 1 {
+			releaseAdmission()
+		}
+		if sentFrames == 250 && !local {
+			s.Admission.SustainedMedia(ctx, admissionEpoch)
+		}
 		if firstFrame {
 			t.Timing.Event("first_audio_frame", started)
 			if local {
@@ -513,6 +531,10 @@ func (r *firstRead) Read(p []byte) (int, error) {
 
 func sourceFailure(stderr []byte) string {
 	if err := media.ClassifyExtraction(stderr, nil); err != nil {
+		var extraction *media.ExtractionError
+		if errors.As(err, &extraction) && extraction.VideoSpecific {
+			return "youtube_age_restricted"
+		}
 		switch category := media.ExtractionCategory(err); category {
 		case "youtube_bot_challenge", "youtube_auth_required", "youtube_rate_limited", "youtube_network_timeout", "youtube_video_unavailable":
 			return category

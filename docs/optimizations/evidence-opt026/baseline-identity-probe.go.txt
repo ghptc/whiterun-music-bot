@@ -1,0 +1,84 @@
+package media
+import("testing";"time")
+func TestOPT026NamedIdentityCorpus(t *testing.T) {
+	positives, negatives := 0, 0
+	for _, version := range []string{"", "Live", "Remix", "Cover", "Radio Edit", "Extended Mix", "Remastered 2021", "Acoustic", "Instrumental"} {
+		tr, c := qualityIdentity()
+		if version != "" {
+			tr.Title += " (" + version + ")"
+			c.Title = tr.Title
+			c.Track = tr.Title
+		}
+		if d := CompareSpotify(tr, c, DefaultMatchPolicy()); d.Status != MatchConfirmed {
+			t.Fatalf("positive %s: %+v", version, d)
+		}
+		positives++
+		bad := c
+		if version == "" {
+			bad.Title += " Live"
+			bad.Track = bad.Title
+		} else {
+			bad.Title = "Song"
+			bad.Track = "Song"
+		}
+		if d := CompareSpotify(tr, bad, DefaultMatchPolicy()); d.Status == MatchConfirmed {
+			t.Fatalf("negative %s: %+v", version, d)
+		}
+		negatives++
+	}
+	for _, tc := range []struct {
+		title, artist string
+		credits       []string
+		seconds       int
+	}{
+		{"Pursuit Of Happiness - Extended Steve Aoki Remix", "Kid Cudi", []string{"Kid Cudi", "MGMT", "Ratatat", "Steve Aoki"}, 374},
+		{"Heads Will Roll - A-Trak Remix", "Yeah Yeah Yeahs", []string{"Yeah Yeah Yeahs", "A-Trak"}, 384},
+		{"Beelzeboss", "Tenacious D", []string{"Tenacious D"}, 365},
+		{"Fuck Her Gently", "Tenacious D", []string{"Tenacious D"}, 123},
+	} {
+		tr := Track{Title: tc.title, Artist: tc.artist, Artists: tc.credits, Album: "Album", Duration: time.Duration(tc.seconds) * time.Second, Explicit: new(true)}
+		c := Candidate{ID: "abcdefghijk", Title: tc.title, Track: tc.title, Artist: tc.artist, Artists: append([]string(nil), tc.credits...), Album: "Album", Channel: tc.artist + " - Topic", Duration: float64(tc.seconds), Explicit: new(true)}
+		if d := CompareSpotify(tr, c, DefaultMatchPolicy()); d.Status != MatchConfirmed {
+			t.Fatalf("known positive %s: %+v", tc.title, d)
+		}
+		positives++
+		for _, change := range []func(*Candidate){
+			func(c *Candidate) { c.Title += " Live"; c.Track = c.Title },
+			func(c *Candidate) {
+				c.Artist = "Other Artist"
+				c.Artists = []string{"Other Artist"}
+				c.Channel = "Other Artist"
+			},
+			func(c *Candidate) { c.Explicit = new(false) },
+			func(c *Candidate) { c.Duration = 3600; c.Title += " Full Album"; c.Track = c.Title },
+			func(c *Candidate) { c.Title = "Song Other Producer Remix"; c.Track = c.Title },
+		} {
+			bad := c
+			change(&bad)
+			if d := CompareSpotify(tr, bad, DefaultMatchPolicy()); d.Status == MatchConfirmed {
+				t.Fatalf("known negative %s: %+v", tc.title, d)
+			}
+			negatives++
+		}
+	}
+	tr, c := qualityIdentity()
+	tr.Artists = []string{"Artist", "Guest"}
+	c.Artists = []string{"Artist", "Guest"}
+	if d := CompareSpotify(tr, c, DefaultMatchPolicy()); d.Status != MatchConfirmed {
+		t.Fatal(d)
+	}
+	positives++
+	for _, artists := range [][]string{{"Artist"}, {"Artist", "Wrong Guest"}} {
+		bad := c
+		bad.Artists = artists
+		if d := CompareSpotify(tr, bad, DefaultMatchPolicy()); d.Status == MatchConfirmed {
+			t.Fatal(d)
+		}
+		negatives++
+	}
+	c.Duration = 0
+	if d := CompareSpotify(tr, c, DefaultMatchPolicy()); d.Status != MatchUncertain {
+		t.Fatal("missing evidence accepted", d)
+	}
+	t.Logf("identity corpus positives=%d negatives=%d false_positives=0", positives, negatives)
+}

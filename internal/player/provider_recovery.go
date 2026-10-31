@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"time"
+	"whiterun/internal/media"
 )
 
-const providerAutomaticRetries = 3
+const providerAutomaticRetries = media.ProviderRecoveryTrials
 
 // Preparation of a direct /play can fail before an occurrence is reserved.
 // Share that provider incident with the player without changing current audio.
@@ -19,19 +20,49 @@ func (p *GuildPlayer) SuspendProvider(err error) {
 		p.mu.Unlock()
 		return
 	}
+	p.observeProviderLocked(err)
 	p.blockProviderLocked(providerFailureCategory(err))
 	p.mu.Unlock()
 	p.announceProvider()
 }
 
 func providerBackoff(attempt int) time.Duration {
-	return min(2*time.Minute, 15*time.Second*time.Duration(1<<min(attempt, 3)))
+	return media.ProviderBackoff(attempt)
 }
 
 // Every resolver and ready playback attempt enters here. During an incident
 // exactly one caller receives a trial; other callers wait for its result.
-// After three unsuccessful trials only an explicit resume opens another budget.
+// Global exhaustion requires operator rearm; guild controls never renew its budget.
 func (p *GuildPlayer) waitProvider(ctx context.Context, suspended func()) (string, error) {
+	if p.admission != nil {
+		shared := p.admission.Snapshot()
+		p.mu.Lock()
+		global := shared.Blocked || p.providerGlobal
+		if shared.Blocked {
+			p.blockProviderLocked(shared.Category)
+		}
+		p.mu.Unlock()
+		if global {
+			p.announceProvider()
+			if suspended != nil {
+				suspended()
+			}
+			permit, err := p.admission.WaitRecovery(ctx)
+			p.mu.Lock()
+			if err == nil {
+				if permit == "" {
+					p.resetProviderLocked()
+				} else {
+					status := p.admission.Snapshot()
+					p.providerProbe = true
+					p.providerRetries = status.Attempts
+					p.log.Info("provider_recovery_attempted", "incident_id", status.Incident, "attempt", status.Attempts, "scope", "process")
+				}
+			}
+			p.mu.Unlock()
+			return permit, err
+		}
+	}
 	for {
 		p.mu.Lock()
 		if ctx.Err() != nil {
@@ -82,6 +113,20 @@ func (p *GuildPlayer) waitProvider(ctx context.Context, suspended func()) (strin
 }
 
 func (p *GuildPlayer) finishProviderLocked(err error, incident string) {
+	if p.providerGlobal && p.admission != nil {
+		p.admission.FinishTrial(incident, err)
+		shared := p.admission.Snapshot()
+		p.providerProbe = false
+		p.providerRetries = shared.Attempts
+		if !shared.Blocked {
+			p.resetProviderLocked()
+			p.signal("provider_recovered")
+		} else {
+			p.providerRetryAt = shared.RetryAt
+			p.signal("provider_backoff")
+		}
+		return
+	}
 	if !p.providerProbe || incident != p.providerIncident {
 		return
 	}
@@ -106,15 +151,41 @@ func (p *GuildPlayer) finishProviderLocked(err error, incident string) {
 
 func (p *GuildPlayer) announceProvider() {
 	p.mu.Lock()
-	if p.providerNotice || p.providerIncident == "" {
+	if p.providerNotice || p.providerIncident == "" || p.providerLastNotice == p.providerIncident {
 		p.mu.Unlock()
 		return
 	}
 	p.providerNotice = true
-	event := PlaybackEvent{IncidentID: p.providerIncident, State: Suspended, FailureStage: "provider", SkippedReason: "YouTube access is temporarily unavailable. The queue and confirmed progress are preserved. Recovery uses bounded backoff; use resume after provider access is restored."}
+	p.providerLastNotice = p.providerIncident
+	reason := "YouTube access is temporarily unavailable. The queue and confirmed progress are preserved. Recovery uses bounded backoff; use resume after provider access is restored."
+	if p.providerGlobal {
+		reason = "YouTube access is temporarily unavailable. The queue and confirmed progress are preserved. Recovery is shared across guilds with bounded backoff; exhausted recovery requires operator intervention."
+	}
+	event := PlaybackEvent{IncidentID: p.providerIncident, State: Suspended, FailureStage: "provider", SkippedReason: reason}
 	fn := p.onSkip
 	p.mu.Unlock()
 	if fn != nil {
 		fn(event)
+	}
+}
+
+// ConfigureYouTube is startup-only; a shared gate replaces per-guild trials for
+// confirmed provider incidents. Legacy/local failures retain their own policy.
+func (p *GuildPlayer) ConfigureYouTube(admission *media.ProviderAdmission, horizon time.Duration) error {
+	if horizon < 0 || horizon > media.VerificationPrefetchHorizon {
+		return errors.New("invalid playback horizon")
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.current != nil || p.voice != nil {
+		return errors.New("configure YouTube before attaching Voice")
+	}
+	p.admission = admission
+	p.prefetchHorizon = horizon
+	return nil
+}
+func (p *GuildPlayer) observeProviderLocked(err error) {
+	if p.admission != nil && !p.admission.Snapshot().Blocked {
+		p.admission.Observe(err)
 	}
 }

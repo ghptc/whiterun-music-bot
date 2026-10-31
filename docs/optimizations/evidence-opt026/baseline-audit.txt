@@ -1,0 +1,39 @@
+=== RUN   TestAccessEfficiency123ColdWarmAndReopen
+    access_efficiency_probe_test.go:102: MEASUREMENT {"media_processes_not_executed":123,"metadata_processes":246,"playback_identity_extra_processes":0,"scenario":"123_distinct_cold","search_processes":123,"verification_processes":123}
+    access_efficiency_probe_test.go:112: MEASUREMENT {"additional_metadata_processes":0,"scenario":"123_ram_warm"}
+    access_efficiency_probe_test.go:123: MEASUREMENT {"additional_metadata_processes":0,"scenario":"123_mapping_fresh_ram_empty"}
+    access_efficiency_probe_test.go:141: MEASUREMENT {"additional_searches":0,"additional_verifications":123,"scenario":"123_mapping_stale_ram_empty"}
+--- PASS: TestAccessEfficiency123ColdWarmAndReopen (5.58s)
+=== RUN   TestAccessEfficiencyConcurrentAndStaleProof
+    access_efficiency_probe_test.go:170: MEASUREMENT {"metadata_processes":2,"scenario":"four_guild_like_resolver_copies_shared_cache"}
+    access_efficiency_probe_test.go:191: MEASUREMENT {"concurrent_verification_processes":4,"fifth_check_additional_processes":1,"scenario":"four_stale_playback_proofs_plus_repeated_check"}
+    access_efficiency_probe_test.go:194: MEASUREMENT {"same_spotify_id_different_source_query_keys_equal":false,"scenario":"key_context_sensitivity"}
+--- PASS: TestAccessEfficiencyConcurrentAndStaleProof (0.06s)
+=== RUN   TestAccessEfficiencyFailedMetadataIsNotGloballyBlocked
+    access_efficiency_probe_test.go:215: MEASUREMENT {"challenges":3,"metadata_processes":6,"scenario":"three_sequential_resolver_calls_without_guild_gate","successful_cache_entries":0}
+--- PASS: TestAccessEfficiencyFailedMetadataIsNotGloballyBlocked (0.10s)
+=== RUN   TestAccessEfficiencyPrefetchLeaseProjection
+    access_efficiency_probe_test.go:238: MEASUREMENT {"assumed_track_seconds":30,"lease_seconds":600,"not_an_http_measurement":true,"positions":123,"predicted_extra_playback_verifications":0,"prefetch_upcoming":6,"scenario":"prefetch_lease_age_projection"}
+    access_efficiency_probe_test.go:238: MEASUREMENT {"assumed_track_seconds":210,"lease_seconds":600,"not_an_http_measurement":true,"positions":123,"predicted_extra_playback_verifications":120,"prefetch_upcoming":6,"scenario":"prefetch_lease_age_projection"}
+--- PASS: TestAccessEfficiencyPrefetchLeaseProjection (0.00s)
+=== RUN   TestAccessEfficiencySharedVideoVerificationPrototype
+    access_efficiency_probe_test.go:289: MEASUREMENT {"five_checks_verification_processes":1,"incompatible_live_identity_rejected":true,"production_code_changed":false,"scenario":"offline_shared_exact_video_proof_prototype"}
+--- PASS: TestAccessEfficiencySharedVideoVerificationPrototype (0.04s)
+PASS
+ok  	whiterun/internal/media	5.780s
+=== RUN   TestAccessEfficiencyPerCollectionWindows
+    access_efficiency_probe_test.go:39: MEASUREMENT {"current_position":1,"matcher_calls":7,"queued_positions":122,"reserved_positions":123,"scenario":"123_position_playlist_before_first_eof"}
+    access_efficiency_probe_test.go:48: MEASUREMENT {"current_position":1,"first_playlist_calls":7,"queued_positions":245,"scenario":"second_123_playlist_behind_first","second_playlist_calls":6}
+--- PASS: TestAccessEfficiencyPerCollectionWindows (0.00s)
+=== RUN   TestAccessEfficiencyBreakerScopeAndBudgets
+    access_efficiency_probe_test.go:92: MEASUREMENT {"additional_calls_after_hour":0,"both_breakers_exhausted":true,"initial_plus_trial_matcher_calls":8,"notices":2,"positions_preserved":246,"scenario":"two_guild_challenge_incidents","voice_leave":false}
+--- PASS: TestAccessEfficiencyBreakerScopeAndBudgets (0.00s)
+PASS
+ok  	whiterun/internal/player	0.002s
+=== RUN   TestAccessEfficiencyFullFlowSQLiteAndMedia
+    access_efficiency_probe_test.go:113: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"cold_sqlite","spotify_metadata_calls":1,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":1,"verification":1}}
+    access_efficiency_probe_test.go:113: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"warm_sqlite_and_ram","spotify_metadata_calls":0,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":0,"verification":0}}
+    access_efficiency_probe_test.go:113: MEASUREMENT {"external_http_requests":0,"real_ffmpeg":true,"resume_offset_ms":29800,"scenario":"reopened_sqlite_empty_ram","spotify_metadata_calls":0,"voice_simulated_frames":16,"yt_dlp_mock_processes":{"media":1,"search":0,"verification":0}}
+--- PASS: TestAccessEfficiencyFullFlowSQLiteAndMedia (1.06s)
+PASS
+ok  	whiterun/internal/discord	1.058s

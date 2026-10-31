@@ -42,25 +42,31 @@ type guild struct {
 	announcements       chan announcement
 }
 type Bot struct {
-	localAdmin localAudioAdmin
-	store      player.Store
-	client     *bot.Client
-	ctx        context.Context
-	cancel     context.CancelFunc
-	log        *slog.Logger
-	resolver   media.CollectionResolver
-	streamer   player.Streamer
-	mu         sync.Mutex
-	guilds     map[snowflake.ID]*guild
-	closing    bool
-	workers    sync.WaitGroup
-	searches   chan struct{}
-	voiceWake  chan struct{}
+	youtubeAdmission *media.ProviderAdmission
+	playbackHorizon  time.Duration
+	localAdmin       localAudioAdmin
+	store            player.Store
+	client           *bot.Client
+	ctx              context.Context
+	cancel           context.CancelFunc
+	log              *slog.Logger
+	resolver         media.CollectionResolver
+	streamer         player.Streamer
+	mu               sync.Mutex
+	guilds           map[snowflake.ID]*guild
+	closing          bool
+	workers          sync.WaitGroup
+	searches         chan struct{}
+	voiceWake        chan struct{}
 }
 
 func New(ctx context.Context, token string, appID snowflake.ID, log *slog.Logger) (*Bot, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	b := &Bot{ctx: ctx, cancel: cancel, log: log, resolver: media.CollectionResolver{YouTube: media.Resolver{Binary: "yt-dlp", Cache: &media.SearchCache{}}, Log: log, Limiter: media.NewMatchLimiter()}, streamer: player.Streamer{YTDLP: "yt-dlp", FFmpeg: "ffmpeg"}, guilds: make(map[snowflake.ID]*guild), searches: make(chan struct{}, 4), voiceWake: make(chan struct{}, 1)}
+	if err := b.ConfigureYouTubeEfficiency(media.DefaultProviderAdmissionConfig(), media.VerificationPrefetchHorizon); err != nil {
+		cancel()
+		return nil, err
+	}
 	limiter := newManagedRESTLimiter(log.With("name", "rest_rate_limiter"))
 	c, err := disgo.New(token, bot.WithLogger(log),
 		bot.WithRestClientConfigOpts(rest.WithRateLimiter(limiter)),
@@ -141,12 +147,14 @@ func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) e
 				return err
 			}
 		}
-		if err := b.resolver.YouTube.VerifySpotify(ctx, track); err != nil {
+		verified, err := b.resolver.YouTube.VerifiedSpotify(ctx, track)
+		if err != nil {
 			if ctx.Err() == nil && !player.IsTransientFailure(err) {
 				b.resolver.YouTube.InvalidateSpotify(ctx, track)
 			}
 			return err
 		}
+		track = verified
 	}
 
 	if track.VerifyBeforePlay {
@@ -201,6 +209,10 @@ func (b *Bot) getGuild(id snowflake.ID) *guild {
 	g := b.guilds[id]
 	if g == nil {
 		g = &guild{player: player.New(b.ctx, b.log.With("guild_id", id), b.play)}
+		if err := g.player.ConfigureYouTube(b.youtubeAdmission, b.playbackHorizon); err != nil {
+			g.player.Close(context.Background())
+			return nil
+		}
 		if b.store != nil {
 			if err := g.player.ConfigureStore(b.store, id.String()); err != nil {
 				b.log.Error("durable_state_load_failed", "guild_id", id, "error", err)
@@ -422,5 +434,27 @@ func waitVoiceReady(ctx context.Context, ready voiceReadiness, timeout time.Dura
 	if err != nil {
 		return fmt.Errorf("DAVE readiness: %w", err)
 	}
+	return nil
+}
+
+// ConfigureYouTubeEfficiency is startup-only. All guilds, metadata and streaming
+// share this admission owner; cache hits and local audio bypass external starts.
+func (b *Bot) ConfigureYouTubeEfficiency(c media.ProviderAdmissionConfig, horizon time.Duration) error {
+	if horizon <= 0 || horizon > media.VerificationPrefetchHorizon {
+		return errors.New("YouTube prefetch horizon must be positive and at most eight minutes")
+	}
+	admission, err := media.NewProviderAdmission(c)
+	if err != nil {
+		return err
+	}
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if len(b.guilds) > 0 {
+		return errors.New("configure YouTube efficiency before creating guild players")
+	}
+	b.youtubeAdmission = admission
+	b.playbackHorizon = horizon
+	b.resolver.YouTube.Admission = admission
+	b.streamer.Admission = admission
 	return nil
 }

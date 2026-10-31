@@ -1,0 +1,290 @@
+package media
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+)
+
+type accessProbeMappings struct {
+	mu    sync.Mutex
+	items map[string]Candidate
+}
+
+func (s *accessProbeMappings) LoadMapping(_ context.Context, k string) (Candidate, bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	v, ok := s.items[k]
+	return v, ok, nil
+}
+func (s *accessProbeMappings) SaveMapping(_ context.Context, k string, v Candidate) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.items[k] = v
+	return nil
+}
+func (s *accessProbeMappings) DeleteMapping(_ context.Context, k string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.items, k)
+	return nil
+}
+
+func accessProbe(t *testing.T, challenge bool) (CollectionResolver, string) {
+	t.Helper()
+	dir := t.TempDir()
+	binary := filepath.Join(dir, "provider-mock")
+	calls := filepath.Join(dir, "calls")
+	script := `#!/usr/bin/env python3
+import sys,json,re,time
+args=sys.argv[1:];target=args[-1];flat='--flat-playlist' in args
+with open(` + fmt.Sprintf("%q", calls) + `, 'a') as f:f.write(('search' if flat else 'verification')+'\n')
+if flat:time.sleep(.01)
+m=re.search(r'Song(\d{11})',target)
+id=m.group(1) if m else target.rsplit('=',1)[-1]
+c={'id':id,'title':'Song'+id,'track':'Song'+id,'channel':'Artist - Topic','artist':'Artist','artists':['Artist'],'album':'Album','duration':210,'categories':['Music']}
+if not flat and ` + map[bool]string{true: "True", false: "False"}[challenge] + `:
+ print("ERROR: Sign in to confirm you're not a bot",file=sys.stderr);sys.exit(1)
+print(json.dumps({'entries':[c]} if flat else c))
+`
+	if err := os.WriteFile(binary, []byte(script), 0700); err != nil {
+		t.Fatal(err)
+	}
+	return CollectionResolver{YouTube: Resolver{Binary: binary, Cache: &SearchCache{}, Mappings: &accessProbeMappings{items: map[string]Candidate{}}}, Limiter: NewMatchLimiter()}, calls
+}
+func accessTrack(i int) Track {
+	id := fmt.Sprintf("%011d", i)
+	return Track{SpotifyID: fmt.Sprintf("%022d", i), Title: "Song" + id, Artist: "Artist", Artists: []string{"Artist"}, Album: "Album", Duration: 210 * time.Second, RequestedSource: "spotify", SourceURL: "https://open.spotify.com/track/" + fmt.Sprintf("%022d", i)}
+}
+func accessCounts(t *testing.T, p string) (int, int) {
+	t.Helper()
+	b, err := os.ReadFile(p)
+	if os.IsNotExist(err) {
+		return 0, 0
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(b)
+	return strings.Count(s, "search\n"), strings.Count(s, "verification\n")
+}
+func accessMetric(t *testing.T, name string, data map[string]any) {
+	t.Helper()
+	data["scenario"] = name
+	b, _ := json.Marshal(data)
+	t.Log("MEASUREMENT " + string(b))
+}
+
+func TestAccessEfficiency123ColdWarmAndReopen(t *testing.T) {
+	r, calls := accessProbe(t, false)
+	ctx := context.Background()
+	tracks := make([]Track, 123)
+	for i := range tracks {
+		var err error
+		tracks[i], err = r.MatchSpotify(ctx, accessTrack(i+1), false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := r.YouTube.VerifySpotify(ctx, tracks[i]); err != nil {
+			t.Fatal(err)
+		}
+	}
+	s, v := accessCounts(t, calls)
+	if s != 123 || v != 123 {
+		t.Fatal(s, v)
+	}
+	accessMetric(t, "123_distinct_cold", map[string]any{"search_processes": s, "verification_processes": v, "metadata_processes": s + v, "playback_identity_extra_processes": 0, "media_processes_not_executed": 123})
+	for i := range tracks {
+		if _, err := r.MatchSpotify(ctx, accessTrack(i+1), false); err != nil {
+			t.Fatal(err)
+		}
+	}
+	s2, v2 := accessCounts(t, calls)
+	if s2 != s || v2 != v {
+		t.Fatal("warm misses", s2, v2)
+	}
+	accessMetric(t, "123_ram_warm", map[string]any{"additional_metadata_processes": s2 + v2 - s - v})
+	r.YouTube.Cache = &SearchCache{}
+	for i := range tracks {
+		if _, err := r.MatchSpotify(ctx, accessTrack(i+1), false); err != nil {
+			t.Fatal(err)
+		}
+	}
+	s2, v2 = accessCounts(t, calls)
+	if s2 != s || v2 != v {
+		t.Fatal("fresh mappings missed", s2, v2)
+	}
+	accessMetric(t, "123_mapping_fresh_ram_empty", map[string]any{"additional_metadata_processes": s2 + v2 - s - v})
+	store := r.YouTube.Mappings.(*accessProbeMappings)
+	store.mu.Lock()
+	for k, c := range store.items {
+		c.CheckedAt = time.Now().Add(-11 * time.Minute)
+		store.items[k] = c
+	}
+	store.mu.Unlock()
+	r.YouTube.Cache = &SearchCache{}
+	for i := range tracks {
+		if _, err := r.MatchSpotify(ctx, accessTrack(i+1), false); err != nil {
+			t.Fatal(err)
+		}
+	}
+	s2, v2 = accessCounts(t, calls)
+	if s2 != 123 || v2 != 246 {
+		t.Fatal(s2, v2)
+	}
+	accessMetric(t, "123_mapping_stale_ram_empty", map[string]any{"additional_searches": s2 - s, "additional_verifications": v2 - v})
+}
+
+func TestAccessEfficiencyConcurrentAndStaleProof(t *testing.T) {
+	r, calls := accessProbe(t, false)
+	ctx := context.Background()
+	start := make(chan struct{})
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	var tr Track
+	for range 4 {
+		wg.Go(func() {
+			<-start
+			got, err := r.MatchSpotify(ctx, accessTrack(1), true)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			mu.Lock()
+			tr = got
+			mu.Unlock()
+		})
+	}
+	close(start)
+	wg.Wait()
+	s, v := accessCounts(t, calls)
+	if s != 1 || v != 1 {
+		t.Fatal("singleflight missed", s, v)
+	}
+	accessMetric(t, "four_guild_like_resolver_copies_shared_cache", map[string]any{"metadata_processes": s + v})
+	tr.identityProof.CheckedAt = time.Now().Add(-11 * time.Minute)
+	for range 4 {
+		wg.Go(func() {
+			if err := r.YouTube.VerifySpotify(ctx, tr); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+	wg.Wait()
+	s2, v2 := accessCounts(t, calls)
+	if s2 != s || v2-v != 4 {
+		t.Fatal(s2, v2)
+	}
+	if err := r.YouTube.VerifySpotify(ctx, tr); err != nil {
+		t.Fatal(err)
+	}
+	_, v3 := accessCounts(t, calls)
+	if v3-v2 != 1 {
+		t.Fatal("verification unexpectedly refreshed original proof")
+	}
+	accessMetric(t, "four_stale_playback_proofs_plus_repeated_check", map[string]any{"concurrent_verification_processes": v2 - v, "fifth_check_additional_processes": v3 - v2})
+	a, b := accessTrack(1), accessTrack(1)
+	b.SourceURL += "?si=context-only"
+	accessMetric(t, "key_context_sensitivity", map[string]any{"same_spotify_id_different_source_query_keys_equal": MappingKey(a, nil) == MappingKey(b, nil)})
+	for _, variant := range []string{" live", " remix", " remaster"} {
+		b = accessTrack(1)
+		b.Title += variant
+		if MappingKey(a, nil) == MappingKey(b, nil) {
+			t.Fatal("identity merged", variant)
+		}
+	}
+}
+
+func TestAccessEfficiencyFailedMetadataIsNotGloballyBlocked(t *testing.T) {
+	r, calls := accessProbe(t, true)
+	for range 3 {
+		if _, err := r.MatchSpotify(context.Background(), accessTrack(1), true); !ProviderUnavailable(err) {
+			t.Fatal(err)
+		}
+	}
+	s, v := accessCounts(t, calls)
+	if s != 3 || v != 3 {
+		t.Fatal(s, v)
+	}
+	accessMetric(t, "three_sequential_resolver_calls_without_guild_gate", map[string]any{"metadata_processes": s + v, "challenges": v, "successful_cache_entries": len(r.YouTube.Cache.entries)})
+}
+
+func TestAccessEfficiencyPrefetchLeaseProjection(t *testing.T) {
+	// Discrete model only: actual window size is measured separately in player.
+	for _, seconds := range []int{30, 210} {
+		const count = 123
+		proof := make([]int, count)
+		for i := range proof {
+			proof[i] = -1
+		}
+		next := 0
+		extra := 0
+		for i := 0; i < count; i++ {
+			now := i * seconds
+			for next < count && next <= i+6 {
+				proof[next] = now
+				next++
+			}
+			if now-proof[i] >= 600 {
+				extra++
+			}
+		}
+		accessMetric(t, "prefetch_lease_age_projection", map[string]any{"positions": count, "assumed_track_seconds": seconds, "prefetch_upcoming": 6, "lease_seconds": 600, "predicted_extra_playback_verifications": extra, "not_an_http_measurement": true})
+		if seconds == 210 && extra != 120 {
+			t.Fatal(extra)
+		}
+	}
+}
+
+func TestAccessEfficiencySharedVideoVerificationPrototype(t *testing.T) {
+	r, calls := accessProbe(t, false)
+	ctx := context.Background()
+	tr, err := r.MatchSpotify(ctx, accessTrack(1), true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, before := accessCounts(t, calls)
+	tr.identityProof.CheckedAt = time.Now().Add(-11 * time.Minute)
+	// Investigation-only composition of existing primitives. Cache raw exact-video
+	// metadata, then enforce each request's original identity and policy separately.
+	check := func(tgt Track) error {
+		direct := r.YouTube
+		direct.Match = nil
+		verified, err := direct.Resolve(ctx, tgt.URL)
+		if err != nil {
+			return err
+		}
+		if verified.identityProof == nil || CompareSpotify(tgt, *verified.identityProof, DefaultMatchPolicy()).Status != MatchConfirmed {
+			return ErrSpotifyMatch
+		}
+		return nil
+	}
+	var wg sync.WaitGroup
+	for range 4 {
+		wg.Go(func() {
+			if err := check(tr); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+	wg.Wait()
+	if err := check(tr); err != nil {
+		t.Fatal(err)
+	}
+	_, after := accessCounts(t, calls)
+	if after-before != 1 {
+		t.Fatal("prototype did not coalesce", after-before)
+	}
+	variant := tr
+	variant.Title += " Live"
+	if err := check(variant); err == nil {
+		t.Fatal("cache bypassed version identity")
+	}
+	accessMetric(t, "offline_shared_exact_video_proof_prototype", map[string]any{"five_checks_verification_processes": after - before, "incompatible_live_identity_rejected": true, "production_code_changed": false})
+}

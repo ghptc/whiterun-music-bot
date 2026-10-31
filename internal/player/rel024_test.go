@@ -26,8 +26,14 @@ func TestREL024HealthDoesNotWaitForDeadlockedWorker(t *testing.T) {
 	if h.Responsive || h.State != "lock_unresponsive" || time.Since(started) > time.Second {
 		t.Fatal(h)
 	}
-	if !p.Health().Responsive {
-		t.Fatal("recovered lock still unhealthy")
+	// The worker may legitimately acquire the mutex immediately after Unlock.
+	// Verify eventual responsiveness, not an uncontended scheduling instant.
+	deadline := time.Now().Add(time.Second)
+	for !p.Health().Responsive {
+		if time.Now().After(deadline) {
+			t.Fatal("recovered lock still unhealthy")
+		}
+		time.Sleep(time.Millisecond)
 	}
 }
 func TestREL024TransientNetworkPreservesPositionsAndHasFiniteBudget(t *testing.T) {

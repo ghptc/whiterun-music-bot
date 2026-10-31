@@ -339,12 +339,16 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 			first = <-job.First
 			err = first.Err
 		}
-		if err == nil && !first.Suspended {
+		if err == nil && !first.Suspended && !first.Deferred {
 			timing.Event("play_first_track_resolved", started)
 		}
 		releaseSearch()
 		if err != nil {
 			reply(err.Error())
+			return
+		}
+		if first.Deferred {
+			reply("Playlist queued. Tracks will be prepared closer to playback. Use /queue to see its status.")
 			return
 		}
 		if first.Suspended {

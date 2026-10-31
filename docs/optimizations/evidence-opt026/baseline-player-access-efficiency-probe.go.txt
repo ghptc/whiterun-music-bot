@@ -1,0 +1,99 @@
+package player
+
+import (
+	"context"
+	"encoding/json"
+	"sync/atomic"
+	"testing"
+	"testing/synctest"
+	"time"
+
+	"whiterun/internal/media"
+)
+
+func accessPlayerMetric(t *testing.T, name string, d map[string]any) {
+	t.Helper()
+	d["scenario"] = name
+	b, _ := json.Marshal(d)
+	t.Log("MEASUREMENT " + string(b))
+}
+
+func TestAccessEfficiencyPerCollectionWindows(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		p, _ := newTestPlayer(t, func(ctx context.Context, _ media.Track, v Voice) error {
+			if err := v.WriteFrame(ctx, []byte{1}); err != nil {
+				return err
+			}
+			<-ctx.Done()
+			return ctx.Err()
+		})
+		var a, b atomic.Int32
+		j := begin(t, p, context.Background(), numberedTracks(1, 123), func(_ context.Context, tr media.Track, _ bool) (media.Track, error) {
+			a.Add(1)
+			return matched(tr), nil
+		})
+		synctest.Wait()
+		if a.Load() != 7 || len(p.State().Entries) != 122 {
+			t.Fatal("unexpected first window", a.Load(), len(p.State().Entries))
+		}
+		accessPlayerMetric(t, "123_position_playlist_before_first_eof", map[string]any{"matcher_calls": a.Load(), "reserved_positions": 123, "queued_positions": len(p.State().Entries), "current_position": p.State().Current.Position})
+		k := begin(t, p, context.Background(), numberedTracks(124, 246), func(_ context.Context, tr media.Track, _ bool) (media.Track, error) {
+			b.Add(1)
+			return matched(tr), nil
+		})
+		synctest.Wait()
+		if a.Load() != 7 || b.Load() != 6 || len(p.State().Entries) != 245 {
+			t.Fatal(a.Load(), b.Load(), len(p.State().Entries))
+		}
+		accessPlayerMetric(t, "second_123_playlist_behind_first", map[string]any{"first_playlist_calls": a.Load(), "second_playlist_calls": b.Load(), "current_position": p.State().Current.Position, "queued_positions": len(p.State().Entries)})
+		p.Stop()
+		synctest.Wait()
+		jobDone(t, j)
+		jobDone(t, k)
+	})
+}
+
+func TestAccessEfficiencyBreakerScopeAndBudgets(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		var calls, notices atomic.Int32
+		matcher := func(_ context.Context, _ media.Track, _ bool) (media.Track, error) {
+			calls.Add(1)
+			return media.Track{}, &media.ExtractionError{Category: "youtube_bot_challenge"}
+		}
+		p, v := newTestPlayer(t, func(ctx context.Context, _ media.Track, _ Voice) error { <-ctx.Done(); return ctx.Err() })
+		q, w := newTestPlayer(t, func(ctx context.Context, _ media.Track, _ Voice) error { <-ctx.Done(); return ctx.Err() })
+		p.SetOnSkip(func(PlaybackEvent) { notices.Add(1) })
+		q.SetOnSkip(func(PlaybackEvent) { notices.Add(1) })
+		j := begin(t, p, context.Background(), numberedTracks(1, 123), matcher)
+		k := begin(t, q, context.Background(), numberedTracks(1, 123), matcher)
+		synctest.Wait()
+		if calls.Load() != 2 {
+			t.Fatal(calls.Load())
+		}
+		time.Sleep(2 * time.Minute)
+		synctest.Wait()
+		if calls.Load() != 8 || notices.Load() != 2 || !p.Health().RecoveryExhausted || !q.Health().RecoveryExhausted || len(p.State().Entries) != 123 || len(q.State().Entries) != 123 {
+			t.Fatal("breaker budget/queue mismatch", calls.Load(), notices.Load())
+		}
+		time.Sleep(time.Hour)
+		synctest.Wait()
+		if calls.Load() != 8 {
+			t.Fatal("unbounded retries")
+		}
+		v.mu.Lock()
+		closedV := v.closed
+		v.mu.Unlock()
+		w.mu.Lock()
+		closedW := w.closed
+		w.mu.Unlock()
+		if closedV || closedW {
+			t.Fatal("unexpected Voice Leave")
+		}
+		accessPlayerMetric(t, "two_guild_challenge_incidents", map[string]any{"initial_plus_trial_matcher_calls": calls.Load(), "notices": notices.Load(), "positions_preserved": len(p.State().Entries) + len(q.State().Entries), "additional_calls_after_hour": 0, "both_breakers_exhausted": true, "voice_leave": false})
+		p.Stop()
+		q.Stop()
+		synctest.Wait()
+		jobDone(t, j)
+		jobDone(t, k)
+	})
+}

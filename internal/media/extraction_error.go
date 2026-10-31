@@ -11,9 +11,10 @@ import (
 // ExtractionError retains the machine-readable cause, never provider stderr,
 // cookies, URLs or subprocess arguments. Unwrap preserves context cancellation.
 type ExtractionError struct {
-	Category string
-	Cause    error
-	ExitCode *int
+	Category      string
+	VideoSpecific bool
+	Cause         error
+	ExitCode      *int
 }
 
 func (e *ExtractionError) Error() string {
@@ -74,5 +75,5 @@ func ClassifyExtraction(stderr []byte, cause error) error {
 		value := exit.ExitCode()
 		code = &value
 	}
-	return &ExtractionError{Category: category, Cause: safeCause, ExitCode: code}
+	return &ExtractionError{Category: category, Cause: safeCause, ExitCode: code, VideoSpecific: strings.Contains(s, "confirm your age") || strings.Contains(s, "age-restricted") || strings.Contains(s, "age restricted")}
 }

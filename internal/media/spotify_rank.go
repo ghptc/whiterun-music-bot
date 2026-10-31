@@ -374,21 +374,21 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (selected Ca
 			TimingFrom(ctx).Event("mapping_read_failed", started)
 		}
 		if cacheErr == nil && ok && videoID.MatchString(cached.ID) {
-			if freshIdentity(cached, time.Now()) && CompareSpotify(*r.Match, cached, r.matchPolicy()).Status == MatchConfirmed {
+			if proofCovers(ctx, cached) && CompareSpotify(*r.Match, cached, r.matchPolicy()).Status == MatchConfirmed {
 				TimingFrom(ctx).Event("spotify_mapping_cache_hit", started, "external_searches_avoided", 1, "external_verifications_avoided", 1)
 				return cached, nil
 			}
-			full, verifyErr := r.extract(ctx, "https://www.youtube.com/watch?v="+cached.ID, "spotify_mapping_revalidation", false)
-			if verifyErr == nil && full.ID == cached.ID && CompareSpotify(*r.Match, full.Candidate, r.matchPolicy()).Status == MatchConfirmed {
+			full, verifyErr := r.rawVideo(ctx, cached.ID, "spotify_mapping_revalidation")
+			if verifyErr == nil && full.ID == cached.ID && CompareSpotify(*r.Match, full, r.matchPolicy()).Status == MatchConfirmed {
 				bounded, cancel = catalogContext(ctx)
-				saveErr := r.Mappings.SaveMapping(bounded, key, full.Candidate)
+				saveErr := r.Mappings.SaveMapping(bounded, key, full)
 				cancel()
 				if saveErr != nil {
 					TimingFrom(ctx).Event("mapping_write_failed", time.Now())
 				}
-				return full.Candidate, nil
+				return full, nil
 			}
-			if verifyErr != nil && ExtractionCategory(verifyErr) != "youtube_video_unavailable" {
+			if verifyErr != nil && !errors.Is(verifyErr, errVideoIdentityMismatch) && ExtractionCategory(verifyErr) != "youtube_video_unavailable" {
 				return Candidate{}, verifyErr
 			}
 			bounded, cancel = catalogContext(ctx)
@@ -402,7 +402,7 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (selected Ca
 			}
 			// Fail closed on an extraction error, but invalidate the stale locator.
 			// Identity mismatch retains the existing discovery fallback.
-			if verifyErr != nil {
+			if verifyErr != nil && !errors.Is(verifyErr, errVideoIdentityMismatch) {
 				return Candidate{}, verifyErr
 			}
 		}
@@ -418,11 +418,11 @@ func (r Resolver) resolveSpotify(ctx context.Context, query string) (selected Ca
 		}, func(c Candidate) (Candidate, error) {
 			attempt, cancel := context.WithTimeout(ctx, 15*time.Second)
 			defer cancel()
-			full, err := r.extract(attempt, "https://www.youtube.com/watch?v="+c.ID, "spotify_candidate_verification", false)
+			full, err := r.rawVideo(attempt, c.ID, "spotify_candidate_verification")
 			if err == nil && full.ID != c.ID {
 				err = errors.New("YouTube returned a different video ID")
 			}
-			return full.Candidate, err
+			return full, err
 		})
 	if err == nil && r.Mappings != nil {
 		bounded, cancel := catalogContext(ctx)

@@ -70,8 +70,9 @@ type Candidate struct {
 }
 
 type Resolver struct {
-	Binary string
-	Cache  *SearchCache
+	Admission *ProviderAdmission
+	Binary    string
+	Cache     *SearchCache
 	// Match is immutable structured metadata for a Spotify-originated search.
 	Match    *Track
 	Policy   *MatchPolicy
@@ -104,13 +105,16 @@ func (r Resolver) Resolve(ctx context.Context, query string) (Track, error) {
 	if r.Match != nil {
 		key = "spotify:" + MappingKey(*r.Match, r.Policy)
 	}
-	if track, ok := r.Cache.get(key, time.Now()); ok {
+	valid := func(t Track) bool {
+		return r.Match == nil || t.identityProof != nil && proofCovers(ctx, *t.identityProof)
+	}
+	if track, ok := r.Cache.get(key, time.Now()); ok && valid(track) {
 		track.Timing = timing
 		timing.Event("resolver_cache_hit", started, "selected", track.Title)
 		return track, nil
 	}
 	work := func(workCtx context.Context) (Track, error) { return r.resolveUncached(workCtx, query, direct, isURL) }
-	track, err := r.Cache.resolve(ctx, key, work)
+	track, err := r.Cache.resolveValid(ctx, key, work, valid)
 	if err != nil {
 		return Track{}, err
 	}
@@ -131,6 +135,11 @@ func (r Resolver) extract(ctx context.Context, target, purpose string, flat bool
 		count = 10
 	}
 	args = append(args, "--skip-download", "--dump-single-json", "--", target)
+	release, _, admissionErr := r.Admission.Admit(ctx)
+	if admissionErr != nil {
+		return searchResult{}, admissionErr
+	}
+	defer release()
 	cmd := Command(ctx, r.Binary, args...)
 	out := &LimitedBuffer{Limit: 8 << 20}
 	stderr := &LimitedBuffer{Limit: 8192}
@@ -147,6 +156,7 @@ func (r Resolver) extract(ctx context.Context, target, purpose string, flat bool
 		runErr = ctx.Err()
 	}
 	if failure := ClassifyExtraction(stderr.Data, runErr); failure != nil {
+		r.Admission.Observe(failure)
 		timing.Event("youtube_extraction_failed", started, "error_category", ExtractionCategory(failure), "purpose", purpose, "stdout_bytes", len(out.Data), "stderr_bytes", len(stderr.Data))
 		return searchResult{}, failure
 	}
@@ -346,6 +356,15 @@ func YouTubeURL(s string) (string, bool, error) {
 
 // CloneTrack detaches mutable identity fields at ownership boundaries.
 func CloneTrack(t Track) Track {
+	if t.identityProof != nil {
+		proof := *t.identityProof
+		proof.Artists = append([]string(nil), proof.Artists...)
+		proof.Categories = append([]string(nil), proof.Categories...)
+		if proof.Explicit != nil {
+			proof.Explicit = new(*proof.Explicit)
+		}
+		t.identityProof = &proof
+	}
 	t.Artists = append([]string(nil), t.Artists...)
 	if t.Explicit != nil {
 		t.Explicit = new(*t.Explicit)

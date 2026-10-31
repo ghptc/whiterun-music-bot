@@ -79,6 +79,21 @@ func (p *GuildPlayer) SetPaused(paused bool) (bool, error) {
 		return true, nil
 	}
 	if !paused && p.providerBlocked {
+		if p.providerGlobal && p.admission != nil {
+			// A healthy stream paused by its owner is independent of pending
+			// provider recovery; resuming it must not renew the global budget.
+			if p.current != nil && p.pause != nil && p.pause.paused() {
+				changed := p.pause.set(false)
+				p.wakeCollectionsLocked()
+				p.diagnosticLocked(slog.LevelInfo, "playback_pause_changed", "paused", false, "expected_event", "resume_or_cancel")
+				return changed, nil
+			}
+			if p.admission.Snapshot().Exhausted {
+				return false, errors.New("YouTube recovery budget is exhausted globally; operator rearm is required after access is restored.")
+			}
+			p.signal("provider_recovery_requested")
+			return true, nil
+		}
 		reason := p.providerReason
 		if p.providerProbe {
 			return true, nil
@@ -110,6 +125,7 @@ func (p *GuildPlayer) SetPaused(paused bool) (bool, error) {
 	}
 	changed := p.pause.set(paused)
 	if changed {
+		p.wakeCollectionsLocked()
 		p.diagnosticLocked(slog.LevelInfo, "playback_pause_changed", "paused", paused, "expected_event", "resume_or_cancel")
 	}
 	return changed, nil
@@ -121,6 +137,7 @@ func (p *GuildPlayer) resetProviderLocked() {
 		return
 	}
 	p.providerBlocked = false
+	p.providerGlobal = false
 	p.providerReason = ""
 	p.providerIncident = ""
 	p.providerNotice = false

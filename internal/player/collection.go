@@ -35,6 +35,7 @@ type CollectionProgress struct {
 	Total, Resolved, Failed, Skipped int
 }
 type CollectionFirst struct {
+	Deferred                 bool
 	Suspended                bool
 	Track                    media.Track
 	Position, Total, Skipped int
@@ -154,6 +155,22 @@ func (j *CollectionJob) publishFirst(first CollectionFirst) {
 
 func (j *CollectionJob) resolve(index int, first bool) collectionResolution {
 	p := j.player
+	var eta time.Duration
+	if first {
+		var wanted bool
+		eta, wanted = j.waitHorizon(index)
+		if !wanted {
+			return collectionResolution{index: index, skipped: true}
+		}
+	} else {
+		p.mu.Lock()
+		var ready bool
+		eta, ready = p.resolutionHorizonLocked(j.progress.ID, index)
+		p.mu.Unlock()
+		if !ready {
+			return collectionResolution{index: index, blocked: true}
+		}
+	}
 	probe, admissionErr := p.waitProvider(j.ctx, func() { j.publishFirst(CollectionFirst{Suspended: true, Total: len(j.metadata)}) })
 	if admissionErr != nil {
 		return collectionResolution{index: index, skipped: true, err: admissionErr}
@@ -170,7 +187,18 @@ func (j *CollectionJob) resolve(index int, first bool) collectionResolution {
 		p.mu.Unlock()
 		return collectionResolution{index: index, skipped: true}
 	}
-	ctx, cancel := context.WithTimeout(j.ctx, CollectionResolveTimeout)
+	// Recovery may have waited minutes while pause, skip or queue order changed.
+	// Recheck the same horizon before spending a newly granted provider trial.
+	var within bool
+	eta, within = p.resolutionHorizonLocked(j.progress.ID, index)
+	if !within {
+		if probe != "" {
+			p.finishProviderLocked(context.Canceled, probe)
+		}
+		p.mu.Unlock()
+		return collectionResolution{index: index, blocked: true}
+	}
+	ctx, cancel := context.WithTimeout(media.WithProviderPermit(j.ctx, probe), CollectionResolveTimeout)
 	providerGeneration := p.providerGeneration
 	j.searches[index] = cancel
 	active := 0
@@ -184,7 +212,7 @@ func (j *CollectionJob) resolve(index int, first bool) collectionResolution {
 	p.mu.Unlock()
 	j.event("track_resolution_start", time.Now(), "spotify_id", j.metadata[index].SpotifyID, "position", index+1, "state", "resolving", "concurrent_resolutions", active)
 	started := time.Now()
-	track, err := safeMatch(j.match, ctx, copyTrack(j.metadata[index]), first)
+	track, err := safeMatch(j.match, media.WithPlaybackEstimate(ctx, eta), copyTrack(j.metadata[index]), first)
 	if ctx.Err() != nil {
 		err = ctx.Err()
 	}
@@ -193,6 +221,7 @@ func (j *CollectionJob) resolve(index int, first bool) collectionResolution {
 	skipped := !j.wanted[index]
 	providerFailure := isProviderFailure(err) && !skipped && j.ctx.Err() == nil
 	if providerFailure {
+		p.observeProviderLocked(err)
 		p.blockProviderLocked(providerFailureCategory(err))
 	}
 	if probe != "" {
@@ -384,7 +413,8 @@ func (j *CollectionJob) run() {
 			if entry.Pending {
 				remaining++
 			}
-			if window < CollectionPrefetch && entry.Pending && j.wanted[entry.position] {
+			_, within := p.resolutionHorizonLocked(j.progress.ID, entry.position)
+			if window < CollectionPrefetch && within && entry.Pending && j.wanted[entry.position] {
 				indexes = append(indexes, entry.position)
 			}
 			window++

@@ -27,6 +27,7 @@ func (p *GuildPlayer) confirmFrame(ctx context.Context, sequence uint64) {
 	}
 	if p.confirmedOffset-p.checkpointOffset >= 5*time.Second {
 		p.checkpointOffset = p.confirmedOffset
+		p.wakeCollectionsLocked()
 		p.persistAudioCheckpointLocked()
 	}
 }

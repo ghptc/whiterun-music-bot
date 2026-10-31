@@ -68,7 +68,13 @@ func (c *SearchCache) putLocked(query string, track Track, now time.Time) {
 	}
 	track = CloneTrack(track)
 	track.Timing = nil // A cache hit must belong to the new interaction.
-	c.entries[query] = cacheEntry{track: track, expires: now.Add(searchCacheTTL)}
+	expires := now.Add(searchCacheTTL)
+	if strings.HasPrefix(query, "video-proof:") && track.identityProof != nil {
+		if proofExpiry := track.identityProof.CheckedAt.Add(identityLease); proofExpiry.Before(expires) {
+			expires = proofExpiry
+		}
+	}
+	c.entries[query] = cacheEntry{track: track, expires: expires}
 }
 
 // Normalize text only. Canonical YouTube URLs are separate keys because video
@@ -86,6 +92,10 @@ type searchFlight struct {
 }
 
 func (c *SearchCache) resolve(ctx context.Context, key string, work func(context.Context) (Track, error)) (Track, error) {
+	return c.resolveValid(ctx, key, work, nil)
+}
+
+func (c *SearchCache) resolveValid(ctx context.Context, key string, work func(context.Context) (Track, error), valid func(Track) bool) (Track, error) {
 	if c == nil {
 		return work(ctx)
 	}
@@ -93,7 +103,7 @@ func (c *SearchCache) resolve(ctx context.Context, key string, work func(context
 		return Track{}, err
 	}
 	c.mu.Lock()
-	if entry, ok := c.entries[key]; ok && time.Now().Before(entry.expires) {
+	if entry, ok := c.entries[key]; ok && time.Now().Before(entry.expires) && (valid == nil || valid(entry.track)) {
 		c.mu.Unlock()
 		return CloneTrack(entry.track), nil
 	}

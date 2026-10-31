@@ -20,8 +20,9 @@ type StreamError struct {
 	Err      error
 }
 
-func (e *StreamError) Error() string { return e.Category + ": " + e.Err.Error() }
-func (e *StreamError) Unwrap() error { return e.Err }
+func (e *StreamError) Error() string            { return e.Category + ": " + e.Err.Error() }
+func (e *StreamError) Unwrap() error            { return e.Err }
+func (e *StreamError) ProviderCategory() string { return e.Category }
 func failureCategory(err error) string {
 	if err == nil {
 		return "eof"
@@ -54,7 +55,7 @@ func providerFailureCategory(err error) string {
 		return media.ExtractionCategory(err)
 	}
 	category := failureCategory(err)
-	if category == "youtube_network_timeout" || category == "youtube_extractor_failure" || category == "youtube_bot_challenge" || category == "youtube_auth_required" || category == "youtube_auth_challenge" || category == "youtube_rate_limited" || category == "youtube_provider_blocked" {
+	if category == "youtube_age_restricted" || category == "youtube_network_timeout" || category == "youtube_extractor_failure" || category == "youtube_bot_challenge" || category == "youtube_auth_required" || category == "youtube_auth_challenge" || category == "youtube_rate_limited" || category == "youtube_provider_blocked" {
 		return category
 	}
 	text := strings.ToLower(err.Error())

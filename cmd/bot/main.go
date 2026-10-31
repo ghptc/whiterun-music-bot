@@ -112,6 +112,9 @@ func run(log *slog.Logger) error {
 			return err
 		}
 	}
+	if err := configureYouTubeEfficiency(b); err != nil {
+		return err
+	}
 	b.ConfigureSpotify(configuredSpotify(log))
 	policy := media.DefaultMatchPolicy()
 	if raw := os.Getenv("SPOTIFY_MATCH_POLICY"); raw != "" {
