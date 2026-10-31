@@ -1,6 +1,7 @@
 test_attestation_flags_and_run_binding (test_verified_release.ReleaseTests.test_attestation_flags_and_run_binding) ... ok
 test_deployment_requires_exact_fresh_approval (test_verified_release.ReleaseTests.test_deployment_requires_exact_fresh_approval) ... ok
 test_exact_clean_checkout_required (test_verified_release.ReleaseTests.test_exact_clean_checkout_required) ... ok
+test_existing_performance_gate_is_mandatory (test_verified_release.ReleaseTests.test_existing_performance_gate_is_mandatory) ... ok
 test_latest_failed_status_cannot_reuse_old_success (test_verified_release.ReleaseTests.test_latest_failed_status_cannot_reuse_old_success) ... ok
 test_legacy_requires_explicit_migration_and_verified_rollback (test_verified_release.ReleaseTests.test_legacy_requires_explicit_migration_and_verified_rollback) ... ok
 test_negative_release_matrix (test_verified_release.ReleaseTests.test_negative_release_matrix) ... ok
@@ -13,6 +14,6 @@ test_valid_verified_release (test_verified_release.ReleaseTests.test_valid_verif
 test_wrong_digest_even_with_signed_manifest (test_verified_release.ReleaseTests.test_wrong_digest_even_with_signed_manifest) ... ok
 
 ----------------------------------------------------------------------
-Ran 12 tests in 0.011s
+Ran 13 tests in 0.010s
 
 OK

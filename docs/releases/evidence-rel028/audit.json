@@ -48,6 +48,10 @@
             {
               "context": "release-ci",
               "integration_id": 15368
+            },
+            {
+              "context": "deterministic-ttfa",
+              "integration_id": 15368
             }
           ]
         }
@@ -106,5 +110,7 @@
     "contracts": 0,
     "sqlite_contracts": 0,
     "actionlint": 0
-  }
+  },
+  "performance_gate_required": true,
+  "release_ready": false
 }

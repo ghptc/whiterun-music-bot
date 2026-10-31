@@ -22,7 +22,7 @@ class API:
         self.rules = [
             {'type': 'required_status_checks', 'ruleset_id': 1, 'parameters': {
                 'strict_required_status_checks_policy': True,
-                'required_status_checks': [{'context': name, 'integration_id': v.APP} for name in v.CHECKS]}},
+                'required_status_checks': [{'context': name, 'integration_id': v.APP} for name in v.REQUIRED_CHECKS]}},
             {'type': 'pull_request', 'ruleset_id': 1, 'parameters': {'required_approving_review_count': 1}},
         ]
         self.rule = {'name': 'REL-028 verified releases', 'enforcement': 'active', 'bypass_actors': [],
@@ -38,6 +38,8 @@ class API:
                      for i, name in enumerate(v.CHECKS, 1)]
         self.checks = [{'id': 100+i, 'head_sha': A, 'name': name, 'status': 'completed',
                         'conclusion': 'success', 'app': {'id': v.APP}} for i, name in enumerate(v.CHECKS, 1)]
+        self.checks.append({'id': 900, 'head_sha': A, 'name': 'deterministic-ttfa',
+                            'status': 'completed', 'conclusion': 'success', 'app': {'id': v.APP}})
         self.environment = {'can_admins_bypass': False,
                             'deployment_branch_policy': {'protected_branches': True, 'custom_branch_policies': False},
                             'protection_rules': [{'type': 'required_reviewers', 'reviewers': [{'type': 'User', 'reviewer': {'id': 9}}]}]}
@@ -207,6 +209,19 @@ class ReleaseTests(unittest.TestCase):
                 v.verified_checkout('.', A)
         with patch.object(v, 'command', side_effect=[A.encode(), b'']):
             v.verified_checkout('.', A)
+
+    def test_existing_performance_gate_is_mandatory(self):
+        for state, conclusion in [('completed', 'failure'), ('in_progress', None), ('completed', 'skipped')]:
+            with self.subTest(state=state, conclusion=conclusion):
+                api = API()
+                api.checks[-1].update(status=state, conclusion=conclusion)
+                with self.assertRaises(v.Denied):
+                    v.release_manifest(api, 20, api.attest)
+        api = API()
+        api.rules[0]['parameters']['required_status_checks'] = [
+            c for c in api.rules[0]['parameters']['required_status_checks'] if c['context'] != 'deterministic-ttfa']
+        with self.assertRaises(v.Denied):
+            v.verified_main(api, A)
 
 
 if __name__ == '__main__':

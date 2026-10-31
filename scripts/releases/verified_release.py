@@ -17,6 +17,7 @@ CI = '.github/workflows/release-ci.yml'
 RELEASE = '.github/workflows/release.yml'
 DEPLOY = '.github/workflows/deploy-production.yml'
 CHECKS = ('release-unit', 'release-race', 'release-contracts', 'release-security', 'release-docker', 'release-ci')
+REQUIRED_CHECKS = CHECKS + ('deterministic-ttfa',)
 APP = 15368  # GitHub Actions; required-check source is bound, not any status writer.
 SHA = re.compile(r'[0-9a-f]{40}')
 DIGEST = re.compile(r'sha256:[0-9a-f]{64}')
@@ -69,7 +70,7 @@ def verified_main(api, sha):
             bound.update(c['context'] for c in p['required_status_checks'] if c.get('integration_id') == APP)
         if rule['type'] == 'pull_request' and p.get('required_approving_review_count', 0) >= 1:
             review_required = True
-    require(set(CHECKS) <= bound and review_required, 'mandatory protection/checks/review missing')
+    require(set(REQUIRED_CHECKS) <= bound and review_required, 'mandatory protection/checks/review missing')
     # A dedicated, active, non-bypassable ruleset must actually apply to main.
     ids = {r.get('ruleset_id') for r in rules if r.get('ruleset_id')}
     trusted = False
@@ -80,7 +81,7 @@ def verified_main(api, sha):
         dedicated = r.get('rules', [])
         mandatory = any(x['type'] == 'required_status_checks'
                         and x.get('parameters', {}).get('strict_required_status_checks_policy')
-                        and set(CHECKS) <= {c['context'] for c in x['parameters']['required_status_checks']
+                        and set(REQUIRED_CHECKS) <= {c['context'] for c in x['parameters']['required_status_checks']
                                            if c.get('integration_id') == APP} for x in dedicated)
         approval = any(x['type'] == 'pull_request'
                        and x.get('parameters', {}).get('required_approving_review_count', 0) >= 1
@@ -142,6 +143,8 @@ def ci_evidence(api, sha, run_id=None):
             check = max(candidates, key=lambda c: c['id'])
             require(check['head_sha'] == sha and check['status'] == 'completed' and check['conclusion'] == 'success',
                     'additional required check not successful')
+            if required['context'] not in {c['name'] for c in proof}:
+                proof.append({'name': check['name'], 'check_id': check['id'], 'conclusion': 'success'})
     return {'run_id': run['id'], 'attempt': run['run_attempt'], 'checks': proof}
 
 

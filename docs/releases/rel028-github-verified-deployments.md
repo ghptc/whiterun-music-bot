@@ -46,7 +46,7 @@ ID `26275718`, applies exactly to `refs/heads/main`, with no bypass actors:
   push, and resolution of review threads.
 - No branch deletion or force pushes.
 
-The six required contexts are:
+The seven required contexts are:
 
 | Context | Mandatory validation |
 | --- | --- |
@@ -56,6 +56,7 @@ The six required contexts are:
 | `release-security` | `go mod verify`, pinned `govulncheck@v1.9.0` |
 | `release-docker` | Build existing Dockerfile; no publication or deployment |
 | `release-ci` | Always-run gate; all five prerequisite jobs must succeed |
+| `deterministic-ttfa` | Existing instant-playback performance workflow, including real-FFmpeg EOF transitions |
 
 No path filters permit bypassing these jobs. Pending, failed, cancelled or skipped
 checks are rejected. Existing code-quality and other original rules still apply.
@@ -93,6 +94,10 @@ to GHCR, and records its immutable digest. A unique SHA/run/attempt tag supports
 discovery; deployments never use that tag. No `latest` is generated. Actions in
 the trusted chain are pinned to complete commit SHAs, with checkout credential
 persistence disabled. Builds and attestations use GitHub-hosted runners.
+The existing performance check is independently mandatory: if it is pending or
+failed when Release CI completes, publication fails before building. A fresh
+manual Verified Release dispatch is permitted only after every required check
+has succeeded; there is no automatic retry loop.
 
 Both the image and `release-manifest.json` receive GitHub/Sigstore build
 attestations from the pinned source revision of `release.yml`. The manifest
@@ -153,7 +158,7 @@ is not proof of internal failure or restored YouTube playback.
 Local validation is evidence for review, **not GitHub release authorization**.
 Recorded logs are in `evidence-rel028/`.
 
-- Release verifier: 12 test methods, including 27 negative release cases, passed.
+- Release verifier: 13 test methods, including 27 negative release cases, passed.
   Cases reject feature branches, unmerged commits, unprotected/bypassable main,
   failed/pending/cancelled/skipped CI, wrong SHA/check source, spoofed check names,
   self-hosted runners, missing/expired manifest, tampered metadata, wrong digest,
@@ -204,7 +209,7 @@ not qualifying protected-main push CI or release provenance. The PR is
 [#1](https://github.com/ghptc/whiterun-music-bot/pull/1); it remains unmerged and
 blocked by review. Documentation updates after this SHA require their own checks.
 
-Two failures in existing advisory workflows must remain visible:
+Two failures in existing workflows must remain visible:
 
 - `Instant playback performance gate`, run `41219779468`: transition test failed
   with `ready EOF transition stalled`; consequently the evaluator correctly
@@ -221,10 +226,18 @@ Two failures in existing advisory workflows must remain visible:
   timeout was raised, no test skipped, and no rerun was used to erase this result.
 
 These workflows were not required before this audit and were not disabled or
-weakened. Mandatory REL-028 validation does not certify these additional
-performance properties. Investigate the application-stack failures before
-approving its merge or production migration; REL-028 does not fix the playback
-transition or logging implementation. See the preserved logs and baseline results.
+weakened. Initially REL-028 required only its six new jobs. That would have left
+the known performance failure advisory, an enforcement gap corrected during
+review: `deterministic-ttfa` is now the seventh required check, in both the active
+ruleset and verifier. Failed, pending or skipped performance checks deny release;
+removing that protection also denies release. All seven check IDs are recorded
+in the manifest. Targeted regression tests cover this requirement.
+
+The application stack is therefore **not releasable** while the EOF-transition
+failure persists. Investigate it before approving merge or migration; REL-028
+does not change playback or logging behavior. Baseline full-package race also
+passed once, so the earlier logstore timeout remains unconfirmed rather than
+being declared fixed. See the preserved logs and baseline results.
 
 ## Migration and operation
 
