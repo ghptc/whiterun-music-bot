@@ -425,3 +425,19 @@ Remaining limits:
 - Profiles perturb timing and are diagnostic evidence only. Final gate results
   must come from its unmodified command without profiling instrumentation.
 - No real YouTube extraction, EC2 rollout or Discord audio verification was done.
+
+## Subsequent owner-authorized release-policy change
+
+After application revision `b87d188` passed unchanged GitHub CI, the owner
+explicitly authorized removing independent PR approval because `ghptc` is the
+sole collaborator. Ruleset 26275718 now requires zero approvals and disables
+latest-push approval; all seven required checks, strictness, no bypass and PR
+requirements remain intact. This was a separate owner-requested policy change,
+not a way to make failed application tests pass. No existing CI definition or
+test assertion was modified. The release verifier now requires the protected
+PR path rather than a second reviewer's count. Four new tests preserve pending
+CI rejection, required PRs and separate production approval; all 17 release
+policy tests pass. See `docs/releases/rel028-owner-merge-policy.json`.
+
+The owner must perform merge manually after final-HEAD checks succeed. No merge
+or deploy was performed. Production-environment owner approval remains required.

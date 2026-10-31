@@ -42,8 +42,10 @@ The original ruleset remains unchanged. An additional active ruleset,
 ID `26275718`, applies exactly to `refs/heads/main`, with no bypass actors:
 
 - Strict, up-to-date required checks bound to GitHub Actions application ID `15368`.
-- One independent PR approval, stale-review dismissal, approval of the latest
-  push, and resolution of review threads.
+- Required PR and resolution of review threads. On 2026-10-31 the owner
+  explicitly authorized zero independent approvals and no latest-push approval:
+  the owner's manual merge is the approval for this single-maintainer repository.
+  Stale-review dismissal remains enabled; no bypass actor was added.
 - No branch deletion or force pushes.
 
 The seven required contexts are:
@@ -60,13 +62,17 @@ The seven required contexts are:
 
 No path filters permit bypassing these jobs. Pending, failed, cancelled or skipped
 checks are rejected. Existing code-quality and other original rules still apply.
-The PR author cannot provide their own required PR approval; another authorized
-reviewer is needed. Do not lower the approval requirement to unblock merging.
+GitHub does not allow PR authors to approve their own reviews. The owner
+explicitly replaced the independent-review requirement with owner-controlled
+manual merge. At the audit, `ghptc` is the only collaborator with write/admin
+access; no permissions or collaborators were added. This is enforced by current
+repository permissions, not a claim that zero-review rules restrict future
+collaborators. Reassess merge permissions if collaborators are added.
 
 The new `production` GitHub environment requires review by `ghptc`, permits only
 protected branches, and disables administrator bypass. Self-review is allowed
-for explicit owner approval of a deployment; it does not replace independent PR
-review. No SSH credentials or production destination variables were provisioned.
+for explicit owner approval of a deployment. This separate deployment approval
+remains required even after the owner manually merges a PR. No SSH credentials or production destination variables were provisioned.
 
 ## Trusted artifact chain
 
@@ -242,8 +248,8 @@ being declared fixed. See the preserved logs and baseline results.
 ## Migration and operation
 
 1. Review the complete pending stack through the feature PR, including YT-027.
-   Require successful GitHub PR checks and independent review; obtain approval
-   before merge. Squash/rebase changes the resulting SHA: authorize only the
+   Require successful GitHub PR checks and the owner's explicit manual merge
+   decision. Independent review is optional under the owner-authorized policy. Squash/rebase changes the resulting SHA: authorize only the
    resulting main commit and its new main push CI, not the old local SHA.
 2. After merge, observe exact-SHA main CI, then a successful Verified Release.
    Read its `release-manifest-<run>-<attempt>` artifact. Verify without deployment:

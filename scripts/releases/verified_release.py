@@ -63,14 +63,14 @@ def verified_main(api, sha):
     require(branch.get('protected') is True, 'main is not protected')
     rules = api.get('rules/branches/main')
     bound = set()
-    review_required = False
+    pr_required = False
     for rule in rules:
         p = rule.get('parameters', {})
         if rule['type'] == 'required_status_checks' and p.get('strict_required_status_checks_policy'):
             bound.update(c['context'] for c in p['required_status_checks'] if c.get('integration_id') == APP)
-        if rule['type'] == 'pull_request' and p.get('required_approving_review_count', 0) >= 1:
-            review_required = True
-    require(set(REQUIRED_CHECKS) <= bound and review_required, 'mandatory protection/checks/review missing')
+        if rule['type'] == 'pull_request':
+            pr_required = True
+    require(set(REQUIRED_CHECKS) <= bound and pr_required, 'mandatory protection/checks/PR missing')
     # A dedicated, active, non-bypassable ruleset must actually apply to main.
     ids = {r.get('ruleset_id') for r in rules if r.get('ruleset_id')}
     trusted = False
@@ -83,10 +83,11 @@ def verified_main(api, sha):
                         and x.get('parameters', {}).get('strict_required_status_checks_policy')
                         and set(REQUIRED_CHECKS) <= {c['context'] for c in x['parameters']['required_status_checks']
                                            if c.get('integration_id') == APP} for x in dedicated)
-        approval = any(x['type'] == 'pull_request'
-                       and x.get('parameters', {}).get('required_approving_review_count', 0) >= 1
-                       for x in dedicated)
-        trusted = (mandatory and approval and r.get('enforcement') == 'active' and not r.get('bypass_actors')
+        # Owner-authorized solo-maintainer policy: merge is the owner's approval.
+        # PRs and all exact-SHA checks stay mandatory; deployment retains its
+        # separate production-environment approval.
+        pull_request = any(x['type'] == 'pull_request' for x in dedicated)
+        trusted = (mandatory and pull_request and r.get('enforcement') == 'active' and not r.get('bypass_actors')
                    and r.get('conditions', {}).get('ref_name') == {'include': ['refs/heads/main'], 'exclude': []})
     require(trusted, 'non-bypassable release ruleset missing')
     compare = api.get(f'compare/{sha}...main')
