@@ -370,20 +370,58 @@ recorded under `evidence-fix029/combined-*`; no production artifact was produced
 | load-10-guilds/warm | 140.003 |
 | ready-transition/ready | 25.854 |
 
-The fix must be pushed to the existing PR and all workflows observed on its exact
-HEAD: `Release CI`, `Quality`, and `Instant playback performance gate`, including
-all seven required checks. A local pass does not satisfy this requirement.
-The final result matrix will be linked here after those runs finish. No merge
-or production operation is authorized by successful tests.
+### GitHub acceptance of the final application revision
+
+Exact application revision: `b87d188b3f4152652bd05b2fa31f5d4976b9b223`.
+All six automatically triggered workflows completed successfully; no failed run
+was rerun, and no pending, canceled or skipped mandatory check was accepted.
+
+| Event | Release CI | Quality | deterministic-ttfa |
+| --- | --- | --- | --- |
+| push | [success: 41240801913](https://github.com/ghptc/whiterun-music-bot/actions/runs/41240801913) | [success: 41240801920](https://github.com/ghptc/whiterun-music-bot/actions/runs/41240801920) | [success: 41240802001](https://github.com/ghptc/whiterun-music-bot/actions/runs/41240802001) |
+| pull request | [success: 41240805689](https://github.com/ghptc/whiterun-music-bot/actions/runs/41240805689) | [success: 41240805677](https://github.com/ghptc/whiterun-music-bot/actions/runs/41240805677) | [success: 41240805690](https://github.com/ghptc/whiterun-music-bot/actions/runs/41240805690) |
+
+Both runs passed all 30 original scenarios. Their Go test elapsed times were
+500.349 s (push) and 560.428 s (PR), within the unchanged 600-second timeout.
+
+| Scenario | Push p95 (ms) | PR p95 (ms) |
+| --- | ---: | ---: |
+| ready transition | 36.966 | 42.435 |
+| ten guilds, warm | 770.192 | 657.874 |
+| 123 positions, cold / warm | 96.486 / 62.683 | 122.169 / 55.279 |
+| 500 positions, cold / warm | 264.513 / 75.687 | 312.588 / 86.595 |
+
+The exact-SHA check-runs API and PR checks returned all 24 jobs completed with
+success, including both instances of every required check: `release-unit`,
+`release-race`, `release-contracts`, `release-security`, `release-docker`,
+`release-ci`, and `deterministic-ttfa`. Quality's full race/logstore, SQLite,
+coverage, deterministic and adversarial jobs all succeeded. See
+`evidence-fix029/github-b87-*` for raw events, metrics and check inventories.
+
+`git diff 6c2bce0 b87d188 -- .github scripts/instant_playback_gate.py
+scripts/test_instant_playback_gate.py` is empty. Existing tests, sample counts,
+budgets, timeout and assertions were preserved. Added regressions live in new
+FIX-029 test files. No GitHub settings were changed during this fix.
+
+The report/evidence-only follow-up must also pass its own automatically triggered
+checks before delivery. Its live final-HEAD checks are available on
+[PR #1](https://github.com/ghptc/whiterun-music-bot/pull/1/checks); the application
+revision and immutable run evidence above remain independently recorded.
+No merge or production operation is authorized by successful tests.
 
 Remaining limits:
 
 - The exact delayed syscall in the historical logstore timeout was not captured;
-  the observed batching amplifier is corrected and must pass unchanged CI.
+  the observed batching amplifier is corrected and unchanged CI now passes.
+  This does not prove that arbitrary slow storage can never exceed the Close
+  deadline; no deadline was enlarged.
 - Clean early EOF can be caused by bad source data or silent truncation. Without
   a transport/process failure there is no proof that retrying will recover it;
   the recording is explicitly failed and the next queue occurrence advances.
   Provider challenges and real interruptions keep their own preservation policy.
+- GitHub PR performance took 560.428 s of the 600-second budget. Host and
+  storage variability remain operational risks; future failures must be inspected
+  rather than rerun or addressed by relaxing the gate.
 - Profiles perturb timing and are diagnostic evidence only. Final gate results
   must come from its unmodified command without profiling instrumentation.
 - No real YouTube extraction, EC2 rollout or Discord audio verification was done.
