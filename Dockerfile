@@ -22,11 +22,11 @@ RUN --mount=type=tmpfs,target=/tmp go vet ./... && go test ./... && CGO_ENABLED=
 FROM denoland/deno:bin-2.5.6 AS deno
 
 FROM debian:bookworm-slim AS runtime
-ARG YTDLP_VERSION=2026.08.19
+ARG YTDLP_VERSION=2026.10.26
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates ffmpeg python3 python3-venv \
     && python3 -m venv /opt/yt-dlp \
-    && /opt/yt-dlp/bin/pip install --no-cache-dir "yt-dlp[default]==${YTDLP_VERSION}" \
+    && /opt/yt-dlp/bin/pip install --no-cache-dir "yt-dlp[default]==${YTDLP_VERSION}" "websockets==17.3" \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --uid 10001 bard
 COPY --from=deno /deno /usr/local/bin/deno

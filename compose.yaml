@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        YTDLP_VERSION: ${YTDLP_VERSION:-2026.08.19}
+        YTDLP_VERSION: ${YTDLP_VERSION:-2026.10.26}
     environment:
       DISCORD_TOKEN: ${DISCORD_TOKEN:?Set DISCORD_TOKEN in .env}
       DISCORD_APPLICATION_ID: ${DISCORD_APPLICATION_ID:?Set DISCORD_APPLICATION_ID in .env}

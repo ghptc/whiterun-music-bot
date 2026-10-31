@@ -1,0 +1,1 @@
+{"yt_dlp": "2026.10.26", "ejs": "0.8.0", "providers_available": {"Bun": false, "Deno": true, "Node": false, "QuickJS": false}, "local_deno_eval": true, "external_calls": 0, "youtube_challenge_executed": false}

@@ -1,0 +1,16 @@
+{
+  "python_package_changes": {
+    "yt-dlp": [
+      "2026.8.19",
+      "2026.10.26"
+    ]
+  },
+  "debian_packages_identical": true,
+  "debian_packages_compared": 310,
+  "unchanged_python_packages": 12,
+  "python_version_identical": true,
+  "os_release_identical": true,
+  "architecture_identical": true,
+  "component_hashes_identical": true,
+  "pip_check": "No broken requirements found."
+}

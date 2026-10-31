@@ -1,0 +1,4 @@
+{
+  "docker_build_raw_sha256": "b94ba785452ba94664578613498b14cf6bd7078964ef76d1b59ad57d795816b7",
+  "published_format": "terminal CR and trailing whitespace normalized for Git review; build output retained"
+}
