@@ -1,0 +1,44 @@
+race	Run go test -race ./... -count=1 -timeout=5m	﻿2026-10-31T16:28:09.3413881Z ##[group]Run go test -race ./... -count=1 -timeout=5m
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.3414612Z ^[[36;1mgo test -race ./... -count=1 -timeout=5m^[[0m
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.3445590Z shell: /usr/bin/bash -e {0}
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.3445843Z ##[endgroup]
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.4066605Z go: downloading modernc.org/sqlite v1.39.1
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.4162017Z go: downloading github.com/disgoorg/snowflake/v2 v2.0.3
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.4173367Z go: downloading github.com/disgoorg/disgo v0.19.6
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.5417096Z go: downloading github.com/disgoorg/json/v2 v2.0.0
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.5421082Z go: downloading github.com/disgoorg/godave v0.2.0
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.5421555Z go: downloading github.com/disgoorg/omit v1.0.0
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.5601589Z go: downloading github.com/gorilla/websocket v1.5.3
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.5607772Z go: downloading github.com/sasha-s/go-csync v0.0.0-20240107134140-fcbab37b09ad
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.5847776Z go: downloading github.com/thomas-vilte/dave-go v0.5.1
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.6384437Z go: downloading golang.org/x/net v0.62.0
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.6487195Z go: downloading golang.org/x/text v0.43.0
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:09.7469355Z go: downloading modernc.org/libc v1.66.10
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:10.2362153Z go: downloading github.com/klauspost/compress v1.18.4
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:11.0756067Z go: downloading golang.org/x/crypto v0.58.0
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:11.2521945Z go: downloading github.com/thomas-vilte/mls-go v1.6.0
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:11.4695971Z go: downloading golang.org/x/sys v0.49.0
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:11.4794939Z go: downloading github.com/dustin/go-humanize v1.0.1
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:11.5040326Z go: downloading github.com/google/uuid v1.6.0
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:11.5229713Z go: downloading golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:11.6973407Z go: downloading modernc.org/mathutil v1.7.1
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:11.6976800Z go: downloading modernc.org/memory v1.11.0
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:28:11.7283613Z go: downloading github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:29:08.3357773Z ok  	whiterun/cmd/bot	3.971s
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:29:08.3358486Z ?   	whiterun/cmd/profile	[no test files]
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:29:08.3358993Z ok  	whiterun/cmd/qa-memory	2.759s
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:29:08.3359435Z ?   	whiterun/cmd/qa-soak	[no test files]
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:30:51.6439873Z ok  	whiterun/internal/discord	102.395s
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:30:51.6440478Z --- FAIL: TestConcurrentWritesBatchAndFinalFlush (3.49s)
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:30:51.6441550Z     store_test.go:161: context deadline exceeded
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:30:51.6442034Z FAIL
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:30:51.6442381Z FAIL	whiterun/internal/logstore	22.234s
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:30:51.6442714Z ok  	whiterun/internal/media	39.842s
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:30:51.6442998Z ok  	whiterun/internal/perfgate	1.017s
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:32:16.4544921Z ok  	whiterun/internal/player	186.189s
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:32:16.4545383Z ok  	whiterun/internal/qasoak	1.266s
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:32:16.4545699Z ok  	whiterun/internal/storage	45.263s
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:32:16.4546192Z ?   	whiterun/scripts/fix025-resolve	[no test files]
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:32:16.4546629Z ?   	whiterun/scripts/probe-spotify-recovery	[no test files]
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:32:16.4546998Z FAIL
+race	Run go test -race ./... -count=1 -timeout=5m	2026-10-31T16:32:16.6515736Z ##[error]Process completed with exit code 1.

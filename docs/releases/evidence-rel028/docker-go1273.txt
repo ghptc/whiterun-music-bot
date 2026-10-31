@@ -1,0 +1,124 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 2.29kB done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#2 DONE 1.0s
+
+#3 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#3 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e done
+#3 CACHED
+
+#4 [internal] load metadata for docker.io/library/debian:bookworm-slim
+#4 ...
+
+#5 [internal] load metadata for docker.io/denoland/deno:bin-2.5.6
+#5 DONE 0.9s
+
+#6 [internal] load metadata for docker.io/library/golang:1.27.3-bookworm
+#6 DONE 0.9s
+
+#4 [internal] load metadata for docker.io/library/debian:bookworm-slim
+#4 DONE 0.9s
+
+#7 [internal] load .dockerignore
+#7 transferring context: 103B done
+#7 DONE 0.0s
+
+#8 [runtime 1/8] FROM docker.io/library/debian:bookworm-slim@sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3
+#8 resolve docker.io/library/debian:bookworm-slim@sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3 0.0s done
+#8 DONE 0.0s
+
+#9 [test-env 1/7] FROM docker.io/library/golang:1.27.3-bookworm@sha256:d9b6a1beb9474adc2a1ce842573639b44b2a0dd49b6669f51d3821baf9ec37c9
+#9 resolve docker.io/library/golang:1.27.3-bookworm@sha256:d9b6a1beb9474adc2a1ce842573639b44b2a0dd49b6669f51d3821baf9ec37c9 0.0s done
+#9 DONE 0.0s
+
+#10 [deno 1/1] FROM docker.io/denoland/deno:bin-2.5.6@sha256:2f5f9d651af33c337767c423a340f76df35e35ff8ff4734210237b9c6fed94c7
+#10 resolve docker.io/denoland/deno:bin-2.5.6@sha256:2f5f9d651af33c337767c423a340f76df35e35ff8ff4734210237b9c6fed94c7 0.0s done
+#10 DONE 0.0s
+
+#11 [internal] load build context
+#11 transferring context: 234.48kB 0.0s done
+#11 DONE 0.0s
+
+#12 [test-env 2/7] RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg     && rm -rf /var/lib/apt/lists/*     && ffmpeg -version     && ffmpeg -hide_banner -loglevel error -f lavfi -i anullsrc=r=48000:cl=stereo        -t 0.1 -c:a libopus -f opus -y /dev/null
+#12 CACHED
+
+#13 [test-env 3/7] WORKDIR /src
+#13 CACHED
+
+#14 [test-env 4/7] COPY go.mod go.sum ./
+#14 DONE 0.0s
+
+#15 [test-env 5/7] RUN GODEBUG=netedns0=0 go mod download
+#15 DONE 6.4s
+
+#16 [test-env 6/7] COPY cmd ./cmd
+#16 DONE 0.0s
+
+#17 [test-env 7/7] COPY internal ./internal
+#17 DONE 0.0s
+
+#18 [build 1/1] RUN --mount=type=tmpfs,target=/tmp go vet ./... && go test ./... && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/bard ./cmd/bot && sha256sum /out/bard
+#18 11.25 ok  	whiterun/cmd/bot	0.051s
+#18 11.25 ?   	whiterun/cmd/profile	[no test files]
+#18 11.25 ok  	whiterun/cmd/qa-memory	0.030s
+#18 11.25 ?   	whiterun/cmd/qa-soak	[no test files]
+#18 22.38 ok  	whiterun/internal/discord	10.852s
+#18 22.38 ok  	whiterun/internal/logstore	0.453s
+#18 22.38 ok  	whiterun/internal/media	8.630s
+#18 22.38 ok  	whiterun/internal/perfgate	0.001s
+#18 74.72 ok  	whiterun/internal/player	63.509s
+#18 74.72 ok  	whiterun/internal/qasoak	0.008s
+#18 74.72 ok  	whiterun/internal/storage	4.559s
+#18 81.12 34f8ec61fb8a0edc6305c0865ae0645ca0d512b6a8537ebce45f90eabdc23deb  /out/bard
+#18 DONE 81.2s
+
+#19 [runtime 2/8] RUN apt-get update && apt-get install -y --no-install-recommends     ca-certificates ffmpeg python3 python3-venv     && python3 -m venv /opt/yt-dlp     && /opt/yt-dlp/bin/pip install --no-cache-dir "yt-dlp[default]==2026.10.26" "websockets==17.3"     && rm -rf /var/lib/apt/lists/*     && useradd --create-home --uid 10001 bard
+#19 CACHED
+
+#20 [runtime 3/8] COPY --from=deno /deno /usr/local/bin/deno
+#20 CACHED
+
+#21 [runtime 4/8] COPY --from=build /out/bard /usr/local/bin/bard
+#21 DONE 0.0s
+
+#22 [runtime 5/8] COPY internal/player/testdata/local-audio/validation.flac /opt/bard-validation/validation.flac
+#22 DONE 0.0s
+
+#23 [runtime 6/8] RUN ffmpeg -version && yt-dlp --version && deno --version     && ffmpeg -hide_banner -loglevel error -f lavfi -i anullsrc=r=48000:cl=stereo        -t 0.1 -c:a libopus -f opus -y /dev/null
+#23 0.261 ffmpeg version 5.1.9-0+deb12u1 Copyright (c) 2000-2026 the FFmpeg developers
+#23 0.261 built with gcc 12 (Debian 12.2.0-14+deb12u1)
+#23 0.261 configuration: --prefix=/usr --extra-version=0+deb12u1 --toolchain=hardened --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --arch=amd64 --enable-gpl --disable-stripping --enable-gnutls --enable-ladspa --enable-libaom --enable-libass --enable-libbluray --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libcodec2 --enable-libdav1d --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libglslang --enable-libgme --enable-libgsm --enable-libjack --enable-libmp3lame --enable-libmysofa --enable-libopenjpeg --enable-libopenmpt --enable-libopus --enable-libpulse --enable-librabbitmq --enable-librist --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzimg --enable-libzmq --enable-libzvbi --enable-lv2 --enable-omx --enable-openal --enable-opencl --enable-opengl --enable-sdl2 --disable-sndio --enable-libjxl --enable-pocketsphinx --enable-librsvg --enable-libmfx --enable-libdc1394 --enable-libdrm --enable-libiec61883 --enable-chromaprint --enable-frei0r --enable-libx264 --enable-libplacebo --enable-librav1e --enable-shared
+#23 0.261 libavutil      57. 28.100 / 57. 28.100
+#23 0.261 libavcodec     59. 37.100 / 59. 37.100
+#23 0.261 libavformat    59. 27.100 / 59. 27.100
+#23 0.261 libavdevice    59.  7.100 / 59.  7.100
+#23 0.261 libavfilter     8. 44.100 /  8. 44.100
+#23 0.261 libswscale      6.  7.100 /  6.  7.100
+#23 0.261 libswresample   4.  7.100 /  4.  7.100
+#23 0.261 libpostproc    56.  6.100 / 56.  6.100
+#23 0.457 2026.10.26
+#23 0.508 deno 2.5.6 (stable, release, x86_64-unknown-linux-gnu)
+#23 0.508 v8 14.0.365.5-rusty
+#23 0.508 typescript 5.9.2
+#23 DONE 0.6s
+
+#24 [runtime 7/8] RUN mkdir -p /home/bard/data && chown bard:bard /home/bard/data
+#24 DONE 0.1s
+
+#25 [runtime 8/8] WORKDIR /home/bard
+#25 DONE 0.0s
+
+#26 exporting to image
+#26 exporting layers
+#26 exporting layers 0.2s done
+#26 exporting manifest sha256:0c669f33c4f425431db5fc03432bda3e14004cbd6fe82136fd2b8e40d166d29c done
+#26 exporting config sha256:e99a6d8e18a6dadcb2ff5507f85eb3d13ae99cce1d9a92dfd408aced83da8a5b done
+#26 exporting attestation manifest sha256:567ee2dc174f54929728d0a4a3837f604fb3a2370c76a557faafa9170352d8c4 done
+#26 exporting manifest list sha256:ed161ecde7347b6ba63fc2605527e71bd892dc80ceaebe2ead3283760b132215 done
+#26 naming to docker.io/library/bard-rel028:ci-only done
+#26 unpacking to docker.io/library/bard-rel028:ci-only 0.1s done
+#26 DONE 0.3s

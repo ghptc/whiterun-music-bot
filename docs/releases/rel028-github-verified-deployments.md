@@ -195,6 +195,37 @@ module minimum and Docker builder are now explicitly `1.27.3`; no findings were
 ignored and no check was removed. See `github-first-security-failure.txt` and
 the subsequent exact-head GitHub run for verification of this correction.
 
+### GitHub verification and outstanding older failures
+
+All six mandatory jobs passed in PR run
+[`41220692136`](https://github.com/ghptc/whiterun-music-bot/actions/runs/41220692136)
+for exact feature SHA `e253a1e010c29e048ec91b56c984c493dcea36d7`. This is PR CI,
+not qualifying protected-main push CI or release provenance. The PR is
+[#1](https://github.com/ghptc/whiterun-music-bot/pull/1); it remains unmerged and
+blocked by review. Documentation updates after this SHA require their own checks.
+
+Two failures in existing advisory workflows must remain visible:
+
+- `Instant playback performance gate`, run `41219779468`: transition test failed
+  with `ready EOF transition stalled`; consequently the evaluator correctly
+  reported the missing ready-transition scenario. A single isolated run of
+  `BARD_INSTANT_GATE=1 BARD_GATE_SAMPLES=100 go test ./internal/discord -run
+  '^TestInstantPlaybackTransitionGate$' -count=1 -v -timeout=3m` against the original
+  `62a44ef` reproduced the exact failure at line 617 after 8.10 seconds. Its source
+  is unchanged by REL-028. This is a confirmed failure already present in the
+  pending application stack, not a passing performance result.
+- `Quality`, run `41219779441`: full-package race job hit the existing 3-second
+  logstore close deadline in `TestConcurrentWritesBatchAndFinalFlush`. Twenty
+  targeted baseline race iterations passed; therefore the original CI timeout is
+  recorded, but its cause and baseline reproducibility remain unconfirmed. No
+  timeout was raised, no test skipped, and no rerun was used to erase this result.
+
+These workflows were not required before this audit and were not disabled or
+weakened. Mandatory REL-028 validation does not certify these additional
+performance properties. Investigate the application-stack failures before
+approving its merge or production migration; REL-028 does not fix the playback
+transition or logging implementation. See the preserved logs and baseline results.
+
 ## Migration and operation
 
 1. Review the complete pending stack through the feature PR, including YT-027.
