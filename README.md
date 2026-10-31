@@ -4,6 +4,10 @@ A small Go Discord music bot. Music discovery follows source intent; explicit Yo
 
 ## Setup
 
+These build instructions are for local development. Production releases must use
+the [GitHub-verified release procedure](docs/releases/rel028-github-verified-deployments.md).
+Local builds, mutable tags and candidate images are not authorized production artifacts.
+
 Prerequisites: Docker Engine running with Docker Compose, a Discord server where you can install a bot, and outbound HTTPS/WebSocket and UDP access. No host Go, Python, or FFmpeg installation is needed.
 
 1. Create an application in the [Discord Developer Portal](https://discord.com/developers/applications), named **The Bard, Slave of Whiterun**. On its Bot page, create/reset the bot token.

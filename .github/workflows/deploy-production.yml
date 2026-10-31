@@ -1,0 +1,72 @@
+name: Verified Production Deployment
+run-name: Deploy production release ${{ inputs.release_run }} rollback ${{ inputs.rollback_run }} current ${{ inputs.expected_current }} legacy ${{ inputs.allow_legacy_current }}
+on:
+  workflow_dispatch:
+    inputs:
+      release_run:
+        description: Successful Verified Release run ID
+        type: string
+        required: true
+      rollback_run:
+        description: Separate successful previously verified rollback release run ID
+        type: string
+        required: true
+      expected_current:
+        description: Current immutable image reference (legacy image ID only with explicit migration)
+        type: string
+        required: true
+      allow_legacy_current:
+        description: Explicit first migration from legacy; verified rollback is still mandatory
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+      checks: read
+      packages: read
+      attestations: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_RUN: ${{ inputs.release_run }}
+      ROLLBACK_RUN: ${{ inputs.rollback_run }}
+      EXPECTED_CURRENT: ${{ inputs.expected_current }}
+      ALLOW_LEGACY: ${{ inputs.allow_legacy_current }}
+      PRODUCTION_HOST: ${{ vars.PRODUCTION_HOST }}
+      PRODUCTION_USER: ${{ vars.PRODUCTION_USER }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Prepare explicitly provisioned SSH identity and pinned host key
+        env:
+          SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+          SSH_HOST_KEY: ${{ vars.PRODUCTION_HOST_KEY }}
+        run: |
+          test -n "$SSH_KEY" && test -n "$SSH_HOST_KEY" && test -n "$PRODUCTION_HOST" && test -n "$PRODUCTION_USER"
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$SSH_HOST_KEY" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+      - name: Verify both releases and environment approval before any SSH/deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(--release-run "$RELEASE_RUN" --rollback-run "$ROLLBACK_RUN" --expected-current "$EXPECTED_CURRENT")
+          if [[ "$ALLOW_LEGACY" == true ]]; then args+=(--allow-legacy-current); fi
+          python3 scripts/releases/deploy_production.py "${args[@]}"
