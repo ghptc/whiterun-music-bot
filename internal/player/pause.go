@@ -11,8 +11,11 @@ import (
 // Each track owns a gate. Closing the resume channel wakes all waiters;
 // cancellation never depends on a resume or on the player's mutex.
 type pauseGate struct {
-	mu     sync.Mutex
-	resume chan struct{}
+	mu            sync.Mutex
+	resume        chan struct{}
+	changed       chan struct{}
+	sourceManaged bool
+	sourceResume  chan struct{}
 }
 type pauseKey struct{}
 
@@ -22,6 +25,10 @@ func (g *pauseGate) set(paused bool) bool {
 	if paused == (g.resume != nil) {
 		return false
 	}
+	if g.changed != nil {
+		close(g.changed)
+	}
+	g.changed = make(chan struct{})
 	if paused {
 		g.resume = make(chan struct{})
 	} else {
@@ -29,6 +36,38 @@ func (g *pauseGate) set(paused bool) bool {
 		g.resume = nil
 	}
 	return true
+}
+func (g *pauseGate) snapshot() (bool, <-chan struct{}) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if g.changed == nil {
+		g.changed = make(chan struct{})
+	}
+	return g.resume != nil, g.changed
+}
+
+// sourcePause hands native source control responsibility to the adapter. Keep
+// draining audio until its Pause acknowledgement so the daemon cannot deadlock
+// waiting for a FIFO write while downstream delivery is already paused.
+func (g *pauseGate) sourcePause() bool {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	g.sourceManaged = true
+	if g.resume != nil && g.sourceResume == nil {
+		g.sourceResume = make(chan struct{})
+	}
+	return g.resume != nil
+}
+func (g *pauseGate) sourceAcknowledged(paused bool) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if paused && g.sourceResume == nil {
+		g.sourceResume = make(chan struct{})
+	}
+	if !paused && g.sourceResume != nil {
+		close(g.sourceResume)
+		g.sourceResume = nil
+	}
 }
 func (g *pauseGate) paused() bool {
 	if g == nil {
@@ -50,6 +89,9 @@ func waitPlayback(ctx context.Context) (bool, error) {
 		}
 		g.mu.Lock()
 		resume := g.resume
+		if g.sourceManaged {
+			resume = g.sourceResume
+		}
 		g.mu.Unlock()
 		if resume == nil {
 			return waited, nil

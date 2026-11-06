@@ -122,8 +122,16 @@ func (b *Bot) ConfigureMatchPolicy(policy media.MatchPolicy) error {
 func (b *Bot) ConfigureSpotify(s *media.Spotify) { b.resolver.Spotify = s }
 
 func (b *Bot) play(ctx context.Context, track media.Track, voice player.Voice) error {
-	if track.RequestedSource == "local" {
-		// Operator-only local descriptors bypass every provider/metadata path.
+	if b.resolver.NativeSpotify && track.RequestedSource == "spotify" {
+		var err error
+		track, err = b.resolver.MatchSpotify(ctx, track, true)
+		if err != nil {
+			return &player.StreamError{Category: "spotify_metadata_unavailable", Err: errors.New("exact Spotify metadata unavailable; queue retained")}
+		}
+	}
+
+	if track.RequestedSource == "local" || track.RequestedSource == "spotify_connect" {
+		// Native Spotify and operator-only local audio bypass YouTube resolution.
 		if metadata, ok := voice.(interface{ SetPlaybackTrack(media.Track) }); ok {
 			metadata.SetPlaybackTrack(track)
 		}
@@ -258,6 +266,9 @@ func (b *Bot) Close(ctx context.Context) {
 		}()
 	}
 	wg.Wait()
+	if b.streamer.Spotify != nil {
+		b.streamer.Spotify.Client.Close()
+	}
 	b.client.Close(ctx)
 }
 

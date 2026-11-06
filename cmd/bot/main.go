@@ -91,7 +91,11 @@ func run(log *slog.Logger) error {
 		defer b.Close(context.Background())
 		return b.SyncCommands(ctx, guild)
 	}
-	for _, binary := range []string{"yt-dlp", "ffmpeg", "deno"} {
+	binaries := []string{"yt-dlp", "ffmpeg", "deno"}
+	if os.Getenv("BARD_SPOTIFY_CONNECT_ENDPOINT") != "" {
+		binaries = []string{"ffmpeg"}
+	}
+	for _, binary := range binaries {
 		if _, err := exec.LookPath(binary); err != nil {
 			return fmt.Errorf("required runtime %s: %w", binary, err)
 		}
@@ -116,6 +120,11 @@ func run(log *slog.Logger) error {
 		return err
 	}
 	b.ConfigureSpotify(configuredSpotify(log))
+	if endpoint := os.Getenv("BARD_SPOTIFY_CONNECT_ENDPOINT"); endpoint != "" {
+		if err := b.ConfigureSpotifyConnect(endpoint, os.Getenv("BARD_SPOTIFY_CONNECT_PIPE")); err != nil {
+			return err
+		}
+	}
 	policy := media.DefaultMatchPolicy()
 	if raw := os.Getenv("SPOTIFY_MATCH_POLICY"); raw != "" {
 		if err := json.Unmarshal([]byte(raw), &policy); err != nil {

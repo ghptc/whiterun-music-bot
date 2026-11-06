@@ -109,6 +109,9 @@ func (s *Spotify) get(ctx context.Context, path string, out any) error {
 }
 
 type spotifyTrack struct {
+	LinkedFrom struct {
+		ID string `json:"id"`
+	} `json:"linked_from"`
 	Explicit    *bool `json:"explicit"`
 	ExternalIDs struct {
 		ISRC string `json:"isrc"`
@@ -271,5 +274,5 @@ func spotifyMetadata(track *spotifyTrack) (Track, bool) {
 			artists = append(artists, artist.Name)
 		}
 	}
-	return Track{SpotifyArtworkURL: spotifyArtwork(track.Album.Images), SpotifyID: track.ID, ISRC: track.ExternalIDs.ISRC, Explicit: track.Explicit, Artists: artists, Title: track.Name, Artist: track.Artists[0].Name, Album: track.Album.Name, Duration: time.Duration(track.DurationMS) * time.Millisecond, RequestedSource: "spotify", SourceURL: "https://open.spotify.com/track/" + track.ID}, true
+	return Track{SpotifyOriginalID: track.LinkedFrom.ID, SpotifyArtworkURL: spotifyArtwork(track.Album.Images), SpotifyID: track.ID, ISRC: track.ExternalIDs.ISRC, Explicit: track.Explicit, Artists: artists, Title: track.Name, Artist: track.Artists[0].Name, Album: track.Album.Name, Duration: time.Duration(track.DurationMS) * time.Millisecond, RequestedSource: "spotify", SourceURL: "https://open.spotify.com/track/" + track.ID}, true
 }

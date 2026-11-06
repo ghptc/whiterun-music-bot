@@ -22,6 +22,7 @@ type Track struct {
 	identityProof       *Candidate
 	SpotifyArtworkURL   string `json:",omitempty"`
 	YouTubeThumbnailURL string `json:",omitempty"`
+	SpotifyOriginalID   string `json:",omitempty"`
 	SpotifyID           string
 	ISRC                string
 	Explicit            *bool

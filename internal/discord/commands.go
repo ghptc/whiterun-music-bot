@@ -249,11 +249,19 @@ func (b *Bot) commandAt(e *events.ApplicationCommandInteractionCreate, started t
 		g.mu.Unlock()
 		reply("The Bard answers your summons.")
 	case "play":
-		if g.player.State().ProviderBlocked {
+		source, _, _, parseErr := media.CollectionURL(data.String("query"))
+		nativeRequest := b.resolver.NativeSpotify && source == "spotify" && parseErr == nil && !data.Bool("force")
+		if g.player.State().ProviderBlocked && !nativeRequest {
 			g.mu.Unlock()
 			reply("YouTube requests are temporarily suspended. The existing queue is preserved. Use /resume to retry.")
 			return
 		}
+		if nativeRequest && b.streamer.Spotify != nil && b.streamer.Spotify.Busy() && (g.player.State().Current == nil || g.player.State().Current.RequestedSource != "spotify_connect") {
+			g.mu.Unlock()
+			reply("Spotify is currently occupied by another playback session. Try again when it finishes.")
+			return
+		}
+
 		ticket := g.player.Ticket()
 		searchCtx := g.searchCtx
 		g.mu.Unlock()

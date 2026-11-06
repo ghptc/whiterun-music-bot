@@ -1,0 +1,5 @@
+ok  	whiterun/internal/media	15.121s
+ok  	whiterun/internal/player	103.227s
+ok  	whiterun/internal/discord	34.755s
+ok  	whiterun/internal/storage	17.113s
+ok  	whiterun/internal/spotifyconnect	1.113s

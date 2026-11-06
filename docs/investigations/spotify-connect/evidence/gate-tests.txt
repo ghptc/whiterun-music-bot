@@ -1,0 +1,9 @@
+test_failed_warmup_with_null_samples_produces_failure_report (test_instant_playback_gate.GateEvidenceTest.test_failed_warmup_with_null_samples_produces_failure_report) ... ok
+test_missing_matrix_fails_closed (test_instant_playback_gate.GateEvidenceTest.test_missing_matrix_fails_closed) ... ok
+test_nearest_rank (test_instant_playback_gate.GateEvidenceTest.test_nearest_rank) ... ok
+test_simulated_udp_cannot_approve_real_voice (test_instant_playback_gate.GateEvidenceTest.test_simulated_udp_cannot_approve_real_voice) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.000s
+
+OK

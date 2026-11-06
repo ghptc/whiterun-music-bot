@@ -1,0 +1,19 @@
+Validation on local Arch Linux, Go 1.27.3:
+PASS go test ./... -count=1
+PASS go test -race ./internal/media ./internal/player ./internal/discord ./internal/storage ./internal/spotifyconnect -count=1
+PASS go vet ./...
+PASS go mod verify
+PASS govulncheck ./... (0 reachable vulnerabilities; see security.txt)
+PASS python3 -B -m unittest discover -s scripts/releases -p 'test_*.py' -v (27 tests)
+PASS python3 -B -m unittest discover -s scripts -p 'test_instant_playback_gate.py' -v (4 tests)
+PASS relevant metadata, player, command and SQLite performance benchmarks (see benchmarks.txt)
+PASS repeated concurrent-start and pause-during-startup race tests (20 repetitions)
+PASS bash -n scripts/spotify-connect/*.sh
+PASS git diff --check
+
+After the full suites, additional native SQLite reopen and duplicate completion
+regressions passed under race (native-storage-player-tests.txt). Full suites and
+mandatory release checks also run on the exact PR commit in GitHub CI.
+
+NOT PASSED independent live Spotify audio: upstream denied audio key, code 1.
+NOT PERFORMED final Discord listening test; no claim that a user heard audio.

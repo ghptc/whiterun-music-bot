@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"math/rand/v2"
+	"strings"
 	"sync"
 	"time"
 
@@ -264,7 +265,7 @@ func (p *GuildPlayer) run() {
 			continue
 		}
 		providerPermit := ""
-		headLocal := len(p.queue) > 0 && p.queue[0].RequestedSource == "local"
+		headLocal := len(p.queue) > 0 && (p.queue[0].RequestedSource == "local" || p.queue[0].RequestedSource == "spotify_connect")
 		if p.providerBlocked && !headLocal && len(p.queue) > 0 && !p.queue[0].Pending && p.voice != nil && !p.halted {
 			p.mu.Unlock()
 			permit, err := p.waitProvider(p.ctx, nil)
@@ -387,6 +388,15 @@ func (p *GuildPlayer) run() {
 			}
 			expectedCancel = true
 		}
+		if !expectedCancel && err != nil && p.current != nil && (p.current.RequestedSource == "spotify_connect" || strings.HasPrefix(category, "spotify_")) && !transportFailure {
+			retained := copyTrack(*p.current)
+			retained.ResumeOffset = p.confirmedOffset
+			p.queue = append([]queueEntry{{Track: retained}}, p.queue...)
+			p.halted = true
+			expectedCancel = true
+			p.diagnosticLocked(slog.LevelWarn, "spotify_playback_failed", "category", category, "result", "queue_preserved_explicit_resume_required")
+		}
+
 		providerFailure := !expectedCancel && isProviderFailure(err) && p.current != nil
 		if providerFailure {
 			retained := copyTrack(*p.current)

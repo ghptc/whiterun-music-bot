@@ -1,0 +1,2 @@
+ok  	whiterun/internal/storage	1.063s
+ok  	whiterun/internal/player	2.827s

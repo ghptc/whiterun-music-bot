@@ -1,0 +1,38 @@
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/media
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkFastMatchRealFixture-8    	     252	    556715 ns/op	  303172 B/op	    4733 allocs/op
+BenchmarkCachedSpotifyIdentity-8   	     720	    248096 ns/op	  109625 B/op	    1689 allocs/op
+BenchmarkPlaybackMetadata500/deferred=false-8         	       8	  28403974 ns/op	 8163201 B/op	   47320 allocs/op
+BenchmarkPlaybackMetadata500/deferred=true-8          	      50	   3720111 ns/op	 2674180 B/op	   10623 allocs/op
+PASS
+ok  	whiterun/internal/media	0.804s
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/player
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkQA013EOFTransition-8   	    2738	    126967 ns/op	     60003 first_frame_ns/op	     65127 transition_ns/op	   92722 B/op	     193 allocs/op
+BenchmarkQualitySnapshot/1-8    	  154898	       911.6 ns/op	     834 B/op	       6 allocs/op
+BenchmarkQualitySnapshot/500-8  	     182	   1099321 ns/op	  856977 B/op	    2020 allocs/op
+BenchmarkQualitySnapshot/1000-8 	     100	   1505778 ns/op	 2561542 B/op	    4024 allocs/op
+PASS
+ok  	whiterun/internal/player	0.890s
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/discord
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkQA013CommandDispatch/help-8         	   24817	      4958 ns/op	      2454 local_ack_ns/op	    1995 B/op	      28 allocs/op
+BenchmarkQA013CommandDispatch/queue-8        	   10000	     11602 ns/op	      2821 local_ack_ns/op	    3570 B/op	      56 allocs/op
+BenchmarkQA013CommandDispatch/pause-8        	   25039	      5340 ns/op	      2387 local_ack_ns/op	    1654 B/op	      25 allocs/op
+PASS
+ok  	whiterun/internal/discord	0.394s
+goos: linux
+goarch: amd64
+pkg: whiterun/internal/storage
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
+BenchmarkQA013QueueCommit/0-8 	    7878	     13237 ns/op	    1204 B/op	      29 allocs/op
+BenchmarkQA013QueueCommit/302-8         	      18	   6087071 ns/op	 1277986 B/op	    3039 allocs/op
+BenchmarkQA013QueueCommit/1000-8        	       6	  19442248 ns/op	 4976837 B/op	   11113 allocs/op
+PASS
+ok  	whiterun/internal/storage	0.367s

@@ -17,6 +17,7 @@ import (
 )
 
 type Streamer struct {
+	Spotify       *SpotifySession
 	Admission     *media.ProviderAdmission
 	YTDLP, FFmpeg string
 	// LocalAudioDir is an absolute, operator-controlled, read-only audio root.
@@ -30,6 +31,13 @@ type Streamer struct {
 func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err error) {
 	started := time.Now()
 	local := t.RequestedSource == "local"
+	native := t.RequestedSource == "spotify_connect"
+	if native && (s.Spotify == nil || t.Duration <= 0 || t.ResumeOffset >= t.Duration) {
+		return &StreamError{"spotify_configuration", errors.New("Spotify native playback unavailable or invalid duration")}
+	}
+	if native && t.Timing == nil {
+		t.Timing = media.NewTiming(slog.Default())
+	}
 	sentFrames := int64(0)
 	var firstLocalFrame time.Duration
 	if local {
@@ -53,7 +61,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 		}
 	}
 	sourceEvent := func(name string, start time.Time, attrs ...any) {
-		if local && strings.HasPrefix(name, "yt_dlp_") {
+		if (local || native) && strings.HasPrefix(name, "yt_dlp_") {
 			return
 		}
 		t.Timing.Event(name, start, attrs...)
@@ -63,7 +71,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	}
 	releaseAdmission := func() {}
 	var admissionEpoch uint64
-	if !local {
+	if !local && !native {
 		var admissionErr error
 		releaseAdmission, admissionEpoch, admissionErr = s.Admission.Admit(parent)
 		if admissionErr != nil {
@@ -101,7 +109,11 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	}
 	go func() {
 		defer monitors.Done()
-		watchStartup(monitorCtx, cancelCause, resolved, firstAudio, resolveTimeout, audioTimeout)
+		if native {
+			watchSpotifyStartup(monitorCtx, cancelCause, resolved, firstAudio, resolveTimeout, audioTimeout)
+		} else {
+			watchStartup(monitorCtx, cancelCause, resolved, firstAudio, resolveTimeout, audioTimeout)
+		}
 	}()
 	go func() { defer monitors.Done(); watchActivity(monitorCtx, cancelCause, &activity, idle) }()
 	defer func() { stopMonitors(); monitors.Wait() }()
@@ -126,6 +138,21 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 		t.Timing.Event("local_audio_opened", started, "duration_ms", t.Duration.Milliseconds(), "progress_ms", t.ResumeOffset.Milliseconds(), "format", format, "first_frame_ms", 0)
 	}
 
+	var spotify *spotifyRun
+	if native {
+		spotify, err = s.Spotify.start(ctx, t, cancelCause)
+		if err != nil {
+			return err
+		}
+		defer spotify.close()
+
+		// A matching completion event plus a quiet FIFO produces track-scoped EOF.
+		// The byte ceiling is only a runaway guard, beyond the expected duration.
+		yt = media.Command(ctx, s.FFmpeg, "-hide_banner", "-loglevel", "error", "-nostdin", "-f", "s16le", "-ar", "44100", "-ac", "2", "-i", "pipe:0", "-c:a", "copy", "-f", "matroska", "pipe:1")
+		yt.Stdin = io.LimitReader(spotify, int64((t.Duration-t.ResumeOffset+5*time.Second)*44100/time.Second)*4)
+
+	}
+
 	// A successful producer can exit while its buffered bytes are still being
 	// paced downstream. Do not apply Command's short post-exit I/O drain limit.
 	// Track cancellation kills FFmpeg too, unblocking the pipe writer.
@@ -145,7 +172,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	// Accurate output seek decodes/discards preceding audio. No signed URL or
 	// unreliable byte-range seek; timeout preserves the position rather than
 	// silently replaying the beginning.
-	if t.ResumeOffset > 0 {
+	if t.ResumeOffset > 0 && !native {
 		ffArgs = append(ffArgs[:7], append([]string{"-ss", fmt.Sprintf("%.3f", t.ResumeOffset.Seconds())}, ffArgs[7:]...)...)
 		t.Timing.Event("playback_resume_started", started, "confirmed_ms", t.ResumeOffset.Milliseconds(), "seek", "decode_and_discard")
 	}
@@ -164,6 +191,9 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	t.Timing.Event("stream_resolve_start", streamStart)
 	sourceEvent("yt_dlp_start", streamStart, "purpose", "playback", "category", "stream", "started_at", streamStart.UTC(), "candidates", 1, "video_id", t.VideoID)
 	if err = yt.Start(); err != nil {
+		if native {
+			return &StreamError{"spotify_pcm_process", errors.New("Spotify PCM producer could not start")}
+		}
 		if local {
 			return &StreamError{"local_audio_source_start", errors.New("local audio producer could not start")}
 		}
@@ -216,7 +246,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 				return parent.Err()
 			}
 			if earlyErr != nil && exitCode(yt) > 0 {
-				return &StreamError{producerFailure(local, ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), earlyErr, producerFailure(local, ytErr.Data))}
+				return &StreamError{streamProducerFailure(local, native, ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), earlyErr, streamProducerFailure(local, native, ytErr.Data))}
 			}
 			if cause := context.Cause(ctx); cause != nil {
 				return cause
@@ -323,11 +353,14 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 		if sentFrames == 1 {
 			releaseAdmission()
 		}
-		if sentFrames == 250 && !local {
+		if sentFrames == 250 && !local && !native {
 			s.Admission.SustainedMedia(ctx, admissionEpoch)
 		}
 		if firstFrame {
 			t.Timing.Event("first_audio_frame", started)
+			if native {
+				t.Timing.Event("spotify_audio_first_frame", started)
+			}
 			if local {
 				firstLocalFrame = time.Since(started)
 				t.Timing.Event("local_audio_first_frame", started, "duration_ms", t.Duration.Milliseconds(), "progress_ms", (t.ResumeOffset + 20*time.Millisecond).Milliseconds(), "first_frame_ms", firstLocalFrame.Milliseconds())
@@ -396,7 +429,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	// A positive producer exit is the root cause when decoding its empty output
 	// also fails. Killed processes are cleanup consequences, not source diagnoses.
 	if ytWait != nil && exitCode(yt) > 0 {
-		failures = append([]error{&StreamError{producerFailure(local, ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), ytWait, producerFailure(local, ytErr.Data))}}, failures...)
+		failures = append([]error{&StreamError{streamProducerFailure(local, native, ytErr.Data), fmt.Errorf("exit_code=%d: %w: %s", exitCode(yt), ytWait, streamProducerFailure(local, native, ytErr.Data))}}, failures...)
 	}
 	if ffWait != nil && exitCode(ff) > 0 {
 		failures = append(failures, &StreamError{"ffmpeg_exit", fmt.Errorf("exit_code=%d: %w: %s", exitCode(ff), ffWait, media.SafeDiagnostic(ffErr.Data))})
@@ -409,7 +442,7 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	}
 	ytTail, ffTail := "", ""
 	if len(failures) > 0 {
-		ytTail, ffTail = producerFailure(local, ytErr.Data), media.SafeDiagnostic(ffErr.Data)
+		ytTail, ffTail = streamProducerFailure(local, native, ytErr.Data), media.SafeDiagnostic(ffErr.Data)
 	}
 	t.Timing.Event("audio_source_exit", streamStart, "video_id", t.VideoID, "yt_exit_code", exitCode(yt), "ffmpeg_exit_code", exitCode(ff), "category", failureCategory(errors.Join(failures...)), "yt_stderr_tail", ytTail, "ffmpeg_stderr_tail", ffTail)
 
@@ -419,6 +452,25 @@ func (s Streamer) Play(parent context.Context, t media.Track, v Voice) (err erro
 	if !t.Live && t.Duration > 0 && t.ResumeOffset+time.Duration(sentFrames)*20*time.Millisecond+2*time.Second < t.Duration {
 		return &StreamError{"audio_eof", errors.New("audio ended before expected recording duration")}
 	}
+	if native && t.ResumeOffset+time.Duration(sentFrames)*20*time.Millisecond > t.Duration+2*time.Second {
+		return &StreamError{"spotify_duration_mismatch", errors.New("Spotify audio exceeded expected duration")}
+	}
+
+	if native {
+		deadline := time.NewTimer(2 * time.Second)
+		defer deadline.Stop()
+		// Completion is a matching player event, independently of transport EOF.
+		select {
+		case <-spotify.completion:
+		case <-ctx.Done():
+			return context.Cause(ctx)
+		case <-deadline.C:
+			return &StreamError{"spotify_unconfirmed_completion", errors.New("PCM ended without matching completion event")}
+		}
+
+		t.Timing.Event("spotify_track_completed", started)
+	}
+
 	// Discord recommends five silence frames at the end of a transmission.
 	for range 5 {
 		timer := time.NewTimer(20 * time.Millisecond)
@@ -566,4 +618,11 @@ func producerFailure(local bool, diagnostic []byte) string {
 		return "local_audio_source"
 	}
 	return sourceFailure(diagnostic)
+}
+
+func streamProducerFailure(local, native bool, diagnostic []byte) string {
+	if native {
+		return "spotify_pcm_process"
+	}
+	return producerFailure(local, diagnostic)
 }

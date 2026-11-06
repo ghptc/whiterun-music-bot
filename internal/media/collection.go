@@ -30,9 +30,10 @@ type SpotifyProvider interface {
 	Collection(context.Context, string, string) (Collection, error)
 }
 type CollectionResolver struct {
-	YouTube Resolver
-	Spotify SpotifyProvider
-	Log     *slog.Logger
+	NativeSpotify bool
+	YouTube       Resolver
+	Spotify       SpotifyProvider
+	Log           *slog.Logger
 	// Search uses the existing music ranking by default; injectable for offline tests.
 	Search  func(context.Context, string) (Track, error)
 	Limiter *MatchLimiter
@@ -153,6 +154,20 @@ func (r CollectionResolver) Resolve(ctx context.Context, query string) (Collecti
 	result, err := r.spotifyMetadata(ctx, kind, id)
 	if err != nil {
 		return Collection{}, err
+	}
+
+	if r.NativeSpotify {
+		if kind == "track" && (len(result.Tracks) != 1 || result.Tracks[0].SpotifyID != id) {
+			return Collection{}, errors.New("Spotify returned a different recording")
+		}
+		for i, t := range result.Tracks {
+			converted, e := nativeSpotifyTrack(t)
+			if e != nil {
+				return Collection{}, e
+			}
+			result.Tracks[i] = converted
+		}
+		return result, nil
 	}
 
 	// Fixed workers bound subprocess concurrency. Each slot retains source order.

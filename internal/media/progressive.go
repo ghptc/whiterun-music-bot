@@ -53,7 +53,7 @@ func (r CollectionResolver) Prepare(ctx context.Context, query string) (Collecti
 	if err != nil {
 		return Collection{}, false, err
 	}
-	if source != "spotify" || kind == "track" {
+	if r.NativeSpotify || source != "spotify" || kind == "track" {
 		c, err := r.Resolve(ctx, query)
 		return c, false, err
 	}
@@ -171,6 +171,10 @@ func (r CollectionResolver) MatchSpotify(ctx context.Context, original Track, fi
 			return Track{}, err
 		}
 	}
+	if r.NativeSpotify {
+		return nativeSpotifyTrack(original)
+	}
+
 	search := r.Search
 	if search == nil {
 		resolver := r.YouTube
